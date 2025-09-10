@@ -38,6 +38,9 @@ public class Account extends BaseEntity implements UserDetails {
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
     private User user;
 
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
+    private RefreshToken refreshToken;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
