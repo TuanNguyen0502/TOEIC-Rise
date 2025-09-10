@@ -23,4 +23,9 @@ public class UserServiceImpl implements IUserService {
         user.setFullName(fullName);
         return userRepository.save(user);
     }
+
+    @Override
+    public User findByAccountId(Long accountId) {
+        return userRepository.findByAccount_Id(accountId).orElseThrow();
+    }
 }

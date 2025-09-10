@@ -5,4 +5,6 @@ import com.hcmute.fit.toeicrise.models.entities.User;
 
 public interface IUserService {
     User register(Account account, String fullName);
+
+    User findByAccountId(Long accountId);
 }
