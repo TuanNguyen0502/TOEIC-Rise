@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.LoginRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.RegisterRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.VerifyUserRequest;
@@ -21,7 +22,6 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +45,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Account account = new Account();
         account.setEmail(input.getEmail());
         account.setPassword(passwordEncoder.encode(input.getPassword()));
-        account.setVerificationCode(generateVerificationCode());
+        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
         account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         account.setIsActive(false);
         accountRepository.save(account);
@@ -136,7 +136,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (account.isEnabled()) {
                 throw new AppException(ErrorCode.VERIFIED_ACCOUNT);
             }
-            account.setVerificationCode(generateVerificationCode());
+            account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             sendVerificationEmail(account);
             accountRepository.save(account);
@@ -158,11 +158,5 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             // Handle email sending exception
             e.printStackTrace();
         }
-    }
-
-    private String generateVerificationCode() {
-        Random random = new Random();
-        int code = random.nextInt(900000) + 100000;
-        return String.valueOf(code);
     }
 }
