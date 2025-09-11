@@ -8,15 +8,33 @@ CREATE TABLE roles
     updated_at  DATETIME
 );
 
+INSERT INTO roles (name, description, created_at, updated_at)
+VALUES ('ADMIN', 'Administrator with full access', NOW(), NOW()),
+       ('LEARNER', 'Learner with access to learning materials', NOW(), NOW()),
+       ('STAFF', 'Staff member with limited access', NOW(), NOW());
+
 -- Accounts
 CREATE TABLE accounts
 (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email         VARCHAR(255) NOT NULL UNIQUE,
-    password      VARCHAR(255) NOT NULL,
-    auth_provider VARCHAR(50),
-    created_at    DATETIME,
-    updated_at    DATETIME
+    id                          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email                       VARCHAR(255) NOT NULL UNIQUE,
+    password                    VARCHAR(255) NOT NULL,
+    auth_provider               VARCHAR(50),
+    is_active                   BOOLEAN DEFAULT TRUE,
+    verification_code           VARCHAR(255),
+    verfication_code_expires_at DATETIME,
+    created_at                  DATETIME,
+    updated_at                  DATETIME
+);
+
+-- Refresh Tokens
+CREATE TABLE refresh_tokens
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token       VARCHAR(255) NOT NULL,
+    account_id  BIGINT       NOT NULL,
+    expiry_date TIMESTAMP    NOT NULL,
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE
 );
 
 -- Users
@@ -28,7 +46,6 @@ CREATE TABLE users
     full_name  VARCHAR(255) NOT NULL,
     gender     ENUM('MALE','FEMALE','OTHER') DEFAULT 'OTHER',
     avatar     VARCHAR(255),
-    is_active  BOOLEAN   DEFAULT TRUE,
     created_at DATETIME,
     updated_at DATETIME,
     FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,

@@ -15,9 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public abstract class BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -21,10 +21,8 @@ public class User extends BaseEntity {
     @Column(name = "avatar", columnDefinition = "VARCHAR(255)")
     private String avatar;
 
-    @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private Boolean isActive;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = false)
+    @OneToOne
+    @JoinColumn(name = "account_id", referencedColumnName = "id", unique = true)
     private Account account;
 
     @ManyToOne
