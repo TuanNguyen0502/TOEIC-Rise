@@ -17,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -145,23 +146,14 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     private void sendVerificationEmail(Account account) { //TODO: Update with company logo
+        Context context = new Context();
+        // Set variables for the template from the POST request data
         String subject = "Account Verification";
-        String verificationCode = "VERIFICATION CODE " + account.getVerificationCode();
-        String htmlMessage = "<html>"
-                + "<body style=\"font-family: Arial, sans-serif;\">"
-                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
-                + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
-                + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
-                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-                + "<h3 style=\"color: #333;\">Verification Code:</h3>"
-                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
-                + "</div>"
-                + "</div>"
-                + "</body>"
-                + "</html>";
+        context.setVariable("subject", subject);
+        context.setVariable("verificationCode", "VERIFICATION CODE " + account.getVerificationCode());
 
         try {
-            emailService.sendVerificationEmail(account.getEmail(), subject, htmlMessage);
+            emailService.sendEmail(account.getEmail(), subject, "emailTemplate", context);
         } catch (MessagingException e) {
             // Handle email sending exception
             e.printStackTrace();

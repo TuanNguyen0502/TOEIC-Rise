@@ -7,21 +7,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements IEmailService {
-    private final JavaMailSender emailSender;
+    private final JavaMailSender mailSender;
+    private final TemplateEngine templateEngine;
 
     @Override
-    public void sendVerificationEmail(String to, String subject, String text) throws MessagingException {
-        MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public void sendEmail(String to, String subject, String template, Context context) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
+        // Process the template with the given context
+        String htmlContent = templateEngine.process(template, context);
+
+        // Set email properties
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setText(text, true);
+        helper.setText(htmlContent, true); // Set true for HTML content
 
-        emailSender.send(message);
+        // Send the email
+        mailSender.send(mimeMessage);
     }
 }
