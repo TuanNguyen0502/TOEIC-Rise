@@ -67,14 +67,43 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (!account.isEnabled()) {
             throw new AppException(ErrorCode.UNVERIFIED_ACCOUNT);
         }
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
-                        input.getPassword()
-                )
-        );
 
-        return account;
+        // Check if account is locked
+        if (!account.isAccountNonLocked()) {
+            throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+        }
+
+        // Explicit password check
+        if (!passwordEncoder.matches(input.getPassword(), account.getPassword())) {
+            // Increment failed attempts
+            account.setFailedLoginAttempts(account.getFailedLoginAttempts() + 1);
+
+            // Lock account if failed attempts >= 5
+            if (account.getFailedLoginAttempts() >= 5) {
+                account.setAccountLockedUntil(LocalDateTime.now().plusMinutes(30));
+                accountRepository.save(account);
+                throw new AppException(ErrorCode.ACCOUNT_LOCKED, "You have entered the wrong password more than 5 times. The account will be temporarily locked.");
+            }
+
+            accountRepository.save(account);
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+        }
+
+        // If we reach here, password is correct - authenticate with Spring Security
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            input.getEmail(),
+                            input.getPassword()
+                    )
+            );
+            // Reset failed attempts on successful login
+            account.setFailedLoginAttempts(0);
+            account.setAccountLockedUntil(null);
+            return accountRepository.save(account);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
     }
 
     @Override

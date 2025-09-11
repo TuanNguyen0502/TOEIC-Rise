@@ -35,6 +35,12 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "verfication_code_expires_at")
     private LocalDateTime verificationCodeExpiresAt;
 
+    @Column(name = "failed_login_attempts", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "account_locked_until")
+    private LocalDateTime accountLockedUntil;
+
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
     private User user;
 
@@ -59,7 +65,7 @@ public class Account extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return accountLockedUntil == null || LocalDateTime.now().isAfter(accountLockedUntil);
     }
 
     @Override
