@@ -9,6 +9,7 @@ import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
+import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IUserService userService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final EmailService emailService;
+    private final IEmailService emailService;
 
     @Override
     public Account register(RegisterRequest input) {
