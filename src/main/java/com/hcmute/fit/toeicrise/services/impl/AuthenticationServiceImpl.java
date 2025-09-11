@@ -133,9 +133,31 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Optional<Account> optionalAccount = accountRepository.findByEmail(email);
         if (optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
+
             if (account.isEnabled()) {
                 throw new AppException(ErrorCode.VERIFIED_ACCOUNT);
             }
+
+            // Check if resend verification is locked
+            if (account.getResendVerificationLockedUntil() != null &&
+                LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
+                    "5");
+            }
+
+            // Increment resend attempts
+            account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
+
+            // If attempts reach 5, lock resend functionality for 30 minutes
+            if (account.getResendVerificationAttempts() >= 5) {
+                account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
+                account.setResendVerificationAttempts(0); // Reset counter after locking
+                accountRepository.save(account);
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
+                    "You have exceeded the verification code resend limit. Please try again after 30 minutes.");
+            }
+
+            // Proceed with resending verification code
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             sendVerificationEmail(account);

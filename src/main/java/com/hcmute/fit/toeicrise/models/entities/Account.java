@@ -41,6 +41,12 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "account_locked_until")
     private LocalDateTime accountLockedUntil;
 
+    @Column(name = "resend_verification_attempts", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer resendVerificationAttempts = 0;
+
+    @Column(name = "resend_verification_locked_until")
+    private LocalDateTime resendVerificationLockedUntil;
+
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
     private User user;
 
