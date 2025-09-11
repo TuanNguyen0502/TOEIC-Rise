@@ -3,8 +3,10 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.LoginRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.RegisterRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.VerifyUserRequest;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
@@ -30,6 +32,14 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Override
     public Account register(RegisterRequest input) {
+        if (!input.getPassword().equals(input.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        if (accountRepository.findByEmail(input.getEmail()).isPresent()) {
+            throw new AppException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
         Account account = new Account();
         account.setEmail(input.getEmail());
         account.setPassword(passwordEncoder.encode(input.getPassword()));
@@ -51,10 +61,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public Account authenticate(LoginRequest input) {
         Account account = accountRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!account.isEnabled()) {
-            throw new RuntimeException("Account not verified. Please verify your account.");
+            throw new AppException(ErrorCode.UNVERIFIED_ACCOUNT);
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -72,7 +82,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
             if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired");
+                throw new AppException(ErrorCode.INVALID_OTP);
             }
             if (account.getVerificationCode().equals(input.getVerificationCode())) {
                 account.setIsActive(true);
@@ -80,10 +90,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setVerificationCodeExpiresAt(null);
                 accountRepository.save(account);
             } else {
-                throw new RuntimeException("Invalid verification code");
+                throw new AppException(ErrorCode.INVALID_OTP);
             }
         } else {
-            throw new RuntimeException("User not found");
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
     }
 
@@ -93,14 +103,14 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
             if (account.isEnabled()) {
-                throw new RuntimeException("Account is already verified");
+                throw new AppException(ErrorCode.VERIFIED_ACCOUNT);
             }
             account.setVerificationCode(generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             sendVerificationEmail(account);
             accountRepository.save(account);
         } else {
-            throw new RuntimeException("User not found");
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
     }
 

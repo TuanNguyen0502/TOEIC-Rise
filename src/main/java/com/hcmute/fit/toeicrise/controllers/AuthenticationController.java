@@ -12,6 +12,7 @@ import com.hcmute.fit.toeicrise.services.impl.AuthenticationServiceImpl;
 import com.hcmute.fit.toeicrise.services.impl.JwtService;
 import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +27,13 @@ public class AuthenticationController {
     private final IUserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Account> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<Account> register(@Valid @RequestBody RegisterRequest registerRequest) {
         Account registeredUser = authenticationServiceImpl.register(registerRequest);
         return ResponseEntity.ok(registeredUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
         Account authenticatedUser = authenticationServiceImpl.authenticate(loginRequest);
         User user = userService.findByAccountId(authenticatedUser.getId());
         String accessToken = jwtService.generateToken(authenticatedUser);

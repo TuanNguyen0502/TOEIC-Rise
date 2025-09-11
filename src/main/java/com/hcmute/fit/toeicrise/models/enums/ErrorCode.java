@@ -11,10 +11,13 @@ public enum ErrorCode {
     INVALID_CREDENTIALS("Email or password is incorrect", HttpStatus.UNAUTHORIZED),
     ACCOUNT_LOCKED("Your account is locked", HttpStatus.UNAUTHORIZED),
     UNVERIFIED_ACCOUNT("Account is not verified", HttpStatus.UNAUTHORIZED),
+    VERIFIED_ACCOUNT("Account is already verified", HttpStatus.BAD_REQUEST),
     OTP_NOT_VERIFIED("OTP has not been verified", HttpStatus.UNAUTHORIZED),
+    DUPLICATE_EMAIL("Email already exists", HttpStatus.UNAUTHORIZED),
 
     // === 2. Validation Errors ===
     VALIDATION_ERROR("Invalid input data", HttpStatus.BAD_REQUEST),
+    PASSWORD_MISMATCH("Passwords do not match", HttpStatus.BAD_REQUEST),
     INVALID_OTP("%s OTP is invalid", HttpStatus.BAD_REQUEST),
 
     // === 3. Business Logic Errors ===
