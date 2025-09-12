@@ -9,9 +9,10 @@ import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.services.impl.AuthenticationServiceImpl;
-import com.hcmute.fit.toeicrise.services.impl.JwtService;
 import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
+import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,28 +21,28 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final JwtService jwtService;
+    private final IJwtService IJwtService;
     private final AuthenticationServiceImpl authenticationServiceImpl;
     private final IRefreshTokenService refreshTokenService;
     private final IUserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Account> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<Account> register(@Valid @RequestBody RegisterRequest registerRequest) {
         Account registeredUser = authenticationServiceImpl.register(registerRequest);
         return ResponseEntity.ok(registeredUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
         Account authenticatedUser = authenticationServiceImpl.authenticate(loginRequest);
         User user = userService.findByAccountId(authenticatedUser.getId());
-        String accessToken = jwtService.generateToken(authenticatedUser);
+        String accessToken = IJwtService.generateToken(authenticatedUser);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getEmail());
 
         return ResponseEntity.ok(LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
-                .expirationTime(jwtService.getExpirationTime())
+                .expirationTime(IJwtService.getExpirationTime())
                 .userId(user.getId())
                 .email(authenticatedUser.getEmail())
                 .fullName(user.getFullName())
@@ -55,11 +56,11 @@ public class AuthenticationController {
             RefreshToken token = refreshTokenService.verifyExpiration(
                     refreshTokenService.findByToken(refreshToken)
             );
-            String accessToken = jwtService.generateToken(token.getAccount());
+            String accessToken = IJwtService.generateToken(token.getAccount());
             return ResponseEntity.ok(RefreshTokenResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(token.getToken())
-                    .expirationTime(jwtService.getExpirationTime())
+                    .expirationTime(IJwtService.getExpirationTime())
                     .build());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -67,7 +68,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserRequest verifyUserRequest) {
+    public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyUserRequest verifyUserRequest) {
         try {
             authenticationServiceImpl.verifyUser(verifyUserRequest);
             return ResponseEntity.ok("Account verified successfully");

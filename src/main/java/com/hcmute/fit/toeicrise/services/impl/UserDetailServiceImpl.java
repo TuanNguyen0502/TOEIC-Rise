@@ -1,8 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.models.entities.Account;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.User;
-import com.hcmute.fit.toeicrise.repositories.AccountRepository;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,14 +18,14 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Account account = accountRepository.findByEmail(username).orElse(null);
-        assert account != null;
-        User user = account.getUser();
-        return new org.springframework.security.core.userdetails.User(account.getEmail(), account.getPassword(), getAuthorities(user));
+        User user = userRepository.findByAccount_Email(username).orElseThrow(() ->
+                new AppException(ErrorCode.INVALID_CREDENTIALS)
+        );
+        return new org.springframework.security.core.userdetails.User(user.getAccount().getEmail(), user.getAccount().getPassword(), getAuthorities(user));
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities(User user) {
