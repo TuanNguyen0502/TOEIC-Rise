@@ -12,13 +12,11 @@ import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -56,7 +54,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         // Link the User entity to the Account
         account.setUser(user);
 
-        sendVerificationEmail(account);
+        emailService.sendVerificationEmail(account);
         accountRepository.save(account);
         return true;
     }
@@ -161,25 +159,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             // Proceed with resending verification code
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-            sendVerificationEmail(account);
+            emailService.sendVerificationEmail(account);
             accountRepository.save(account);
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
-        }
-    }
-
-    private void sendVerificationEmail(Account account) { //TODO: Update with company logo
-        Context context = new Context();
-        // Set variables for the template from the POST request data
-        String subject = "Account Verification";
-        context.setVariable("subject", subject);
-        context.setVariable("verificationCode", "VERIFICATION CODE " + account.getVerificationCode());
-
-        try {
-            emailService.sendEmail(account.getEmail(), subject, "emailTemplate", context);
-        } catch (MessagingException e) {
-            // Handle email sending exception
-            e.printStackTrace();
         }
     }
 }
