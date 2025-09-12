@@ -82,7 +82,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (account.getFailedLoginAttempts() >= 5) {
                 account.setAccountLockedUntil(LocalDateTime.now().plusMinutes(30));
                 accountRepository.save(account);
-                throw new AppException(ErrorCode.ACCOUNT_LOCKED, "You have entered the wrong password more than 5 times. The account will be temporarily locked.");
+                throw new AppException(ErrorCode.ACCOUNT_LOCKED);
             }
 
             accountRepository.save(account);
@@ -120,7 +120,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setVerificationCodeExpiresAt(null);
                 accountRepository.save(account);
             } else {
-                throw new AppException(ErrorCode.INVALID_OTP);
+                throw new AppException(ErrorCode.INVALID_OTP, "Register's");
             }
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
@@ -140,8 +140,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             // Check if resend verification is locked
             if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
-                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
-                    "5");
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
             // Increment resend attempts
@@ -152,8 +151,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
                 account.setResendVerificationAttempts(0); // Reset counter after locking
                 accountRepository.save(account);
-                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
-                    "You have exceeded the verification code resend limit. Please try again after 30 minutes.");
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
             // Proceed with resending verification code
