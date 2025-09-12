@@ -16,15 +16,19 @@ VALUES ('ADMIN', 'Administrator with full access', NOW(), NOW()),
 -- Accounts
 CREATE TABLE accounts
 (
-    id                          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email                       VARCHAR(255) NOT NULL UNIQUE,
-    password                    VARCHAR(255) NOT NULL,
-    auth_provider               VARCHAR(50),
-    is_active                   BOOLEAN DEFAULT TRUE,
-    verification_code           VARCHAR(255),
-    verfication_code_expires_at DATETIME,
-    created_at                  DATETIME,
-    updated_at                  DATETIME
+    id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email                            VARCHAR(255) NOT NULL UNIQUE,
+    password                         VARCHAR(255) NOT NULL,
+    auth_provider                    VARCHAR(50),
+    is_active                        BOOLEAN DEFAULT TRUE,
+    verification_code                VARCHAR(255),
+    verfication_code_expires_at      DATETIME,
+    failed_login_attempts            INT     DEFAULT 0,
+    account_locked_until             DATETIME,
+    resend_verification_attempts     INT     DEFAULT 0,
+    resend_verification_locked_until DATETIME,
+    created_at                       DATETIME,
+    updated_at                       DATETIME
 );
 
 -- Refresh Tokens
