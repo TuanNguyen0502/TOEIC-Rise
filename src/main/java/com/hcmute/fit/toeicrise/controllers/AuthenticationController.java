@@ -1,14 +1,14 @@
 package com.hcmute.fit.toeicrise.controllers;
 
-import com.hcmute.fit.toeicrise.dtos.requests.LoginRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.RegisterRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.VerifyUserRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
 import com.hcmute.fit.toeicrise.models.entities.User;
-import com.hcmute.fit.toeicrise.services.impl.AuthenticationServiceImpl;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final IJwtService IJwtService;
-    private final AuthenticationServiceImpl authenticationServiceImpl;
+    private final IAuthenticationService authenticationServiceImpl;
     private final IRefreshTokenService refreshTokenService;
     private final IUserService userService;
 
@@ -85,5 +85,26 @@ public class AuthenticationController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        authenticationServiceImpl.forgotPassword(forgotPasswordRequest);
+        return ResponseEntity.ok("Verification code sent");
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest otpRequest) {
+        return ResponseEntity.ok(authenticationServiceImpl.verifyOtp(otpRequest));
+    }
+
+    @PostMapping("/reset-password")
+    private ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
+        if (authorization == null||!authorization.startsWith("Bearer ")) {
+            throw new AppException(ErrorCode.TOKEN_INVALID);
+        }
+        String token = authorization.substring(7);
+        authenticationServiceImpl.resetPassword(resetPasswordRequest, token);
+        return ResponseEntity.ok("Password reset successfully");
     }
 }

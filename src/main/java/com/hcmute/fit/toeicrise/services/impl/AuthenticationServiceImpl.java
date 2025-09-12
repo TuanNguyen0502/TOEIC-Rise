@@ -1,9 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
-import com.hcmute.fit.toeicrise.dtos.requests.LoginRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.RegisterRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.VerifyUserRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
@@ -11,6 +9,7 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
+import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +30,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IEmailService emailService;
+    private final IJwtService jwtService;
 
     @Override
     public Account register(RegisterRequest input) {
@@ -121,7 +121,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setVerificationCodeExpiresAt(null);
                 accountRepository.save(account);
             } else {
-                throw new AppException(ErrorCode.INVALID_OTP);
+                throw new AppException(ErrorCode.INVALID_OTP, "Register's");
             }
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
@@ -133,10 +133,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Optional<Account> optionalAccount = accountRepository.findByEmail(email);
         if (optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
-
-            if (account.isEnabled()) {
-                throw new AppException(ErrorCode.VERIFIED_ACCOUNT);
-            }
 
             // Check if resend verification is locked
             if (account.getResendVerificationLockedUntil() != null &&
@@ -165,6 +161,48 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+        Account account = accountRepository.findByEmail(forgotPasswordRequest.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        accountRepository.save(account);
+        if (account.getResendVerificationLockedUntil() != null &&
+                LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
+            throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
+                    "5");
+        }
+        sendVerificationEmail(account);
+    }
+
+    @Override
+    public String verifyOtp(OtpRequest otp) {
+        Account account = accountRepository.findByEmail(otp.getEmail()).orElseThrow(()
+                -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+        if (!account.getVerificationCode().equals(otp.getOtp())){
+            throw new AppException(ErrorCode.INVALID_OTP, "User's");
+        }
+        account.setVerificationCode(null);
+        account.setVerificationCodeExpiresAt(null);
+        accountRepository.save(account);
+        return jwtService.generateTokenResetPassword(account);
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
+        if (!resetPasswordRequest.getConfirmPassword().equals(resetPasswordRequest.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+        if (!jwtService.isPasswordResetTokenValid(token)){
+            throw new AppException(ErrorCode.TOKEN_EXPIRED);
+        }
+        Account account = accountRepository.findByEmail(resetPasswordRequest.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+        account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
+        accountRepository.save(account);
     }
 
     private void sendVerificationEmail(Account account) { //TODO: Update with company logo

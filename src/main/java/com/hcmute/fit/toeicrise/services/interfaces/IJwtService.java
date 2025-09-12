@@ -18,4 +18,7 @@ public interface IJwtService {
     long getExpirationTime();
 
     boolean isTokenValid(String token, UserDetails userDetails);
+
+    String generateTokenResetPassword(UserDetails userDetails);
+    boolean isPasswordResetTokenValid(String token);
 }

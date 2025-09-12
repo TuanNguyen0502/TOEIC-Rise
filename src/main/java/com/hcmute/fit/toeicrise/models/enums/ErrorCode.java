@@ -14,6 +14,8 @@ public enum ErrorCode {
     VERIFIED_ACCOUNT("Account is already verified", HttpStatus.BAD_REQUEST),
     OTP_NOT_VERIFIED("OTP has not been verified", HttpStatus.UNAUTHORIZED),
     DUPLICATE_EMAIL("Email already exists", HttpStatus.UNAUTHORIZED),
+    TOKEN_EXPIRED("Token has expired", HttpStatus.UNAUTHORIZED),
+    TOKEN_INVALID("Token is invalid", HttpStatus.UNAUTHORIZED),
 
     // === 2. Validation Errors ===
     VALIDATION_ERROR("Invalid input data", HttpStatus.BAD_REQUEST),

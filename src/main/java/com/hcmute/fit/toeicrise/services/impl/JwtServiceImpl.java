@@ -71,6 +71,19 @@ public class JwtServiceImpl implements IJwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
+    @Override
+    public String generateTokenResetPassword(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("resetPwd", true);
+        return generateToken(claims, userDetails);
+    }
+
+    @Override
+    public boolean isPasswordResetTokenValid(String token) {
+        Claims claims = extractAllClaims(token);
+        return Boolean.TRUE.equals(claims.get("resetPwd"));
+    }
+
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
