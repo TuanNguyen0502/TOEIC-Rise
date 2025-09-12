@@ -33,7 +33,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IEmailService emailService;
 
     @Override
-    public Account register(RegisterRequest input) {
+    public boolean register(RegisterRequest input) {
         if (!input.getPassword().equals(input.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
@@ -57,7 +57,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setUser(user);
 
         sendVerificationEmail(account);
-        return accountRepository.save(account);
+        accountRepository.save(account);
+        return true;
     }
 
     @Override
