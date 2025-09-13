@@ -171,7 +171,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
                     "5");
         }
-        sendVerificationEmail(account);
+        emailService.sendVerificationEmail(account);
     }
 
     @Override
@@ -199,20 +199,5 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
-    }
-
-    private void sendVerificationEmail(Account account) { //TODO: Update with company logo
-        Context context = new Context();
-        // Set variables for the template from the POST request data
-        String subject = "Account Verification";
-        context.setVariable("subject", subject);
-        context.setVariable("verificationCode", "VERIFICATION CODE " + account.getVerificationCode());
-
-        try {
-            emailService.sendEmail(account.getEmail(), subject, "emailTemplate", context);
-        } catch (MessagingException e) {
-            // Handle email sending exception
-            e.printStackTrace();
-        }
     }
 }
