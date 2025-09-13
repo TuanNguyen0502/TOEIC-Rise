@@ -1,8 +1,10 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
@@ -26,6 +28,6 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User findByAccountId(Long accountId) {
-        return userRepository.findByAccount_Id(accountId).orElseThrow();
+        return userRepository.findByAccount_Id(accountId).orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
     }
 }
