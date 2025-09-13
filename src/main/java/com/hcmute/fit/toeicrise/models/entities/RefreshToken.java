@@ -16,8 +16,8 @@ import java.time.Instant;
 @AllArgsConstructor
 public class RefreshToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String token;

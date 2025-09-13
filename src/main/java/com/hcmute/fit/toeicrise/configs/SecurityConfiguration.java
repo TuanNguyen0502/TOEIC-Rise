@@ -25,6 +25,7 @@ public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,6 +41,10 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/auth/login/google")
+                        .successHandler(customOAuth2SuccessHandler)
+                        .failureUrl("/auth/loginFailure"))
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
