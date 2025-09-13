@@ -99,7 +99,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset-password")
-    private ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
+    private ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
         if (authorization == null||!authorization.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.TOKEN_INVALID);
         }
