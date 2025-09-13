@@ -15,7 +15,6 @@ import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -60,7 +59,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         redisService.put(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(),
                 input.getEmail(), input.getFullName(), ECacheDuration.CACHE_FULLNAME_REGISTRATION.getDuration());
 
-        sendVerificationEmail(account);
+        emailService.sendVerificationEmail(account);
         return true;
     }
 
@@ -175,13 +174,16 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setIsActive(true);
                 account.setVerificationCode(null);
                 account.setVerificationCodeExpiresAt(null);
-                accountRepository.save(account);
 
                 // Create associated User entity
-                User user = userService.register(account, fullName);
+                User user = new User();
+                user.setRole(roleRepository.findByName(ERole.LEARNER));
+                user.setAccount(account);
+                user.setFullName(fullName);
 
                 // Link the User entity to the Account
                 account.setUser(user);
+                accountRepository.save(account);
 
                 redisService.remove(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail());
                 redisService.remove(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail());
