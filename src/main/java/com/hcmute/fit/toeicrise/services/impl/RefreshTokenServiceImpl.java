@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RefreshTokenRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
@@ -23,7 +25,8 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
     @Override
     public RefreshToken createRefreshToken(String email) {
         RefreshToken refreshToken = RefreshToken.builder()
-                .account(accountRepository.findByEmail(email).get())
+                .account(accountRepository.findByEmail(email).orElseThrow(() ->
+                        new AppException(ErrorCode.INVALID_CREDENTIALS)))
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
                 .build();
@@ -40,7 +43,7 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token expired. Please make a new login request");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return token;
     }

@@ -23,7 +23,7 @@ public enum ErrorCode {
     INVALID_OTP("%s OTP is invalid", HttpStatus.BAD_REQUEST),
 
     // === 3. Business Logic Errors ===
-    OTP_LIMIT_EXCEEDED("Exceeded %s OTP limit", HttpStatus.TOO_MANY_REQUESTS),
+    OTP_LIMIT_EXCEEDED("Exceeded %s OTP limit. Please try again after 30 minutes.", HttpStatus.TOO_MANY_REQUESTS),
     REGISTRATION_EXPIRED("Registration session has expired. Please register again.", HttpStatus.GONE),
 
     // === 4. Resource / Data Not Found or Conflicts ===
