@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
+import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,11 +21,12 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password")
     private String password;
 
-    @Column(columnDefinition = "VARCHAR(50)")
-    private String authProvider;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    private EAuthProvider authProvider;
 
     @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isActive;

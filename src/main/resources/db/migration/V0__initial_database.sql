@@ -18,8 +18,8 @@ CREATE TABLE accounts
 (
     id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
     email                            VARCHAR(255) NOT NULL UNIQUE,
-    password                         VARCHAR(255) NOT NULL,
-    auth_provider                    VARCHAR(50),
+    password                         VARCHAR(255),
+    auth_provider                    ENUM('LOCAL','GOOGLE', 'FACEBOOK', 'GITHUB') DEFAULT 'LOCAL',
     is_active                        BOOLEAN DEFAULT TRUE,
     verification_code                VARCHAR(255),
     verfication_code_expires_at      DATETIME,
@@ -35,7 +35,7 @@ CREATE TABLE accounts
 -- Mật khẩu: Admin@toeicrise2025
 INSERT INTO `accounts`
 VALUES (1, 'admin@toeic-rise.com', '$2a$10$k82KIubG8RXFQ2ad7rQCJ.efujvRWBM7CzgXNwEDZohWyOnbrRuc6', NULL, 1, NULL, NULL,
-        0, NULL, 0, NULL, '2025-09-12 23:26:06', '2025-09-12 23:28:06');
+        0, NULL, 0, NULL, NOW(), NOW());
 
 -- Refresh Tokens
 CREATE TABLE refresh_tokens
@@ -66,7 +66,7 @@ CREATE TABLE users
 -- Liên kết với account admin đã tạo ở trên
 -- Liên kết với role ADMIN đã tạo ở trên
 INSERT INTO `users`
-VALUES (1, 1, 1, 'Administrator', NULL, NULL, '2025-09-12 23:26:06', '2025-09-12 23:26:06');
+VALUES (1, 1, 1, 'Administrator', NULL, NULL, NOW(), NOW());
 
 -- Chat conversations
 CREATE TABLE chat_conversations
