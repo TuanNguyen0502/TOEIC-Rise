@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -17,7 +18,22 @@ public class EmailServiceImpl implements IEmailService {
     private final TemplateEngine templateEngine;
 
     @Override
-    public void sendEmail(String to, String subject, String template, Context context) throws MessagingException {
+    public void sendVerificationEmail(Account account) {
+        Context context = new Context();
+        // Set variables for the template from the POST request data
+        String subject = "Account Verification";
+        context.setVariable("subject", subject);
+        context.setVariable("verificationCode", account.getVerificationCode());
+
+        try {
+            sendEmail(account.getEmail(), subject, "emailTemplate", context);
+        } catch (MessagingException e) {
+            // Handle email sending exception
+            e.printStackTrace();
+        }
+    }
+
+    private void sendEmail(String to, String subject, String template, Context context) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 

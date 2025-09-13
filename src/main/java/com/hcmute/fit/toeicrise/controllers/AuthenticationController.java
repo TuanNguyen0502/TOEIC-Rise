@@ -27,9 +27,9 @@ public class AuthenticationController {
     private final IUserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Account> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        Account registeredUser = authenticationServiceImpl.register(registerRequest);
-        return ResponseEntity.ok(registeredUser);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        authenticationServiceImpl.register(registerRequest);
+        return ResponseEntity.ok("Registration successful. Please check your email for the verification code.");
     }
 
     @PostMapping("/login")
@@ -94,12 +94,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest otpRequest) {
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpRequest otpRequest) {
         return ResponseEntity.ok(authenticationServiceImpl.verifyOtp(otpRequest));
     }
 
     @PostMapping("/reset-password")
-    private ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
+    private ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
         if (authorization == null||!authorization.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.TOKEN_INVALID);
         }
