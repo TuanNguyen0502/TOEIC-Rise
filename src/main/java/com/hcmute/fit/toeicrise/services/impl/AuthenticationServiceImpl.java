@@ -5,12 +5,11 @@ import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.enums.ECacheDuration;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
-import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
-import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
-import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
+import com.hcmute.fit.toeicrise.services.interfaces.*;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +27,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final IEmailService emailService;
     private final IJwtService jwtService;
+    private final IRedisService redisService;
 
     @Override
     public boolean register(RegisterRequest input) {
@@ -46,16 +45,12 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
         account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         account.setIsActive(false);
-        accountRepository.save(account);
+        redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(),
+                input.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+        redisService.put(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(),
+                input.getEmail(), input.getFullName(), ECacheDuration.CACHE_FULLNAME_REGISTRATION.getDuration());
 
-        // Create associated User entity
-        User user = userService.register(account, input.getFullName());
-
-        // Link the User entity to the Account
-        account.setUser(user);
-
-        emailService.sendVerificationEmail(account);
-        accountRepository.save(account);
+        sendVerificationEmail(account);
         return true;
     }
 
@@ -108,9 +103,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Override
     public void verifyUser(VerifyUserRequest input) {
-        Optional<Account> optionalAccount = accountRepository.findByEmail(input.getEmail());
-        if (optionalAccount.isPresent()) {
-            Account account = optionalAccount.get();
+        Account account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail(), Account.class);
+        String fullName = redisService.get(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail(), String.class);
+        if (account != null) {
             if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
                 throw new AppException(ErrorCode.INVALID_OTP);
             }
@@ -119,20 +114,30 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setVerificationCode(null);
                 account.setVerificationCodeExpiresAt(null);
                 accountRepository.save(account);
+
+                // Create associated User entity
+                User user = userService.register(account, fullName);
+
+                // Link the User entity to the Account
+                account.setUser(user);
+
+                redisService.remove(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail());
+                redisService.remove(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail());
             } else {
                 throw new AppException(ErrorCode.INVALID_OTP, "Register's");
             }
         } else {
-            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account");
         }
     }
 
     @Override
     public void resendVerificationCode(String email) {
-        Optional<Account> optionalAccount = accountRepository.findByEmail(email);
-        if (optionalAccount.isPresent()) {
-            Account account = optionalAccount.get();
-
+        Account account = accountRepository.findByEmail(email).orElse(null);
+        if (account == null) {
+            account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), email, Account.class);
+        }
+        if (account != null) {
             // Check if resend verification is locked
             if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
