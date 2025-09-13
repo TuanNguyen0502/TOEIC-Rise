@@ -2,14 +2,19 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.*;
+import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
+import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
 import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import com.hcmute.fit.toeicrise.models.enums.ECacheDuration;
+import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
+import com.hcmute.fit.toeicrise.repositories.RoleRepository;
+import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,10 +27,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
     private final AccountRepository accountRepository;
-    private final IUserService userService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IEmailService emailService;
+    private final IRefreshTokenService refreshTokenService;
     private final IJwtService jwtService;
     private final IRedisService redisService;
 
@@ -45,17 +52,47 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
         account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         account.setIsActive(false);
+        account.setAuthProvider(EAuthProvider.LOCAL);
+
         redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(),
                 input.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
         redisService.put(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(),
                 input.getEmail(), input.getFullName(), ECacheDuration.CACHE_FULLNAME_REGISTRATION.getDuration());
 
-        sendVerificationEmail(account);
+        emailService.sendVerificationEmail(account);
         return true;
     }
 
     @Override
-    public Account authenticate(LoginRequest input) {
+    public LoginResponse login(LoginRequest loginRequest) {
+        Account authenticatedUser = this.authenticate(loginRequest);
+        return getLoginResponse(authenticatedUser);
+    }
+
+    @Override
+    public LoginResponse loginWithGoogle(String email, String fullName, String avatar) {
+        Account authenticatedUser = this.loginAndRegisterWithGoogle(email, fullName, avatar);
+        return getLoginResponse(authenticatedUser);
+    }
+
+    private LoginResponse getLoginResponse(Account authenticatedUser) {
+        User user = userRepository.findByAccount_Id(authenticatedUser.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
+        String accessToken = jwtService.generateToken(authenticatedUser);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getEmail());
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .expirationTime(jwtService.getExpirationTime())
+                .userId(user.getId())
+                .email(authenticatedUser.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole().getName())
+                .build();
+    }
+
+    private Account authenticate(LoginRequest input) {
         Account account = accountRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
 
@@ -101,6 +138,30 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
     }
 
+    public Account loginAndRegisterWithGoogle(String email, String fullName, String avatar) {
+        // Nếu đã tồn tại thì trả về luôn
+        return accountRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    // Nếu chưa có thì tạo mới
+                    Account account = new Account();
+                    account.setEmail(email);
+                    account.setIsActive(true);
+                    account.setAuthProvider(EAuthProvider.GOOGLE);
+
+                    // Tạo mới user và gắn vào account
+                    User user = new User();
+                    user.setAvatar(avatar);
+                    user.setFullName(fullName);
+                    user.setRole(roleRepository.findByName(ERole.LEARNER));
+                    user.setAccount(account);
+
+                    account.setUser(user);
+
+                    return accountRepository.save(account);
+                });
+    }
+
+
     @Override
     public void verifyUser(VerifyUserRequest input) {
         Account account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail(), Account.class);
@@ -113,13 +174,16 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setIsActive(true);
                 account.setVerificationCode(null);
                 account.setVerificationCodeExpiresAt(null);
-                accountRepository.save(account);
 
                 // Create associated User entity
-                User user = userService.register(account, fullName);
+                User user = new User();
+                user.setRole(roleRepository.findByName(ERole.LEARNER));
+                user.setAccount(account);
+                user.setFullName(fullName);
 
                 // Link the User entity to the Account
                 account.setUser(user);
+                accountRepository.save(account);
 
                 redisService.remove(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail());
                 redisService.remove(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail());
@@ -176,7 +240,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
                     "5");
         }
-        sendVerificationEmail(account);
+        emailService.sendVerificationEmail(account);
     }
 
     @Override
@@ -204,20 +268,5 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
-    }
-
-    private void sendVerificationEmail(Account account) { //TODO: Update with company logo
-        Context context = new Context();
-        // Set variables for the template from the POST request data
-        String subject = "Account Verification";
-        context.setVariable("subject", subject);
-        context.setVariable("verificationCode", "VERIFICATION CODE " + account.getVerificationCode());
-
-        try {
-            emailService.sendEmail(account.getEmail(), subject, "emailTemplate", context);
-        } catch (MessagingException e) {
-            // Handle email sending exception
-            e.printStackTrace();
-        }
     }
 }

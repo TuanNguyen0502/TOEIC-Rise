@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -18,6 +19,7 @@ public class EmailServiceImpl implements IEmailService {
     private final TemplateEngine templateEngine;
 
     @Override
+    @Async
     public void sendVerificationEmail(Account account) {
         Context context = new Context();
         // Set variables for the template from the POST request data

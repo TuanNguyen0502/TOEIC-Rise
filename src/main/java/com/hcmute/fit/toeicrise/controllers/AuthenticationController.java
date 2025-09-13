@@ -4,27 +4,26 @@ import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
-import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
-import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final IJwtService IJwtService;
+    private final IJwtService jwtService;
     private final IAuthenticationService authenticationServiceImpl;
     private final IRefreshTokenService refreshTokenService;
-    private final IUserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -34,20 +33,13 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
-        Account authenticatedUser = authenticationServiceImpl.authenticate(loginRequest);
-        User user = userService.findByAccountId(authenticatedUser.getId());
-        String accessToken = IJwtService.generateToken(authenticatedUser);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getEmail());
+        return ResponseEntity.ok(authenticationServiceImpl.login(loginRequest));
+    }
 
-        return ResponseEntity.ok(LoginResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .expirationTime(IJwtService.getExpirationTime())
-                .userId(user.getId())
-                .email(authenticatedUser.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole().getName())
-                .build());
+    @GetMapping("/login/google")
+    public ResponseEntity<String > loginWithGoogleAuth(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/google");
+        return ResponseEntity.ok("Redirecting ..");
     }
 
     @PostMapping("/refresh-token")
@@ -56,11 +48,11 @@ public class AuthenticationController {
             RefreshToken token = refreshTokenService.verifyExpiration(
                     refreshTokenService.findByToken(refreshToken)
             );
-            String accessToken = IJwtService.generateToken(token.getAccount());
+            String accessToken = jwtService.generateToken(token.getAccount());
             return ResponseEntity.ok(RefreshTokenResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(token.getToken())
-                    .expirationTime(IJwtService.getExpirationTime())
+                    .expirationTime(jwtService.getExpirationTime())
                     .build());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
