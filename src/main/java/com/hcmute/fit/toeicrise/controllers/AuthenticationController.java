@@ -27,9 +27,9 @@ public class AuthenticationController {
     private final IUserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Account> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        Account registeredUser = authenticationServiceImpl.register(registerRequest);
-        return ResponseEntity.ok(registeredUser);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        authenticationServiceImpl.register(registerRequest);
+        return ResponseEntity.ok("Registration successful. Please check your email for the verification code.");
     }
 
     @PostMapping("/login")

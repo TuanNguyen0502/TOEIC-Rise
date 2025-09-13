@@ -16,16 +16,26 @@ VALUES ('ADMIN', 'Administrator with full access', NOW(), NOW()),
 -- Accounts
 CREATE TABLE accounts
 (
-    id                          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email                       VARCHAR(255) NOT NULL UNIQUE,
-    password                    VARCHAR(255) NOT NULL,
-    auth_provider               VARCHAR(50),
-    is_active                   BOOLEAN DEFAULT TRUE,
-    verification_code           VARCHAR(255),
-    verfication_code_expires_at DATETIME,
-    created_at                  DATETIME,
-    updated_at                  DATETIME
+    id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email                            VARCHAR(255) NOT NULL UNIQUE,
+    password                         VARCHAR(255) NOT NULL,
+    auth_provider                    VARCHAR(50),
+    is_active                        BOOLEAN DEFAULT TRUE,
+    verification_code                VARCHAR(255),
+    verfication_code_expires_at      DATETIME,
+    failed_login_attempts            INT     DEFAULT 0,
+    account_locked_until             DATETIME,
+    resend_verification_attempts     INT     DEFAULT 0,
+    resend_verification_locked_until DATETIME,
+    created_at                       DATETIME,
+    updated_at                       DATETIME
 );
+
+-- Tạo tài khoản admin mặc định
+-- Mật khẩu: Admin@toeicrise2025
+INSERT INTO `accounts`
+VALUES (1, 'admin@toeic-rise.com', '$2a$10$k82KIubG8RXFQ2ad7rQCJ.efujvRWBM7CzgXNwEDZohWyOnbrRuc6', NULL, 1, NULL, NULL,
+        0, NULL, 0, NULL, '2025-09-12 23:26:06', '2025-09-12 23:28:06');
 
 -- Refresh Tokens
 CREATE TABLE refresh_tokens
@@ -51,6 +61,12 @@ CREATE TABLE users
     FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE RESTRICT
 );
+
+-- Tạo user admin mặc định
+-- Liên kết với account admin đã tạo ở trên
+-- Liên kết với role ADMIN đã tạo ở trên
+INSERT INTO `users`
+VALUES (1, 1, 1, 'Administrator', NULL, NULL, '2025-09-12 23:26:06', '2025-09-12 23:26:06');
 
 -- Chat conversations
 CREATE TABLE chat_conversations

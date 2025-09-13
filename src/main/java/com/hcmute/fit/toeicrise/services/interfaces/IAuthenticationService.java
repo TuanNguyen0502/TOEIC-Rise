@@ -6,7 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.VerifyUserRequest;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 
 public interface IAuthenticationService {
-    Account register(RegisterRequest input);
+    boolean register(RegisterRequest input);
 
     Account authenticate(LoginRequest input);
 

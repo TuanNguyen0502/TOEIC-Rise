@@ -12,13 +12,11 @@ import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -33,7 +31,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IEmailService emailService;
 
     @Override
-    public Account register(RegisterRequest input) {
+    public boolean register(RegisterRequest input) {
         if (!input.getPassword().equals(input.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
@@ -56,8 +54,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         // Link the User entity to the Account
         account.setUser(user);
 
-        sendVerificationEmail(account);
-        return accountRepository.save(account);
+        emailService.sendVerificationEmail(account);
+        accountRepository.save(account);
+        return true;
     }
 
     @Override
@@ -83,7 +82,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (account.getFailedLoginAttempts() >= 5) {
                 account.setAccountLockedUntil(LocalDateTime.now().plusMinutes(30));
                 accountRepository.save(account);
-                throw new AppException(ErrorCode.ACCOUNT_LOCKED, "You have entered the wrong password more than 5 times. The account will be temporarily locked.");
+                throw new AppException(ErrorCode.ACCOUNT_LOCKED);
             }
 
             accountRepository.save(account);
@@ -121,7 +120,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setVerificationCodeExpiresAt(null);
                 accountRepository.save(account);
             } else {
-                throw new AppException(ErrorCode.INVALID_OTP);
+                throw new AppException(ErrorCode.INVALID_OTP, "Register's");
             }
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
@@ -141,8 +140,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             // Check if resend verification is locked
             if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
-                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
-                    "5");
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
             // Increment resend attempts
@@ -153,32 +151,16 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
                 account.setResendVerificationAttempts(0); // Reset counter after locking
                 accountRepository.save(account);
-                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
-                    "You have exceeded the verification code resend limit. Please try again after 30 minutes.");
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
             // Proceed with resending verification code
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-            sendVerificationEmail(account);
+            emailService.sendVerificationEmail(account);
             accountRepository.save(account);
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
-        }
-    }
-
-    private void sendVerificationEmail(Account account) { //TODO: Update with company logo
-        Context context = new Context();
-        // Set variables for the template from the POST request data
-        String subject = "Account Verification";
-        context.setVariable("subject", subject);
-        context.setVariable("verificationCode", "VERIFICATION CODE " + account.getVerificationCode());
-
-        try {
-            emailService.sendEmail(account.getEmail(), subject, "emailTemplate", context);
-        } catch (MessagingException e) {
-            // Handle email sending exception
-            e.printStackTrace();
         }
     }
 }
