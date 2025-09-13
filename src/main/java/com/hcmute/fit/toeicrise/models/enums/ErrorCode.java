@@ -42,7 +42,8 @@ public enum ErrorCode {
     // === 9. System & Uncategorized ===
     DATABASE_ERROR("Database error", HttpStatus.NOT_IMPLEMENTED),
     GENERATE_TOKEN_EXCEPTION("Failed to generate token", HttpStatus.NOT_IMPLEMENTED),
-    UNCATEGORIZED_EXCEPTION("Unexpected error occurred", HttpStatus.NOT_IMPLEMENTED),;
+    UNCATEGORIZED_EXCEPTION("Unexpected error occurred", HttpStatus.NOT_IMPLEMENTED),
+    CACHE_ERROR("Cache error", HttpStatus.NOT_IMPLEMENTED);
 
     private final String message;
     private final HttpStatus httpStatus;

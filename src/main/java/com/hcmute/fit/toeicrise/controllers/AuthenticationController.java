@@ -86,12 +86,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest otpRequest) {
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpRequest otpRequest) {
         return ResponseEntity.ok(authenticationServiceImpl.verifyOtp(otpRequest));
     }
 
     @PostMapping("/reset-password")
-    private ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
+    private ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
         if (authorization == null||!authorization.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.TOKEN_INVALID);
         }
