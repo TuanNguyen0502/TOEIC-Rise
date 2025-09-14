@@ -27,6 +27,8 @@ CREATE TABLE accounts
     account_locked_until             DATETIME,
     resend_verification_attempts     INT     DEFAULT 0,
     resend_verification_locked_until DATETIME,
+    refresh_token                    VARCHAR(255),
+    refresh_token_expiry_date        TIMESTAMP,
     created_at                       DATETIME,
     updated_at                       DATETIME
 );
@@ -35,17 +37,7 @@ CREATE TABLE accounts
 -- Mật khẩu: Admin@toeicrise2025
 INSERT INTO `accounts`
 VALUES (1, 'admin@toeic-rise.com', '$2a$10$k82KIubG8RXFQ2ad7rQCJ.efujvRWBM7CzgXNwEDZohWyOnbrRuc6', NULL, 1, NULL, NULL,
-        0, NULL, 0, NULL, NOW(), NOW());
-
--- Refresh Tokens
-CREATE TABLE refresh_tokens
-(
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    token       VARCHAR(255) NOT NULL,
-    account_id  BIGINT       NOT NULL,
-    expiry_date TIMESTAMP    NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE
-);
+        0, NULL, 0, NULL, NULL, NULL, NOW(), NOW());
 
 -- Users
 CREATE TABLE users
