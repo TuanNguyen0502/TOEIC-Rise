@@ -173,7 +173,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String fullName = redisService.get(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail(), String.class);
         if (account != null) {
             if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new AppException(ErrorCode.INVALID_OTP);
+                throw new AppException(ErrorCode.OTP_EXPIRED);
             }
             if (account.getVerificationCode().equals(input.getVerificationCode())) {
                 account.setIsActive(true);
@@ -203,8 +203,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public void resendVerificationCode(String email) {
         Account account = accountRepository.findByEmail(email).orElse(null);
+        boolean isRegister = false;
         if (account == null) {
             account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), email, Account.class);
+            isRegister = true;
         }
         if (account != null) {
             // Check if resend verification is locked
@@ -220,7 +222,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (account.getResendVerificationAttempts() >= 5) {
                 account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
                 account.setResendVerificationAttempts(0); // Reset counter after locking
-                accountRepository.save(account);
+                if (isRegister) {
+                    redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+                }
+                else accountRepository.save(account);
                 throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
@@ -228,7 +233,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             emailService.sendVerificationEmail(account);
-            accountRepository.save(account);
+            if (isRegister) {
+                redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+            }
+            else accountRepository.save(account);
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
@@ -237,15 +245,22 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Account account = accountRepository.findByEmail(forgotPasswordRequest.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
-        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        accountRepository.save(account);
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
         if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
                     "5");
         }
+        if (account.getResendVerificationAttempts() > 5) {
+            account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
+            account.setResendVerificationAttempts(0); // Reset counter after locking
+            accountRepository.save(account);
+            throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
+        }
+        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
+        accountRepository.save(account);
         emailService.sendVerificationEmail(account);
     }
 
@@ -255,6 +270,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
         if (!account.getVerificationCode().equals(otp.getOtp())) {
             throw new AppException(ErrorCode.INVALID_OTP, "User's");
+        }
+        if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.OTP_EXPIRED);
         }
         account.setVerificationCode(null);
         account.setVerificationCodeExpiresAt(null);
@@ -270,8 +288,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (!jwtService.isPasswordResetTokenValid(token)) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
-        Account account = accountRepository.findByEmail(resetPasswordRequest.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
+        String emailToken = jwtService.extractUsername(token);
+        Account account = accountRepository.findByEmail(emailToken)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
     }
