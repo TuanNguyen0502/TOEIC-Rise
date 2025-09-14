@@ -3,9 +3,9 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
-import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import com.hcmute.fit.toeicrise.models.enums.ECacheDuration;
@@ -16,23 +16,28 @@ import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
+    @Value("${security.jwt.refresh-token.expiration}")
+    private Long refreshTokenDurationMs;
+
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IEmailService emailService;
-    private final IRefreshTokenService refreshTokenService;
     private final IJwtService jwtService;
     private final IRedisService redisService;
 
@@ -79,11 +84,11 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         User user = userRepository.findByAccount_Id(authenticatedUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
         String accessToken = jwtService.generateToken(authenticatedUser);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getEmail());
+        String refreshToken = createRefreshToken(authenticatedUser);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
+                .refreshToken(refreshToken)
                 .expirationTime(jwtService.getExpirationTime())
                 .userId(user.getId())
                 .email(authenticatedUser.getEmail())
@@ -168,7 +173,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String fullName = redisService.get(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail(), String.class);
         if (account != null) {
             if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new AppException(ErrorCode.INVALID_OTP);
+                throw new AppException(ErrorCode.OTP_EXPIRED);
             }
             if (account.getVerificationCode().equals(input.getVerificationCode())) {
                 account.setIsActive(true);
@@ -191,20 +196,22 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 throw new AppException(ErrorCode.INVALID_OTP, "Register's");
             }
         } else {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account");
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account");
         }
     }
 
     @Override
     public void resendVerificationCode(String email) {
         Account account = accountRepository.findByEmail(email).orElse(null);
+        boolean isRegister = false;
         if (account == null) {
             account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), email, Account.class);
+            isRegister = true;
         }
         if (account != null) {
             // Check if resend verification is locked
             if (account.getResendVerificationLockedUntil() != null &&
-                LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
+                    LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
                 throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
@@ -215,7 +222,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (account.getResendVerificationAttempts() >= 5) {
                 account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
                 account.setResendVerificationAttempts(0); // Reset counter after locking
-                accountRepository.save(account);
+                if (isRegister) {
+                    redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+                }
+                else accountRepository.save(account);
                 throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
@@ -223,32 +233,46 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             emailService.sendVerificationEmail(account);
-            accountRepository.save(account);
+            if (isRegister) {
+                redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+            }
+            else accountRepository.save(account);
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
     }
+
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Account account = accountRepository.findByEmail(forgotPasswordRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
-        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        accountRepository.save(account);
         if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
                     "5");
         }
+        if (account.getResendVerificationAttempts() > 5) {
+            account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
+            account.setResendVerificationAttempts(0); // Reset counter after locking
+            accountRepository.save(account);
+            throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
+        }
+        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
+        accountRepository.save(account);
         emailService.sendVerificationEmail(account);
     }
 
     @Override
     public String verifyOtp(OtpRequest otp) {
         Account account = accountRepository.findByEmail(otp.getEmail()).orElseThrow(()
-                -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
-        if (!account.getVerificationCode().equals(otp.getOtp())){
+                -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
+        if (!account.getVerificationCode().equals(otp.getOtp())) {
             throw new AppException(ErrorCode.INVALID_OTP, "User's");
+        }
+        if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.OTP_EXPIRED);
         }
         account.setVerificationCode(null);
         account.setVerificationCodeExpiresAt(null);
@@ -261,12 +285,46 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (!resetPasswordRequest.getConfirmPassword().equals(resetPasswordRequest.getPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
-        if (!jwtService.isPasswordResetTokenValid(token)){
+        if (!jwtService.isPasswordResetTokenValid(token)) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
-        Account account = accountRepository.findByEmail(resetPasswordRequest.getEmail())
+        String emailToken = jwtService.extractUsername(token);
+        Account account = accountRepository.findByEmail(emailToken)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
+    }
+
+    @Override
+    public RefreshTokenResponse refreshToken(String refreshToken) {
+        Account account = accountRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        if (account.getRefreshTokenExpiryDate().isBefore(Instant.now())) {
+            throw new AppException(ErrorCode.TOKEN_EXPIRED);
+        }
+
+        String newAccessToken = jwtService.generateToken(account);
+
+        return RefreshTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(refreshToken)
+                .expirationTime(jwtService.getExpirationTime())
+                .build();
+    }
+
+    private String createRefreshToken(Account account) {
+        // Reuse existing valid refresh token
+        if (account.getRefreshToken() != null && account.getRefreshTokenExpiryDate() != null) {
+            if (account.getRefreshTokenExpiryDate().isAfter(Instant.now())) {
+                return account.getRefreshToken();
+            }
+        }
+        String refreshToken = UUID.randomUUID().toString();
+        account.setRefreshToken(refreshToken);
+        account.setRefreshTokenExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        accountRepository.save(account);
+        return refreshToken;
     }
 }

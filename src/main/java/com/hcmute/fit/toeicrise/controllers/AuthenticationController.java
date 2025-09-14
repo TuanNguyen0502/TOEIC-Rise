@@ -2,13 +2,9 @@ package com.hcmute.fit.toeicrise.controllers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.RefreshToken;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
-import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
-import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +17,7 @@ import java.io.IOException;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final IJwtService jwtService;
     private final IAuthenticationService authenticationServiceImpl;
-    private final IRefreshTokenService refreshTokenService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -45,15 +39,7 @@ public class AuthenticationController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestBody String refreshToken) {
         try {
-            RefreshToken token = refreshTokenService.verifyExpiration(
-                    refreshTokenService.findByToken(refreshToken)
-            );
-            String accessToken = jwtService.generateToken(token.getAccount());
-            return ResponseEntity.ok(RefreshTokenResponse.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(token.getToken())
-                    .expirationTime(jwtService.getExpirationTime())
-                    .build());
+            return ResponseEntity.ok(authenticationServiceImpl.refreshToken(refreshToken));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -91,7 +77,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset-password")
-    private ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
         if (authorization == null||!authorization.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.TOKEN_INVALID);
         }
