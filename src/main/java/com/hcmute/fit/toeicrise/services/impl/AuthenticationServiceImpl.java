@@ -198,8 +198,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public void resendVerificationCode(String email) {
         Account account = accountRepository.findByEmail(email).orElse(null);
+        boolean isRegister = false;
         if (account == null) {
             account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), email, Account.class);
+            isRegister = true;
         }
         if (account != null) {
             // Check if resend verification is locked
@@ -215,7 +217,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (account.getResendVerificationAttempts() >= 5) {
                 account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
                 account.setResendVerificationAttempts(0); // Reset counter after locking
-                accountRepository.save(account);
+                if (isRegister) {
+                    redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+                }
+                else accountRepository.save(account);
                 throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
@@ -223,7 +228,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             emailService.sendVerificationEmail(account);
-            accountRepository.save(account);
+            if (isRegister) {
+                redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
+            }
+            else accountRepository.save(account);
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
