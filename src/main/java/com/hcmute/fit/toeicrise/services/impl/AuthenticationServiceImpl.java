@@ -245,6 +245,12 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
                     "5");
         }
+        if (account.getResendVerificationAttempts() > 5) {
+            account.setResendVerificationLockedUntil(LocalDateTime.now().plusMinutes(30));
+            account.setResendVerificationAttempts(0); // Reset counter after locking
+            accountRepository.save(account);
+            throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
+        }
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
         account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
