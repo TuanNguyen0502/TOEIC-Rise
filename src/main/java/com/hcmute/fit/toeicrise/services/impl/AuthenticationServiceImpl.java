@@ -168,7 +168,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String fullName = redisService.get(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail(), String.class);
         if (account != null) {
             if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new AppException(ErrorCode.INVALID_OTP);
+                throw new AppException(ErrorCode.TOKEN_EXPIRED);
             }
             if (account.getVerificationCode().equals(input.getVerificationCode())) {
                 account.setIsActive(true);
