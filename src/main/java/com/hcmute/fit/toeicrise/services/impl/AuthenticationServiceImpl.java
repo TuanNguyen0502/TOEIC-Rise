@@ -282,7 +282,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (!jwtService.isPasswordResetTokenValid(token)){
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
-        Account account = accountRepository.findByEmail(resetPasswordRequest.getEmail())
+        String emailToken = jwtService.extractUsername(token);
+        Account account = accountRepository.findByEmail(emailToken)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
