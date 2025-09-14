@@ -11,8 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ResetPasswordRequest {
-    @Pattern(regexp = Constant.EMAIL_PATTERN, message = MessageConstant.INVALID_EMAIL)
-    private String email;
     @Pattern(regexp = Constant.PASSWORD_PATTERN, message = MessageConstant.INVALID_PASSWORD)
     private String password;
     private String confirmPassword;
