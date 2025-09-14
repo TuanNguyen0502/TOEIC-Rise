@@ -240,14 +240,15 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Account account = accountRepository.findByEmail(forgotPasswordRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
-        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        accountRepository.save(account);
         if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
                     "5");
         }
+        account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
+        accountRepository.save(account);
         emailService.sendVerificationEmail(account);
     }
 
