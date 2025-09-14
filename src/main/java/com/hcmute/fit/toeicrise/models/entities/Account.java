@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -49,11 +50,14 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "resend_verification_locked_until")
     private LocalDateTime resendVerificationLockedUntil;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
-    private User user;
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
+    @Column(name = "refresh_token_expiry_date")
+    private Instant refreshTokenExpiryDate;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
-    private RefreshToken refreshToken;
+    private User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
