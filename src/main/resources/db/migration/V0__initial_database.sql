@@ -22,7 +22,7 @@ CREATE TABLE accounts
     auth_provider                    ENUM('LOCAL','GOOGLE', 'FACEBOOK', 'GITHUB') DEFAULT 'LOCAL',
     is_active                        BOOLEAN DEFAULT TRUE,
     verification_code                VARCHAR(255),
-    verfication_code_expires_at      DATETIME,
+    verification_code_expires_at     DATETIME,
     failed_login_attempts            INT     DEFAULT 0,
     account_locked_until             DATETIME,
     resend_verification_attempts     INT     DEFAULT 0,
@@ -60,40 +60,6 @@ CREATE TABLE users
 INSERT INTO `users`
 VALUES (1, 1, 1, 'Administrator', NULL, NULL, NOW(), NOW());
 
--- Chat conversations
-CREATE TABLE chat_conversations
-(
-    id      BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title   VARCHAR(255),
-    user_id BIGINT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-);
-
--- Chat memories
-CREATE TABLE chat_memories
-(
-    id                   VARCHAR(255) PRIMARY KEY,
-    conversation_id      VARCHAR(255) NOT NULL,
-    message_type         VARCHAR(50)  NOT NULL,
-    content              TEXT         NOT NULL,
-    metadata             TEXT,
-    created_at           DATETIME,
-    chat_conversation_id BIGINT       NOT NULL,
-    FOREIGN KEY (chat_conversation_id) REFERENCES chat_conversations (id) ON DELETE CASCADE
-);
-
--- Chat ratings
-CREATE TABLE chat_ratings
-(
-    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id    BIGINT       NOT NULL,
-    message_id VARCHAR(255) NOT NULL,
-    rating     ENUM('LIKE', 'DISLIKE') NOT NULL,
-    created_at DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (message_id) REFERENCES chat_memories (id) ON DELETE CASCADE
-);
-
 -- Parts
 CREATE TABLE parts
 (
@@ -125,8 +91,8 @@ CREATE TABLE test_sets
 CREATE TABLE tests
 (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    test_set_id BIGINT,
     name        VARCHAR(255) NOT NULL,
+    test_set_id BIGINT,
     created_at  DATETIME,
     updated_at  DATETIME,
     FOREIGN KEY (test_set_id) REFERENCES test_sets (id) ON DELETE SET NULL
@@ -140,6 +106,7 @@ CREATE TABLE question_groups
     image_url  VARCHAR(255),
     position   INT    NOT NULL,
     passage    TEXT,
+    transcript TEXT,
     test_id    BIGINT NOT NULL,
     part_id    BIGINT NOT NULL,
     created_at DATETIME,
@@ -154,7 +121,7 @@ CREATE TABLE questions
     id                BIGINT AUTO_INCREMENT PRIMARY KEY,
     question_group_id BIGINT  NOT NULL,
     position          INT     NOT NULL,
-    text              TEXT,
+    content           TEXT,
     options           JSON    NOT NULL, -- lưu A,B,C,D dạng JSON
     correct_option    CHAR(1) NOT NULL, -- A/B/C/D
     explanations      TEXT,
@@ -164,24 +131,13 @@ CREATE TABLE questions
 );
 
 -- Bảng trung gian (Many-to-Many)
-CREATE TABLE question_tags
+CREATE TABLE questions_tags
 (
     question_id BIGINT NOT NULL,
     tag_id      BIGINT NOT NULL,
     PRIMARY KEY (question_id, tag_id),
     FOREIGN KEY (question_id) REFERENCES questions (id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
-);
-
--- Question transcripts (lưu transcript audio)
-CREATE TABLE question_transcripts
-(
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    question_group_id BIGINT NOT NULL,
-    transcript        TEXT   NOT NULL,
-    created_at        DATETIME,
-    updated_at        DATETIME,
-    FOREIGN KEY (question_group_id) REFERENCES question_groups (id) ON DELETE CASCADE
 );
 
 -- User tests (kết quả làm bài của user)

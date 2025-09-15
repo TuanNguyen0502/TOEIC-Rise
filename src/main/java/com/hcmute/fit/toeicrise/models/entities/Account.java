@@ -35,7 +35,7 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "verification_code", columnDefinition = "VARCHAR(255)")
     private String verificationCode;
 
-    @Column(name = "verfication_code_expires_at")
+    @Column(name = "verification_code_expires_at")
     private LocalDateTime verificationCodeExpiresAt;
 
     @Column(name = "failed_login_attempts", nullable = false, columnDefinition = "INT DEFAULT 0")
