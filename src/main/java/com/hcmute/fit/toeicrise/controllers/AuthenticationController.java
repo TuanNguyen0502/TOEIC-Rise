@@ -2,13 +2,18 @@ package com.hcmute.fit.toeicrise.controllers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -27,7 +32,23 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(authenticationServiceImpl.login(loginRequest));
+        // 1. Xác thực người dùng và tạo JWT token
+        LoginResponse loginResponse = authenticationServiceImpl.login(loginRequest);
+        // 2. Tạo refresh token
+        String refreshToken = authenticationServiceImpl.createRefreshToken(loginRequest.getEmail());
+        long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
+        // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
+        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true) // Không thể đọc bằng JavaScript → tăng bảo mật
+                .secure(true) // Chỉ sử dụng qua HTTPS
+                .path("/") // Cookie có hiệu lực toàn bộ hệ thống
+                .maxAge(refreshTokenExpirationTime) // Thời gian sống của cookie
+                .build();
+
+        // Trả về login response kèm cookie
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(loginResponse);
     }
 
     @GetMapping("/login/google")
@@ -36,10 +57,36 @@ public class AuthenticationController {
         return ResponseEntity.ok("Redirecting ..");
     }
 
-    @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody String refreshToken) {
+    @GetMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token") String refreshToken) {
         try {
-            return ResponseEntity.ok(authenticationServiceImpl.refreshToken(refreshToken));
+            // Lấy thông tin người dùng từ Security Context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+            // Lấy email từ đối tượng Authentication
+            String email = authentication.getName();
+            if (email == null || email.isEmpty()) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+            // 2. Tạo refresh token
+            RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken, email);
+            // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
+            String newRefreshToken = authenticationServiceImpl.createRefreshToken(email);
+            long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
+            // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
+            ResponseCookie responseCookie = ResponseCookie.from("refresh_token", newRefreshToken)
+                    .httpOnly(true) // Không thể đọc bằng JavaScript → tăng bảo mật
+                    .secure(true) // Chỉ sử dụng qua HTTPS
+                    .path("/") // Cookie có hiệu lực toàn bộ hệ thống
+                    .maxAge(refreshTokenExpirationTime) // Thời gian sống của cookie
+                    .build();
+
+            // Trả về login response kèm cookie
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                    .body(refreshTokenResponse);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

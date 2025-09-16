@@ -10,7 +10,6 @@ import lombok.Data;
 @Builder
 public class LoginResponse {
     private String accessToken;
-    private String refreshToken;
     private long expirationTime;
     private Long userId;
     private String email;
