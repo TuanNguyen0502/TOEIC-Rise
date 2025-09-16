@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +14,10 @@ import lombok.*;
 public class Test extends BaseEntity {
     @Column(nullable = false)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ETestStatus status;
 
     @ManyToOne
     @JoinColumn(name = "test_set_id")

@@ -93,6 +93,7 @@ CREATE TABLE tests
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(255) NOT NULL,
     test_set_id BIGINT,
+    status      ENUM('PENDING', 'APPROVED', 'REJECTED', 'DELETED') DEFAULT 'PENDING',
     created_at  DATETIME,
     updated_at  DATETIME,
     FOREIGN KEY (test_set_id) REFERENCES test_sets (id) ON DELETE SET NULL
