@@ -55,7 +55,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setEmail(input.getEmail());
         account.setPassword(passwordEncoder.encode(input.getPassword()));
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
         account.setIsActive(false);
         account.setAuthProvider(EAuthProvider.LOCAL);
 
@@ -229,7 +229,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
             // Proceed with resending verification code
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-            account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+            account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
             emailService.sendVerificationEmail(account);
             if (isRegister) {
                 redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
@@ -256,7 +256,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
         }
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
         account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
         accountRepository.save(account);
         emailService.sendVerificationEmail(account);
