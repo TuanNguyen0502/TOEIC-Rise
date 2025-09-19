@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -45,8 +46,8 @@ public class TestServiceImpl implements ITestService {
                         .id(test.getId())
                         .name(test.getName())
                         .status(test.getStatus().name().replace("_", " "))
-                        .createdAt(test.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .updatedAt(test.getUpdatedAt().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .createdAt(test.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                        .updatedAt(test.getUpdatedAt().format(java.time.format.DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                         .build());
     }
 }

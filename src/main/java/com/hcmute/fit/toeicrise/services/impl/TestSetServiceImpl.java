@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
@@ -54,8 +55,8 @@ public class TestSetServiceImpl implements ITestSetService {
                         .id(testSet.getId())
                         .name(testSet.getName())
                         .status(testSet.getStatus().name().replace("_", " "))
-                        .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                        .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                         .build());
     }
 
@@ -78,8 +79,8 @@ public class TestSetServiceImpl implements ITestSetService {
                 .id(testSet.getId())
                 .name(testSet.getName())
                 .status(testSet.getStatus().name().replace("_", " "))
-                .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                 .testResponses(testResponses)
                 .build();
     }
