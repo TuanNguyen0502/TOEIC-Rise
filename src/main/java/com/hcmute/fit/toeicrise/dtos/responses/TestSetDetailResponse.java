@@ -12,5 +12,5 @@ public class TestSetDetailResponse {
     private String status;
     private String createdAt;
     private String updatedAt;
-    private Page<TestSetResponse> testSetResponses;
+    private Page<TestResponse> testResponses;
 }
