@@ -16,11 +16,16 @@ public class TestSetController {
                                             @RequestParam(required = false) String status,
                                             @RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int size,
-                                            @RequestParam(defaultValue = "createdAt") String sortBy,
+                                            @RequestParam(defaultValue = "updatedAt") String sortBy,
                                             @RequestParam(defaultValue = "DESC") String direction) {
         return ResponseEntity.ok(testSetService.getAllTestSets(
                 name, status, page, size, sortBy, direction
         ));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTestSetDetailById(@PathVariable Long id) {
+        return ResponseEntity.ok(testSetService.getTestSetDetailById(id));
     }
 
     @DeleteMapping("/{id}")
