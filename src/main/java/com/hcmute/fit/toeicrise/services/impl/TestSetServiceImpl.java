@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
+import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,15 +33,13 @@ public class TestSetServiceImpl implements ITestSetService {
                                                 String direction) {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
         if (name != null && !name.isEmpty()) {
-            specification = specification.and((root, _, criteriaBuilder) ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            specification = specification.and(TestSpecification.nameContains(name));
         }
         if (status != null && !status.isEmpty()) {
             if (Arrays.stream(ETestSetStatus.values()).noneMatch(s -> s.name().equals(status))) {
                 throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
             }
-            specification = specification.and((root, _, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("status"), status));
+            specification = specification.and(TestSpecification.statusEquals(status));
         }
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
