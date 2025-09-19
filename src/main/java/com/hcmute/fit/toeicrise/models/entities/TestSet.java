@@ -1,8 +1,7 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -15,4 +14,8 @@ import lombok.*;
 public class TestSet extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ETestSetStatus status;
 }
