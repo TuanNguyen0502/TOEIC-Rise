@@ -18,7 +18,7 @@ public enum ErrorCode {
     TOKEN_INVALID("Token is invalid", HttpStatus.UNAUTHORIZED),
 
     // === 2. Validation Errors ===
-    VALIDATION_ERROR("Invalid input data", HttpStatus.BAD_REQUEST),
+    VALIDATION_ERROR("Invalid %s value.", HttpStatus.BAD_REQUEST),
     PASSWORD_MISMATCH("Passwords do not match", HttpStatus.BAD_REQUEST),
     INVALID_OTP("%s OTP is invalid", HttpStatus.BAD_REQUEST),
     OTP_EXPIRED("OTP has expired", HttpStatus.BAD_REQUEST),

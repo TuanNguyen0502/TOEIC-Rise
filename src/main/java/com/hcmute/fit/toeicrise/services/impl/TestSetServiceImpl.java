@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
@@ -7,12 +8,53 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
 public class TestSetServiceImpl implements ITestSetService {
     private final TestSetRepository testSetRepository;
+
+    @Override
+    public Page<TestSetResponse> getAllTestSets(String name,
+                                                String status,
+                                                int page,
+                                                int size,
+                                                String sortBy,
+                                                String direction) {
+        Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
+        if (name != null && !name.isEmpty()) {
+            specification = specification.and((root, _, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+        if (status != null && !status.isEmpty()) {
+            if (Arrays.stream(ETestSetStatus.values()).noneMatch(s -> s.name().equals(status))) {
+                throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
+            }
+            specification = specification.and((root, _, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("status"), status));
+        }
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return testSetRepository.findAll(specification, pageable)
+                .map(testSet -> TestSetResponse.builder()
+                        .id(testSet.getId())
+                        .name(testSet.getName())
+                        .status(testSet.getStatus().name().replace("_", " "))
+                        .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .build());
+    }
 
     @Override
     public void deleteTestSetById(Long id) {
