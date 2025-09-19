@@ -55,7 +55,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setEmail(input.getEmail());
         account.setPassword(passwordEncoder.encode(input.getPassword()));
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
         account.setIsActive(false);
         account.setAuthProvider(EAuthProvider.LOCAL);
 
@@ -84,11 +84,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         User user = userRepository.findByAccount_Id(authenticatedUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
         String accessToken = jwtService.generateToken(authenticatedUser);
-        String refreshToken = createRefreshToken(authenticatedUser);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .expirationTime(jwtService.getExpirationTime())
                 .userId(user.getId())
                 .email(authenticatedUser.getEmail())
@@ -231,7 +229,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
             // Proceed with resending verification code
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-            account.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+            account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
             emailService.sendVerificationEmail(account);
             if (isRegister) {
                 redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
@@ -258,7 +256,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
         }
         account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
-        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
         account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
         accountRepository.save(account);
         emailService.sendVerificationEmail(account);
@@ -297,8 +295,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    public RefreshTokenResponse refreshToken(String refreshToken) {
-        Account account = accountRepository.findByRefreshToken(refreshToken)
+    public RefreshTokenResponse refreshToken(String refreshToken, String email) {
+        Account account = accountRepository.findByRefreshTokenAndEmail(refreshToken, email)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         if (account.getRefreshTokenExpiryDate().isBefore(Instant.now())) {
@@ -309,22 +307,24 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(refreshToken)
-                .expirationTime(jwtService.getExpirationTime())
+                .accessTokenExpirationTime(jwtService.getExpirationTime())
                 .build();
     }
 
-    private String createRefreshToken(Account account) {
-        // Reuse existing valid refresh token
-        if (account.getRefreshToken() != null && account.getRefreshTokenExpiryDate() != null) {
-            if (account.getRefreshTokenExpiryDate().isAfter(Instant.now())) {
-                return account.getRefreshToken();
-            }
-        }
+    @Override
+    public String createRefreshToken(String email) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
+        // Create new refresh token
         String refreshToken = UUID.randomUUID().toString();
         account.setRefreshToken(refreshToken);
         account.setRefreshTokenExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         accountRepository.save(account);
         return refreshToken;
+    }
+
+    @Override
+    public long getRefreshTokenDurationMs() {
+        return refreshTokenDurationMs;
     }
 }
