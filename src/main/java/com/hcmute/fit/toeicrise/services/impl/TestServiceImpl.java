@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
@@ -31,7 +32,7 @@ public class TestServiceImpl implements ITestService {
             specification = specification.and(TestSpecification.nameContains(name));
         }
         if (status != null && !status.isEmpty()) {
-            if (Arrays.stream(ETestSetStatus.values()).noneMatch(s -> s.name().equals(status))) {
+            if (Arrays.stream(ETestStatus.values()).noneMatch(s -> s.name().equals(status))) {
                 throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
             }
             specification = specification.and(TestSpecification.statusEquals(status));

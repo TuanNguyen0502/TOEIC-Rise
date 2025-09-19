@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.repositories.specifications;
 
 import com.hcmute.fit.toeicrise.models.entities.Test;
-import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TestSpecification {
