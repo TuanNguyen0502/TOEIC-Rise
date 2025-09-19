@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -41,6 +43,21 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         // Call service to handle Google login
         LoginResponse loginResponse = authenticationService.loginWithGoogle(email, name, picture);
+
+        // Create refresh token
+        String refreshToken = authenticationService.createRefreshToken(email);
+        long refreshTokenExpirationTime = authenticationService.getRefreshTokenDurationMs();
+
+        // Create an HttpOnly cookie with the refresh token
+        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true) // Cannot be accessed by JavaScript → enhances security
+                .secure(true) // Only use over HTTPS
+                .path("/") // Cookie is valid for the entire system
+                .maxAge(refreshTokenExpirationTime) // Cookie lifetime
+                .build();
+
+        // Add the cookie to the response
+        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
 
         // Return JSON to client
         response.setContentType("application/json");
