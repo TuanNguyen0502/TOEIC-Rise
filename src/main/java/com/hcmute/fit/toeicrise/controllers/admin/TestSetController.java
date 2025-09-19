@@ -24,8 +24,16 @@ public class TestSetController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTestSetDetailById(@PathVariable Long id) {
-        return ResponseEntity.ok(testSetService.getTestSetDetailById(id));
+    public ResponseEntity<?> getTestSetDetailById(@PathVariable Long id,
+                                                  @RequestParam(required = false) String name,
+                                                  @RequestParam(required = false) String status,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "10") int size,
+                                                  @RequestParam(defaultValue = "updatedAt") String sortBy,
+                                                  @RequestParam(defaultValue = "DESC") String direction) {
+        return ResponseEntity.ok(testSetService.getTestSetDetailById(
+                id, name, status, page, size, sortBy, direction)
+        );
     }
 
     @DeleteMapping("/{id}")
