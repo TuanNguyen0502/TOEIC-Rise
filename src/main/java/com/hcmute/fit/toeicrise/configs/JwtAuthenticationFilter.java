@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.configs;
 
 import com.hcmute.fit.toeicrise.services.impl.JwtServiceImpl;
+import com.hcmute.fit.toeicrise.services.impl.TokenBlacklistService;
 import com.hcmute.fit.toeicrise.services.impl.UserDetailServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtServiceImpl jwtServiceImpl;
     private final UserDetailServiceImpl userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(
@@ -41,8 +43,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            final String userEmail = jwtServiceImpl.extractUsername(jwt);
 
+            // Check if token is blacklisted
+            if (tokenBlacklistService.isTokenBlacklisted(jwt)) {
+                // Clear security context and return 401 Unauthorized
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token has been invalidated");
+                return; // Stop the filter chain here
+            }
+
+            final String userEmail = jwtServiceImpl.extractUsername(jwt);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null) {
