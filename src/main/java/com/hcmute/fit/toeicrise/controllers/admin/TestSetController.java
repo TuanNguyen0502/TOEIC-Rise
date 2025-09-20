@@ -1,5 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
+import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,7 @@ public class TestSetController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllTestSets(@RequestParam(required = false) String name,
-                                            @RequestParam(required = false) String status,
+                                            @RequestParam(required = false) ETestSetStatus status,
                                             @RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int size,
                                             @RequestParam(defaultValue = "updatedAt") String sortBy,
@@ -26,7 +28,7 @@ public class TestSetController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getTestSetDetailById(@PathVariable Long id,
                                                   @RequestParam(required = false) String name,
-                                                  @RequestParam(required = false) String status,
+                                                  @RequestParam(required = false) ETestStatus status,
                                                   @RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "10") int size,
                                                   @RequestParam(defaultValue = "updatedAt") String sortBy,

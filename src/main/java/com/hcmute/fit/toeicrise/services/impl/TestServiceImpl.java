@@ -26,16 +26,13 @@ public class TestServiceImpl implements ITestService {
     private final TestRepository testRepository;
 
     @Override
-    public Page<TestResponse> getTestsByTestSetId(Long testSetId, String name, String status, int page, int size, String sortBy, String direction) {
+    public Page<TestResponse> getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(TestSpecification.testSetIdEquals(testSetId));
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSpecification.nameContains(name));
         }
-        if (status != null && !status.isEmpty()) {
-            if (Arrays.stream(ETestStatus.values()).noneMatch(s -> s.name().equals(status))) {
-                throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
-            }
+        if (status != null) {
             specification = specification.and(TestSpecification.statusEquals(status));
         }
 

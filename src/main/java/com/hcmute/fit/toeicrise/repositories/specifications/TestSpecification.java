@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.repositories.specifications;
 
 import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TestSpecification {
@@ -14,7 +15,7 @@ public class TestSpecification {
                 name == null ? null : criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
-    public static Specification<Test> statusEquals(String status) {
+    public static Specification<Test> statusEquals(ETestStatus status) {
         return (root, _, criteriaBuilder) ->
                 status == null ? null : criteriaBuilder.equal(root.get("status"), status);
     }
