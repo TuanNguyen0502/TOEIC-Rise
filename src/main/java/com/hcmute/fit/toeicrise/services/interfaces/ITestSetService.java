@@ -25,5 +25,5 @@ public interface ITestSetService {
 
     void deleteTestSetById(Long id);
     void addTestSet(TestSetRequest testSetRequest);
-    TestSet updateTestSet(UpdateTestSetRequest updateTestSetRequest);
+    TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest);
 }

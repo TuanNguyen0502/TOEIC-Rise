@@ -11,6 +11,7 @@ import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.TestSetMapper;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSetSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
@@ -32,6 +33,7 @@ import java.util.Arrays;
 public class TestSetServiceImpl implements ITestSetService {
     private final TestSetRepository testSetRepository;
     private final ITestService testService;
+    private final TestSetMapper testSetMapper;
 
     @Override
     public Page<TestSetResponse> getAllTestSets(String name,
@@ -110,7 +112,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional
-    public TestSet updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
+    public TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
         TestSet oldTestSet = testSetRepository.findById(updateTestSetRequest.getId()).orElse(null);
         if (oldTestSet == null) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set");
@@ -119,11 +121,9 @@ public class TestSetServiceImpl implements ITestSetService {
         if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())){
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set's name");
         }
-        if (!CodeGeneratorUtils.isValidEnum(ETestSetStatus.class, updateTestSetRequest.getStatus().name()))
-            throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
         oldTestSet.setName(updateTestSetRequest.getTestName());
         oldTestSet.setStatus(updateTestSetRequest.getStatus());
         testSetRepository.save(oldTestSet);
-        return oldTestSet;
+        return testSetMapper.toTestSetResponse(oldTestSet);
     }
 }
