@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.services.interfaces.ITokenBlacklistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -10,13 +11,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class TokenBlacklistService {
-    private static final Logger logger = LoggerFactory.getLogger(TokenBlacklistService.class);
+public class TokenBlacklistServiceImpl implements ITokenBlacklistService {
+    private static final Logger logger = LoggerFactory.getLogger(TokenBlacklistServiceImpl.class);
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtServiceImpl jwtService;
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
-    public TokenBlacklistService(@Qualifier("tokenBlacklistRedisTemplate") RedisTemplate<String, String> redisTemplate, JwtServiceImpl jwtService) {
+    public TokenBlacklistServiceImpl(@Qualifier("tokenBlacklistRedisTemplate") RedisTemplate<String, String> redisTemplate, JwtServiceImpl jwtService) {
         this.redisTemplate = redisTemplate;
         this.jwtService = jwtService;
     }
@@ -24,6 +25,7 @@ public class TokenBlacklistService {
     /**
      * Blacklist a token by adding it to Redis with an expiration time matching the token's remaining validity
      */
+    @Override
     public boolean blacklistToken(String token) {
         try {
             if (token == null || token.isEmpty()) {
@@ -44,7 +46,7 @@ public class TokenBlacklistService {
 
                 // Verify the token was actually added to the blacklist
                 Boolean exists = redisTemplate.hasKey(key);
-                if (Boolean.FALSE.equals(exists)) {
+                if (!exists) {
                     logger.error("Failed to verify token in blacklist after adding");
                     return false;
                 }
@@ -65,6 +67,7 @@ public class TokenBlacklistService {
     /**
      * Check if a token is blacklisted
      */
+    @Override
     public boolean isTokenBlacklisted(String token) {
         try {
             if (token == null || token.isEmpty()) {

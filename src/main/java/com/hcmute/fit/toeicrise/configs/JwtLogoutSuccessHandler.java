@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.configs;
 
-import com.hcmute.fit.toeicrise.services.impl.TokenBlacklistService;
+import com.hcmute.fit.toeicrise.services.interfaces.ITokenBlacklistService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
-    private final TokenBlacklistService tokenBlacklistService;
+    private final ITokenBlacklistService tokenBlacklistServiceImpl;
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -21,7 +21,7 @@ public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             // Add token to blacklist
-            tokenBlacklistService.blacklistToken(token);
+            tokenBlacklistServiceImpl.blacklistToken(token);
         }
 
         // Clear any JWT cookies that might exist

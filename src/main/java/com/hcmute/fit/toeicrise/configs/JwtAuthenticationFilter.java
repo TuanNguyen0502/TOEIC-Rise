@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.configs;
 
 import com.hcmute.fit.toeicrise.services.impl.JwtServiceImpl;
-import com.hcmute.fit.toeicrise.services.impl.TokenBlacklistService;
 import com.hcmute.fit.toeicrise.services.impl.UserDetailServiceImpl;
+import com.hcmute.fit.toeicrise.services.interfaces.ITokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtServiceImpl jwtServiceImpl;
     private final UserDetailServiceImpl userDetailsService;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final ITokenBlacklistService tokenBlacklistServiceImpl;
 
     @Override
     protected void doFilterInternal(
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String jwt = authHeader.substring(7);
 
             // Check if token is blacklisted
-            if (tokenBlacklistService.isTokenBlacklisted(jwt)) {
+            if (tokenBlacklistServiceImpl.isTokenBlacklisted(jwt)) {
                 // Clear security context and return 401 Unauthorized
                 SecurityContextHolder.clearContext();
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
