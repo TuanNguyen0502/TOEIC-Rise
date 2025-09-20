@@ -1,6 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
+import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -90,5 +94,36 @@ public class TestSetServiceImpl implements ITestSetService {
         TestSet testSet = testSetRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
         testSet.setStatus(ETestSetStatus.DELETED);
         testSetRepository.save(testSet);
+    }
+
+    @Override
+    @Transactional
+    public void addTestSet(TestSetRequest testSetRequest) {
+        if (testSetRepository.existsByName(testSetRequest.getTestName())){
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
+        }
+        TestSet testSet = TestSet.builder()
+                .name(testSetRequest.getTestName())
+                .status(ETestSetStatus.IN_USE).build();
+        testSetRepository.save(testSet);
+    }
+
+    @Override
+    @Transactional
+    public TestSet updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
+        TestSet oldTestSet = testSetRepository.findById(updateTestSetRequest.getId()).orElse(null);
+        if (oldTestSet == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set");
+        }
+        TestSet testSet = testSetRepository.findByName(updateTestSetRequest.getTestName()).orElse(null);
+        if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())){
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set's name");
+        }
+        if (!CodeGeneratorUtils.isValidEnum(ETestSetStatus.class, updateTestSetRequest.getStatus().name()))
+            throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
+        oldTestSet.setName(updateTestSetRequest.getTestName());
+        oldTestSet.setStatus(updateTestSetRequest.getStatus());
+        testSetRepository.save(oldTestSet);
+        return oldTestSet;
     }
 }
