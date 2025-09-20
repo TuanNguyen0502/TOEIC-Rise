@@ -10,6 +10,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.TestSetMapper;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
@@ -37,7 +38,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     public Page<TestSetResponse> getAllTestSets(String name,
-                                                String status,
+                                                ETestSetStatus status,
                                                 int page,
                                                 int size,
                                                 String sortBy,
@@ -46,10 +47,7 @@ public class TestSetServiceImpl implements ITestSetService {
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSetSpecification.nameContains(name));
         }
-        if (status != null && !status.isEmpty()) {
-            if (Arrays.stream(ETestSetStatus.values()).noneMatch(s -> s.name().equals(status))) {
-                throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
-            }
+        if (status != null) {
             specification = specification.and(TestSetSpecification.statusEquals(status));
         }
 
@@ -69,7 +67,7 @@ public class TestSetServiceImpl implements ITestSetService {
     @Override
     public TestSetDetailResponse getTestSetDetailById(Long testSetId,
                                                       String name,
-                                                      String status,
+                                                      ETestStatus status,
                                                       int page,
                                                       int size,
                                                       String sortBy,
