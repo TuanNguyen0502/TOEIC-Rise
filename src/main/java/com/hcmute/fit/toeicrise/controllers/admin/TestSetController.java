@@ -2,7 +2,10 @@ package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,5 +45,16 @@ public class TestSetController {
     public ResponseEntity<?> deleteTestSetById(@PathVariable Long id) {
         testSetService.deleteTestSetById(id);
         return ResponseEntity.ok("Test set deleted successfully");
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createTestSet(@Valid @RequestBody TestSetRequest testSetRequest) {
+        testSetService.addTestSet(testSetRequest);
+        return ResponseEntity.ok("Test set created successfully");
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateTestSet(@Valid @RequestBody UpdateTestSetRequest updateTestSetRequest) {
+        return ResponseEntity.ok(testSetService.updateTestSet(updateTestSetRequest));
     }
 }
