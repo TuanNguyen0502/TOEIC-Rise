@@ -6,7 +6,6 @@ import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import org.mapstruct.*;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,13 +18,15 @@ public interface QuestionMapper {
     @Mapping(source = "tags", target = "tags")
     QuestionResponse toQuestionResponse(Question question);
 
-    default List<String> map(Set<Tag> tags) {
+    /**
+     * Maps a Set of Tag entities to a Set of tag names (String)
+     */
+    default Set<String> map(Set<Tag> tags) {
         if (tags == null) {
-            return List.of();
+            return Set.of();
         }
         return tags.stream()
                 .map(Tag::getName)
-                .distinct()
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }

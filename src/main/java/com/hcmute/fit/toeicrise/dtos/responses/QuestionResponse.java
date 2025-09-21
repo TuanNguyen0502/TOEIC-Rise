@@ -3,7 +3,7 @@ package com.hcmute.fit.toeicrise.dtos.responses;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -14,5 +14,5 @@ public class QuestionResponse {
     private String part;
     private String createdAt;
     private String updatedAt;
-    private List<String> tags;
+    private Set<String> tags;
 }
