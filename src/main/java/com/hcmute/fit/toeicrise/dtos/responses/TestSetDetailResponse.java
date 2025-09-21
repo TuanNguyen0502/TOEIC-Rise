@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.dtos.responses;
 
+import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -9,7 +10,7 @@ import org.springframework.data.domain.Page;
 public class TestSetDetailResponse {
     private Long id;
     private String name;
-    private String status;
+    private ETestSetStatus status;
     private String createdAt;
     private String updatedAt;
     private Page<TestResponse> testResponses;

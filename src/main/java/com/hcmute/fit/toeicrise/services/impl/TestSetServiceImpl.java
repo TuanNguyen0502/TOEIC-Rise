@@ -54,13 +54,7 @@ public class TestSetServiceImpl implements ITestSetService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return testSetRepository.findAll(specification, pageable)
-                .map(testSet -> TestSetResponse.builder()
-                        .id(testSet.getId())
-                        .name(testSet.getName())
-                        .status(testSet.getStatus().name().replace("_", " "))
-                        .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                        .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                        .build());
+                .map(testSetMapper::toTestSetResponse);
     }
 
     @Override
@@ -78,14 +72,7 @@ public class TestSetServiceImpl implements ITestSetService {
         // Get tests in the test set with filtering and pagination
         Page<TestResponse> testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
 
-        return TestSetDetailResponse.builder()
-                .id(testSet.getId())
-                .name(testSet.getName())
-                .status(testSet.getStatus().name().replace("_", " "))
-                .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                .testResponses(testResponses)
-                .build();
+        return testSetMapper.toTestSetDetailResponse(testSet, testResponses);
     }
 
     @Override

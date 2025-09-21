@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.dtos.responses;
 
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import lombok.Data;
 public class TestResponse {
     private Long id;
     private String name;
-    private String status;
+    private ETestStatus status;
     private String createdAt;
     private String updatedAt;
 }
