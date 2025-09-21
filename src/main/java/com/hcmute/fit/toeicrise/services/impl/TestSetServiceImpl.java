@@ -80,6 +80,8 @@ public class TestSetServiceImpl implements ITestSetService {
         TestSet testSet = testSetRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
         testSet.setStatus(ETestSetStatus.DELETED);
         testSetRepository.save(testSet);
+        // Also mark all tests in this test set as DELETED
+        testService.deleteTestsByTestSetId(id);
     }
 
     @Override

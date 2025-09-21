@@ -16,7 +16,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +66,16 @@ public class TestServiceImpl implements ITestService {
         test.setStatus(ETestStatus.DELETED);
         testRepository.save(test);
         return true;
+    }
+
+    @Async
+    @Override
+    public void deleteTestsByTestSetId(Long testSetId) {
+        List<Test> tests = testRepository.findAllByTestSet_Id(testSetId);
+        for (Test test : tests) {
+            test.setStatus(ETestStatus.DELETED);
+        }
+        testRepository.saveAll(tests);
     }
 
     private Page<TestResponse> getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
