@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.PartRepository;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
+import com.hcmute.fit.toeicrise.repositories.specifications.QuestionSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionTagService;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +36,12 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public Page<QuestionResponse> getQuestionsByTestId(Long testId, String part, int page, int size, String sortBy, String direction) {
         Specification<Question> specification = (_, _, cb) -> cb.conjunction();
+        specification = specification.and(QuestionSpecification.hasTestId(testId));
         if (part != null && !part.isEmpty()) {
             if (!partRepository.existsByName(part)) {
                 throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part");
             }
-            specification = specification.and((root, _, cb) -> cb.equal(root.get("part"), part));
+            specification = specification.and(QuestionSpecification.hasPart(part));
         }
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
