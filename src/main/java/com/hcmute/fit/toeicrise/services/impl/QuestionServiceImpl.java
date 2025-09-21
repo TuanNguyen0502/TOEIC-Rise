@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class QuestionServiceImpl implements IQuestionService {
     private final QuestionMapper questionMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<QuestionResponse> getQuestionsByTestId(Long testId, String part, int page, int size, String sortBy, String direction) {
         Specification<Question> specification = QuestionSpecification.hasTestId(testId);
         if (part != null && !part.isEmpty()) {
