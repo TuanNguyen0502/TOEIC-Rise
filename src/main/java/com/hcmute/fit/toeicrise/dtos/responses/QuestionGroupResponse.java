@@ -9,7 +9,6 @@ public class QuestionGroupResponse {
     private Long id;
     private Integer position;
     private String partName;
-    private Integer numberOfQuestions;
     private String createdAt;
     private String updatedAt;
 }

@@ -29,11 +29,6 @@ public class QuestionServiceImpl implements IQuestionService {
     private final QuestionMapper questionMapper;
 
     @Override
-    public int countQuestionsByQuestionGroupId(Long questionGroupId) {
-        return questionRepository.countAllByQuestionGroup_Id(questionGroupId);
-    }
-
-    @Override
     public Page<QuestionResponse> getQuestionsByTestId(Long testId, String part, int page, int size, String sortBy, String direction) {
         Specification<Question> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(QuestionSpecification.hasTestId(testId));
