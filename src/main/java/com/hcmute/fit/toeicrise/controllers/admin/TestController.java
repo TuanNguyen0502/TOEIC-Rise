@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.controllers.admin;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class TestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTest(@PathVariable Long id, @RequestBody TestUpdateRequest testUpdateRequest) {
+    public ResponseEntity<?> updateTest(@PathVariable Long id, @Valid @RequestBody TestUpdateRequest testUpdateRequest) {
         return ResponseEntity.ok(testService.updateTest(id, testUpdateRequest));
     }
 
