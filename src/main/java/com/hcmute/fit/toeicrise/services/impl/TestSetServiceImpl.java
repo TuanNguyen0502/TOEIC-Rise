@@ -1,7 +1,5 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.commons.constants.Constant;
-import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
@@ -26,8 +24,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Objects;
 
 @Service
@@ -71,7 +67,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
         // Get tests in the test set with filtering and pagination
         Page<TestResponse> testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
-
+        // Map to detail response
         return testSetMapper.toTestSetDetailResponse(testSet, testResponses);
     }
 

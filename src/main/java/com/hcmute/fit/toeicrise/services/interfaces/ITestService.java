@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.domain.Page;
@@ -17,4 +18,6 @@ public interface ITestService {
 
     @Async
     void deleteTestsByTestSetId(Long testSetId);
+
+    TestDetailResponse getTestDetailById(Long id, String part, int page, int size, String sortBy, String direction);
 }

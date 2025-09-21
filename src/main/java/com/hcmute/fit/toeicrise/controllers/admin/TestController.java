@@ -25,6 +25,16 @@ public class TestController {
         ));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTestById(@PathVariable Long id,
+                                         @RequestParam(required = false) String part,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int size,
+                                         @RequestParam(defaultValue = "updatedAt") String sortBy,
+                                         @RequestParam(defaultValue = "DESC") String direction) {
+        return ResponseEntity.ok(testService.getTestDetailById(id, part, page, size, sortBy, direction));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTest(@PathVariable Long id, @RequestBody TestUpdateRequest testUpdateRequest) {
         return ResponseEntity.ok(testService.updateTest(id, testUpdateRequest));
