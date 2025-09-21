@@ -5,5 +5,7 @@ import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.domain.Page;
 
 public interface ITestService {
+    Page<TestResponse> getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction);
+
     Page<TestResponse> getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction);
 }
