@@ -8,7 +8,6 @@ import lombok.Data;
 public class QuestionGroupResponse {
     private Long id;
     private Integer position;
-    private String partName;
     private String createdAt;
     private String updatedAt;
 }

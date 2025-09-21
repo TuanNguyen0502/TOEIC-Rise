@@ -1,8 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -13,7 +12,6 @@ import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +29,6 @@ import java.util.List;
 public class TestServiceImpl implements ITestService {
     private final TestRepository testRepository;
     private final IQuestionGroupService questionGroupService;
-    private final IQuestionService questionService;
     private final TestMapper testMapper;
 
     @Override
@@ -86,15 +83,14 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public TestDetailResponse getTestDetailById(Long id, String part, int page, int size, String sortBy, String direction) {
+    public TestDetailResponse getTestDetailById(Long id) {
         // Validate test ID
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
 
         // Fetch question groups and questions
-        List<QuestionGroupResponse> questionGroups = questionGroupService.getQuestionGroupsByTestId(id);
-        Page<QuestionResponse> questions = questionService.getQuestionsByTestId(id, part, page, size, sortBy, direction);
-        return testMapper.toDetailResponse(test, questionGroups, questions);
+        List<PartResponse> partResponses = questionGroupService.getQuestionGroupsByTestIdGroupByPart(id);
+        return testMapper.toDetailResponse(test, partResponses);
     }
 
     private Page<TestResponse> getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {

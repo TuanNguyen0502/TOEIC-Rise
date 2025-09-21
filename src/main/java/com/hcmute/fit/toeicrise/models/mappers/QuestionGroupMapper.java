@@ -7,7 +7,6 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface QuestionGroupMapper {
-    @Mapping(source = "part.name", target = "partName")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     QuestionGroupResponse toResponse(QuestionGroup questionGroup);

@@ -19,5 +19,5 @@ public interface ITestService {
     @Async
     void deleteTestsByTestSetId(Long testSetId);
 
-    TestDetailResponse getTestDetailById(Long id, String part, int page, int size, String sortBy, String direction);
+    TestDetailResponse getTestDetailById(Long id);
 }
