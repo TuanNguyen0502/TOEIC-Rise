@@ -13,7 +13,5 @@ public class QuestionGroupResponse {
     private String imageUrl;
     private String passage;
     private Integer position;
-    private String createdAt;
-    private String updatedAt;
     private List<QuestionResponse> questions;
 }
