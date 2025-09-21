@@ -1,9 +1,12 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TestServiceImpl implements ITestService {
     private final TestRepository testRepository;
+    private final TestMapper testMapper;
 
     @Override
     public Page<TestResponse> getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
@@ -33,6 +37,25 @@ public class TestServiceImpl implements ITestService {
         return getTestResponses(name, status, page, size, sortBy, direction, specification);
     }
 
+    @Override
+    public TestResponse updateTest(Long id, TestUpdateRequest testUpdateRequest) {
+        // Validate test ID
+        Test existingTest = testRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+
+        // Check for name uniqueness
+        Test testWithSameName = testRepository.findByName(testUpdateRequest.getName()).orElse(null);
+        if (testWithSameName != null && !testWithSameName.getId().equals(existingTest.getId())) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
+        }
+
+        // Update fields
+        existingTest.setName(testUpdateRequest.getName());
+        existingTest.setStatus(testUpdateRequest.getStatus());
+        Test updatedTest = testRepository.save(existingTest);
+        return testMapper.toResponse(updatedTest);
+    }
+
     private Page<TestResponse> getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSpecification.nameContains(name));
@@ -44,13 +67,6 @@ public class TestServiceImpl implements ITestService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return testRepository.findAll(specification, pageable)
-                .map(test -> TestResponse.builder()
-                        .id(test.getId())
-                        .name(test.getName())
-                        .status(test.getStatus().name())
-                        .createdAt(test.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                        .updatedAt(test.getUpdatedAt().format(java.time.format.DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                        .build());
+        return testRepository.findAll(specification, pageable).map(testMapper::toResponse);
     }
 }

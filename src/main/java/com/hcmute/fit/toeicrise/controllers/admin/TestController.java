@@ -1,13 +1,11 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
+import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/tests")
@@ -25,5 +23,10 @@ public class TestController {
         return ResponseEntity.ok(testService.getAllTests(
                 name, status, page, size, sortBy, direction
         ));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTest(@PathVariable Long id, @RequestBody TestUpdateRequest testUpdateRequest) {
+        return ResponseEntity.ok(testService.updateTest(id, testUpdateRequest));
     }
 }
