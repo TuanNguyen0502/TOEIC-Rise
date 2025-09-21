@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -47,9 +48,7 @@ public class TestSetServiceImpl implements ITestSetService {
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSetSpecification.nameContains(name));
         }
-        if (status != null) {
-            specification = specification.and(TestSetSpecification.statusEquals(status));
-        }
+        specification = specification.and(TestSetSpecification.statusEquals(Objects.requireNonNullElse(status, ETestSetStatus.IN_USE)));
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
