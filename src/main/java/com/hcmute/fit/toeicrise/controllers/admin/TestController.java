@@ -29,4 +29,9 @@ public class TestController {
     public ResponseEntity<?> updateTest(@PathVariable Long id, @RequestBody TestUpdateRequest testUpdateRequest) {
         return ResponseEntity.ok(testService.updateTest(id, testUpdateRequest));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTest(@PathVariable Long id) {
+        return ResponseEntity.ok(testService.deleteTestById(id));
+    }
 }

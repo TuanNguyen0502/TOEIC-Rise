@@ -56,12 +56,24 @@ public class TestServiceImpl implements ITestService {
         return testMapper.toResponse(updatedTest);
     }
 
+    @Override
+    public boolean deleteTestById(Long id) {
+        Test test = testRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+        test.setStatus(ETestStatus.DELETED);
+        testRepository.save(test);
+        return true;
+    }
+
     private Page<TestResponse> getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSpecification.nameContains(name));
         }
         if (status != null) {
             specification = specification.and(TestSpecification.statusEquals(status));
+        } else {
+            // If status is null, get all statuses except DELETED
+            specification = specification.and(TestSpecification.statusNotEquals(ETestStatus.DELETED));
         }
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);

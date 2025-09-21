@@ -11,4 +11,6 @@ public interface ITestService {
     Page<TestResponse> getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction);
 
     TestResponse updateTest(Long id, TestUpdateRequest testUpdateRequest);
+
+    boolean deleteTestById(Long id);
 }
