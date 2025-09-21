@@ -2,12 +2,14 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
+import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionGroupRepository questionGroupRepository;
+    private final IQuestionService questionService;
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
 
@@ -38,9 +41,13 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                     Part part = entry.getKey();
                     List<QuestionGroup> groups = entry.getValue();
 
-                    // Map each QuestionGroup to QuestionGroupResponse
+                    // Map each QuestionGroup to QuestionGroupResponse with questions
                     List<QuestionGroupResponse> questionGroupResponses = groups.stream()
-                            .map(questionGroupMapper::toResponse)
+                            .map(group -> {
+                                // Fetch questions for this question group
+                                List<QuestionResponse> questions = questionService.getQuestionsByQuestionGroupId(group.getId());
+                                return questionGroupMapper.toResponse(group, questions);
+                            })
                             .toList();
 
                     // Create and return a PartResponse
