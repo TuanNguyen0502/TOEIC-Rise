@@ -39,6 +39,7 @@ public enum ErrorCode {
     IMAGE_SIZE_EXCEEDED("Image size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
     FILE_READ_ERROR("Can not read file", HttpStatus.NOT_IMPLEMENTED),
     OTP_SEND_FAILED("Failed to send OTP", HttpStatus.SERVICE_UNAVAILABLE),
+    JSON_CONVERT_ERROR("Error converting list to JSON", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // === 9. System & Uncategorized ===
     DATABASE_ERROR("Database error", HttpStatus.NOT_IMPLEMENTED),
