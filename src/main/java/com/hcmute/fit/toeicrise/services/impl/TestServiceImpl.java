@@ -38,7 +38,7 @@ public class TestServiceImpl implements ITestService {
     private final TestSetRepository testSetRepository;
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
-    private final IQuestionTagService questionTagService;
+    private final ITagService tagService;
     private final TestMapper testMapper;
 
     @Override
@@ -70,24 +70,21 @@ public class TestServiceImpl implements ITestService {
     @Override
     @Transactional
     public void importTest(MultipartFile file, String testName, Long testSetId) {
-        TestSet testSet = testSetRepository.findById(testSetId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Test Set"));
+        TestSet testSet = testSetRepository.findById(testSetId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Set"));
         Test test = createTest(testName, testSet);
         List<QuestionExcelRequest> questionExcelRequests = readFile(file);
         processAndSaveQuestion(test, questionExcelRequests);
     }
 
-    @Override
-    public Test createTest(String testName, TestSet testSet) {
-        Test test= Test.builder()
-                .name(testName)
-                .status(ETestStatus.PENDING)
-                .testSet(testSet)
-                .build();
+    private Test createTest(String testName, TestSet testSet) {
+        Test test = new Test();
+        test.setName(testName);
+        test.setStatus(ETestStatus.PENDING);
+        test.setTestSet(testSet);
         return testRepository.save(test);
     }
 
-    @Override
-    public List<QuestionExcelRequest> readFile(MultipartFile file) {
+    private List<QuestionExcelRequest> readFile(MultipartFile file) {
         List<QuestionExcelRequest> questionExcelRequests = new ArrayList<>();
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -107,8 +104,7 @@ public class TestServiceImpl implements ITestService {
         return questionExcelRequests;
     }
 
-    @Override
-    public void processAndSaveQuestion(Test test, List<QuestionExcelRequest> questions) {
+    private void processAndSaveQuestion(Test test, List<QuestionExcelRequest> questions) {
         Map<Integer, QuestionGroup> groupMap = new HashMap<>();
         questions.sort(Comparator.comparing(QuestionExcelRequest::getNumberOfQuestions,
                 Comparator.nullsLast(Comparator.naturalOrder())));
@@ -128,11 +124,11 @@ public class TestServiceImpl implements ITestService {
                 Part part = partService.getPartById(firstQuestion.getPartNumber());
                 QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion, groupPosition);
                 groupMap.put(groupKey, questionGroup);
-                int questionPosition = 1;
+
+                // Process each question in the group with its own position within the group
                 for (QuestionExcelRequest dto : groupQuestions) {
-                    Question question = questionService.createQuestion(dto, questionGroup, questionPosition);
-                    questionTagService.processQuestionTags(question, dto.getTags());
-                    questionPosition++;
+                    Set<Tag> tags = tagService.getTagsFromString(dto.getTags());
+                    questionService.createQuestion(dto, questionGroup, dto.getNumberOfQuestions(), tags);
                 }
 
                 groupPosition++;

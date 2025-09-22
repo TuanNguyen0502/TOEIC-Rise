@@ -16,9 +16,9 @@ public class TestController {
     private final ITestService testService;
 
     @PostMapping("/import")
-    public ResponseEntity<?> importTests(@RequestParam("file") MultipartFile
-                                        file, @RequestParam("testName")
-    String testName, @RequestParam("testSetId") Long testSetId) {
+    public ResponseEntity<?> importTests(@RequestParam("file") MultipartFile file,
+                                         @RequestParam("testName") String testName,
+                                         @RequestParam("testSetId") Long testSetId) {
         testService.importTest(file, testName, testSetId);
         return ResponseEntity.ok("Test imported");
     }
