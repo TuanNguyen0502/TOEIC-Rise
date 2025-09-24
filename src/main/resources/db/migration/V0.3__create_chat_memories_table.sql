@@ -3,7 +3,7 @@ CREATE TABLE system_prompts
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     content    TEXT NOT NULL,
     version    INT  NOT NULL,
-    is_active BOOLEAN,
+    is_active  BOOLEAN NOT NULL ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
