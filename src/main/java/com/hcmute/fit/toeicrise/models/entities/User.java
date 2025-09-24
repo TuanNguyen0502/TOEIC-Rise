@@ -4,8 +4,6 @@ import com.hcmute.fit.toeicrise.models.enums.EGender;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "users")
 @EqualsAndHashCode(callSuper = true)
@@ -30,7 +28,4 @@ public class User extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatTitle> chatTitles;
 }
