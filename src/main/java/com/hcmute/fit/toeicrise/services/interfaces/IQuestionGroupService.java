@@ -6,5 +6,5 @@ import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 
 public interface IQuestionGroupService {
-    QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest request, int position);
+    QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest request);
 }

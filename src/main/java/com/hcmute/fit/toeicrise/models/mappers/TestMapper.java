@@ -12,7 +12,7 @@ public interface TestMapper {
 
         // Các field số
         request.setPartNumber(getCellValueAsInteger(row.getCell(0)));
-        request.setQuestionGroupId(getCellValueAsInteger(row.getCell(1)));
+        request.setQuestionGroupId(getCellValueAsString(row.getCell(1)));
         request.setNumberOfQuestions(getCellValueAsInteger(row.getCell(2)));
 
         // Các field text

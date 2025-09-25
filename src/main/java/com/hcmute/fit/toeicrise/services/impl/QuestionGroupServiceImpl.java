@@ -9,6 +9,7 @@ import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +18,10 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionGroupMapper questionGroupMapper;
 
     @Override
-    public QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest questionExcelRequest, int position) {
-        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest, position);
-        return questionGroupRepository.save(questionGroup);
+    @Transactional
+    public QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest questionExcelRequest) {
+        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+        return questionGroup;
     }
 }

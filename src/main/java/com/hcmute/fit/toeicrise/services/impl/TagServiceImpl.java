@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -16,30 +15,28 @@ public class TagServiceImpl implements ITagService {
     private final TagRepository tagRepository;
 
     @Override
-    public Set<Tag> getTagsFromString(String tagsString) {
-        Set<Tag> tags = new HashSet<>();
+    public List<Tag> getTagsFromString(String tagsString) {
+        List<Tag> tags = new ArrayList<>();
         if (!StringUtils.hasText(tagsString)) {
             return tags;
         }
-
         String[] tagNames = tagsString.split(";");
         for (String tagName : tagNames) {
             if (StringUtils.hasText(tagName)) {
-                Tag tag = findOrCreateTag(tagName);
+                Tag tag = findOrCreateTag(tagName.trim());
                 tags.add(tag);
             }
         }
-
         return tags;
     }
 
     private Tag findOrCreateTag(String tagName) {
-        Tag tag = tagRepository.findByName(tagName).orElse(null);
-        if (tag == null) {
-            tag = new Tag();
-            tag.setName(tagName);
-            tagRepository.save(tag);
-        }
-        return tag;
+        return tagRepository.findByName(tagName)
+                .orElseGet(() -> {
+                    Tag newTag = Tag.builder()
+                            .name(tagName)
+                            .build();
+                    return tagRepository.save(newTag);
+                });
     }
 }

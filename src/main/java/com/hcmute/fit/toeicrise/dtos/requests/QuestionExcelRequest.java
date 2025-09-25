@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 public class QuestionExcelRequest {
     private Integer partNumber;
-    private Integer questionGroupId;
+    private String questionGroupId;
     private Integer numberOfQuestions;
     private String passageText;
     private String question;

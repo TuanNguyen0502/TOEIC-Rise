@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface QuestionGroupMapper {
-    default QuestionGroup toQuestionGroup(Test test, Part part, QuestionExcelRequest excelRequest, int position) {
+    default QuestionGroup toQuestionGroup(Test test, Part part, QuestionExcelRequest excelRequest) {
         QuestionGroup questionGroup = new QuestionGroup();
         questionGroup.setTest(test);
         questionGroup.setPart(part);

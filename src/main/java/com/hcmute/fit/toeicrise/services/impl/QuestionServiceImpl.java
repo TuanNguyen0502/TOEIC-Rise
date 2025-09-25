@@ -10,7 +10,8 @@ import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +20,13 @@ public class QuestionServiceImpl implements IQuestionService {
     private final QuestionMapper questionMapper;
 
     @Override
-    public Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, int position, Set<Tag> tags) {
-        Question question = questionMapper.toEntity(request, questionGroup, position, tags);
-        return questionRepository.save(question);
+    public Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags) {
+        Question question = questionMapper.toEntity(request, questionGroup);
+        questionRepository.save(question);
+        if (tags != null && !tags.isEmpty()) {
+            question.setTags(new ArrayList<>(tags));
+            question = questionRepository.save(question);
+        }
+        return question;
     }
 }
