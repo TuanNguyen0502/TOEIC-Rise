@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.*;
+import com.hcmute.fit.toeicrise.dtos.responses.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 
@@ -26,4 +27,6 @@ public interface IAuthenticationService {
     String createRefreshToken(String email);
 
     long getRefreshTokenDurationMs();
+
+    CurrentUserResponse getCurrentUser(String email);
 }

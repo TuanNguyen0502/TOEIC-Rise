@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.*;
+import com.hcmute.fit.toeicrise.dtos.responses.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -11,6 +12,7 @@ import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import com.hcmute.fit.toeicrise.models.enums.ECacheDuration;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.UserMapper;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
@@ -40,6 +42,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IEmailService emailService;
     private final IJwtService jwtService;
     private final IRedisService redisService;
+    private final UserMapper userMapper;
 
     @Override
     public boolean register(RegisterRequest input) {
@@ -326,5 +329,14 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public long getRefreshTokenDurationMs() {
         return refreshTokenDurationMs;
+    }
+
+    @Override
+    public CurrentUserResponse getCurrentUser(String email) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
+        User user = userRepository.findByAccount_Id(account.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        return userMapper.toCurrentUserResponse(user);
     }
 }
