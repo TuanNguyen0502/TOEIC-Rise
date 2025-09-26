@@ -4,9 +4,7 @@ import com.hcmute.fit.toeicrise.commons.utils.StringListJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "questions")
@@ -29,7 +27,7 @@ public class Question extends BaseEntity {
     @Column(name = "correct_option", nullable = false, length = 1)
     private String correctOption;
 
-    @Column(name = "explanation", columnDefinition = "TEXT")
+    @Column(name = "explanations", columnDefinition = "TEXT")
     private String explanation;
 
     @ManyToOne(optional = false)
@@ -42,5 +40,6 @@ public class Question extends BaseEntity {
             joinColumns = @JoinColumn(name = "question_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private Set<Tag> tags = new HashSet<>();
+    @Builder.Default
+    private List<Tag> tags = new ArrayList<>();
 }

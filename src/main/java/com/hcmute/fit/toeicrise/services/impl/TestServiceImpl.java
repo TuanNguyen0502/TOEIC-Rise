@@ -1,18 +1,22 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
-import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
+import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
+import com.hcmute.fit.toeicrise.services.interfaces.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,14 +25,30 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils.extractGroupNumber;
 
 @Service
 @RequiredArgsConstructor
 public class TestServiceImpl implements ITestService {
     private final TestRepository testRepository;
+    private final IPartService partService;
+    private final TestSetRepository testSetRepository;
+    private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
+    private final ITagService tagService;
+
     private final TestMapper testMapper;
 
     @Override
@@ -108,5 +128,87 @@ public class TestServiceImpl implements ITestService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return testRepository.findAll(specification, pageable).map(testMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void importTest(MultipartFile file, String testName, Long testSetId) {
+        if (!isValidFile(file))
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        TestSet testSet = testSetRepository.findById(testSetId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Set"));
+        Test test = createTest(testName, testSet);
+        List<QuestionExcelRequest> questionExcelRequests = readFile(file);
+        processQuestions(test, questionExcelRequests);
+    }
+
+    @Override
+    public Test createTest(String testName, TestSet testSet) {
+        Test test = new Test();
+        test.setName(testName);
+        test.setStatus(ETestStatus.PENDING);
+        test.setTestSet(testSet);
+        return testRepository.save(test);
+    }
+
+    @Override
+    public List<QuestionExcelRequest> readFile(MultipartFile file) {
+        List<QuestionExcelRequest> questionExcelRequests = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue;
+                }
+                QuestionExcelRequest questionExcelRequest = testMapper.mapRowToDTO(row);
+                if (questionExcelRequest != null) {
+                    questionExcelRequests.add(questionExcelRequest);
+                }
+            }
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+        return questionExcelRequests;
+    }
+
+    @Override
+    public void processQuestions(Test test, List<QuestionExcelRequest> questions){
+        List<QuestionExcelRequest> sortedQuestions = questions.stream()
+                .sorted(Comparator.comparing(QuestionExcelRequest::getNumberOfQuestions, Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+        Map<Integer, List<QuestionExcelRequest>> groupedQuestions = new HashMap<>();
+        for (QuestionExcelRequest question : sortedQuestions) {
+            Integer groupKey = Optional.ofNullable(extractGroupNumber(question.getQuestionGroupId()))
+                    .orElse(-question.getNumberOfQuestions());
+            groupedQuestions.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(question);
+        }
+        for (Map.Entry<Integer, List<QuestionExcelRequest>> entry : new ArrayList<>(groupedQuestions.entrySet())) {
+            processQuestionGroup(test, entry.getValue());
+        }
+    }
+
+    @Override
+    public void processQuestionGroup(Test test, List<QuestionExcelRequest> groupQuestions) {
+        try {
+            QuestionExcelRequest firstQuestion = groupQuestions.get(0);
+                Part part = partService.getPartById(firstQuestion.getPartNumber());
+                QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
+                for (int i = 0; i < groupQuestions.size(); i++) {
+                    QuestionExcelRequest dto = groupQuestions.get(i);
+                    List<Tag> tags = tagService.getTagsFromString(dto.getTags());
+                    questionService.createQuestion(dto, questionGroup, tags);
+                }
+        } catch (Exception e) {
+                e.printStackTrace();
+                throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+    }
+
+    @Override
+    public boolean isValidFile(MultipartFile file) {
+        String filePath = file.getOriginalFilename();
+        if (filePath == null)
+            return false;
+        return filePath.endsWith(".xlsx")||filePath.endsWith(".xls")||filePath.endsWith(".xlsm");
     }
 }

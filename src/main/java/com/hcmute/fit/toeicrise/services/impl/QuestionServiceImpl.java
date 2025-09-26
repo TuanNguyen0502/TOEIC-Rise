@@ -1,5 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.models.entities.Question;
+import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
+import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
@@ -7,6 +11,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,6 +20,17 @@ public class QuestionServiceImpl implements IQuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
 
+    @Override
+    public Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags) {
+        Question question = questionMapper.toEntity(request, questionGroup);
+        questionRepository.save(question);
+        if (tags != null && !tags.isEmpty()) {
+            question.setTags(new ArrayList<>(tags));
+            question = questionRepository.save(question);
+        }
+        return question;
+    }
+  
     @Override
     public List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId) {
         return questionRepository.findAllByQuestionGroup_Id(questionGroupId)

@@ -34,11 +34,12 @@ public enum ErrorCode {
     // === 5. External Services / Upload Errors ===
     UPLOAD_FAILED("Failed to upload file", HttpStatus.NOT_IMPLEMENTED),
     IMAGE_DELETE_FAILED("Failed to delete image", HttpStatus.NOT_IMPLEMENTED),
-    INVALID_IMAGE_FORMAT("The image format you sent is invalid", HttpStatus.NOT_IMPLEMENTED),
+    INVALID_FILE_FORMAT("The file format you sent is invalid", HttpStatus.NOT_IMPLEMENTED),
     MAIL_SEND_FAILED("Failed to send email", HttpStatus.SERVICE_UNAVAILABLE),
     IMAGE_SIZE_EXCEEDED("Image size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
     FILE_READ_ERROR("Can not read file", HttpStatus.NOT_IMPLEMENTED),
     OTP_SEND_FAILED("Failed to send OTP", HttpStatus.SERVICE_UNAVAILABLE),
+    JSON_CONVERT_ERROR("Error converting list to JSON", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // === 9. System & Uncategorized ===
     DATABASE_ERROR("Database error", HttpStatus.NOT_IMPLEMENTED),

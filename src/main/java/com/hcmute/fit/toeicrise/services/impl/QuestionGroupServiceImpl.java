@@ -1,14 +1,16 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
+import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
+import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,5 +56,13 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                     return partMapper.toPartResponse(part, questionGroupResponses);
                 })
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest questionExcelRequest) {
+        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+        return questionGroup;
     }
 }

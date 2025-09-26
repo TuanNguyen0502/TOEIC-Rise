@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/admin/tests")
@@ -14,6 +15,14 @@ import org.springframework.web.bind.annotation.*;
 public class TestController {
     private final ITestService testService;
 
+    @PostMapping("/import")
+    public ResponseEntity<?> importTests(@RequestParam("file") MultipartFile file,
+                                         @RequestParam("testName") String testName,
+                                         @RequestParam("testSetId") Long testSetId) {
+        testService.importTest(file, testName, testSetId);
+        return ResponseEntity.ok("Test imported");
+    }
+  
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@RequestParam(required = false) String name,
                                          @RequestParam(required = false) ETestStatus status,

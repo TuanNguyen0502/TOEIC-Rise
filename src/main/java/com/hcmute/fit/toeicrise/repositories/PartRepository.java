@@ -4,7 +4,10 @@ import com.hcmute.fit.toeicrise.models.entities.Part;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PartRepository extends JpaRepository<Part, Long> {
-    boolean existsByName(String name);
+  Optional<Part> findByName(String name);
+  boolean existsByName(String name);
 }
