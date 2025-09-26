@@ -1,14 +1,18 @@
 package com.hcmute.fit.toeicrise.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.impl.JwtServiceImpl;
 import com.hcmute.fit.toeicrise.services.impl.UserDetailServiceImpl;
 import com.hcmute.fit.toeicrise.services.interfaces.ITokenBlacklistService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +23,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtServiceImpl jwtServiceImpl;
     private final UserDetailServiceImpl userDetailsService;
     private final ITokenBlacklistService tokenBlacklistServiceImpl;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(
@@ -72,6 +79,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response);
+        } catch (ExpiredJwtException exception) {
+            // Handle expired JWT specifically
+            ErrorCode errorCode = ErrorCode.TOKEN_EXPIRED;
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorCode.name());
+            errorResponse.put("message", errorCode.getMessage());
+            errorResponse.put("status", errorCode.getHttpStatus().value());
+
+            response.setStatus(errorCode.getHttpStatus().value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            objectMapper.writeValue(response.getOutputStream(), errorResponse);
         } catch (Exception exception) {
             handlerExceptionResolver.resolveException(request, response, null, exception);
         }

@@ -19,4 +19,9 @@ public class TestSpecification {
         return (root, _, criteriaBuilder) ->
                 status == null ? null : criteriaBuilder.equal(root.get("status"), status);
     }
+
+    public static Specification<Test> statusNotEquals(ETestStatus eTestStatus) {
+        return (root, _, criteriaBuilder) ->
+                eTestStatus == null ? null : criteriaBuilder.notEqual(root.get("status"), eTestStatus);
+    }
 }

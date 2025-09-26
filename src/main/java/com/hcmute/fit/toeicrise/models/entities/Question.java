@@ -4,7 +4,9 @@ import com.hcmute.fit.toeicrise.commons.utils.StringListJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "questions")
@@ -33,4 +35,12 @@ public class Question extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "question_group_id")
     private QuestionGroup questionGroup;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "questions_tags",
+            joinColumns = @JoinColumn(name = "question_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
 }
