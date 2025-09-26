@@ -132,4 +132,19 @@ public class AuthenticationController {
         authenticationServiceImpl.resetPassword(resetPasswordRequest, token);
         return ResponseEntity.ok("Password reset successfully");
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        // Lấy thông tin người dùng từ Security Context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        // Lấy email từ đối tượng Authentication
+        String email = authentication.getName();
+        if (email == null || email.isEmpty()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(authenticationServiceImpl.getCurrentUser(email));
+    }
 }

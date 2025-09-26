@@ -26,16 +26,22 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+                )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**", "/swagger-ui.html",  "/swagger-ui/**",
                                 "/v3/api-docs/**")
                         .permitAll()
-                        .requestMatchers("/admin/test-sets/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/test-sets/**", "/admin/tests/**").hasRole("ADMIN")
                         .requestMatchers("/learner/home/").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
@@ -48,9 +54,7 @@ public class SecurityConfiguration {
                         .failureUrl("/auth/loginFailure"))
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
+                        .logoutSuccessHandler(jwtLogoutSuccessHandler)
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .permitAll()
@@ -65,8 +69,10 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://app-backend.com", "http://localhost:8080")); //TODO: update backend url
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedOrigins(List.of("https://app-backend.com", "http://localhost:8080", "http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -9,6 +9,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.TestSetMapper;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
@@ -24,8 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     public Page<TestSetResponse> getAllTestSets(String name,
-                                                String status,
+                                                ETestSetStatus status,
                                                 int page,
                                                 int size,
                                                 String sortBy,
@@ -45,30 +45,19 @@ public class TestSetServiceImpl implements ITestSetService {
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSetSpecification.nameContains(name));
         }
-        if (status != null && !status.isEmpty()) {
-            if (Arrays.stream(ETestSetStatus.values()).noneMatch(s -> s.name().equals(status))) {
-                throw new AppException(ErrorCode.VALIDATION_ERROR, "status");
-            }
-            specification = specification.and(TestSetSpecification.statusEquals(status));
-        }
+        specification = specification.and(TestSetSpecification.statusEquals(Objects.requireNonNullElse(status, ETestSetStatus.IN_USE)));
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return testSetRepository.findAll(specification, pageable)
-                .map(testSet -> TestSetResponse.builder()
-                        .id(testSet.getId())
-                        .name(testSet.getName())
-                        .status(testSet.getStatus().name().replace("_", " "))
-                        .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                        .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                        .build());
+                .map(testSetMapper::toTestSetResponse);
     }
 
     @Override
     public TestSetDetailResponse getTestSetDetailById(Long testSetId,
                                                       String name,
-                                                      String status,
+                                                      ETestStatus status,
                                                       int page,
                                                       int size,
                                                       String sortBy,
@@ -79,15 +68,8 @@ public class TestSetServiceImpl implements ITestSetService {
 
         // Get tests in the test set with filtering and pagination
         Page<TestResponse> testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
-
-        return TestSetDetailResponse.builder()
-                .id(testSet.getId())
-                .name(testSet.getName())
-                .status(testSet.getStatus().name().replace("_", " "))
-                .createdAt(testSet.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                .updatedAt(testSet.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
-                .testResponses(testResponses)
-                .build();
+        // Map to detail response
+        return testSetMapper.toTestSetDetailResponse(testSet, testResponses);
     }
 
     @Override
@@ -95,6 +77,8 @@ public class TestSetServiceImpl implements ITestSetService {
         TestSet testSet = testSetRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
         testSet.setStatus(ETestSetStatus.DELETED);
         testSetRepository.save(testSet);
+        // Also mark all tests in this test set as DELETED
+        testService.deleteTestsByTestSetId(id);
     }
 
     @Override

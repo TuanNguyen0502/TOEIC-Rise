@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface PartRepository extends JpaRepository<Part, Long> {
-    Optional<Part> findByName(String name);
+  Optional<Part> findByName(String name);
+  boolean existsByName(String name);
 }

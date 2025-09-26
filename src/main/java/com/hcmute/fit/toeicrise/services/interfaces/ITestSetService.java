@@ -4,12 +4,14 @@ import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import org.springframework.data.domain.Page;
 
 public interface ITestSetService {
     Page<TestSetResponse> getAllTestSets(String name,
-                                         String status,
+                                         ETestSetStatus status,
                                          int page,
                                          int size,
                                          String sortBy,
@@ -17,7 +19,7 @@ public interface ITestSetService {
 
     TestSetDetailResponse getTestSetDetailById(Long testSetId,
                                                String name,
-                                               String status,
+                                               ETestStatus status,
                                                int page,
                                                int size,
                                                String sortBy,
