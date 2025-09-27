@@ -18,4 +18,6 @@ public interface ISystemPromptService {
     boolean updateSystemPrompt(Long id, SystemPromptUpdateRequest request);
 
     boolean createSystemPrompt(SystemPromptCreateRequest request);
+
+    boolean patchSystemPrompt(Long id);
 }

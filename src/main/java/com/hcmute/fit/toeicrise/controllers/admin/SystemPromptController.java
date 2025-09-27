@@ -37,6 +37,12 @@ public class SystemPromptController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("{id}")
+    public ResponseEntity<?> patchSystemPrompt(@PathVariable Long id) {
+        systemPromptService.patchSystemPrompt(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("")
     public ResponseEntity<?> createSystemPrompt(@Valid @RequestBody SystemPromptCreateRequest request) {
         systemPromptService.createSystemPrompt(request);

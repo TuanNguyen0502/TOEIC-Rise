@@ -109,6 +109,23 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         return true;
     }
 
+    @Override
+    public boolean patchSystemPrompt(Long id) {
+        SystemPrompt existingPrompt = systemPromptRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
+
+        // If the updated prompt is set to active, deactivate the current active prompt
+        if (existingPrompt.getIsActive().equals(false)) {
+            deactivateSystemPrompt();
+            existingPrompt.setIsActive(true);
+            systemPromptRepository.save(existingPrompt);
+        } else {
+            // Prevent deactivating the only active prompt
+            throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
+        }
+        return true;
+    }
+
     private void deactivateSystemPrompt() {
         SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActive(true).orElse(null);
         // Deactivate the current active prompt if it exists
