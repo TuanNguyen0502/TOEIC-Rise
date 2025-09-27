@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
@@ -58,6 +59,13 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
 
         // Create PageResponse with meta information and result
         return pageResponseMapper.toPageResponse(systemPrompts);
+    }
+
+    @Override
+    public SystemPromptDetailResponse getSystemPromptById(Long id) {
+        SystemPrompt systemPrompt = systemPromptRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
+        return systemPromptMapper.toDetailResponse(systemPrompt);
     }
 
     @Override

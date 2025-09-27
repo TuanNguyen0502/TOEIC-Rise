@@ -25,6 +25,11 @@ public class SystemPromptController {
         return ResponseEntity.ok(systemPromptService.getAllSystemPrompts(isActive, version, page, size, sortBy, direction));
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<?> getSystemPromptById(@PathVariable Long id) {
+        return ResponseEntity.ok(systemPromptService.getSystemPromptById(id));
+    }
+
     @PostMapping("")
     public ResponseEntity<?> createSystemPrompt(@Valid @RequestBody SystemPromptCreateRequest request) {
         systemPromptService.createSystemPrompt(request);
