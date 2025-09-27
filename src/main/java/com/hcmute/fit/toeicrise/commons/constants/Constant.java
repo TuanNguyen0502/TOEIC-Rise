@@ -8,4 +8,5 @@ public class Constant {
     public static final String OTP_PATTERN = "^\\d{6}$";
     public static final String NAME_TEST_SET_PATTERN = "^[a-zA-Z0-9 ()]+$";
     public static final String TEST_NAME_PATTERN = "^[a-zA-Z0-9 ()]+$";
+    public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[a-zA-Z0-9 .,!?()'\"-]{20,}$";
 }
