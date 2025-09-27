@@ -88,10 +88,12 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
             lastestVersion = existingPrompt; // If no other versions exist, keep the current one
         }
 
-        existingPrompt.setContent(request.getContent());
-        existingPrompt.setVersion(lastestVersion.getVersion() + 1);
-        existingPrompt.setIsActive(request.getIsActive());
-        systemPromptRepository.save(existingPrompt);
+        // Create a new SystemPrompt entity with updated details and incremented version
+        SystemPrompt systemPrompt = new SystemPrompt();
+        systemPrompt.setContent(request.getContent());
+        systemPrompt.setVersion(lastestVersion.getVersion() + 1);
+        systemPrompt.setIsActive(request.getIsActive());
+        systemPromptRepository.save(systemPrompt);
         return true;
     }
 
