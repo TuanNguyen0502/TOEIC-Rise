@@ -15,6 +15,8 @@ public interface ISystemPromptService {
 
     SystemPromptDetailResponse getSystemPromptById(Long id);
 
+    SystemPromptDetailResponse getActiveSystemPrompt();
+
     boolean updateSystemPrompt(Long id, SystemPromptUpdateRequest request);
 
     boolean createSystemPrompt(SystemPromptCreateRequest request);

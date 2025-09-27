@@ -12,6 +12,7 @@ import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.SystemPromptMapper;
 import com.hcmute.fit.toeicrise.repositories.SystemPromptRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.SystemPromptSpecification;
+import com.hcmute.fit.toeicrise.services.interfaces.IRedisService;
 import com.hcmute.fit.toeicrise.services.interfaces.ISystemPromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,12 +22,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
 @Service
 @RequiredArgsConstructor
 public class SystemPromptServiceImpl implements ISystemPromptService {
     private final SystemPromptRepository systemPromptRepository;
     private final SystemPromptMapper systemPromptMapper;
     private final PageResponseMapper pageResponseMapper;
+    private final IRedisService redisService;
+
+    // Cache constants
+    private static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
+    private static final String ACTIVE_PROMPT_KEY = "active";
+    private static final Duration CACHE_DURATION = Duration.ofDays(30);
 
     @Override
     public PageResponse getAllSystemPrompts(Boolean isActive,
@@ -70,14 +79,38 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     }
 
     @Override
+    public SystemPromptDetailResponse getActiveSystemPrompt() {
+        // Try to get from cache first
+        SystemPromptDetailResponse cachedPrompt = redisService.get(
+                SYSTEM_PROMPT_CACHE,
+                ACTIVE_PROMPT_KEY,
+                SystemPromptDetailResponse.class);
+
+        if (cachedPrompt != null) {
+            return cachedPrompt;
+        }
+
+        // If not in cache, get from database and cache it
+        SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActive(true)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Active System Prompt"));
+
+        SystemPromptDetailResponse response = systemPromptMapper.toDetailResponse(activePrompt);
+
+        // Cache the result
+        redisService.put(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
+
+        return response;
+    }
+
+    @Override
     public boolean updateSystemPrompt(Long id, SystemPromptUpdateRequest request) {
         SystemPrompt existingPrompt = systemPromptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
         // If the updated prompt is set to active, deactivate the current active prompt
-        if (request.getIsActive().equals(true) && !request.getIsActive().equals(existingPrompt.getIsActive())) {
+        if (request.getIsActive()) {
             deactivateSystemPrompt();
-        } else if (request.getIsActive().equals(false) && existingPrompt.getIsActive().equals(true)) {
+        } else if (existingPrompt.getIsActive()) {
             // Prevent deactivating the only active prompt
             throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
         }
@@ -94,6 +127,12 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         systemPrompt.setVersion(lastestVersion.getVersion() + 1);
         systemPrompt.setIsActive(request.getIsActive());
         systemPromptRepository.save(systemPrompt);
+
+        // If the new system prompt is active, update cache
+        if (request.getIsActive()) {
+            updateActivePromptCache(systemPrompt);
+        }
+
         return true;
     }
 
@@ -111,6 +150,10 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
                 .isActive(true)
                 .build();
         systemPromptRepository.save(newPrompt);
+
+        // Update cache with the new active prompt
+        updateActivePromptCache(newPrompt);
+
         return true;
     }
 
@@ -124,6 +167,9 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
             deactivateSystemPrompt();
             existingPrompt.setIsActive(true);
             systemPromptRepository.save(existingPrompt);
+
+            // Update cache with the new active prompt
+            updateActivePromptCache(existingPrompt);
         } else {
             // Prevent deactivating the only active prompt
             throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
@@ -137,6 +183,15 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         if (activePrompt != null) {
             activePrompt.setIsActive(false);
             systemPromptRepository.save(activePrompt);
+
+            // Remove the active prompt from cache
+            redisService.remove(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY);
         }
+    }
+
+    private void updateActivePromptCache(SystemPrompt activePrompt) {
+        // Cache the new active prompt (put() will overwrite any existing entry)
+        SystemPromptDetailResponse response = systemPromptMapper.toDetailResponse(activePrompt);
+        redisService.put(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
     }
 }
