@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ISystemPromptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,12 @@ public class SystemPromptController {
     @GetMapping("{id}")
     public ResponseEntity<?> getSystemPromptById(@PathVariable Long id) {
         return ResponseEntity.ok(systemPromptService.getSystemPromptById(id));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<?> updateSystemPrompt(@PathVariable Long id, @Valid @RequestBody SystemPromptUpdateRequest request) {
+        systemPromptService.updateSystemPrompt(id, request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("")

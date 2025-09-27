@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptResponse;
@@ -69,28 +70,51 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     }
 
     @Override
-    public boolean createSystemPrompt(SystemPromptCreateRequest request) {
-        SystemPrompt lastestVersion = systemPromptRepository.findLatestVersion().orElse(null);
-        // If there is an existing version, ensure the new version is greater
-        if (lastestVersion != null && request.getVersion() <= lastestVersion.getVersion()) {
-            // New version must be greater than the latest version
-            throw new AppException(ErrorCode.SYSTEM_PROMPT_VERSION_INVALID);
+    public boolean updateSystemPrompt(Long id, SystemPromptUpdateRequest request) {
+        SystemPrompt existingPrompt = systemPromptRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
+
+        // If the updated prompt is set to active, deactivate the current active prompt
+        if (request.getIsActive().equals(true) && !request.getIsActive().equals(existingPrompt.getIsActive())) {
+            deactivateSystemPrompt();
+        } else if (request.getIsActive().equals(false) && existingPrompt.getIsActive().equals(true)) {
+            // Prevent deactivating the only active prompt
+            throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
         }
 
+        // Fetch the latest version to determine the new version number
+        SystemPrompt lastestVersion = systemPromptRepository.findLatestVersion().orElse(null);
+
+        existingPrompt.setContent(request.getContent());
+        existingPrompt.setVersion(lastestVersion == null ? 1 : lastestVersion.getVersion() + 1);
+        existingPrompt.setIsActive(request.getIsActive());
+        systemPromptRepository.save(existingPrompt);
+        return true;
+    }
+
+    @Override
+    public boolean createSystemPrompt(SystemPromptCreateRequest request) {
+        // Deactivate the current active prompt
+        deactivateSystemPrompt();
+        // Fetch the latest version to determine the new version number
+        SystemPrompt lastestVersion = systemPromptRepository.findLatestVersion().orElse(null);
+
+        // Create and save the new system prompt as active
+        SystemPrompt newPrompt = SystemPrompt.builder()
+                .version(lastestVersion == null ? 1 : lastestVersion.getVersion() + 1)
+                .content(request.getContent())
+                .isActive(true)
+                .build();
+        systemPromptRepository.save(newPrompt);
+        return true;
+    }
+
+    private void deactivateSystemPrompt() {
         SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActive(true).orElse(null);
         // Deactivate the current active prompt if it exists
         if (activePrompt != null) {
             activePrompt.setIsActive(false);
             systemPromptRepository.save(activePrompt);
         }
-
-        // Create and save the new system prompt as active
-        SystemPrompt newPrompt = SystemPrompt.builder()
-                .version(request.getVersion())
-                .content(request.getContent())
-                .isActive(true)
-                .build();
-        systemPromptRepository.save(newPrompt);
-        return true;
     }
 }

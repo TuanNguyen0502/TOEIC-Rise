@@ -6,4 +6,6 @@ public class MessageConstant {
     public static final String INVALID_OTP = "Invalid OTP! OTP must be exactly 6 digits (0-9).";
     public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";
     public static final String INVALID_TEST_NAME = "Test's name can only contain letters, digits, spaces, and parentheses.";
+    public static final String NOT_BLANK_SYSTEM_PROMPT_CONTENT = "Content must not be blank";
+    public static final String NOT_NULL_SYSTEM_PROMPT_IS_ACTIVE = "isActive must not be null";
 }
