@@ -38,8 +38,8 @@ public class SystemPromptController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<?> patchSystemPrompt(@PathVariable Long id) {
-        systemPromptService.patchSystemPrompt(id);
+    public ResponseEntity<?> changeActive(@PathVariable Long id) {
+        systemPromptService.changeActive(id);
         return ResponseEntity.ok().build();
     }
 

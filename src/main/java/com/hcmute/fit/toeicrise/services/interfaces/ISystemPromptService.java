@@ -21,5 +21,5 @@ public interface ISystemPromptService {
 
     boolean createSystemPrompt(SystemPromptCreateRequest request);
 
-    boolean patchSystemPrompt(Long id);
+    boolean changeActive(Long id);
 }

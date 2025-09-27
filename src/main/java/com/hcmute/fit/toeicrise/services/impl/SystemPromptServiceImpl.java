@@ -158,7 +158,7 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     }
 
     @Override
-    public boolean patchSystemPrompt(Long id) {
+    public boolean changeActive(Long id) {
         SystemPrompt existingPrompt = systemPromptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
