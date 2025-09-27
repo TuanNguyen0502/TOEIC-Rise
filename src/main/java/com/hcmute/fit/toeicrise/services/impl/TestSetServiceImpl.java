@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
@@ -11,6 +11,7 @@ import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.TestSetMapper;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSetSpecification;
@@ -33,14 +34,15 @@ public class TestSetServiceImpl implements ITestSetService {
     private final TestSetRepository testSetRepository;
     private final ITestService testService;
     private final TestSetMapper testSetMapper;
+    private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public Page<TestSetResponse> getAllTestSets(String name,
-                                                ETestSetStatus status,
-                                                int page,
-                                                int size,
-                                                String sortBy,
-                                                String direction) {
+    public PageResponse getAllTestSets(String name,
+                                       ETestSetStatus status,
+                                       int page,
+                                       int size,
+                                       String sortBy,
+                                       String direction) {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSetSpecification.nameContains(name));
@@ -50,8 +52,10 @@ public class TestSetServiceImpl implements ITestSetService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return testSetRepository.findAll(specification, pageable)
+        Page<TestSetResponse> testSetResponses = testSetRepository.findAll(specification, pageable)
                 .map(testSetMapper::toTestSetResponse);
+
+        return pageResponseMapper.toPageResponse(testSetResponses);
     }
 
     @Override
@@ -67,7 +71,7 @@ public class TestSetServiceImpl implements ITestSetService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
 
         // Get tests in the test set with filtering and pagination
-        Page<TestResponse> testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
+        PageResponse testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
         // Map to detail response
         return testSetMapper.toTestSetDetailResponse(testSet, testResponses);
     }
@@ -84,7 +88,7 @@ public class TestSetServiceImpl implements ITestSetService {
     @Override
     @Transactional
     public void addTestSet(TestSetRequest testSetRequest) {
-        if (testSetRepository.existsByName(testSetRequest.getTestName())){
+        if (testSetRepository.existsByName(testSetRequest.getTestName())) {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
         }
         TestSet testSet = TestSet.builder()
@@ -101,7 +105,7 @@ public class TestSetServiceImpl implements ITestSetService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set");
         }
         TestSet testSet = testSetRepository.findByName(updateTestSetRequest.getTestName()).orElse(null);
-        if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())){
+        if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set's name");
         }
         oldTestSet.setName(updateTestSetRequest.getTestName());
