@@ -26,6 +26,7 @@ public enum ErrorCode {
     // === 3. Business Logic Errors ===
     OTP_LIMIT_EXCEEDED("Exceeded %s OTP limit. Please try again after 30 minutes.", HttpStatus.TOO_MANY_REQUESTS),
     REGISTRATION_EXPIRED("Registration session has expired. Please register again.", HttpStatus.GONE),
+    SYSTEM_PROMPT_VERSION_INVALID("System prompt version must be greater than the lastest version", HttpStatus.BAD_REQUEST),
 
     // === 4. Resource / Data Not Found or Conflicts ===
     RESOURCE_NOT_FOUND("%s not found", HttpStatus.NOT_FOUND),
