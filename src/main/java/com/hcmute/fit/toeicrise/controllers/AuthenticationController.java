@@ -135,16 +135,23 @@ public class AuthenticationController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
-        // Lấy thông tin người dùng từ Security Context
+        // Get user authentication from Security Context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+
+        // Debug logging to help troubleshoot the issue
+        if (authentication == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "No authentication found in SecurityContext");
         }
-        // Lấy email từ đối tượng Authentication
+
+        if (!authentication.isAuthenticated()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "User is not authenticated");
+        }
+
         String email = authentication.getName();
-        if (email == null || email.isEmpty()) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+        if (email == null || email.isEmpty() || "anonymousUser".equals(email)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Invalid or anonymous user");
         }
+
         return ResponseEntity.ok(authenticationServiceImpl.getCurrentUser(email));
     }
 }

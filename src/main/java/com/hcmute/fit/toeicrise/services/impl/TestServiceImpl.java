@@ -1,16 +1,16 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
@@ -35,7 +35,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils.extractGroupNumber;
 
@@ -50,15 +49,16 @@ public class TestServiceImpl implements ITestService {
     private final ITagService tagService;
 
     private final TestMapper testMapper;
+    private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public Page<TestResponse> getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
+    public PageResponse getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
         return getTestResponses(name, status, page, size, sortBy, direction, specification);
     }
 
     @Override
-    public Page<TestResponse> getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction) {
+    public PageResponse getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(TestSpecification.testSetIdEquals(testSetId));
         return getTestResponses(name, status, page, size, sortBy, direction, specification);
@@ -113,7 +113,7 @@ public class TestServiceImpl implements ITestService {
         return testMapper.toDetailResponse(test, partResponses);
     }
 
-    private Page<TestResponse> getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
+    private PageResponse getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
         if (name != null && !name.isEmpty()) {
             specification = specification.and(TestSpecification.nameContains(name));
         }
@@ -127,7 +127,8 @@ public class TestServiceImpl implements ITestService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return testRepository.findAll(specification, pageable).map(testMapper::toResponse);
+        Page<TestResponse> testResponses = testRepository.findAll(specification, pageable).map(testMapper::toResponse);
+        return pageResponseMapper.toPageResponse(testResponses);
     }
 
     @Override
@@ -172,10 +173,10 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public void processQuestions(Test test, List<QuestionExcelRequest> questions){
+    public void processQuestions(Test test, List<QuestionExcelRequest> questions) {
         List<QuestionExcelRequest> sortedQuestions = questions.stream()
                 .sorted(Comparator.comparing(QuestionExcelRequest::getNumberOfQuestions, Comparator.nullsLast(Comparator.naturalOrder())))
-                .collect(Collectors.toList());
+                .toList();
         Map<Integer, List<QuestionExcelRequest>> groupedQuestions = new HashMap<>();
         for (QuestionExcelRequest question : sortedQuestions) {
             Integer groupKey = Optional.ofNullable(extractGroupNumber(question.getQuestionGroupId()))
@@ -191,16 +192,16 @@ public class TestServiceImpl implements ITestService {
     public void processQuestionGroup(Test test, List<QuestionExcelRequest> groupQuestions) {
         try {
             QuestionExcelRequest firstQuestion = groupQuestions.get(0);
-                Part part = partService.getPartById(firstQuestion.getPartNumber());
-                QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
-                for (int i = 0; i < groupQuestions.size(); i++) {
-                    QuestionExcelRequest dto = groupQuestions.get(i);
-                    List<Tag> tags = tagService.getTagsFromString(dto.getTags());
-                    questionService.createQuestion(dto, questionGroup, tags);
-                }
+            Part part = partService.getPartById(firstQuestion.getPartNumber());
+            QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
+            for (int i = 0; i < groupQuestions.size(); i++) {
+                QuestionExcelRequest dto = groupQuestions.get(i);
+                List<Tag> tags = tagService.getTagsFromString(dto.getTags());
+                questionService.createQuestion(dto, questionGroup, tags);
+            }
         } catch (Exception e) {
-                e.printStackTrace();
-                throw new AppException(ErrorCode.FILE_READ_ERROR);
+            e.printStackTrace();
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
         }
     }
 
@@ -209,6 +210,6 @@ public class TestServiceImpl implements ITestService {
         String filePath = file.getOriginalFilename();
         if (filePath == null)
             return false;
-        return filePath.endsWith(".xlsx")||filePath.endsWith(".xls")||filePath.endsWith(".xlsm");
+        return filePath.endsWith(".xlsx") || filePath.endsWith(".xls") || filePath.endsWith(".xlsm");
     }
 }

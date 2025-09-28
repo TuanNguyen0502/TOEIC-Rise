@@ -145,16 +145,18 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     public Account loginAndRegisterWithGoogle(String email, String fullName, String avatar) {
-        // Nếu đã tồn tại thì trả về luôn
+        // Check if user already exists
         return accountRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    // Nếu chưa có thì tạo mới
+                    // Create new account if user doesn't exist
                     Account account = new Account();
                     account.setEmail(email);
                     account.setIsActive(true);
                     account.setAuthProvider(EAuthProvider.GOOGLE);
+                    // Set a placeholder password to avoid null password issues
+                    account.setPassword("{oauth2}");
 
-                    // Tạo mới user và gắn vào account
+                    // Create new user and link to account
                     User user = new User();
                     user.setAvatar(avatar);
                     user.setFullName(fullName);

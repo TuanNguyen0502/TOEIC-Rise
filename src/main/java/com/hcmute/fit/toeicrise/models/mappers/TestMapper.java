@@ -7,6 +7,8 @@ import com.hcmute.fit.toeicrise.models.entities.Test;
 import org.mapstruct.*;
 import org.apache.poi.ss.usermodel.*;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface TestMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
