@@ -116,15 +116,15 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         }
 
         // Fetch the latest version to determine the new version number
-        SystemPrompt lastestVersion = systemPromptRepository.findLatestVersion().orElse(null);
-        if (lastestVersion == null) {
-            lastestVersion = existingPrompt; // If no other versions exist, keep the current one
+        SystemPrompt latestVersion = systemPromptRepository.findLatestVersion().orElse(null);
+        if (latestVersion == null) {
+            latestVersion = existingPrompt; // If no other versions exist, keep the current one
         }
 
         // Create a new SystemPrompt entity with updated details and incremented version
         SystemPrompt systemPrompt = new SystemPrompt();
         systemPrompt.setContent(request.getContent());
-        systemPrompt.setVersion(lastestVersion.getVersion() + 1);
+        systemPrompt.setVersion(latestVersion.getVersion() + 1);
         systemPrompt.setIsActive(request.getIsActive());
         systemPromptRepository.save(systemPrompt);
 
@@ -141,11 +141,11 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         // Deactivate the current active prompt
         deactivateSystemPrompt();
         // Fetch the latest version to determine the new version number
-        SystemPrompt lastestVersion = systemPromptRepository.findLatestVersion().orElse(null);
+        SystemPrompt latestVersion = systemPromptRepository.findLatestVersion().orElse(null);
 
         // Create and save the new system prompt as active
         SystemPrompt newPrompt = SystemPrompt.builder()
-                .version(lastestVersion == null ? 1 : lastestVersion.getVersion() + 1)
+                .version(latestVersion == null ? 1 : latestVersion.getVersion() + 1)
                 .content(request.getContent())
                 .isActive(true)
                 .build();
@@ -163,7 +163,7 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
         // If the updated prompt is set to active, deactivate the current active prompt
-        if (existingPrompt.getIsActive().equals(false)) {
+        if (!existingPrompt.getIsActive()) {
             deactivateSystemPrompt();
             existingPrompt.setIsActive(true);
             systemPromptRepository.save(existingPrompt);
