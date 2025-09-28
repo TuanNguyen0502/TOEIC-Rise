@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.exceptions.handlers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.commons.bases.ExceptionResponse;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,15 +24,14 @@ import java.time.ZoneId;
 public class SecurityExceptionHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
     private final ObjectMapper objectMapper;
 
-
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-
+        handleSecurityException(request, response, HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHENTICATED.getMessage());
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-
+        handleSecurityException(request, response, HttpStatus.FORBIDDEN, ErrorCode.UNAUTHORIZED.getMessage());
     }
 
     private void handleSecurityException(HttpServletRequest request,
