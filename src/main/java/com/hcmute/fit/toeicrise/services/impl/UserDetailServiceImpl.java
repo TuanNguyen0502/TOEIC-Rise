@@ -22,10 +22,14 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByAccount_Email(username).orElseThrow(() ->
-                new AppException(ErrorCode.INVALID_CREDENTIALS)
+        User user = userRepository.findByAccount_Email(username)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getAccount().getEmail(),
+                user.getAccount().getPassword(),
+                getAuthorities(user)
         );
-        return new org.springframework.security.core.userdetails.User(user.getAccount().getEmail(), user.getAccount().getPassword(), getAuthorities(user));
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities(User user) {
