@@ -22,7 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import static com.hcmute.fit.toeicrise.commons.constants.Constant.ACTIVE_PROMPT_KEY;
+import static com.hcmute.fit.toeicrise.commons.constants.Constant.SYSTEM_PROMPT_CACHE;
+import static com.hcmute.fit.toeicrise.commons.constants.Constant.CACHE_DURATION;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +34,7 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     private final PageResponseMapper pageResponseMapper;
     private final IRedisService redisService;
 
-    // Cache constants
-    private static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
-    private static final String ACTIVE_PROMPT_KEY = "active";
-    private static final Duration CACHE_DURATION = Duration.ofDays(30);
+
 
     @Override
     public PageResponse getAllSystemPrompts(Boolean isActive,
