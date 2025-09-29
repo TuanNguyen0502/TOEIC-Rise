@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream()
                 .collect(Collectors.groupingBy(QuestionGroup::getPart));
 
-        // Convert the map to a list of PartResponse objects
+        // Convert the map to a list of PartResponse objects and sort by part name
         return groupedByPart.entrySet().stream()
                 .map(entry -> {
                     Part part = entry.getKey();
@@ -55,6 +56,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                     // Create and return a PartResponse
                     return partMapper.toPartResponse(part, questionGroupResponses);
                 })
+                .sorted(Comparator.comparing(PartResponse::getName))
                 .toList();
     }
 
