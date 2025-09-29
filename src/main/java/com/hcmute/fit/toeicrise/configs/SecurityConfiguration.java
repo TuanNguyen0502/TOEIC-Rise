@@ -26,15 +26,16 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
-    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
+    private final SecurityExceptionHandler securityExceptionHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+                        .authenticationEntryPoint(securityExceptionHandler)
+                        .accessDeniedHandler(securityExceptionHandler)
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
