@@ -47,13 +47,13 @@ public class TestSetController {
         return ResponseEntity.ok("Test set deleted successfully");
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<?> createTestSet(@Valid @RequestBody TestSetRequest testSetRequest) {
         testSetService.addTestSet(testSetRequest);
         return ResponseEntity.ok("Test set created successfully");
     }
 
-    @PutMapping("/update")
+    @PutMapping("")
     public ResponseEntity<?> updateTestSet(@Valid @RequestBody UpdateTestSetRequest updateTestSetRequest) {
         return ResponseEntity.ok(testSetService.updateTestSet(updateTestSetRequest));
     }

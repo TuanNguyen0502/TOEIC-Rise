@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.configs;
 
-import jakarta.servlet.http.HttpServletResponse;
+import com.hcmute.fit.toeicrise.exceptions.handlers.SecurityExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
