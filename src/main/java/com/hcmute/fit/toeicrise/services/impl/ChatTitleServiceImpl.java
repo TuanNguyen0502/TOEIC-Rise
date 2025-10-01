@@ -67,10 +67,9 @@ public class ChatTitleServiceImpl implements IChatTitleService {
     }
 
     @Override
-    public void deleteChatTitle(Long chatTitleId) {
-        ChatTitle chatTitle = chatTitleRepository.findById(chatTitleId)
+    public void deleteChatTitle(String conversationId) {
+        ChatTitle chatTitle = chatTitleRepository.findByConversationId(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Chat title"));
-        String conversationId = chatTitle.getConversationId();
         chatTitleRepository.delete(chatTitle);
         chatService.deleteConversation(conversationId);
     }

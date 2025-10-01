@@ -12,7 +12,7 @@ public interface IChatTitleService {
 
     void renameChatTitle(Long chatTitleId, String newTitle);
 
-    void deleteChatTitle(Long chatTitleId);
+    void deleteChatTitle(String conversationId);
 
     boolean checkConversationIdBelongsToUser(String email, String conversationId);
 }

@@ -84,4 +84,15 @@ public class ChatbotController {
         chatTitleService.createChatTitle(email, request);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("{conversationId}")
+    public ResponseEntity<?> deleteConversation(@PathVariable String conversationId) {
+        // Verify conversation belongs to user
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!chatTitleService.checkConversationIdBelongsToUser(email, conversationId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        chatTitleService.deleteChatTitle(conversationId);
+        return ResponseEntity.ok().build();
+    }
 }
