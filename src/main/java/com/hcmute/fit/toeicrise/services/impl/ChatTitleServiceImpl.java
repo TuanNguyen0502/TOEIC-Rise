@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatTitleResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.ChatTitle;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,7 @@ public class ChatTitleServiceImpl implements IChatTitleService {
         }
         // Create new chat title
         ChatTitle chatTitle = new ChatTitle();
+        chatTitle.setId(UUID.randomUUID().toString());
         chatTitle.setUser(user);
         chatTitle.setConversationId(request.getConversationId());
         chatTitle.setTitle(request.getTitle());
@@ -59,16 +62,26 @@ public class ChatTitleServiceImpl implements IChatTitleService {
     }
 
     @Override
-    public void renameChatTitle(Long chatTitleId, String newTitle) {
-        ChatTitle chatTitle = chatTitleRepository.findById(chatTitleId)
+    public void renameChatTitle(String email, ChatTitleUpdateRequest request) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        if (!chatTitleRepository.existsByConversationIdAndUser_Id(request.getConversationId(), user.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        ChatTitle chatTitle = chatTitleRepository.findByConversationIdAndUser_Id(request.getConversationId(), user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Chat title"));
-        chatTitle.setTitle(newTitle);
+        chatTitle.setTitle(request.getNewTitle());
         chatTitleRepository.save(chatTitle);
     }
 
     @Override
-    public void deleteChatTitle(String conversationId) {
-        ChatTitle chatTitle = chatTitleRepository.findByConversationId(conversationId)
+    public void deleteChatTitle(String email, String conversationId) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        if (!chatTitleRepository.existsByConversationIdAndUser_Id(conversationId, user.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        ChatTitle chatTitle = chatTitleRepository.findByConversationIdAndUser_Id(conversationId, user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Chat title"));
         chatTitleRepository.delete(chatTitle);
         chatService.deleteConversation(conversationId);

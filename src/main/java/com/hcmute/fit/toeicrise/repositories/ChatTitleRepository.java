@@ -13,5 +13,5 @@ public interface ChatTitleRepository extends JpaRepository<ChatTitle, Long> {
 
     boolean existsByConversationIdAndUser_Id(String conversationId, Long userId);
 
-    Optional<ChatTitle> findByConversationId(String conversationId);
+    Optional<ChatTitle> findByConversationIdAndUser_Id(String conversationId, Long userId);
 }

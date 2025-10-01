@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -89,10 +90,14 @@ public class ChatbotController {
     public ResponseEntity<?> deleteConversation(@PathVariable String conversationId) {
         // Verify conversation belongs to user
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!chatTitleService.checkConversationIdBelongsToUser(email, conversationId)) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-        chatTitleService.deleteChatTitle(conversationId);
+        chatTitleService.deleteChatTitle(email, conversationId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("rename-title")
+    public ResponseEntity<?> renameTitle(@RequestBody ChatTitleUpdateRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        chatTitleService.renameChatTitle(email, request);
         return ResponseEntity.ok().build();
     }
 }
