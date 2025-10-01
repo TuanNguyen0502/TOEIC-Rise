@@ -8,11 +8,16 @@ import org.springframework.ai.chat.messages.MessageType;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
 public class ChatMessage implements Message {
     private final Message originalMessage;
     private String messageId;
     private String conversationId;
+
+    public ChatMessage(Message originalMessage, String messageId, String conversationId) {
+        this.originalMessage = originalMessage;
+        this.messageId = messageId;
+        this.conversationId = conversationId;
+    }
 
     // Delegate to original message
     @Override

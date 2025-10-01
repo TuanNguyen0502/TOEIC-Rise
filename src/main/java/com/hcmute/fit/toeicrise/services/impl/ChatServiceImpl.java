@@ -15,7 +15,6 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.scheduling.annotation.Async;
@@ -48,14 +47,26 @@ public class ChatServiceImpl implements IChatService {
         if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
             chatRequest.setConversationId(UUID.randomUUID().toString());
         }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
         Flux<String> content = chatClient.prompt()
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId()))
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
                 .user(chatRequest.getMessage())
                 .system(getActiveSystemPrompt())
                 .stream()
                 .content();
-        String messageId = getLatestAssistantMessageId(chatRequest.getConversationId());
-        return content.map(contentText -> chatbotMapper.toChatbotResponse(contentText, messageId, chatRequest.getConversationId(), MessageType.ASSISTANT.name()));
+
+        return content.map(contentText -> chatbotMapper.toChatbotResponse(
+            contentText,
+            messageId,
+            chatRequest.getConversationId(),
+            MessageType.ASSISTANT.name()
+        ));
     }
 
     @Override
@@ -64,9 +75,9 @@ public class ChatServiceImpl implements IChatService {
         if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
             chatRequest.setConversationId(UUID.randomUUID().toString());
         }
-        // Save user message first
-        Message userMessage = new UserMessage(chatRequest.getMessage());
-        chatMemoryRepository.saveMessage(chatRequest.getConversationId(), userMessage);
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
 
         Flux<String> content = ChatClient.create(chatModel)
                 .prompt()
@@ -74,7 +85,10 @@ public class ChatServiceImpl implements IChatService {
                 .user(user -> user
                         .text(chatRequest.getMessage())
                         .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId()))
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
                 .stream()
                 .content();
 
@@ -91,10 +105,12 @@ public class ChatServiceImpl implements IChatService {
                     Message assistantMessage = new AssistantMessage(fullResponse.get());
                     chatMemoryRepository.saveMessage(chatRequest.getConversationId(), assistantMessage);
                 })
-                .map(contentChunk -> {
-                    String messageId = getLatestAssistantMessageId(chatRequest.getConversationId());
-                    return new ChatbotResponse(contentChunk, messageId, chatRequest.getConversationId(), MessageType.ASSISTANT.name());
-                });
+                .map(contentChunk -> chatbotMapper.toChatbotResponse(
+                    contentChunk,
+                    messageId,
+                    chatRequest.getConversationId(),
+                    MessageType.ASSISTANT.name()
+                ));
     }
 
     @Override

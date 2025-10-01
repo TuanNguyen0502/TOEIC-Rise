@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import jakarta.annotation.PostConstruct;
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/learner/chatbot")
@@ -61,26 +62,11 @@ public class ChatbotController {
     @PostMapping(path = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> chat(@RequestBody ChatRequest chatRequest) {
         return chatService.chat(chatRequest)
-                .doOnError(e -> {
-                    // Silently handle any errors
-                    log.debug("Suppressed chat error: {}", e.getMessage());
-                })
-                .onErrorResume(e -> {
-                    // Continue with empty flux on error
-                    return Flux.empty();
-                });
+                .delayElements(Duration.ofMillis(50));
     }
 
     @PostMapping(path = "/title", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> createChatTitle(@RequestBody TitleRequest titleRequest) {
-        return chatService.generateConversationTitle(titleRequest)
-                .doOnError(e -> {
-                    // Silently handle any errors
-                    log.debug("Suppressed title generation error: {}", e.getMessage());
-                })
-                .onErrorResume(e -> {
-                    // Continue with empty flux on error
-                    return Flux.empty();
-                });
+        return chatService.generateConversationTitle(titleRequest);
     }
 }
