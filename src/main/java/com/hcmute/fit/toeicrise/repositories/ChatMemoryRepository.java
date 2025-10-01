@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import com.hcmute.fit.toeicrise.models.entities.ChatMessage;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -61,24 +62,24 @@ public class ChatMemoryRepository implements org.springframework.ai.chat.memory.
         return count != null && count > 0;
     }
 
-//    public List<ChatbotResponse> getChatHistory(String conversationId) {
-//        return jdbcTemplate.query("""
-//                        SELECT id, content, conversation_id, message_type
-//                        FROM chat_memories
-//                        WHERE conversation_id = ?
-//                        ORDER BY created_at ASC
-//                        """,
-//                (rs, rowNum) -> {
-//                    ChatbotResponse response = new ChatbotResponse();
-//                    response.setMessageId(rs.getString("id"));
-//                    response.setContent(rs.getString("content"));
-//                    response.setConversationId(rs.getString("conversation_id"));
-//                    response.setMessageType(rs.getString("message_type"));
-//                    return response;
-//                },
-//                conversationId
-//        );
-//    }
+    public List<ChatbotResponse> getChatHistory(String conversationId) {
+        return jdbcTemplate.query("""
+                        SELECT id, content, conversation_id, message_type
+                        FROM chat_memories
+                        WHERE conversation_id = ?
+                        ORDER BY created_at ASC
+                        """,
+                (rs, _) -> {
+                    ChatbotResponse response = new ChatbotResponse();
+                    response.setMessageId(rs.getString("id"));
+                    response.setContent(rs.getString("content"));
+                    response.setConversationId(rs.getString("conversation_id"));
+                    response.setMessageType(rs.getString("message_type"));
+                    return response;
+                },
+                conversationId
+        );
+    }
 
     @Override
     public List<String> findConversationIds() {
