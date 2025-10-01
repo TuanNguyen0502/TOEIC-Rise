@@ -8,4 +8,6 @@ public interface IChatTitleService {
     List<ChatTitleResponse> getAllChatTitlesByUserId(Long userId);
 
     void renameChatTitle(Long chatTitleId, String newTitle);
+
+    void deleteChatTitle(Long chatTitleId);
 }

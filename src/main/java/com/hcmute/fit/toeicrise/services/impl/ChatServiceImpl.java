@@ -16,6 +16,7 @@ import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 import reactor.core.publisher.Flux;
@@ -83,6 +84,12 @@ public class ChatServiceImpl implements IChatService {
                     String messageId = getLatestAssistantMessageId(conversationId);
                     return new ChatbotResponse(contentChunk, messageId, conversationId, MessageType.ASSISTANT.name());
                 });
+    }
+
+    @Async
+    @Override
+    public void deleteConversation(String conversationId) {
+        chatMemoryRepository.deleteByConversationId(conversationId);
     }
 
     private String getLatestAssistantMessageId(String conversationId) {
