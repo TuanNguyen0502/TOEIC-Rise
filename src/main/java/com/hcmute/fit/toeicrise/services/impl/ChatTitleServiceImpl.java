@@ -12,12 +12,10 @@ import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +34,7 @@ public class ChatTitleServiceImpl implements IChatTitleService {
                 .toList();
     }
 
+    @Override
     public void createChatTitle(ChatTitleCreateRequest request) {
         // Verify user exists
         User user = userRepository.findById(request.getUserId())
