@@ -4,7 +4,6 @@ import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
-import com.hcmute.fit.toeicrise.models.entities.ChatMessage;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
