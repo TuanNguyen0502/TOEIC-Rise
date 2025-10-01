@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -133,11 +134,11 @@ public class TestServiceImpl implements ITestService {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void importTest(MultipartFile file, String testName, Long testSetId) {
+    public void importTest(MultipartFile file, TestRequest request) {
         if (!isValidFile(file))
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
-        TestSet testSet = testSetRepository.findById(testSetId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Set"));
-        Test test = createTest(testName, testSet);
+        TestSet testSet = testSetRepository.findById(request.getTestSetId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Set"));
+        Test test = createTest(request.getTestName(), testSet);
         List<QuestionExcelRequest> questionExcelRequests = readFile(file);
         processQuestions(test, questionExcelRequests);
     }

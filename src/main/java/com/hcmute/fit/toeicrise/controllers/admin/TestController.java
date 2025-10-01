@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
+import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
@@ -16,10 +17,9 @@ public class TestController {
     private final ITestService testService;
 
     @PostMapping("/import")
-    public ResponseEntity<?> importTests(@RequestParam("file") MultipartFile file,
-                                         @RequestParam("testName") String testName,
-                                         @RequestParam("testSetId") Long testSetId) {
-        testService.importTest(file, testName, testSetId);
+    public ResponseEntity<?> importTests(@RequestPart MultipartFile file,
+                                         @Valid @RequestPart TestRequest testRequest) {
+        testService.importTest(file, testRequest);
         return ResponseEntity.ok("Test imported");
     }
   
