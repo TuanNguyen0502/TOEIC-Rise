@@ -133,18 +133,6 @@ public class ChatServiceImpl implements IChatService {
         chatMemoryRepository.deleteByConversationId(conversationId);
     }
 
-    private String getLatestAssistantMessageId(String conversationId) {
-        List<Message> allMessages = chatMemoryRepository.findByConversationId(conversationId);
-        for (int i = allMessages.size() - 1; i >= 0; i--) {
-            Message message = allMessages.get(i);
-            if (message instanceof ChatMessage chatMessage &&
-                    message.getMessageType() == MessageType.ASSISTANT) {
-                return chatMessage.getMessageId();
-            }
-        }
-        return null;
-    }
-
     private String getActiveSystemPrompt() {
         SystemPromptDetailResponse response = systemPromptService.getActiveSystemPrompt();
         return response.getContent();
