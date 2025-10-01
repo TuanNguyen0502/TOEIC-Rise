@@ -14,6 +14,8 @@ public interface IChatService {
 
     Flux<ChatbotResponse> chat(String message, String conversationId, InputStream imageInputStream, String contentType);
 
+    String generateConversationTitle(String userMessage);
+
     @Async
     void deleteConversation(String conversationId);
 }

@@ -86,6 +86,19 @@ public class ChatServiceImpl implements IChatService {
                 });
     }
 
+    @Override
+    public String generateConversationTitle(String userMessage) {
+        String prompt = "Dựa trên tin nhắn sau của người dùng, hãy tạo một tiêu đề ngắn gọn, rõ ràng và phù hợp cho cuộc hội thoại. "
+                + "Tiêu đề phải dưới 10 từ, không có dấu ngoặc kép, không thêm giải thích hoặc văn bản thừa. "
+                + "Chỉ trả về tiêu đề duy nhất.\n\nTin nhắn người dùng:\n"
+                + userMessage;
+        return chatClient.prompt()
+                .system("Bạn là một trợ lý hữu ích, có nhiệm vụ tạo ra tiêu đề cuộc hội thoại ngắn gọn và phù hợp.")
+                .user(prompt)
+                .call()
+                .content();
+    }
+
     @Async
     @Override
     public void deleteConversation(String conversationId) {
