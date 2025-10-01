@@ -26,7 +26,12 @@ public class ChatTitleServiceImpl implements IChatTitleService {
     private final ChatTitleMapper chatTitleMapper;
 
     @Override
-    public List<ChatTitleResponse> getAllChatTitlesByUserId(Long userId) {
+    public List<ChatTitleResponse> getAllChatTitlesByUserId(String email) {
+        // Verify user exists
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        Long userId = user.getId();
+        // Fetch and map chat titles
         return chatTitleRepository.findAllByUser_Id(userId)
                 .stream()
                 .sorted(Comparator.comparing(ChatTitle::getUpdatedAt))

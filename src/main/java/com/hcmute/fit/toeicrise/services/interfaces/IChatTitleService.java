@@ -6,7 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.ChatTitleResponse;
 import java.util.List;
 
 public interface IChatTitleService {
-    List<ChatTitleResponse> getAllChatTitlesByUserId(Long userId);
+    List<ChatTitleResponse> getAllChatTitlesByUserId(String email);
 
     void createChatTitle(ChatTitleCreateRequest request);
 
