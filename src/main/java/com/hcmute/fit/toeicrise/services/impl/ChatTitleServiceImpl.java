@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.models.entities.ChatTitle;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.ChatTitleMapper;
+import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.repositories.ChatTitleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
@@ -21,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatTitleServiceImpl implements IChatTitleService {
     private final ChatTitleRepository chatTitleRepository;
+    private final ChatMemoryRepository chatMemoryRepository;
     private final UserRepository userRepository;
     private final IChatService chatService;
     private final ChatTitleMapper chatTitleMapper;
@@ -40,10 +42,14 @@ public class ChatTitleServiceImpl implements IChatTitleService {
     }
 
     @Override
-    public void createChatTitle(ChatTitleCreateRequest request) {
+    public void createChatTitle(String email, ChatTitleCreateRequest request) {
         // Verify user exists
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        // Verify conversation exists
+        if (!chatMemoryRepository.existsByConversationId(request.getConversationId())) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Conversation");
+        }
         // Create new chat title
         ChatTitle chatTitle = new ChatTitle();
         chatTitle.setUser(user);

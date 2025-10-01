@@ -12,4 +12,5 @@ public class MessageConstant {
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
     public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
     public static final String CHAT_MESSAGE_NOT_BLANK = "Message must not be blank";
+    public static final String CHAT_TITLE_NOT_BLANK = "Title must not be blank";
 }

@@ -37,15 +37,6 @@ public class ChatMemoryRepository implements org.springframework.ai.chat.memory.
                 """, String.class, messageId);
     }
 
-    public boolean renameConversationId(String oldConversationId, String newConversationId) {
-        int updatedRows = jdbcTemplate.update("""
-                UPDATE chat_memories 
-                SET conversation_id = ? 
-                WHERE conversation_id = ?
-                """, newConversationId, oldConversationId);
-        return updatedRows > 0;
-    }
-
     public boolean existsByMessageId(String messageId) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*) FROM chat_memories 

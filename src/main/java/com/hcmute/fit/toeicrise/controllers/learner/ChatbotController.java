@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
@@ -65,8 +66,15 @@ public class ChatbotController {
                 .delayElements(Duration.ofMillis(50));
     }
 
-    @PostMapping(path = "/title", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> createChatTitle(@RequestBody TitleRequest titleRequest) {
+    @PostMapping(path = "/generate-title", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> generateTitle(@RequestBody TitleRequest titleRequest) {
         return chatService.generateConversationTitle(titleRequest);
+    }
+
+    @PostMapping("save-title")
+    public ResponseEntity<?> saveTitle(@RequestBody ChatTitleCreateRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        chatTitleService.createChatTitle(email, request);
+        return ResponseEntity.ok().build();
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 public interface IChatTitleService {
     List<ChatTitleResponse> getAllChatTitlesByUserId(String email);
 
-    void createChatTitle(ChatTitleCreateRequest request);
+    void createChatTitle(String email, ChatTitleCreateRequest request);
 
     void renameChatTitle(Long chatTitleId, String newTitle);
 
