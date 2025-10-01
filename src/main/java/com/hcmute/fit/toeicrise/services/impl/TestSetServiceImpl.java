@@ -105,7 +105,7 @@ public class TestSetServiceImpl implements ITestSetService {
         }
         TestSet testSet = testSetRepository.findByName(updateTestSetRequest.getTestName()).orElse(null);
         if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set's name");
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
         }
         oldTestSet.setName(updateTestSetRequest.getTestName());
         oldTestSet.setStatus(updateTestSetRequest.getStatus());

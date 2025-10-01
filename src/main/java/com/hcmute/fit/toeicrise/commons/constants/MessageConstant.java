@@ -9,4 +9,7 @@ public class MessageConstant {
     public static final String NOT_BLANK_SYSTEM_PROMPT_CONTENT = "Content must not be blank";
     public static final String INVALID_SYSTEM_PROMPT_CONTENT = "Content must be at least 20 characters and can only contain letters, digits, spaces, and punctuation (.,!?()'\"-)";
     public static final String NOT_NULL_SYSTEM_PROMPT_IS_ACTIVE = "isActive must not be null";
+    public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
+    public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
+    public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
 }
