@@ -4,6 +4,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +59,11 @@ public class ChatbotController {
 
     @GetMapping("{conversationId}")
     public ResponseEntity<?> getChatHistory(@PathVariable String conversationId) {
+        // Verify conversation belongs to user
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!chatTitleService.checkConversationIdBelongsToUser(email, conversationId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         return ResponseEntity.ok(chatService.getChatHistory(conversationId));
     }
 

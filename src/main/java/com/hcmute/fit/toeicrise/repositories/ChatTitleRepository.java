@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ChatTitleRepository extends JpaRepository<ChatTitle, Long> {
     List<ChatTitle> findAllByUser_Id(Long userId);
+
+    boolean existsByConversationIdAndUser_Id(String conversationId, Long userId);
 }

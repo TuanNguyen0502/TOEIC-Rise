@@ -74,4 +74,12 @@ public class ChatTitleServiceImpl implements IChatTitleService {
         chatTitleRepository.delete(chatTitle);
         chatService.deleteConversation(conversationId);
     }
+
+    @Override
+    public boolean checkConversationIdBelongsToUser(String email, String conversationId) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        Long userId = user.getId();
+        return chatTitleRepository.existsByConversationIdAndUser_Id(conversationId, userId);
+    }
 }
