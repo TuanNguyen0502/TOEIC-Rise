@@ -103,7 +103,8 @@ public class ChatServiceImpl implements IChatService {
                 + "Tiêu đề phải dưới 10 từ, không có dấu ngoặc kép, không thêm giải thích hoặc văn bản thừa. "
                 + "Chỉ trả về tiêu đề duy nhất.\n\nTin nhắn người dùng:\n"
                 + titleRequest.getMessage();
-        return chatClient.prompt()
+        return ChatClient.create(chatModel)
+                .prompt()
                 .system("Bạn là một trợ lý hữu ích, có nhiệm vụ tạo ra tiêu đề cuộc hội thoại ngắn gọn và phù hợp.")
                 .user(prompt)
                 .stream()

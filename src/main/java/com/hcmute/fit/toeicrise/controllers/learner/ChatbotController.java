@@ -58,7 +58,7 @@ public class ChatbotController {
         return ResponseEntity.ok(chatService.getChatHistory(conversationId));
     }
 
-    @PostMapping("/chat")
+    @PostMapping(path = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> chat(@RequestBody ChatRequest chatRequest) {
         return chatService.chat(chatRequest)
                 .doOnError(e -> {
