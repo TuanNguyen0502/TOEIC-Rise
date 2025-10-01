@@ -14,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TestRequest {
-    @Pattern(regexp = Constant.TEST_NAME_PATTERN, message = MessageConstant.INVALID_TEST_NAME)
+    @Pattern(regexp = Constant.TEST_NAME_PATTERN, message = MessageConstant.TEST_NAME_INVALID)
     @NotBlank(message = MessageConstant.TEST_NAME_NOT_BLANK)
     private String testName;
 
