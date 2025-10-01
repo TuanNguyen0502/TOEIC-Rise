@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -42,6 +43,10 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public Flux<ChatbotResponse> chat(ChatRequest chatRequest) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
         Flux<String> content = chatClient.prompt()
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId()))
                 .user(chatRequest.getMessage())
@@ -54,6 +59,10 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
         // Save user message first
         Message userMessage = new UserMessage(chatRequest.getMessage());
         chatMemoryRepository.saveMessage(chatRequest.getConversationId(), userMessage);
