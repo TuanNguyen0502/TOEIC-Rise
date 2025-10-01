@@ -70,13 +70,12 @@ public class ChatbotController {
 
     @PostMapping(path = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> chat(@RequestBody ChatRequest chatRequest) {
-        return chatService.chat(chatRequest)
-                .delayElements(Duration.ofMillis(50));
+        return chatService.chat(chatRequest).delayElements(Duration.ofMillis(50));
     }
 
     @PostMapping(path = "/generate-title", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> generateTitle(@RequestBody TitleRequest titleRequest) {
-        return chatService.generateConversationTitle(titleRequest);
+        return chatService.generateConversationTitle(titleRequest).delayElements(Duration.ofMillis(50));
     }
 
     @PostMapping("save-title")
