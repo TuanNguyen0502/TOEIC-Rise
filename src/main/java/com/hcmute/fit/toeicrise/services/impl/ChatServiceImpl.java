@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.ChatMessage;
@@ -40,30 +41,30 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> chat(String conversationId, String userMessage) {
+    public Flux<ChatbotResponse> chat(ChatRequest chatRequest) {
         Flux<String> content = chatClient.prompt()
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId))
-                .user(userMessage)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId()))
+                .user(chatRequest.getMessage())
                 .system(getActiveSystemPrompt())
                 .stream()
                 .content();
-        String messageId = getLatestAssistantMessageId(conversationId);
-        return content.map(contentText -> chatbotMapper.toChatbotResponse(contentText, messageId, conversationId, MessageType.ASSISTANT.name()));
+        String messageId = getLatestAssistantMessageId(chatRequest.getConversationId());
+        return content.map(contentText -> chatbotMapper.toChatbotResponse(contentText, messageId, chatRequest.getConversationId(), MessageType.ASSISTANT.name()));
     }
 
     @Override
-    public Flux<ChatbotResponse> chat(String message, String conversationId, InputStream imageInputStream, String contentType) {
+    public Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType) {
         // Save user message first
-        Message userMessage = new UserMessage(message);
-        chatMemoryRepository.saveMessage(conversationId, userMessage);
+        Message userMessage = new UserMessage(chatRequest.getMessage());
+        chatMemoryRepository.saveMessage(chatRequest.getConversationId(), userMessage);
 
         Flux<String> content = ChatClient.create(chatModel)
                 .prompt()
                 .system(getActiveSystemPrompt())
                 .user(user -> user
-                        .text(message)
+                        .text(chatRequest.getMessage())
                         .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId))
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId()))
                 .stream()
                 .content();
 
@@ -78,16 +79,16 @@ public class ChatServiceImpl implements IChatService {
                 .doOnComplete(() -> {
                     // Save the complete assistant message when streaming is done
                     Message assistantMessage = new AssistantMessage(fullResponse.get());
-                    chatMemoryRepository.saveMessage(conversationId, assistantMessage);
+                    chatMemoryRepository.saveMessage(chatRequest.getConversationId(), assistantMessage);
                 })
                 .map(contentChunk -> {
-                    String messageId = getLatestAssistantMessageId(conversationId);
-                    return new ChatbotResponse(contentChunk, messageId, conversationId, MessageType.ASSISTANT.name());
+                    String messageId = getLatestAssistantMessageId(chatRequest.getConversationId());
+                    return new ChatbotResponse(contentChunk, messageId, chatRequest.getConversationId(), MessageType.ASSISTANT.name());
                 });
     }
 
     @Override
-    public String generateConversationTitle(String userMessage) {
+    public Flux<String> generateConversationTitle(String userMessage) {
         String prompt = "Dựa trên tin nhắn sau của người dùng, hãy tạo một tiêu đề ngắn gọn, rõ ràng và phù hợp cho cuộc hội thoại. "
                 + "Tiêu đề phải dưới 10 từ, không có dấu ngoặc kép, không thêm giải thích hoặc văn bản thừa. "
                 + "Chỉ trả về tiêu đề duy nhất.\n\nTin nhắn người dùng:\n"
@@ -95,7 +96,7 @@ public class ChatServiceImpl implements IChatService {
         return chatClient.prompt()
                 .system("Bạn là một trợ lý hữu ích, có nhiệm vụ tạo ra tiêu đề cuộc hội thoại ngắn gọn và phù hợp.")
                 .user(prompt)
-                .call()
+                .stream()
                 .content();
     }
 

@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
+import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import org.springframework.scheduling.annotation.Async;
 import reactor.core.publisher.Flux;
@@ -10,11 +11,11 @@ import java.util.List;
 public interface IChatService {
     List<ChatbotResponse> getChatHistory(String conversationId);
 
-    Flux<ChatbotResponse> chat(String conversationId, String userMessage);
+    Flux<ChatbotResponse> chat(ChatRequest chatRequest);
 
-    Flux<ChatbotResponse> chat(String message, String conversationId, InputStream imageInputStream, String contentType);
+    Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType);
 
-    String generateConversationTitle(String userMessage);
+    Flux<String> generateConversationTitle(String userMessage);
 
     @Async
     void deleteConversation(String conversationId);
