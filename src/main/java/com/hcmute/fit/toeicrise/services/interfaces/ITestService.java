@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -27,7 +28,7 @@ public interface ITestService {
 
     TestDetailResponse getTestDetailById(Long id);
 
-    void importTest(MultipartFile file, String testName, Long testSetId);
+    void importTest(MultipartFile file, TestRequest testRequest);
 
     Test createTest(String testName, TestSet testSet);
 

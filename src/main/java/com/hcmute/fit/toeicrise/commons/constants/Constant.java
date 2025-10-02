@@ -1,5 +1,7 @@
 package com.hcmute.fit.toeicrise.commons.constants;
 
+import java.time.Duration;
+
 public class Constant {
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String TIMEZONE_VIETNAM = "Asia/Ho_Chi_Minh";
@@ -8,4 +10,9 @@ public class Constant {
     public static final String OTP_PATTERN = "^\\d{6}$";
     public static final String NAME_TEST_SET_PATTERN = "^[a-zA-Z0-9 ()]+$";
     public static final String TEST_NAME_PATTERN = "^[a-zA-Z0-9 ()]+$";
+    public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[a-zA-Z0-9 .,!?()'\"-]{20,}$";
+    // Cache constants
+    public static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
+    public static final String ACTIVE_PROMPT_KEY = "active";
+    public static final Duration CACHE_DURATION = Duration.ofDays(30);
 }
