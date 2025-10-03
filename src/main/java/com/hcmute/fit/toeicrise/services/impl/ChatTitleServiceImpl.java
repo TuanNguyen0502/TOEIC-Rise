@@ -88,10 +88,12 @@ public class ChatTitleServiceImpl implements IChatTitleService {
     }
 
     @Override
-    public boolean checkConversationIdBelongsToUser(String email, String conversationId) {
+    public void checkConversationIdBelongsToUser(String email, String conversationId) {
         User user = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         Long userId = user.getId();
-        return chatTitleRepository.existsByConversationIdAndUser_Id(conversationId, userId);
+        if (!chatTitleRepository.existsByConversationIdAndUser_Id(conversationId, userId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }

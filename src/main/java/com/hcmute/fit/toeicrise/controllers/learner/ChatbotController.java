@@ -64,9 +64,7 @@ public class ChatbotController {
     public ResponseEntity<?> getChatHistory(@PathVariable String conversationId) {
         // Verify conversation belongs to user
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!chatTitleService.checkConversationIdBelongsToUser(email, conversationId)) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        chatTitleService.checkConversationIdBelongsToUser(email, conversationId);
         return ResponseEntity.ok(chatService.getChatHistory(conversationId));
     }
 

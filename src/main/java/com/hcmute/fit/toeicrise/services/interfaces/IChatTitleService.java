@@ -15,5 +15,5 @@ public interface IChatTitleService {
 
     void deleteChatTitle(String email, String conversationId);
 
-    boolean checkConversationIdBelongsToUser(String email, String conversationId);
+    void checkConversationIdBelongsToUser(String email, String conversationId);
 }
