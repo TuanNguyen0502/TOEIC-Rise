@@ -14,4 +14,6 @@ public class MessageConstant {
     public static final String CHAT_MESSAGE_NOT_BLANK = "Message must not be blank";
     public static final String CHAT_TITLE_NOT_BLANK = "Title must not be blank";
     public static final String CHAT_CONVERSATION_ID_NOT_BLANK = "Conversation ID must not be blank";
+    public static final String CHAT_TITLE_INVALID = "Title can only contain letters, digits, spaces, and punctuation (.,!?()'\"-), and must be between 1 and 100 characters long.";
+    public static final String CHAT_CONVERSATION_ID_INVALID = "Conversation ID is invalid.";
 }
