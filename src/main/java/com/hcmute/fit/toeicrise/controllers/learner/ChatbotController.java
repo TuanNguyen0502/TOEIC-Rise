@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import jakarta.annotation.PostConstruct;
+
+import java.io.InputStream;
 import java.time.Duration;
 
 @RestController
@@ -70,7 +72,16 @@ public class ChatbotController {
 
     @PostMapping(path = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> chat(@RequestBody ChatRequest chatRequest) {
-        return chatService.chat(chatRequest).delayElements(Duration.ofMillis(50));
+        if (chatRequest.getImage() == null || chatRequest.getImage().isEmpty()) {
+            return chatService.chat(chatRequest).delayElements(Duration.ofMillis(50));
+        } else {
+            try (InputStream inputStream = chatRequest.getImage().getInputStream()) {
+                return chatService.chat(chatRequest, inputStream, chatRequest.getImage().getContentType())
+                        .delayElements(Duration.ofMillis(50));
+            } catch (Exception e) {
+                return Flux.error(new AppException(ErrorCode.IMAGE_PROCESSING_ERROR));
+            }
+        }
     }
 
     @PostMapping(path = "/generate-title", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
