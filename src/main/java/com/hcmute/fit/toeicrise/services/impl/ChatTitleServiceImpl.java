@@ -57,7 +57,7 @@ public class ChatTitleServiceImpl implements IChatTitleService {
         chatTitle.setId(UUID.randomUUID().toString());
         chatTitle.setUser(user);
         chatTitle.setConversationId(request.getConversationId());
-        chatTitle.setTitle(request.getTitle());
+        chatTitle.setTitle(request.getNewTitle());
         chatTitleRepository.save(chatTitle);
     }
 
