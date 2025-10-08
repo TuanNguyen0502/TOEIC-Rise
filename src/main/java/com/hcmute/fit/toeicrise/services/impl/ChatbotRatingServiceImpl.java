@@ -84,8 +84,8 @@ public class ChatbotRatingServiceImpl implements IChatbotRatingService {
         List<ChatbotRatingDetailResponse.ChatbotResponse> chatbotResponses = chatMemoryRepository.getChatHistory(conversationId)
                 .stream()
                 .map(chatMemory -> {
-                    EChatbotRating chatbotRatingByMessageId = getChatbotRatingByMessageId(chatMemory.getMessageId());
-                    return chatbotRatingMapper.toChatbotResponse(chatMemory, chatbotRatingByMessageId);
+                    ChatbotRating rating = chatbotRatingRepository.findFirstByMessageId(chatMemory.getMessageId()).orElse(null);
+                    return chatbotRatingMapper.toChatbotResponse(chatMemory, rating != null ? rating.getRating() : null);
                 })
                 .toList();
 
@@ -120,9 +120,5 @@ public class ChatbotRatingServiceImpl implements IChatbotRatingService {
                 .rating(chatbotRatingRequest.getRating())
                 .build();
         chatbotRatingRepository.save(chatbotRating);
-    }
-
-    private EChatbotRating getChatbotRatingByMessageId(String messageId) {
-        return chatbotRatingRepository.findFirstByMessageId(messageId);
     }
 }
