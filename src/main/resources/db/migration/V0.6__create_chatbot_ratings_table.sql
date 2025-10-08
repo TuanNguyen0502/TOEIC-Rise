@@ -2,7 +2,7 @@ CREATE TABLE chatbot_ratings
 (
     id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id            BIGINT       NOT NULL,
-    message_id         VARCHAR(255) NOT NULL,
+    message_id         VARCHAR(255),
     conversation_title VARCHAR(255) NOT NULL,
     message            TEXT         NOT NULL,
     rating             ENUM('LIKE', 'DISLIKE') NOT NULL,
