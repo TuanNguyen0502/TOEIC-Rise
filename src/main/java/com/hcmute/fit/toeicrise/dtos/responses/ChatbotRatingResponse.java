@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.dtos.responses;
 
-import com.hcmute.fit.toeicrise.models.enums.EChatbotRating;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +13,6 @@ public class ChatbotRatingResponse {
     private Long id;
     private String conversationTitle;
     private String message;
-    private EChatbotRating rating;
+    private String rating;
     private String createdAt;
 }
