@@ -75,9 +75,12 @@ public class ChatbotRatingServiceImpl implements IChatbotRatingService {
         // Get chatbot rating
         ChatbotRating chatbotRating = chatbotRatingRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Chatbot rating"));
-        // Get conversation title
-        String conversationId = chatMemoryRepository.getConversationIdByMessageId(chatbotRating.getMessageId());
+        // If messageId is null, return empty chat history
+        if (chatbotRating.getMessageId() == null) {
+            return chatbotRatingMapper.toChatbotRatingDetailResponse(chatbotRating, List.of());
+        }
         // Get chat history
+        String conversationId = chatMemoryRepository.getConversationIdByMessageId(chatbotRating.getMessageId());
         List<ChatbotRatingDetailResponse.ChatbotResponse> chatbotResponses = chatMemoryRepository.getChatHistory(conversationId)
                 .stream()
                 .map(chatMemory -> {
