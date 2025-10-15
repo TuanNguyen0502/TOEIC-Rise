@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface TestSetRepository extends JpaRepository<TestSet, Long>, JpaSpecificationExecutor<TestSet> {
     boolean existsByName(String name);
     Optional<TestSet> findByName(String name);
-    @Query("select t from TestSet t where t.status='IN_USE'")
+    @Query("select t from TestSet t where t.status='IN_USE' order by t.createdAt desc")
     List<TestSet> getAllByStatus();
 }
