@@ -11,4 +11,9 @@ public class MessageConstant {
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
     public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
+    public static final String INVALID_INPUT_DATA = "Invalid input data";
+    public static final String PAGE_MIN = "Page index must be zero or greater.";
+    public static final String SIZE_PAGE_MIN = "Size must be greater than ten.";
+    public static final String PAGE_MAX = "Page index must be less than or equal to 100.";
+    public static final String SIZE_PAGE_MAX = "Size must be less than or equal to 50.";
 }

@@ -25,6 +25,10 @@ public interface TestMapper {
         dto.setPartResponses(partResponses);
     }
 
+    @Mapping(source = "name", target = "testName")
+    @Mapping(source = "testSet.name", target = "testSetName")
+    LearnerTestResponse toLearnerTestResponse(Test test);
+
     default QuestionExcelRequest mapRowToDTO(Row row) {
         QuestionExcelRequest request = new QuestionExcelRequest();
 
