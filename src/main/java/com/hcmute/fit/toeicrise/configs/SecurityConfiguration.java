@@ -43,7 +43,7 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**").hasRole("ADMIN")
-                        .requestMatchers("/learner/home/", "/learner/").hasRole("LEARNER")
+                        .requestMatchers("/learner/home/").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
