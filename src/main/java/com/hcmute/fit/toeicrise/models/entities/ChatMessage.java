@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;

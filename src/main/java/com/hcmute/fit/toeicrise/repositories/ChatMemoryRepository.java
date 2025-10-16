@@ -38,19 +38,21 @@ public class ChatMemoryRepository implements org.springframework.ai.chat.memory.
     }
 
     public boolean existsByMessageId(String messageId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*) FROM chat_memories 
-                WHERE id = ?
-                """, Integer.class, messageId);
-        return count != null && count > 0;
+        Boolean exists = jdbcTemplate.queryForObject("""
+                    SELECT EXISTS (
+                        SELECT 1 FROM chat_memories WHERE id = ?
+                    )
+                """, Boolean.class, messageId);
+        return Boolean.TRUE.equals(exists);
     }
 
     public boolean existsByConversationId(String conversationId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*) FROM chat_memories 
-                WHERE conversation_id = ?
-                """, Integer.class, conversationId);
-        return count != null && count > 0;
+        Boolean exists = jdbcTemplate.queryForObject("""
+                SELECT EXISTS (
+                        SELECT 1 FROM chat_memories WHERE conversation_id = ?
+                    )
+                """, Boolean.class, conversationId);
+        return Boolean.TRUE.equals(exists);
     }
 
     public List<ChatbotResponse> getChatHistory(String conversationId) {
