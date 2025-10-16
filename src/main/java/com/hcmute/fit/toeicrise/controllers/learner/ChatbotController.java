@@ -81,16 +81,10 @@ public class ChatbotController {
         }
     }
 
-    @PostMapping(path = "/generate-title", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> generateTitle(@RequestBody TitleRequest titleRequest) {
-        return chatService.generateConversationTitle(titleRequest).delayElements(Duration.ofMillis(50));
-    }
-
-    @PostMapping("save-title")
-    public ResponseEntity<?> saveTitle(@RequestBody ChatTitleCreateRequest request) {
+    @PostMapping("/generate-title")
+    public String generateTitle(@RequestBody TitleRequest titleRequest) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        chatTitleService.createChatTitle(email, request);
-        return ResponseEntity.ok().build();
+        return chatService.generateConversationTitle(email, titleRequest);
     }
 
     @PostMapping("rate")

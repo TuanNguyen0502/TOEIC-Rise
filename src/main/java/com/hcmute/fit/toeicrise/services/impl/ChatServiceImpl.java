@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
+import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import com.hcmute.fit.toeicrise.services.interfaces.ISystemPromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -33,6 +34,7 @@ public class ChatServiceImpl implements IChatService {
     private final ChatModel chatModel;
     private final ChatMemoryRepository chatMemoryRepository;
     private final ISystemPromptService systemPromptService;
+    private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
 
     @Override
@@ -61,10 +63,10 @@ public class ChatServiceImpl implements IChatService {
                 .content();
 
         return content.map(contentText -> chatbotMapper.toChatbotResponse(
-            contentText,
-            messageId,
-            chatRequest.getConversationId(),
-            MessageType.ASSISTANT.name()
+                contentText,
+                messageId,
+                chatRequest.getConversationId(),
+                MessageType.ASSISTANT.name()
         ));
     }
 
@@ -105,25 +107,32 @@ public class ChatServiceImpl implements IChatService {
                     chatMemoryRepository.saveMessage(chatRequest.getConversationId(), assistantMessage);
                 })
                 .map(contentChunk -> chatbotMapper.toChatbotResponse(
-                    contentChunk,
-                    messageId,
-                    chatRequest.getConversationId(),
-                    MessageType.ASSISTANT.name()
+                        contentChunk,
+                        messageId,
+                        chatRequest.getConversationId(),
+                        MessageType.ASSISTANT.name()
                 ));
     }
 
     @Override
-    public Flux<String> generateConversationTitle(TitleRequest titleRequest) {
+    public String generateConversationTitle(String email, TitleRequest titleRequest) {
         String prompt = "Dựa trên tin nhắn sau của người dùng, hãy tạo một tiêu đề ngắn gọn, rõ ràng và phù hợp cho cuộc hội thoại. "
                 + "Tiêu đề phải dưới 10 từ, không có dấu ngoặc kép, không thêm giải thích hoặc văn bản thừa. "
                 + "Chỉ trả về tiêu đề duy nhất.\n\nTin nhắn người dùng:\n"
                 + titleRequest.getMessage();
-        return ChatClient.create(chatModel)
+        String title = ChatClient.create(chatModel)
                 .prompt()
                 .system("Bạn là một trợ lý hữu ích, có nhiệm vụ tạo ra tiêu đề cuộc hội thoại ngắn gọn và phù hợp.")
                 .user(prompt)
-                .stream()
+                .call()
                 .content();
+        if (title != null) {
+            // Remove newline characters and trim whitespace
+            title = title.replace("\n", " ").trim();
+        }
+        // Save title to database
+        chatTitleService.createChatTitle(email, titleRequest.getConversationId(), title);
+        return title;
     }
 
     @Async

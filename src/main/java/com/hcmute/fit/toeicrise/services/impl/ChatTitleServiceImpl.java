@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ChatTitleResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -14,6 +13,7 @@ import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -43,21 +43,22 @@ public class ChatTitleServiceImpl implements IChatTitleService {
                 .toList();
     }
 
+    @Async
     @Override
-    public void createChatTitle(String email, ChatTitleCreateRequest request) {
+    public void createChatTitle(String email, String conversationId, String newTitle) {
         // Verify user exists
         User user = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         // Verify conversation exists
-        if (!chatMemoryRepository.existsByConversationId(request.getConversationId())) {
+        if (!chatMemoryRepository.existsByConversationId(conversationId)) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Conversation");
         }
         // Create new chat title
         ChatTitle chatTitle = new ChatTitle();
         chatTitle.setId(UUID.randomUUID().toString());
         chatTitle.setUser(user);
-        chatTitle.setConversationId(request.getConversationId());
-        chatTitle.setTitle(request.getNewTitle());
+        chatTitle.setConversationId(conversationId);
+        chatTitle.setTitle(newTitle);
         chatTitleRepository.save(chatTitle);
     }
 
