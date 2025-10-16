@@ -34,7 +34,7 @@ public enum ErrorCode {
 
     // === 5. External Services / Upload Errors ===
     UPLOAD_FAILED("Failed to upload file", HttpStatus.NOT_IMPLEMENTED),
-    IMAGE_DELETE_FAILED("Failed to delete image", HttpStatus.NOT_IMPLEMENTED),
+    FILE_DELETE_FAILED("Failed to delete file", HttpStatus.NOT_IMPLEMENTED),
     INVALID_FILE_FORMAT("The file format you sent is invalid", HttpStatus.NOT_IMPLEMENTED),
     MAIL_SEND_FAILED("Failed to send email", HttpStatus.SERVICE_UNAVAILABLE),
     IMAGE_SIZE_EXCEEDED("Image size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
@@ -56,5 +56,7 @@ public enum ErrorCode {
         this.httpStatus = httpStatus;
     }
 
-    public int getHttpStatusCode() {return httpStatus.value();}
+    public int getHttpStatusCode() {
+        return httpStatus.value();
+    }
 }
