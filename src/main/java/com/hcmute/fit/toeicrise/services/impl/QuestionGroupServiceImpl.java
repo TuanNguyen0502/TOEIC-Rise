@@ -61,6 +61,19 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
+    public List<PartResponse> getQuestionGroupsByTestIdAndPartId(Long testId, Long partId) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_Id(testId, partId);
+        Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream().collect(Collectors.groupingBy(QuestionGroup::getPart));
+        return groupedByPart.entrySet().stream().map(entry -> {
+            Part part = entry.getKey();
+            List<QuestionGroup> groups = entry.getValue();
+            List<QuestionGroupResponse> questionGroupResponses = groups.stream().map(group -> questionGroupMapper.toResponse(group, null)).toList();
+            return partMapper.toPartResponse(part, questionGroupResponses);
+        }).sorted(Comparator.comparing(PartResponse::getName))
+                .toList();
+    }
+
+    @Override
     @Transactional
     public QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest questionExcelRequest) {
         QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);

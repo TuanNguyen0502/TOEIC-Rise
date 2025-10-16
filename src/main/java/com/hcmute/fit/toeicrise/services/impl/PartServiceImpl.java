@@ -8,6 +8,8 @@ import com.hcmute.fit.toeicrise.services.interfaces.IPartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PartServiceImpl implements IPartService {
@@ -18,5 +20,10 @@ public class PartServiceImpl implements IPartService {
         return partRepository.findById((long) id).orElseThrow(
                 () -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part")
         );
+    }
+
+    @Override
+    public List<Part> getAllParts() {
+        return partRepository.findAll();
     }
 }

@@ -13,4 +13,6 @@ public interface IQuestionGroupService {
     QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest request);
     @Transactional(readOnly = true)
     List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId);
+    @Transactional(readOnly = true)
+    List<PartResponse> getQuestionGroupsByTestIdAndPartId(Long testId, Long partId);
 }
