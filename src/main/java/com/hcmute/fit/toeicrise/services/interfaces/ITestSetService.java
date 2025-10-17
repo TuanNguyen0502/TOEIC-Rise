@@ -8,6 +8,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 
+import java.util.List;
+
 public interface ITestSetService {
     PageResponse getAllTestSets(String name,
                                 ETestSetStatus status,
@@ -15,6 +17,7 @@ public interface ITestSetService {
                                 int size,
                                 String sortBy,
                                 String direction);
+    List<TestSetResponse> getAllTestSet();
 
     TestSetDetailResponse getTestSetDetailById(Long testSetId,
                                                String name,

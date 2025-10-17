@@ -25,6 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -55,6 +56,11 @@ public class TestSetServiceImpl implements ITestSetService {
                 .map(testSetMapper::toTestSetResponse);
 
         return pageResponseMapper.toPageResponse(testSetResponses);
+    }
+
+    @Override
+    public List<TestSetResponse> getAllTestSet() {
+        return testSetRepository.getAllByStatus().stream().map(testSetMapper::toTestSetResponse).toList();
     }
 
     @Override

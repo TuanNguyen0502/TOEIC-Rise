@@ -44,6 +44,8 @@ public class SecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/question-groups/**").hasRole("ADMIN")
                         .requestMatchers("/learner/home/").hasRole("LEARNER")
+                        .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/question-groups/**").hasRole("ADMIN")
+                        .requestMatchers("/learner/home/", "/learner/test-sets/").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
