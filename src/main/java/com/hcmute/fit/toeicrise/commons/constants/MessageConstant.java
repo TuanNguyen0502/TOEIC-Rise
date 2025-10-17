@@ -11,4 +11,8 @@ public class MessageConstant {
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
     public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
+    public static final String QUESTION_GROUP_TRANSCRIPT_NOT_BLANK = "Question group transcript must not be blank.";
+    public static final String QUESTION_GROUP_TRANSCRIPT_NOT_NULL = "Question group transcript must not be null.";
+    public static final String QUESTION_GROUP_AUDIO_SIZE_EXCEEDED = "Question group audio size must not exceed 10MB.";
+    public static final String QUESTION_GROUP_IMAGE_SIZE_EXCEEDED = "Question group image size must not exceed 5MB.";
 }

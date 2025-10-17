@@ -1,9 +1,13 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionGroupRepository questionGroupRepository;
     private final IQuestionService questionService;
+    private final CloudinaryUtil cloudinaryUtil;
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
 
@@ -66,5 +71,75 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
         questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
         return questionGroup;
+    }
+
+    @Transactional
+    @Override
+    public void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request) {
+        QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+
+        // Check audio file
+        if (isListeningPart(questionGroup.getPart())) {
+            if (request.getAudio() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file is required for listening parts.");
+            } else if (!cloudinaryUtil.isAudioFileValid(request.getAudio())) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio file format.");
+            }
+        } else if (!isListeningPart(questionGroup.getPart()) && request.getAudio() != null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file should not be provided for non-listening parts.");
+        }
+
+        // Check image file
+        if (questionGroup.getImageUrl() != null && request.getImage() == null) { // Has existing image
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Image file is required.");
+        }
+        if (request.getImage() != null && !cloudinaryUtil.isImageFileValid(request.getImage())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image file format.");
+        }
+
+        // Check passage
+        if ((isListeningPart(questionGroup.getPart()) || questionGroup.getPart().getName().contains("5")) &&
+                (request.getPassage() != null && !request.getPassage().isEmpty())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
+        } else if (request.getPassage() == null || request.getPassage().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
+        }
+
+        // Update question group
+        if (request.getAudio() != null) {
+            String audioUrl;
+            // Update existing audio
+            if (questionGroup.getAudioUrl() != null && cloudinaryUtil.isCloudinaryUrl(questionGroup.getAudioUrl())) {
+                // Update audio file in Cloudinary
+                audioUrl = cloudinaryUtil.updateFile(request.getAudio(), questionGroup.getAudioUrl());
+            } else {
+                // Upload new audio file to Cloudinary
+                audioUrl = cloudinaryUtil.uploadFile(request.getAudio());
+            }
+            questionGroup.setAudioUrl(audioUrl);
+        }
+        if (request.getImage() != null) {
+            String imageUrl;
+            // Update existing image
+            if (questionGroup.getImageUrl() != null && cloudinaryUtil.isCloudinaryUrl(questionGroup.getImageUrl())) {
+                // Update image file in Cloudinary
+                imageUrl = cloudinaryUtil.updateFile(request.getImage(), questionGroup.getImageUrl());
+            } else {
+                // Upload new image file to Cloudinary
+                imageUrl = cloudinaryUtil.uploadFile(request.getImage());
+            }
+            questionGroup.setImageUrl(imageUrl);
+        }
+        questionGroup.setPassage(request.getPassage());
+        questionGroup.setTranscript(request.getTranscript());
+        questionGroupRepository.save(questionGroup);
+    }
+
+    private boolean isListeningPart(Part part) {
+        return part.getName().contains("1") ||
+                part.getName().contains("2") ||
+                part.getName().contains("3") ||
+                part.getName().contains("4");
     }
 }

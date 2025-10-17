@@ -31,6 +31,7 @@ public enum ErrorCode {
     // === 4. Resource / Data Not Found or Conflicts ===
     RESOURCE_NOT_FOUND("%s not found", HttpStatus.NOT_FOUND),
     RESOURCE_ALREADY_EXISTS("%s already exists", HttpStatus.CONFLICT),
+    INVALID_REQUEST("Invalid request, %s", HttpStatus.BAD_REQUEST),
 
     // === 5. External Services / Upload Errors ===
     UPLOAD_FAILED("Failed to upload file", HttpStatus.NOT_IMPLEMENTED),

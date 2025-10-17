@@ -15,4 +15,7 @@ public class Constant {
     public static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
+    // Question group file size limits
+    public static final int QUESTION_GROUP_AUDIO_MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    public static final int QUESTION_GROUP_IMAGE_MAX_SIZE = 5 * 1024 * 1024;  // 5MB
 }

@@ -34,16 +34,28 @@ public class CloudinaryUtil {
     public void deleteFile(String url) {
         try {
             String publicId = extractPublicId(url);
-            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "auto"));
         } catch (IOException e) {
             throw new AppException(ErrorCode.FILE_DELETE_FAILED);
         }
+    }
+
+    public boolean isImageFileValid(MultipartFile image) {
+        String filename = image.getOriginalFilename();
+        if (filename == null) return false;
+        return isValidSuffixImage(filename);
     }
 
     public boolean isValidSuffixImage(String img) {
         return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
                 img.endsWith(".png") || img.endsWith(".gif") ||
                 img.endsWith(".bmp");
+    }
+
+    public boolean isAudioFileValid(MultipartFile audio) {
+        String filename = audio.getOriginalFilename();
+        if (filename == null) return false;
+        return isValidSuffixAudio(filename);
     }
 
     public boolean isValidSuffixAudio(String audio) {
@@ -57,11 +69,19 @@ public class CloudinaryUtil {
         return uploadFile(file);
     }
 
+    public boolean isCloudinaryUrl(String url) {
+        return url.contains("res.cloudinary.com");
+    }
+
     private String extractPublicId(String url) {
         if (url == null || url.isEmpty()) return null;
         // URL: https://res.cloudinary.com/your_cloud/image/upload/v1234567890/filename.jpg
+
         String[] parts = url.split("/");
+        if (parts.length < 2) return null; // Invalid URL
+
         String filename = parts[parts.length - 1]; // filename.jpg
-        return filename.split("\\.")[0]; // filename
+        // Remove file extension
+        return filename.contains(".") ? filename.split("\\.")[0] : filename;
     }
 }
