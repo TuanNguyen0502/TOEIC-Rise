@@ -79,7 +79,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
 
-        // Check audio file
+        // Validate audio file
         if (isListeningPart(questionGroup.getPart())) {
             if (request.getAudio() == null) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file is required for listening parts.");
@@ -90,7 +90,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file should not be provided for non-listening parts.");
         }
 
-        // Check image file
+        // Validate image file
         if (questionGroup.getImageUrl() != null && request.getImage() == null) { // Has existing image
             throw new AppException(ErrorCode.INVALID_REQUEST, "Image file is required.");
         }
@@ -98,11 +98,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image file format.");
         }
 
-        // Check passage
+        // Validate passage
         if ((isListeningPart(questionGroup.getPart()) || questionGroup.getPart().getName().contains("5")) &&
                 (request.getPassage() != null && !request.getPassage().isEmpty())) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
-        } else if (request.getPassage() == null || request.getPassage().isEmpty()) {
+        } else if (request.getPassage() == null || request.getPassage().isEmpty() ||
+                request.getPassage().isBlank()) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
         }
 
