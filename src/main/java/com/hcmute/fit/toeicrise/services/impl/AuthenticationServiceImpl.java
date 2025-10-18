@@ -341,4 +341,18 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         return userMapper.toCurrentUserResponse(user);
     }
+
+    @Override
+    public void changePassword(UserChangePasswordRequest userChangePasswordRequest, String email) {
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
+        if (!passwordEncoder.matches(userChangePasswordRequest.getOldPassword(), account.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+        if (!userChangePasswordRequest.getNewPassword().equals(userChangePasswordRequest.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        account.setPassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
+        accountRepository.save(account);
+    }
 }
