@@ -49,7 +49,7 @@ public class CloudinaryUtil {
     public boolean isValidSuffixImage(String img) {
         return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
                 img.endsWith(".png") || img.endsWith(".gif") ||
-                img.endsWith(".bmp");
+                img.endsWith(".bmp") || img.endsWith(".webp");
     }
 
     public boolean isAudioFileValid(MultipartFile audio) {
@@ -61,7 +61,7 @@ public class CloudinaryUtil {
     public boolean isValidSuffixAudio(String audio) {
         return audio.endsWith(".mp3") || audio.endsWith(".wav") ||
                 audio.endsWith(".aac") || audio.endsWith(".flac") ||
-                audio.endsWith(".ogg");
+                audio.endsWith(".ogg") || audio.endsWith(".m4a");
     }
 
     public String updateFile(MultipartFile file, String oldUrl) {
