@@ -18,10 +18,9 @@ public interface UserMapper {
 
     default ProfileResponse toProfileResponse(String email, User user) {
         return ProfileResponse.builder()
-                .userId(user.getId())
                 .email(email)
                 .fullName(user.getFullName())
-                .gender(user.getGender().name())
+                .gender(user.getGender())
                 .avatar(user.getAvatar())
                 .build();
     }
