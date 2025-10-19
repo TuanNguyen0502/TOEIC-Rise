@@ -8,10 +8,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
-import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
-import com.hcmute.fit.toeicrise.models.enums.ECacheDuration;
-import com.hcmute.fit.toeicrise.models.enums.ERole;
-import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.enums.*;
 import com.hcmute.fit.toeicrise.models.mappers.UserMapper;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
@@ -31,9 +28,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
-    @Value("${security.jwt.refresh-token.expiration}")
-    private Long refreshTokenDurationMs;
-
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -43,6 +37,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IJwtService jwtService;
     private final IRedisService redisService;
     private final UserMapper userMapper;
+    @Value("${security.jwt.refresh-token.expiration}")
+    private Long refreshTokenDurationMs;
 
     @Override
     public boolean register(RegisterRequest input) {
@@ -188,6 +184,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 user.setRole(roleRepository.findByName(ERole.LEARNER));
                 user.setAccount(account);
                 user.setFullName(fullName);
+                user.setGender(EGender.OTHER);
 
                 // Link the User entity to the Account
                 account.setUser(user);
@@ -227,8 +224,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 account.setResendVerificationAttempts(0); // Reset counter after locking
                 if (isRegister) {
                     redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
-                }
-                else accountRepository.save(account);
+                } else accountRepository.save(account);
                 throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, "5");
             }
 
@@ -238,8 +234,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             emailService.sendVerificationEmail(account);
             if (isRegister) {
                 redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
-            }
-            else accountRepository.save(account);
+            } else accountRepository.save(account);
         } else {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
@@ -248,7 +243,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Account account = accountRepository.findByEmail(forgotPasswordRequest.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
         if (account.getResendVerificationLockedUntil() != null &&
                 LocalDateTime.now().isBefore(account.getResendVerificationLockedUntil())) {
             throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED,
@@ -293,7 +288,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
         String emailToken = jwtService.extractUsername(token);
         Account account = accountRepository.findByEmail(emailToken)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Account"));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
 
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
