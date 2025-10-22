@@ -9,8 +9,10 @@ public class MessageConstant {
     public static final String INVALID_SYSTEM_PROMPT_CONTENT = "Content must be at least 20 characters and can only contain letters, digits, spaces, and punctuation (.,!?()'\"-)";
     public static final String NOT_NULL_SYSTEM_PROMPT_IS_ACTIVE = "isActive must not be null";
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
+    // Test messages
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
     public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
+    // Chatbot messages
     public static final String CHAT_MESSAGE_NOT_BLANK = "Message must not be blank";
     public static final String CHAT_TITLE_NOT_BLANK = "Title must not be blank";
     public static final String CHAT_CONVERSATION_ID_NOT_BLANK = "Conversation ID must not be blank";
@@ -18,6 +20,13 @@ public class MessageConstant {
     public static final String CHAT_CONVERSATION_ID_INVALID = "Conversation ID is invalid.";
     public static final String MESSAGE_ID_NOT_BLANK = "Message ID must not be blank";
     public static final String ECHATBOT_RATING_NOT_NULL = "Rating must not be null";
+    // Page messages
+    public static final String INVALID_INPUT_DATA = "Invalid input data";
+    public static final String PAGE_MIN = "Page index must be zero or greater.";
+    public static final String SIZE_PAGE_MIN = "Size must be greater than ten.";
+    public static final String PAGE_MAX = "Page index must be less than or equal to 100.";
+    public static final String SIZE_PAGE_MAX = "Size must be less than or equal to 50.";
+    // Question Group messages
     public static final String QUESTION_GROUP_TRANSCRIPT_NOT_BLANK = "Question group transcript must not be blank.";
     public static final String QUESTION_GROUP_TRANSCRIPT_NOT_NULL = "Question group transcript must not be null.";
     public static final String QUESTION_GROUP_AUDIO_SIZE_EXCEEDED = "Question group audio size must not exceed 10MB.";
