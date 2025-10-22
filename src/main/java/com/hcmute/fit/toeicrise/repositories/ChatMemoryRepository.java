@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
 import com.hcmute.fit.toeicrise.models.entities.ChatMessage;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,49 +37,42 @@ public class ChatMemoryRepository implements org.springframework.ai.chat.memory.
                 """, String.class, messageId);
     }
 
-    public boolean renameConversationId(String oldConversationId, String newConversationId) {
-        int updatedRows = jdbcTemplate.update("""
-                UPDATE chat_memories 
-                SET conversation_id = ? 
-                WHERE conversation_id = ?
-                """, newConversationId, oldConversationId);
-        return updatedRows > 0;
-    }
-
     public boolean existsByMessageId(String messageId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*) FROM chat_memories 
-                WHERE id = ?
-                """, Integer.class, messageId);
-        return count != null && count > 0;
+        Boolean exists = jdbcTemplate.queryForObject("""
+                    SELECT EXISTS (
+                        SELECT 1 FROM chat_memories WHERE id = ?
+                    )
+                """, Boolean.class, messageId);
+        return Boolean.TRUE.equals(exists);
     }
 
     public boolean existsByConversationId(String conversationId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*) FROM chat_memories 
-                WHERE conversation_id = ?
-                """, Integer.class, conversationId);
-        return count != null && count > 0;
+        Boolean exists = jdbcTemplate.queryForObject("""
+                SELECT EXISTS (
+                        SELECT 1 FROM chat_memories WHERE conversation_id = ?
+                    )
+                """, Boolean.class, conversationId);
+        return Boolean.TRUE.equals(exists);
     }
 
-//    public List<ChatbotResponse> getChatHistory(String conversationId) {
-//        return jdbcTemplate.query("""
-//                        SELECT id, content, conversation_id, message_type
-//                        FROM chat_memories
-//                        WHERE conversation_id = ?
-//                        ORDER BY created_at ASC
-//                        """,
-//                (rs, rowNum) -> {
-//                    ChatbotResponse response = new ChatbotResponse();
-//                    response.setMessageId(rs.getString("id"));
-//                    response.setContent(rs.getString("content"));
-//                    response.setConversationId(rs.getString("conversation_id"));
-//                    response.setMessageType(rs.getString("message_type"));
-//                    return response;
-//                },
-//                conversationId
-//        );
-//    }
+    public List<ChatbotResponse> getChatHistory(String conversationId) {
+        return jdbcTemplate.query("""
+                        SELECT id, content, conversation_id, message_type
+                        FROM chat_memories
+                        WHERE conversation_id = ?
+                        ORDER BY created_at ASC
+                        """,
+                (rs, _) -> {
+                    ChatbotResponse response = new ChatbotResponse();
+                    response.setMessageId(rs.getString("id"));
+                    response.setContent(rs.getString("content"));
+                    response.setConversationId(rs.getString("conversation_id"));
+                    response.setMessageType(rs.getString("message_type"));
+                    return response;
+                },
+                conversationId
+        );
+    }
 
     @Override
     public List<String> findConversationIds() {
