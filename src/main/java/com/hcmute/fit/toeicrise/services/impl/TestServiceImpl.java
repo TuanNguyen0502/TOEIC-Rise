@@ -2,15 +2,11 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestDetailResponse;
-import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
-import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.enums.*;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
@@ -201,7 +197,6 @@ public class TestServiceImpl implements ITestService {
                 questionService.createQuestion(dto, questionGroup, tags);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AppException(ErrorCode.FILE_READ_ERROR);
         }
     }
@@ -212,5 +207,22 @@ public class TestServiceImpl implements ITestService {
         if (filePath == null)
             return false;
         return filePath.endsWith(".xlsx") || filePath.endsWith(".xls") || filePath.endsWith(".xlsm");
+    }
+
+    @Override
+    public PageResponse searchTestsByName(com.hcmute.fit.toeicrise.dtos.requests.PageRequest request) {
+        Specification<Test> testSpecification = (_, _, cb) -> cb.conjunction();
+        testSpecification = testSpecification.and(TestSpecification.testSetIdsIn(request.getSort()));
+
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            testSpecification = testSpecification.and(TestSpecification.nameContains(request.getName()));
+        }
+        testSpecification = testSpecification.and(TestSpecification.statusEquals(ETestStatus.APPROVED));
+        testSpecification = testSpecification.and(TestSpecification.testSetStatusEquals(ETestSetStatus.IN_USE));
+        Sort sort = Sort.by(Sort.Direction.fromString(EDirection.DES.getValue()), ESort.CREATED_AT.getValue());
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+        Page<LearnerTestResponse> testResponses = testRepository.findAll(testSpecification, pageable).map(testMapper::toLearnerTestResponse);
+        return pageResponseMapper.toPageResponse(testResponses);
     }
 }
