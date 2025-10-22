@@ -8,6 +8,7 @@ public class MessageConstant {
     public static final String NOT_BLANK_SYSTEM_PROMPT_CONTENT = "Content must not be blank";
     public static final String INVALID_SYSTEM_PROMPT_CONTENT = "Content must be at least 20 characters and can only contain letters, digits, spaces, and punctuation (.,!?()'\"-)";
     public static final String NOT_NULL_SYSTEM_PROMPT_IS_ACTIVE = "isActive must not be null";
+    // Test messages
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
     // Test messages
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
@@ -21,6 +22,13 @@ public class MessageConstant {
     public static final String MESSAGE_ID_NOT_BLANK = "Message ID must not be blank";
     public static final String ECHATBOT_RATING_NOT_NULL = "Rating must not be null";
     // Page messages
+    // Profile messages
+    public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
+    public static final String PROFILE_FULLNAME_NOT_BLANK = "Full name must not be blank.";
+    public static final String PROFILE_FULLNAME_INVALID = "Full name can only contain letters and spaces.";
+    public static final String PROFILE_AVATAR_SIZE_EXCEEDED = "Avatar file size must not exceed 2MB.";
+    public static final String PROFILE_GENDER_NOT_NULL = "Gender must not be null.";
+    // Question Group messages
     public static final String INVALID_INPUT_DATA = "Invalid input data";
     public static final String PAGE_MIN = "Page index must be zero or greater.";
     public static final String SIZE_PAGE_MIN = "Size must be greater than ten.";
