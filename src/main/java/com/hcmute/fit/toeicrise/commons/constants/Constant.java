@@ -15,6 +15,9 @@ public class Constant {
     public static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
+    // Profile constants
+    public static final String PROFILE_FULLNAME_PATTERN = "^[a-zA-Z ]+$";
+    public static final int PROFILE_AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
     // Question group
     public static final int QUESTION_GROUP_AUDIO_MAX_SIZE = 10 * 1024 * 1024; // 10MB
     public static final int QUESTION_GROUP_IMAGE_MAX_SIZE = 5 * 1024 * 1024;  // 5MB
