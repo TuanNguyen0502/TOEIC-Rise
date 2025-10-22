@@ -29,4 +29,6 @@ public interface IAuthenticationService {
     long getRefreshTokenDurationMs();
 
     CurrentUserResponse getCurrentUser(String email);
+
+    void changePassword(UserChangePasswordRequest userChangePasswordRequest, String email);
 }

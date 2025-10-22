@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers;
 
+import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
@@ -12,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -59,16 +58,8 @@ public class AuthenticationController {
     @GetMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token") String refreshToken) {
         try {
-            // Lấy thông tin người dùng từ Security Context
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-            // Lấy email từ đối tượng Authentication
-            String email = authentication.getName();
-            if (email == null || email.isEmpty()) {
-                throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+
+            String email = SecurityUtils.getCurrentUser();
             // 2. Tạo refresh token
             RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken, email);
             // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
@@ -134,20 +125,8 @@ public class AuthenticationController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
-        // Get user authentication from Security Context
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // Debug logging to help troubleshoot the issue
-        if (authentication == null) {
-            throw new AppException(ErrorCode.UNAUTHORIZED, "No authentication found in SecurityContext");
-        }
-
-        if (!authentication.isAuthenticated()) {
-            throw new AppException(ErrorCode.UNAUTHORIZED, "User is not authenticated");
-        }
-
-        String email = authentication.getName();
-        if (email == null || email.isEmpty() || "anonymousUser".equals(email)) {
+        String email = SecurityUtils.getCurrentUser();
+        if (email.isEmpty() || "anonymousUser".equals(email)) {
             throw new AppException(ErrorCode.UNAUTHORIZED, "Invalid or anonymous user");
         }
 
