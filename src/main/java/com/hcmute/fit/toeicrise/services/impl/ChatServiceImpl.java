@@ -17,7 +17,6 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 import reactor.core.publisher.Flux;
@@ -133,12 +132,6 @@ public class ChatServiceImpl implements IChatService {
         // Save title to database
         chatTitleService.createChatTitle(email, titleRequest.getConversationId(), title);
         return title;
-    }
-
-    @Async
-    @Override
-    public void deleteConversation(String conversationId) {
-        chatMemoryRepository.deleteByConversationId(conversationId);
     }
 
     private String getActiveSystemPrompt() {
