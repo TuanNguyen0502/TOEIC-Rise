@@ -10,7 +10,6 @@ public class MessageConstant {
     public static final String NOT_NULL_SYSTEM_PROMPT_IS_ACTIVE = "isActive must not be null";
     // Test messages
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
-    // Test messages
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
     public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
     // Chatbot messages
