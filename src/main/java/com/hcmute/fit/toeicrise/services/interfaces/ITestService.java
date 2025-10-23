@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
+import com.hcmute.fit.toeicrise.dtos.requests.PageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -39,4 +40,6 @@ public interface ITestService {
     void processQuestionGroup(Test test, List<QuestionExcelRequest> groupQuestions);
 
     boolean isValidFile(MultipartFile file);
+
+    PageResponse searchTestsByName(PageRequest request);
 }

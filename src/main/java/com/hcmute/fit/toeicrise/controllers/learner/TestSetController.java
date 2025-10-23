@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController("learnerTestSetController")
-@RequestMapping("/learner/test-sets")
+@RequestMapping("/test-sets")
 @RequiredArgsConstructor
 public class TestSetController {
     private final ITestSetService testSetService;

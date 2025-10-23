@@ -1,13 +1,17 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.UserMapper;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
+import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,8 +22,27 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements IUserService {
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Override
+    public ProfileResponse getUserProfileByEmail(String email) {
+        return userRepository.findByAccount_Email(email)
+                .map(user -> userMapper.toProfileResponse(email, user))
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+    }
+
+    @Override
+    public void updateUserProfile(String email, ProfileUpdateRequest request) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+
+        user.setFullName(request.getFullName());
+        user.setGender(request.getGender());
+        userRepository.save(user);
+    }
+  
     @Override
     public void createUser(UserCreateRequest request) {
         // Check for duplicate email

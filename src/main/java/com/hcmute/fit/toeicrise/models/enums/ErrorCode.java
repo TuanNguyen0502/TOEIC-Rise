@@ -31,16 +31,18 @@ public enum ErrorCode {
     // === 4. Resource / Data Not Found or Conflicts ===
     RESOURCE_NOT_FOUND("%s not found", HttpStatus.NOT_FOUND),
     RESOURCE_ALREADY_EXISTS("%s already exists", HttpStatus.CONFLICT),
+    INVALID_REQUEST("Invalid request, %s", HttpStatus.BAD_REQUEST),
 
     // === 5. External Services / Upload Errors ===
     UPLOAD_FAILED("Failed to upload file", HttpStatus.NOT_IMPLEMENTED),
-    IMAGE_DELETE_FAILED("Failed to delete image", HttpStatus.NOT_IMPLEMENTED),
+    FILE_DELETE_FAILED("Failed to delete file", HttpStatus.NOT_IMPLEMENTED),
     INVALID_FILE_FORMAT("The file format you sent is invalid", HttpStatus.NOT_IMPLEMENTED),
     MAIL_SEND_FAILED("Failed to send email", HttpStatus.SERVICE_UNAVAILABLE),
     IMAGE_SIZE_EXCEEDED("Image size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
     FILE_READ_ERROR("Can not read file", HttpStatus.NOT_IMPLEMENTED),
     OTP_SEND_FAILED("Failed to send OTP", HttpStatus.SERVICE_UNAVAILABLE),
     JSON_CONVERT_ERROR("Error converting list to JSON", HttpStatus.INTERNAL_SERVER_ERROR),
+    IMAGE_PROCESSING_ERROR("Error processing image", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // === 9. System & Uncategorized ===
     DATABASE_ERROR("Database error", HttpStatus.NOT_IMPLEMENTED),
@@ -56,5 +58,7 @@ public enum ErrorCode {
         this.httpStatus = httpStatus;
     }
 
-    public int getHttpStatusCode() {return httpStatus.value();}
+    public int getHttpStatusCode() {
+        return httpStatus.value();
+    }
 }
