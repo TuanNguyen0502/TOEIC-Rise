@@ -12,6 +12,7 @@ public class QuestionGroupResponse {
     private String audioUrl;
     private String imageUrl;
     private String passage;
+    private String transcript;
     private Integer position;
     private List<QuestionResponse> questions;
 }

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateTestSetRequest {
-    @Pattern(regexp = Constant.NAME_TEST_SET_PATTERN, message = MessageConstant.INVALID_TEST_SET)
+    @Pattern(regexp = Constant.TEST_SET_NAME_PATTERN, message = MessageConstant.INVALID_TEST_SET)
     private String testName;
     private ETestSetStatus status;
     private Long id;

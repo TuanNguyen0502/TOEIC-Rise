@@ -15,10 +15,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SystemPromptUpdateRequest {
-    @NotBlank(message = MessageConstant.NOT_BLANK_SYSTEM_PROMPT_CONTENT)
-    @Pattern(regexp = Constant.SYSTEM_PROMPT_CONTENT_PATTERN, message = MessageConstant.INVALID_SYSTEM_PROMPT_CONTENT)
+    @NotBlank(message = MessageConstant.SYSTEM_PROMPT_CONTENT_NOT_BLANK)
+    @NotNull(message = MessageConstant.SYSTEM_PROMPT_CONTENT_NOT_NULL)
+    @Pattern(regexp = Constant.SYSTEM_PROMPT_CONTENT_PATTERN, message = MessageConstant.SYSTEM_PROMPT_CONTENT_INVALID)
     private String content;
 
-    @NotNull(message = MessageConstant.NOT_NULL_SYSTEM_PROMPT_IS_ACTIVE)
+    @NotNull(message = MessageConstant.SYSTEM_PROMPT_IS_ACTIVE_NOT_NULL)
     private Boolean isActive;
 }

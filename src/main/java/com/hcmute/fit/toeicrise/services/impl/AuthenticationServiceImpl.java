@@ -38,7 +38,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IJwtService jwtService;
     private final IRedisService redisService;
     private final UserMapper userMapper;
-    private final CloudinaryUtil cloudinaryUtil;
     @Value("${security.jwt.refresh-token.expiration}")
     private Long refreshTokenDurationMs;
 
@@ -187,7 +186,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 user.setAccount(account);
                 user.setFullName(fullName);
                 user.setGender(EGender.OTHER);
-                user.setAvatar(cloudinaryUtil.getDefaultAvatarUrl());
 
                 // Link the User entity to the Account
                 account.setUser(user);

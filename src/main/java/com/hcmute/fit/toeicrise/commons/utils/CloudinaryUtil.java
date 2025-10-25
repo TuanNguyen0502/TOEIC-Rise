@@ -35,6 +35,11 @@ public class CloudinaryUtil {
         }
     }
 
+    public String updateFile(MultipartFile file, String oldUrl) {
+        deleteFile(oldUrl);
+        return uploadFile(file);
+    }
+
     public void deleteFile(String url) {
         try {
             String publicId = extractPublicId(url);
@@ -44,33 +49,42 @@ public class CloudinaryUtil {
         }
     }
 
-    public boolean isImageFileValid(MultipartFile image) {
+    public void validateImageFile(MultipartFile image) {
         String filename = image.getOriginalFilename();
-        if (filename == null) return false;
-        return isValidSuffixImage(filename);
+        if (filename == null || !isValidSuffixImage(filename)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image file format.");
+        }
     }
 
-    public boolean isValidSuffixImage(String img) {
+    public void validateImageURL(String imageUrl) {
+        if (isValidSuffixImage(imageUrl)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image file format.");
+        }
+    }
+
+    public void validateAudioFile(MultipartFile audio) {
+        String filename = audio.getOriginalFilename();
+        if (filename == null || !isValidSuffixAudio(filename)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio file format.");
+        }
+    }
+
+    public void validateAudioURL(String audioUrl) {
+        if (isValidSuffixAudio(audioUrl)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio file format.");
+        }
+    }
+
+    private boolean isValidSuffixImage(String img) {
         return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
                 img.endsWith(".png") || img.endsWith(".gif") ||
                 img.endsWith(".bmp") || img.endsWith(".webp");
     }
 
-    public boolean isAudioFileValid(MultipartFile audio) {
-        String filename = audio.getOriginalFilename();
-        if (filename == null) return false;
-        return isValidSuffixAudio(filename);
-    }
-
-    public boolean isValidSuffixAudio(String audio) {
+    private boolean isValidSuffixAudio(String audio) {
         return audio.endsWith(".mp3") || audio.endsWith(".wav") ||
                 audio.endsWith(".aac") || audio.endsWith(".flac") ||
                 audio.endsWith(".ogg") || audio.endsWith(".m4a");
-    }
-
-    public String updateFile(MultipartFile file, String oldUrl) {
-        deleteFile(oldUrl);
-        return uploadFile(file);
     }
 
     public boolean isCloudinaryUrl(String url) {
