@@ -1,10 +1,15 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserResponse;
+import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.time.format.DateTimeFormatter;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -22,6 +27,19 @@ public interface UserMapper {
                 .fullName(user.getFullName())
                 .gender(user.getGender())
                 .avatar(user.getAvatar())
+                .build();
+    }
+
+    default UserResponse toUserResponse(User user) {
+        Account account = user.getAccount();
+        return UserResponse.builder()
+                .userId(user.getId())
+                .email(account.getEmail())
+                .isActive(account.getIsActive())
+                .fullName(user.getFullName())
+                .avatar(user.getAvatar())
+                .role(user.getRole())
+                .updatedAt(user.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                 .build();
     }
 }

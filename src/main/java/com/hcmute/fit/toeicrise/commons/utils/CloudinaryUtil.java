@@ -20,6 +20,10 @@ public class CloudinaryUtil {
         this.cloudinary = cloudinary;
     }
 
+    public String getDefaultAvatarUrl() {
+        return "https://res.cloudinary.com/toeic-rise/image/upload/v1761193814/default-avatar_hbm1bj.png";
+    }
+
     public String uploadFile(MultipartFile file) {
         try {
             Map data = cloudinary.uploader()
