@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryUtil cloudinaryUtil;
 
     @Override
     public ProfileResponse getUserProfileByEmail(String email) {
@@ -42,7 +44,7 @@ public class UserServiceImpl implements IUserService {
         user.setGender(request.getGender());
         userRepository.save(user);
     }
-  
+
     @Override
     public void createUser(UserCreateRequest request) {
         // Check for duplicate email
@@ -68,7 +70,10 @@ public class UserServiceImpl implements IUserService {
         user.setAccount(account);
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
-        // Avatar handling can be added here if needed
+        if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            cloudinaryUtil.validateImageFile(request.getAvatar());
+            user.setAvatar(cloudinaryUtil.uploadFile(request.getAvatar()));
+        }
 
         // Link the User entity to the Account
         account.setUser(user);
