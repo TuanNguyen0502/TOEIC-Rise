@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.IAccountService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import jakarta.validation.Valid;
@@ -24,6 +25,12 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> changeUserStatus(@PathVariable("id") Long accountId) {
         accountService.changeAccountStatus(accountId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable("id") Long accountId, @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+        userService.updateUser(accountId, userUpdateRequest);
         return ResponseEntity.ok().build();
     }
 }

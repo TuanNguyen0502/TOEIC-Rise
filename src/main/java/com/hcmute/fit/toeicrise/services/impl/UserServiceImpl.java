@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
@@ -48,13 +49,11 @@ public class UserServiceImpl implements IUserService {
     @Override
     public void createUser(UserCreateRequest request) {
         // Check for duplicate email
-        Account existingAccount = accountRepository.findByEmail(request.getEmail()).orElse(null);
-        if (existingAccount != null) {
+        if (isDuplicateEmail(request.getEmail())) {
             throw new AppException(ErrorCode.DUPLICATE_EMAIL);
         }
-
         // Validate password and confirm password match
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
+        if (isValidPassword(request.getPassword(), request.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
 
@@ -73,10 +72,45 @@ public class UserServiceImpl implements IUserService {
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
             cloudinaryUtil.validateImageFile(request.getAvatar());
             user.setAvatar(cloudinaryUtil.uploadFile(request.getAvatar()));
+        } else {
+            user.setAvatar(cloudinaryUtil.getDefaultAvatarUrl());
         }
 
         // Link the User entity to the Account
         account.setUser(user);
         accountRepository.save(account);
+    }
+
+    @Override
+    public void updateUser(Long id, UserUpdateRequest request) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
+        User user = account.getUser();
+
+        // Validate password and confirm password match
+        if (isValidPassword(request.getPassword(), request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        account.setPassword(passwordEncoder.encode(request.getPassword()));
+        account.setIsActive(request.isActive());
+        user.setRole(roleRepository.findByName(request.getRole()));
+        user.setFullName(request.getFullName());
+        user.setGender(request.getGender());
+        if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            cloudinaryUtil.validateImageFile(request.getAvatar());
+            user.setAvatar(user.getAvatar().equals(cloudinaryUtil.getDefaultAvatarUrl())
+                    ? cloudinaryUtil.uploadFile(request.getAvatar())
+                    : cloudinaryUtil.updateFile(request.getAvatar(), user.getAvatar()));
+        }
+        accountRepository.save(account);
+    }
+
+    private boolean isValidPassword(String password, String confirmPassword) {
+        return password.equals(confirmPassword);
+    }
+
+    private boolean isDuplicateEmail(String email) {
+        return accountRepository.findByEmail(email).isPresent();
     }
 }

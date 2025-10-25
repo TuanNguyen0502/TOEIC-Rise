@@ -4,7 +4,7 @@ public class MessageConstant {
     public static final String INVALID_EMAIL = "Invalid email! Please enter a valid email address.";
     public static final String INVALID_PASSWORD = "Invalid password! Password must be 8-20 characters long, contain at least one digit, one lowercase letter, one uppercase letter, one special character from .@#$%^&+=, and have no whitespace.";
     public static final String INVALID_OTP = "Invalid OTP! OTP must be exactly 6 digits (0-9).";
-    public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";    
+    public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";
     // Profile messages
     public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
     public static final String PROFILE_FULLNAME_NOT_BLANK = "Full name must not be blank.";
@@ -56,4 +56,5 @@ public class MessageConstant {
     public static final String GENDER_NOT_NULL = "Gender must not be null.";
     public static final String AVATAR_INVALID_SIZE = "Avatar size must not exceed 2MB.";
     public static final String ROLE_NOT_NULL = "Role must not be null.";
+    public static final String IS_ACTIVE_NOT_NULL = "isActive must not be null.";
 }
