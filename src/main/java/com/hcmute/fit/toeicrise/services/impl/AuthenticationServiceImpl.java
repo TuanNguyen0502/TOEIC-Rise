@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.responses.CurrentUserResponse;
