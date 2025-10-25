@@ -79,49 +79,19 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     public void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request) {
         QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+        Part part = questionGroup.getPart();
 
-        // Validate audio file
-        validateAudioFileForPart(questionGroup.getPart(), request.getAudio(), request.getAudioUrl());
-
-        // Validate image file
-        validateImageFileForPart(questionGroup.getPart(), request.getImage(), request.getImageUrl(), questionGroup.getImageUrl());
-
-        // Validate passage
-        validatePassageForPart(questionGroup.getPart(), request.getPassage());
+        // Validate
+        validateAudioForPart(part, request.getAudio(), request.getAudioUrl());
+        validateImageForPart(part, request.getImage(), request.getImageUrl());
+        validatePassageForPart(part, request.getPassage());
 
         // Update question group
         // Handle audio file
-        if (request.getAudio() != null) {
-            String audioUrl;
-            // Update existing audio
-            if (questionGroup.getAudioUrl() != null && cloudinaryUtil.isCloudinaryUrl(questionGroup.getAudioUrl())) {
-                // Update audio file in Cloudinary
-                audioUrl = cloudinaryUtil.updateFile(request.getAudio(), questionGroup.getAudioUrl());
-            } else {
-                // Upload new audio file to Cloudinary
-                audioUrl = cloudinaryUtil.uploadFile(request.getAudio());
-            }
-            questionGroup.setAudioUrl(audioUrl);
-        } else if (request.getAudioUrl() != null && !request.getAudioUrl().isBlank()) {
-            // Set audio URL directly if provided
-            questionGroup.setAudioUrl(request.getAudioUrl());
-        }
-        // Handle image file
-        if (request.getImage() != null) {
-            String imageUrl;
-            // Update existing image
-            if (questionGroup.getImageUrl() != null && cloudinaryUtil.isCloudinaryUrl(questionGroup.getImageUrl())) {
-                // Update image file in Cloudinary
-                imageUrl = cloudinaryUtil.updateFile(request.getImage(), questionGroup.getImageUrl());
-            } else {
-                // Upload new image file to Cloudinary
-                imageUrl = cloudinaryUtil.uploadFile(request.getImage());
-            }
-            questionGroup.setImageUrl(imageUrl);
-        } else if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
-            // Set image URL directly if provided
-            questionGroup.setImageUrl(request.getImageUrl());
-        }
+        questionGroup.setAudioUrl(processMediaFile(
+                request.getAudio(), request.getAudioUrl(), questionGroup.getAudioUrl()));
+        questionGroup.setImageUrl(processMediaFile(
+                request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
         questionGroup.setTranscript(request.getTranscript());
         questionGroupRepository.save(questionGroup);
@@ -132,29 +102,43 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return questionGroupRepository.findById(questionGroupId).orElse(null);
     }
 
-    private void validateAudioFileForPart(Part part, MultipartFile audio, String audioUrl) {
-        if (isListeningPart(part)) {
-            if (audio == null && (audioUrl == null || audioUrl.isBlank())) {
-                throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file is required for listening parts.");
-            } else if (audio != null && !cloudinaryUtil.isAudioFileValid(audio)) {
-                throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio file format.");
-            }
-        } else if (!isListeningPart(part) && audio != null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file should not be provided for non-listening parts.");
+    private void validateAudioForPart(Part part, MultipartFile audio, String audioUrl) {
+        boolean isListening = isListeningPart(part);
+        boolean hasAudioFile = audio != null && !audio.isEmpty();
+        boolean hasAudioUrl = audioUrl != null && !audioUrl.isBlank();
+
+        // Non-listening parts should not have audio
+        if (!isListening && (hasAudioFile || hasAudioUrl)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Audio should not be provided for non-listening parts.");
         }
+        // Listening parts require audio
+        if (isListening && !hasAudioFile && !hasAudioUrl) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Audio is required for listening parts.");
+        }
+        // Validate audio file and URL
+        if (hasAudioFile) cloudinaryUtil.validateAudioFile(audio);
+        if (hasAudioUrl) cloudinaryUtil.validateAudioURL(audioUrl);
     }
 
-    private void validateImageFileForPart(Part part, MultipartFile image, String imageUrl, String oldImageUrl) {
-        if (!isListeningPart(part) && image != null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Image file should not be provided for non-listening parts.");
+    private void validateImageForPart(Part part, MultipartFile image, String imageUrl) {
+        boolean isListening = isListeningPart(part);
+        boolean isPart1 = isPart1(part);
+        boolean hasImageFile = image != null && !image.isEmpty();
+        boolean hasImageUrl = imageUrl != null && !imageUrl.isBlank();
+
+        // Non-listening parts should not have images
+        if (!isListening && (hasImageFile || hasImageUrl)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Image should not be provided for non-listening parts.");
         }
-        if (oldImageUrl != null && (image == null && (imageUrl == null || imageUrl.isBlank()))) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Image file is required.");
+        // Part 1 requires an image
+        if (isPart1 && !hasImageFile && !hasImageUrl) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for part 1.");
         }
-        if (image != null && !cloudinaryUtil.isImageFileValid(image)) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image file format.");
-        }
+        // Validate image file and URL
+        if (hasImageFile) cloudinaryUtil.validateImageFile(image);
+        if (hasImageUrl) cloudinaryUtil.validateImageURL(imageUrl);
     }
+ 
 
     private void validatePassageForPart(Part part, String passage) {
         if (passage == null || passage.isBlank()) {
@@ -171,5 +155,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 part.getName().contains("2") ||
                 part.getName().contains("3") ||
                 part.getName().contains("4");
+    }
+
+    private boolean isPart1(Part part) {
+        return part.getName().contains("1");
     }
 }

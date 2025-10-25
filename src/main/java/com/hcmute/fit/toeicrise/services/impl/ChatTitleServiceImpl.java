@@ -10,7 +10,6 @@ import com.hcmute.fit.toeicrise.models.mappers.ChatTitleMapper;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.repositories.ChatTitleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -26,7 +25,6 @@ public class ChatTitleServiceImpl implements IChatTitleService {
     private final ChatTitleRepository chatTitleRepository;
     private final ChatMemoryRepository chatMemoryRepository;
     private final UserRepository userRepository;
-    private final IChatService chatService;
     private final ChatTitleMapper chatTitleMapper;
 
     @Override
@@ -85,7 +83,7 @@ public class ChatTitleServiceImpl implements IChatTitleService {
         ChatTitle chatTitle = chatTitleRepository.findByConversationIdAndUser_Id(conversationId, user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Chat title"));
         chatTitleRepository.delete(chatTitle);
-        chatService.deleteConversation(conversationId);
+        chatMemoryRepository.deleteByConversationId(conversationId);
     }
 
     @Override
