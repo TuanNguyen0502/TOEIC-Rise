@@ -4,18 +4,28 @@ import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
+import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.UserMapper;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
+import com.hcmute.fit.toeicrise.repositories.specifications.UserSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +35,29 @@ public class UserServiceImpl implements IUserService {
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryUtil cloudinaryUtil;
+    private final UserMapper userMapper;
+    private final PageResponseMapper pageResponseMapper;
+
+    @Override
+    public PageResponse getAllUsers(String email, Boolean isActive, ERole role, int page, int size, String sortBy, String direction) {
+        Specification<User> specification = (_, _, cb) -> cb.conjunction();
+        if (email != null && !email.isEmpty()) {
+            specification = specification.and(UserSpecification.emailContains(email));
+        }
+        if (isActive != null) {
+            specification = specification.and(UserSpecification.isActiveEquals(isActive));
+        }
+        if (role != null) {
+            specification = specification.and(UserSpecification.hasRole(role));
+        }
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<UserResponse> userResponses = userRepository.findAll(specification, pageable).map(userMapper::toUserResponse);
+        return pageResponseMapper.toPageResponse(userResponses);
+    }
 
     @Override
     public ProfileResponse getUserProfileByEmail(String email) {
@@ -82,10 +112,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void updateUser(Long id, UserUpdateRequest request) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
-        User user = account.getUser();
+    public void updateUser(Long userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        Account account = user.getAccount();
 
         // Validate password and confirm password match
         if (isValidPassword(request.getPassword(), request.getConfirmPassword())) {
@@ -104,6 +134,14 @@ public class UserServiceImpl implements IUserService {
                     : cloudinaryUtil.updateFile(request.getAvatar(), user.getAvatar()));
         }
         accountRepository.save(account);
+    }
+
+    @Override
+    public void changeAccountStatus(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        user.getAccount().setIsActive(!user.getAccount().getIsActive());
+        userRepository.save(user);
     }
 
     private boolean isValidPassword(String password, String confirmPassword) {
