@@ -5,6 +5,8 @@ import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,6 +48,15 @@ public class GlobalExceptionHandler {
         } else {
             return buildResponseEntity(ErrorCode.VALIDATION_ERROR, request.getRequestURI(), ErrorCode.VALIDATION_ERROR.getMessage());
         }
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<ExceptionResponse> handleConstraintViolation(ConstraintViolationException exception, HttpServletRequest request) {
+        Map<String, String> messages = new HashMap<>();
+        for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
+            messages.putIfAbsent(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
+        }
+        return buildResponseEntity(ErrorCode.VALIDATION_ERROR, request.getRequestURI(), messages);
     }
 
     private ResponseEntity<ExceptionResponse> buildResponseEntity(ErrorCode errorCode, String path, Object message) {

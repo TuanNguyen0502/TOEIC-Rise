@@ -1,10 +1,13 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
@@ -37,5 +40,13 @@ public class QuestionServiceImpl implements IQuestionService {
                 .stream()
                 .map(questionMapper::toQuestionResponse)
                 .toList();
+    }
+
+    @Override
+    public void updateQuestion(QuestionRequest questionRequest) {
+        Question question = questionRepository.findByIdAndQuestionGroup_Id(questionRequest.getId(),
+                questionRequest.getQuestionGroupId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+        question = questionMapper.toEntity(questionRequest, question);
+        questionRepository.save(question);
     }
 }

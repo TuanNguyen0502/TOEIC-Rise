@@ -127,6 +127,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         questionGroupRepository.save(questionGroup);
     }
 
+    @Override
+    public QuestionGroup getQuestionGroup(Long questionGroupId) {
+        return questionGroupRepository.findById(questionGroupId).orElse(null);
+    }
+
     private void validateAudioFileForPart(Part part, MultipartFile audio, String audioUrl) {
         if (isListeningPart(part)) {
             if (audio == null && (audioUrl == null || audioUrl.isBlank())) {
