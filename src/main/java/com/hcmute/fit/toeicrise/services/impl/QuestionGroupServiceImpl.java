@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
@@ -125,7 +126,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Audio is required for listening parts.");
         }
         // Validate audio file and URL
-        if (hasAudioFile) cloudinaryUtil.validateAudioFile(audio);
+        if (hasAudioFile) {
+            if (audio.getSize() > Constant.QUESTION_GROUP_AUDIO_MAX_SIZE) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file size exceeds the maximum limit.");
+            }
+            cloudinaryUtil.validateAudioFile(audio);
+        }
         if (hasAudioUrl) cloudinaryUtil.validateAudioURL(audioUrl);
     }
 
@@ -144,7 +150,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for part 1.");
         }
         // Validate image file and URL
-        if (hasImageFile) cloudinaryUtil.validateImageFile(image);
+        if (hasImageFile) {
+            if (image.getSize() > Constant.QUESTION_GROUP_IMAGE_MAX_SIZE) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Image file size exceeds the maximum limit.");
+            }
+            cloudinaryUtil.validateImageFile(image);
+        }
         if (hasImageUrl) cloudinaryUtil.validateImageURL(imageUrl);
     }
 
