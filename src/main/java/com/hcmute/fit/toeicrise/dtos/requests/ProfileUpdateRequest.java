@@ -6,7 +6,6 @@ import com.hcmute.fit.toeicrise.models.enums.EGender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +21,5 @@ public class ProfileUpdateRequest {
     @NotNull(message = MessageConstant.PROFILE_GENDER_NOT_NULL)
     private EGender gender;
 
-    @Size(max = Constant.PROFILE_AVATAR_MAX_SIZE, message = MessageConstant.PROFILE_AVATAR_SIZE_EXCEEDED)
     private MultipartFile avatar;
 }

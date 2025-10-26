@@ -9,7 +9,6 @@ public class MessageConstant {
     public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
     public static final String PROFILE_FULLNAME_NOT_BLANK = "Full name must not be blank.";
     public static final String PROFILE_FULLNAME_INVALID = "Full name can only contain letters and spaces.";
-    public static final String PROFILE_AVATAR_SIZE_EXCEEDED = "Avatar file size must not exceed 2MB.";
     public static final String PROFILE_GENDER_NOT_NULL = "Gender must not be null.";
     // Page messages
     public static final String INVALID_INPUT_DATA = "Invalid input data";

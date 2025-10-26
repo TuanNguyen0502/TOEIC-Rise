@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
@@ -72,6 +73,10 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         // Update avatar if provided
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            if (request.getAvatar().getSize() > Constant.AVATAR_MAX_SIZE) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
+            cloudinaryUtil.validateImageFile(request.getAvatar());
             // Check if the current avatar is the default one
             String avatarUrl = cloudinaryUtil.getDefaultAvatarUrl().equals(user.getAvatar()) // is default avatar
                     ? cloudinaryUtil.uploadFile(request.getAvatar()) // upload new avatar
