@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateUserProfile(@Valid @RequestBody ProfileUpdateRequest profileUpdateRequest) {
+    public ResponseEntity<?> updateUserProfile(@Valid @ModelAttribute ProfileUpdateRequest profileUpdateRequest) {
         String email = SecurityUtils.getCurrentUser();
         userService.updateUserProfile(email, profileUpdateRequest);
         return ResponseEntity.ok("Profile updated successfully");
