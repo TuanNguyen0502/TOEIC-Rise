@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserResponse;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
@@ -38,7 +39,23 @@ public interface UserMapper {
                 .isActive(account.getIsActive())
                 .fullName(user.getFullName())
                 .avatar(user.getAvatar())
-                .role(user.getRole())
+                .role(user.getRole().getName())
+                .updatedAt(user.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .build();
+    }
+
+    default UserDetailResponse toUserDetailResponse(User user) {
+        Account account = user.getAccount();
+        return UserDetailResponse.builder()
+                .userId(user.getId())
+                .email(account.getEmail())
+                .authProvider(account.getAuthProvider())
+                .isActive(account.getIsActive())
+                .fullName(user.getFullName())
+                .gender(user.getGender())
+                .avatar(user.getAvatar())
+                .role(user.getRole().getName())
+                .createdAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                 .updatedAt(user.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                 .build();
     }

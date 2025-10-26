@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
@@ -57,6 +58,13 @@ public class UserServiceImpl implements IUserService {
 
         Page<UserResponse> userResponses = userRepository.findAll(specification, pageable).map(userMapper::toUserResponse);
         return pageResponseMapper.toPageResponse(userResponses);
+    }
+
+    @Override
+    public UserDetailResponse getUserDetailById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        return userMapper.toUserDetailResponse(user);
     }
 
     @Override
