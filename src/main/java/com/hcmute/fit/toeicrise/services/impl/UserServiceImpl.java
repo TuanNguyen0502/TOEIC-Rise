@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
@@ -108,6 +109,9 @@ public class UserServiceImpl implements IUserService {
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            if (request.getAvatar().getSize() > Constant.AVATAR_MAX_SIZE) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
             cloudinaryUtil.validateImageFile(request.getAvatar());
             user.setAvatar(cloudinaryUtil.uploadFile(request.getAvatar()));
         } else {
@@ -136,6 +140,9 @@ public class UserServiceImpl implements IUserService {
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            if (request.getAvatar().getSize() > Constant.AVATAR_MAX_SIZE) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
             cloudinaryUtil.validateImageFile(request.getAvatar());
             user.setAvatar(user.getAvatar().equals(cloudinaryUtil.getDefaultAvatarUrl())
                     ? cloudinaryUtil.uploadFile(request.getAvatar())

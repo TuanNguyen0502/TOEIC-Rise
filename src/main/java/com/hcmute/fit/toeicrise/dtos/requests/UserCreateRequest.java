@@ -35,7 +35,6 @@ public class UserCreateRequest {
     @NotNull(message = MessageConstant.GENDER_NOT_NULL)
     private EGender gender;
 
-    @Size(max = Constant.AVATAR_MAX_SIZE, message = MessageConstant.AVATAR_INVALID_SIZE)
     private MultipartFile avatar;
 
     @NotNull(message = MessageConstant.ROLE_NOT_NULL)

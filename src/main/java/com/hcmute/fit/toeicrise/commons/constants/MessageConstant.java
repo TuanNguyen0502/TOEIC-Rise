@@ -54,7 +54,6 @@ public class MessageConstant {
     public static final String FULLNAME_NOT_NULL = "Full name must not be null.";
     public static final String FULLNAME_INVALID = "Full name can only contain letters and spaces.";
     public static final String GENDER_NOT_NULL = "Gender must not be null.";
-    public static final String AVATAR_INVALID_SIZE = "Avatar size must not exceed 2MB.";
     public static final String ROLE_NOT_NULL = "Role must not be null.";
     public static final String IS_ACTIVE_NOT_NULL = "isActive must not be null.";
 }
