@@ -102,6 +102,20 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return questionGroupRepository.findById(questionGroupId).orElse(null);
     }
 
+    private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
+        boolean hasFile = newFile != null && !newFile.isEmpty();
+        boolean hasUrl = newUrl != null && !newUrl.isBlank();
+
+        if (hasFile) {
+            // If there's an old file in Cloudinary, update it
+            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl)) {
+                return cloudinaryUtil.updateFile(newFile, oldUrl);
+            }
+            return cloudinaryUtil.uploadFile(newFile);
+        }
+        return hasUrl ? newUrl : oldUrl;
+    }
+
     private void validateAudioForPart(Part part, MultipartFile audio, String audioUrl) {
         boolean isListening = isListeningPart(part);
         boolean hasAudioFile = audio != null && !audio.isEmpty();
