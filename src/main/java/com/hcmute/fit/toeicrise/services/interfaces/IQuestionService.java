@@ -13,4 +13,5 @@ public interface IQuestionService {
     Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
     List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId);
     void updateQuestion(QuestionRequest questionRequest);
+    void deleteQuestionTagsByQuestionId(Long questionId);
 }

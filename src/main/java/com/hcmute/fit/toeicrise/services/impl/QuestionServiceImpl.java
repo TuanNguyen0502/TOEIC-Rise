@@ -11,8 +11,10 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
+import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.List;
 public class QuestionServiceImpl implements IQuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
+    private final ITagService tagService;
 
     @Override
     public Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags) {
@@ -36,17 +39,31 @@ public class QuestionServiceImpl implements IQuestionService {
   
     @Override
     public List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId) {
-        return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
+         return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
                 .stream()
                 .map(questionMapper::toQuestionResponse)
                 .toList();
     }
 
+    @Transactional
     @Override
     public void updateQuestion(QuestionRequest questionRequest) {
         Question question = questionRepository.findByIdAndQuestionGroup_Id(questionRequest.getId(),
                 questionRequest.getQuestionGroupId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+        deleteQuestionTagsByQuestionId(questionRequest.getId());
+        List<Tag> tags = tagService.getTagsFromString(questionRequest.getTags());
         question = questionMapper.toEntity(questionRequest, question);
+        question.setTags(tags);
         questionRepository.save(question);
+    }
+
+    @Transactional
+    @Override
+    public void deleteQuestionTagsByQuestionId(Long questionId) {
+        try {
+            questionRepository.deleteTagsByQuestionId(questionId);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.DATABASE_ERROR);
+        }
     }
 }
