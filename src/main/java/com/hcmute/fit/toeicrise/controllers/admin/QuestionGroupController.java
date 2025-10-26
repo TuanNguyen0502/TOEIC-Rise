@@ -12,7 +12,7 @@ public class QuestionGroupController {
     private final IQuestionGroupService questionGroupService;
 
     @PutMapping("/{id}")
-    public void updateQuestionGroup(@PathVariable Long id, @RequestBody QuestionGroupUpdateRequest request) {
+    public void updateQuestionGroup(@PathVariable Long id, @ModelAttribute QuestionGroupUpdateRequest request) {
         questionGroupService.updateQuestionGroup(id, request);
     }
 }

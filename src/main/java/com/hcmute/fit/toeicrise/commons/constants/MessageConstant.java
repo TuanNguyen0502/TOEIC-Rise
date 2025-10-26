@@ -36,8 +36,6 @@ public class MessageConstant {
     // Question Group messages
     public static final String QUESTION_GROUP_TRANSCRIPT_NOT_BLANK = "Question group transcript must not be blank.";
     public static final String QUESTION_GROUP_TRANSCRIPT_NOT_NULL = "Question group transcript must not be null.";
-    public static final String QUESTION_GROUP_AUDIO_SIZE_EXCEEDED = "Question group audio size must not exceed 10MB.";
-    public static final String QUESTION_GROUP_IMAGE_SIZE_EXCEEDED = "Question group image size must not exceed 5MB.";
     public static final String QUESTION_GROUP_AUDIO_URL_INVALID = "Question group audio URL is invalid.";
     public static final String QUESTION_GROUP_IMAGE_URL_INVALID = "Question group image URL is invalid.";
     public static final String QUESTION_GROUP_AUDIO_URL_FORMAT_INVALID = "Question group audio URL format is invalid.";
