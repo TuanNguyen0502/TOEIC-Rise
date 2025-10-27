@@ -129,8 +129,6 @@ public class UserServiceImpl implements IUserService {
             }
             cloudinaryUtil.validateImageFile(request.getAvatar());
             user.setAvatar(cloudinaryUtil.uploadFile(request.getAvatar()));
-        } else {
-            user.setAvatar(cloudinaryUtil.getDefaultAvatarUrl());
         }
 
         // Link the User entity to the Account
@@ -159,7 +157,7 @@ public class UserServiceImpl implements IUserService {
                 throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
             }
             cloudinaryUtil.validateImageFile(request.getAvatar());
-            user.setAvatar(user.getAvatar().equals(cloudinaryUtil.getDefaultAvatarUrl())
+            user.setAvatar(user.getAvatar() == null
                     ? cloudinaryUtil.uploadFile(request.getAvatar())
                     : cloudinaryUtil.updateFile(request.getAvatar(), user.getAvatar()));
         }
