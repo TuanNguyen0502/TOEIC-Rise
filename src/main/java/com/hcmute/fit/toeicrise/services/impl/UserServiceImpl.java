@@ -89,11 +89,9 @@ public class UserServiceImpl implements IUserService {
                 throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
             }
             cloudinaryUtil.validateImageFile(request.getAvatar());
-            // Check if the current avatar is the default one
-            String avatarUrl = cloudinaryUtil.getDefaultAvatarUrl().equals(user.getAvatar()) // is default avatar
+            user.setAvatar(user.getAvatar() == null
                     ? cloudinaryUtil.uploadFile(request.getAvatar()) // upload new avatar
-                    : cloudinaryUtil.updateFile(request.getAvatar(), user.getAvatar()); // upload new avatar and delete old one
-            user.setAvatar(avatarUrl);
+                    : cloudinaryUtil.updateFile(request.getAvatar(), user.getAvatar())); // upload new avatar and delete old one);
         }
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
