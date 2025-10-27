@@ -16,7 +16,7 @@ public class UserController {
     private final IAuthenticationService authenticationService;
     private final IUserService userService;
 
-    @PostMapping("/change-password")
+    @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
         authenticationService.changePassword(userChangePasswordRequest, SecurityUtils.getCurrentUser());
         return ResponseEntity.ok("Password updated successfully");
