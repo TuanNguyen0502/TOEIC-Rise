@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
@@ -61,6 +62,13 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public UserDetailResponse getUserDetailById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        return userMapper.toUserDetailResponse(user);
+    }
+
+    @Override
     public ProfileResponse getUserProfileByEmail(String email) {
         return userRepository.findByAccount_Email(email)
                 .map(user -> userMapper.toProfileResponse(email, user))
@@ -112,6 +120,9 @@ public class UserServiceImpl implements IUserService {
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            if (request.getAvatar().getSize() > Constant.AVATAR_MAX_SIZE) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
             cloudinaryUtil.validateImageFile(request.getAvatar());
             user.setAvatar(cloudinaryUtil.uploadFile(request.getAvatar()));
         } else {
@@ -140,6 +151,9 @@ public class UserServiceImpl implements IUserService {
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            if (request.getAvatar().getSize() > Constant.AVATAR_MAX_SIZE) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
             cloudinaryUtil.validateImageFile(request.getAvatar());
             user.setAvatar(user.getAvatar().equals(cloudinaryUtil.getDefaultAvatarUrl())
                     ? cloudinaryUtil.uploadFile(request.getAvatar())
