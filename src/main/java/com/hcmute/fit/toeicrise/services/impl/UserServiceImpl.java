@@ -85,7 +85,7 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         // Update avatar if provided
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
-            if (request.getAvatar().getSize() > Constant.AVATAR_MAX_SIZE) {
+            if (request.getAvatar().getSize() > Constant.PROFILE_AVATAR_MAX_SIZE) {
                 throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
             }
             cloudinaryUtil.validateImageFile(request.getAvatar());

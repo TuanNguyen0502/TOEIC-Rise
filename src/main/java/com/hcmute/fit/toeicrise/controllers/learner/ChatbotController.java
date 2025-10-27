@@ -68,7 +68,7 @@ public class ChatbotController {
     }
 
     @PostMapping(path = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChatbotResponse> chat(@RequestBody ChatRequest chatRequest) {
+    public Flux<ChatbotResponse> chat(@ModelAttribute ChatRequest chatRequest) {
         if (chatRequest.getImage() == null || chatRequest.getImage().isEmpty()) {
             return chatService.chat(chatRequest).delayElements(Duration.ofMillis(50));
         } else {
