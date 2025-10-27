@@ -98,6 +98,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         questionGroupRepository.save(questionGroup);
     }
 
+    @Override
+    public QuestionGroup getQuestionGroup(Long questionGroupId) {
+        return questionGroupRepository.findById(questionGroupId).orElse(null);
+    }
+
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
         boolean hasUrl = newUrl != null && !newUrl.isBlank();
@@ -158,6 +163,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         if (hasImageUrl) cloudinaryUtil.validateImageURL(imageUrl);
     }
+ 
 
     private void validatePassageForPart(Part part, String passage) {
         if (passage == null || passage.isBlank()) {
