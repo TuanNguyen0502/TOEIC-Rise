@@ -17,6 +17,6 @@ public class UserSpecification {
 
     public static Specification<User> hasRole(ERole role) {
         return (root, _, criteriaBuilder) ->
-                role == null ? null : criteriaBuilder.equal(root.get("role"), role);
+                role == null ? null : criteriaBuilder.equal(root.get("role").get("name"), role);
     }
 }
