@@ -5,6 +5,8 @@ import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -53,6 +55,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
     public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(Exception ex, HttpServletRequest request) {
         return buildResponseEntity(ErrorCode.FILE_SIZE_EXCEEDED, request.getRequestURI(), ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<ExceptionResponse> handleConstraintViolation(ConstraintViolationException exception, HttpServletRequest request) {
+        Map<String, String> messages = new HashMap<>();
+        for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
+            messages.putIfAbsent(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
+        }
+        return buildResponseEntity(ErrorCode.VALIDATION_ERROR, request.getRequestURI(), messages);
     }
 
     private ResponseEntity<ExceptionResponse> buildResponseEntity(ErrorCode errorCode, String path, Object message) {

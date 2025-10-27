@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
+import com.hcmute.fit.toeicrise.validators.annotations.QuestionGroupValidator;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@QuestionGroupValidator
 public class QuestionGroup extends BaseEntity {
     @Column(name = "audio_url", columnDefinition = "VARCHAR(255)")
     private String audioUrl;

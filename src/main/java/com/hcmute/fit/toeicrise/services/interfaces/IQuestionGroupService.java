@@ -18,4 +18,6 @@ public interface IQuestionGroupService {
 
     @Transactional
     void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request);
+
+    QuestionGroup getQuestionGroup(Long questionGroupId);
 }

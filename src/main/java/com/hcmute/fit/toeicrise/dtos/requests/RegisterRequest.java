@@ -8,17 +8,18 @@ import lombok.Data;
 
 @Data
 public class RegisterRequest {
-    @NotBlank(message = "Please enter your email!")
+    @NotBlank(message = MessageConstant.EMAIL_NOT_BLANK)
     @Pattern(regexp = Constant.EMAIL_PATTERN, message = MessageConstant.INVALID_EMAIL)
     private String email;
 
-    @NotBlank(message = "Please enter your password!")
+    @NotBlank(message = MessageConstant.PASSWORD_NOT_BLANK)
     @Pattern(regexp = Constant.PASSWORD_PATTERN, message = MessageConstant.INVALID_PASSWORD)
     private String password;
 
-    @NotBlank(message = "Please enter your confirm password!")
+    @NotBlank(message = MessageConstant.CONFIRM_PASSWORD_NOT_BLANK)
     private String confirmPassword;
 
     @NotBlank(message = "Please enter your full name!")
+    @Pattern(regexp = Constant.FULLNAME_PATTERN, message = MessageConstant.FULLNAME_INVALID)
     private String fullName;
 }

@@ -42,7 +42,7 @@ public enum ErrorCode {
     FILE_SIZE_EXCEEDED("File size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
     FILE_READ_ERROR("Can not read file", HttpStatus.NOT_IMPLEMENTED),
     OTP_SEND_FAILED("Failed to send OTP", HttpStatus.SERVICE_UNAVAILABLE),
-    JSON_CONVERT_ERROR("Error converting list to JSON", HttpStatus.INTERNAL_SERVER_ERROR),
+    JSON_CONVERT_ERROR("Error converting JSON", HttpStatus.INTERNAL_SERVER_ERROR),
     IMAGE_PROCESSING_ERROR("Error processing image", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // === 9. System & Uncategorized ===
