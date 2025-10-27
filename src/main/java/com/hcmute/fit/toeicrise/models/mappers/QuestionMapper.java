@@ -37,6 +37,7 @@ public interface QuestionMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "options", source = "options", qualifiedByName = "mapToList")
+    @Mapping(target = "tags", ignore = true)
     Question toEntity(QuestionRequest questionRequest, @MappingTarget Question question);
 
     @Named("mapToList")

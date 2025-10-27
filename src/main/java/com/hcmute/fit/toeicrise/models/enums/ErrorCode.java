@@ -39,6 +39,7 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT("The file format you sent is invalid", HttpStatus.NOT_IMPLEMENTED),
     MAIL_SEND_FAILED("Failed to send email", HttpStatus.SERVICE_UNAVAILABLE),
     IMAGE_SIZE_EXCEEDED("Image size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
+    FILE_SIZE_EXCEEDED("File size exceeds the limit", HttpStatus.NOT_IMPLEMENTED),
     FILE_READ_ERROR("Can not read file", HttpStatus.NOT_IMPLEMENTED),
     OTP_SEND_FAILED("Failed to send OTP", HttpStatus.SERVICE_UNAVAILABLE),
     JSON_CONVERT_ERROR("Error converting JSON", HttpStatus.INTERNAL_SERVER_ERROR),
