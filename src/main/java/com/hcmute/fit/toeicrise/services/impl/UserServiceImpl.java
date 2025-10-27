@@ -46,6 +46,10 @@ public class UserServiceImpl implements IUserService {
     public PageResponse getAllUsers(String email, Boolean isActive, ERole role, int page, int size, String sortBy, String direction) {
         Specification<User> specification = (_, _, cb) -> cb.conjunction();
         if (email != null && !email.isEmpty()) {
+            // Validate and add email filter
+            if (!email.matches(Constant.EMAIL_PATTERN)) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid email format");
+            }
             specification = specification.and(UserSpecification.emailContains(email));
         }
         if (isActive != null) {
