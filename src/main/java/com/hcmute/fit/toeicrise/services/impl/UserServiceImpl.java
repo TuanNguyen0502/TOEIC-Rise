@@ -105,7 +105,7 @@ public class UserServiceImpl implements IUserService {
             throw new AppException(ErrorCode.DUPLICATE_EMAIL);
         }
         // Validate password and confirm password match
-        if (isValidPassword(request.getPassword(), request.getConfirmPassword())) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
 
@@ -141,7 +141,7 @@ public class UserServiceImpl implements IUserService {
         Account account = user.getAccount();
 
         // Validate password and confirm password match
-        if (isValidPassword(request.getPassword(), request.getConfirmPassword())) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
 
@@ -168,10 +168,6 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         user.getAccount().setIsActive(!user.getAccount().getIsActive());
         userRepository.save(user);
-    }
-
-    private boolean isValidPassword(String password, String confirmPassword) {
-        return password.equals(confirmPassword);
     }
 
     private boolean isDuplicateEmail(String email) {
