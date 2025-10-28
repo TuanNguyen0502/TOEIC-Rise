@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.dtos.requests;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.Data;
 @Data
 public class RegisterRequest {
     @NotBlank(message = MessageConstant.EMAIL_NOT_BLANK)
-    @Pattern(regexp = Constant.EMAIL_PATTERN, message = MessageConstant.INVALID_EMAIL)
+    @Email(message = MessageConstant.INVALID_EMAIL)
     private String email;
 
     @NotBlank(message = MessageConstant.PASSWORD_NOT_BLANK)

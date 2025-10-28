@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @Builder
 public class UserCreateRequest {
-    @Pattern(regexp = Constant.EMAIL_PATTERN, message = MessageConstant.INVALID_EMAIL)
+    @Email(message = MessageConstant.INVALID_EMAIL)
     @NotNull(message = MessageConstant.EMAIL_NOT_NULL)
     @NotBlank(message = MessageConstant.EMAIL_NOT_BLANK)
     private String email;
