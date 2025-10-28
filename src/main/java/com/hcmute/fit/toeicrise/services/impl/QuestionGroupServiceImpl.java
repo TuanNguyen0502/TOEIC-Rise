@@ -163,13 +163,17 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         if (hasImageUrl) cloudinaryUtil.validateImageURL(imageUrl);
     }
- 
+
 
     private void validatePassageForPart(Part part, String passage) {
-        if (passage == null || passage.isBlank()) {
+        if (passage != null && !passage.isBlank()) {
             if (isListeningPart(part) || part.getName().contains("5")) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
             } else {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
+            }
+        } else {
+            if (part.getName().contains("6") || part.getName().contains("7")) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
             }
         }
