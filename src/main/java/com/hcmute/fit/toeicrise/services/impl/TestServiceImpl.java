@@ -14,6 +14,7 @@ import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -196,7 +197,10 @@ public class TestServiceImpl implements ITestService {
                 List<Tag> tags = tagService.getTagsFromString(dto.getTags());
                 questionService.createQuestion(dto, questionGroup, tags);
             }
-        } catch (Exception e) {
+        } catch (ConstraintViolationException e){
+            throw e;
+        }
+        catch (Exception e) {
             throw new AppException(ErrorCode.FILE_READ_ERROR);
         }
     }
