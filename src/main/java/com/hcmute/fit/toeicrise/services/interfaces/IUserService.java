@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UserResetPasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
@@ -20,6 +21,8 @@ public interface IUserService {
     void createUser(UserCreateRequest request);
 
     void updateUser(Long id, UserUpdateRequest request);
+
+    void resetPassword(Long userId, UserResetPasswordRequest request);
 
     void changeAccountStatus(Long userId);
 }
