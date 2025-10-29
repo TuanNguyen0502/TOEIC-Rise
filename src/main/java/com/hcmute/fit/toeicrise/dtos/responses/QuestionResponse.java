@@ -13,5 +13,6 @@ public class QuestionResponse {
     private String content;
     private List<String> options;
     private String correctOption;
+    private String explanation;
     private List<String> tags;
 }

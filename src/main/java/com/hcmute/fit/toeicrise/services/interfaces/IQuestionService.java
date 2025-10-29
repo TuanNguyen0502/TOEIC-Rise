@@ -14,4 +14,5 @@ public interface IQuestionService {
     List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId);
     void updateQuestion(QuestionRequest questionRequest);
     void deleteQuestionTagsByQuestionId(Long questionId);
+    QuestionResponse getQuestionById(Long questionId);
 }
