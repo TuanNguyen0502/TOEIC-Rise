@@ -100,7 +100,13 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     @Override
     public QuestionGroup getQuestionGroup(Long questionGroupId) {
-        return questionGroupRepository.findById(questionGroupId).orElse(null);
+        return questionGroupRepository.findById(questionGroupId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group"));
+    }
+
+    @Override
+    public QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId) {
+        List<QuestionResponse> questions = questionService.getQuestionsByQuestionGroupId(questionGroupId);
+        return questionGroupMapper.toResponse(getQuestionGroup(questionGroupId), questions);
     }
 
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {

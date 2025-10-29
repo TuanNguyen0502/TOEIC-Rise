@@ -66,4 +66,9 @@ public class QuestionServiceImpl implements IQuestionService {
             throw new AppException(ErrorCode.DATABASE_ERROR);
         }
     }
+
+    @Override
+    public QuestionResponse getQuestionById(Long questionId) {
+        return questionMapper.toQuestionResponse(questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question")));
+    }
 }

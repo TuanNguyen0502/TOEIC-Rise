@@ -18,4 +18,9 @@ public class QuestionController {
         questionService.updateQuestion(questionRequest);
         return ResponseEntity.ok("Update question updated successfully");
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getQuestionById(@PathVariable Long id) {
+        return ResponseEntity.ok(questionService.getQuestionById(id));
+    }
 }
