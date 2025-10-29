@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,5 +16,10 @@ public class QuestionGroupController {
     @PutMapping("/{id}")
     public void updateQuestionGroup(@PathVariable Long id, @Valid @ModelAttribute QuestionGroupUpdateRequest request) {
         questionGroupService.updateQuestionGroup(id, request);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getQuestionGroup(@PathVariable Long id) {
+        return ResponseEntity.ok(questionGroupService.getQuestionGroupResponse(id));
     }
 }
