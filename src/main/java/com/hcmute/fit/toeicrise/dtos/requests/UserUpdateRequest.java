@@ -14,16 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @Builder
 public class UserUpdateRequest {
-    @NotBlank(message = MessageConstant.PASSWORD_NOT_BLANK)
-    @NotNull(message = MessageConstant.PASSWORD_NOT_NULL)
-    @Pattern(regexp = Constant.PASSWORD_PATTERN, message = MessageConstant.INVALID_PASSWORD)
-    private String password;
-
-    @NotBlank(message = MessageConstant.CONFIRM_PASSWORD_NOT_BLANK)
-    @NotNull(message = MessageConstant.CONFIRM_PASSWORD_NOT_NULL)
-    @Pattern(regexp = Constant.PASSWORD_PATTERN, message = MessageConstant.INVALID_PASSWORD)
-    private String confirmPassword;
-
     @NotNull(message = MessageConstant.FULLNAME_NOT_NULL)
     @NotBlank(message = MessageConstant.FULLNAME_NOT_BLANK)
     @Pattern(regexp = Constant.FULLNAME_PATTERN, message = MessageConstant.FULLNAME_INVALID)

@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UserResetPasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
@@ -139,13 +140,6 @@ public class UserServiceImpl implements IUserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         Account account = user.getAccount();
-
-        // Validate password and confirm password match
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
-        }
-
-        account.setPassword(passwordEncoder.encode(request.getPassword()));
         account.setIsActive(request.isActive());
         user.setRole(roleRepository.findByName(request.getRole()));
         user.setFullName(request.getFullName());
@@ -159,6 +153,18 @@ public class UserServiceImpl implements IUserService {
                     ? cloudinaryUtil.uploadFile(request.getAvatar())
                     : cloudinaryUtil.updateFile(request.getAvatar(), user.getAvatar()));
         }
+        accountRepository.save(account);
+    }
+
+    @Override
+    public void resetPassword(Long userId, UserResetPasswordRequest request) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        Account account = user.getAccount();
+        account.setPassword(passwordEncoder.encode(request.getPassword()));
         accountRepository.save(account);
     }
 

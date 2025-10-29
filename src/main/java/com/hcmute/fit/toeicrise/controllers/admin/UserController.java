@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.UserResetPasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
@@ -47,6 +48,12 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable("id") Long userId, @Valid @ModelAttribute UserUpdateRequest userUpdateRequest) {
         userService.updateUser(userId, userUpdateRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/reset-password")
+    public ResponseEntity<?> resetUserPassword(@PathVariable("id") Long userId, @Valid @RequestBody UserResetPasswordRequest userResetPasswordRequest) {
+        userService.resetPassword(userId, userResetPasswordRequest);
         return ResponseEntity.ok().build();
     }
 }
