@@ -52,6 +52,11 @@ public class GlobalExceptionHandler {
         }
     }
 
+    @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
+    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(Exception ex, HttpServletRequest request) {
+        return buildResponseEntity(ErrorCode.FILE_SIZE_EXCEEDED, request.getRequestURI(), ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
+    }
+
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<ExceptionResponse> handleConstraintViolation(ConstraintViolationException exception, HttpServletRequest request) {
         Map<String, String> messages = new HashMap<>();
