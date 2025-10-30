@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
-    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, HttpServletRequest request) {
         return buildResponseEntity(ErrorCode.FILE_SIZE_EXCEEDED, request.getRequestURI(), ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
     }
 
@@ -64,11 +64,6 @@ public class GlobalExceptionHandler {
             messages.putIfAbsent(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
         }
         return buildResponseEntity(ErrorCode.VALIDATION_ERROR, request.getRequestURI(), messages);
-    }
-
-    @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
-    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException exception, HttpServletRequest request) {
-        return buildResponseEntity(ErrorCode.FILE_SIZE_EXCEEDED, request.getRequestURI(), ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
     }
 
     private ResponseEntity<ExceptionResponse> buildResponseEntity(ErrorCode errorCode, String path, Object message) {
