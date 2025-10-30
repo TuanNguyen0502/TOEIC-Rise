@@ -100,7 +100,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     @Override
     public QuestionGroup getQuestionGroup(Long questionGroupId) {
-        return questionGroupRepository.findById(questionGroupId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group"));
+        return questionGroupRepository.findById(questionGroupId).orElse(null);
     }
 
     @Override
