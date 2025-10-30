@@ -57,7 +57,7 @@ public class CloudinaryUtil {
     }
 
     public void validateImageURL(String imageUrl) {
-        if (isValidSuffixImage(imageUrl)) {
+        if (!isValidSuffixImage(imageUrl)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image file format.");
         }
     }
@@ -70,7 +70,7 @@ public class CloudinaryUtil {
     }
 
     public void validateAudioURL(String audioUrl) {
-        if (isValidSuffixAudio(audioUrl)) {
+        if (!isValidSuffixAudio(audioUrl)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio file format.");
         }
     }
