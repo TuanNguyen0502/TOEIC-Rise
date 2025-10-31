@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.validators.constraints;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionByPart;
 import jakarta.validation.ConstraintValidator;
@@ -15,8 +16,13 @@ public class QuestionByPartValidation implements ConstraintValidator<ValidQuesti
     @Override
     public boolean isValid(QuestionRequest value, ConstraintValidatorContext context) {
         QuestionGroup questionGroup = questionGroupService.getQuestionGroup(value.getQuestionGroupId());
-        boolean valid = true;
         context.disableDefaultConstraintViolation();
+        if (questionGroup == null) {
+            context.buildConstraintViolationWithTemplate("Question group not found")
+                    .addPropertyNode("question").addConstraintViolation();
+            return false;
+        }
+        boolean valid = true;
         switch ((int) questionGroup.getPart().getId().longValue()){
             case 3,4,5,7 -> {
                 if (value.getContent() == null || value.getContent().isEmpty()) {

@@ -48,23 +48,12 @@ public class QuestionServiceImpl implements IQuestionService {
     @Transactional
     @Override
     public void updateQuestion(QuestionRequest questionRequest) {
-        Question question = questionRepository.findByIdAndQuestionGroup_Id(questionRequest.getId(),
-                questionRequest.getQuestionGroupId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
-        deleteQuestionTagsByQuestionId(questionRequest.getId());
+        Question question = questionRepository.findById(questionRequest.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
         List<Tag> tags = tagService.getTagsFromString(questionRequest.getTags());
         question = questionMapper.toEntity(questionRequest, question);
         question.setTags(tags);
         questionRepository.save(question);
-    }
-
-    @Transactional
-    @Override
-    public void deleteQuestionTagsByQuestionId(Long questionId) {
-        try {
-            questionRepository.deleteTagsByQuestionId(questionId);
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.DATABASE_ERROR);
-        }
     }
 
     @Override
