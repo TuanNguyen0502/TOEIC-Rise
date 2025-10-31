@@ -50,10 +50,9 @@ public class QuestionServiceImpl implements IQuestionService {
     public void updateQuestion(QuestionRequest questionRequest) {
         Question question = questionRepository.findById(questionRequest.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
-        question.getTags().clear();
         List<Tag> tags = tagService.getTagsFromString(questionRequest.getTags());
         question = questionMapper.toEntity(questionRequest, question);
-        question.getTags().addAll(tags);
+        question.setTags(tags);
         questionRepository.save(question);
     }
 
