@@ -1,9 +1,9 @@
 package com.hcmute.fit.toeicrise.controllers;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
-import com.hcmute.fit.toeicrise.dtos.requests.*;
-import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.authentication.*;
+import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
@@ -115,7 +115,7 @@ public class AuthenticationController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
-        if (authorization == null||!authorization.startsWith("Bearer ")) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.TOKEN_INVALID);
         }
         String token = authorization.substring(7);

@@ -1,9 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.TitleRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;

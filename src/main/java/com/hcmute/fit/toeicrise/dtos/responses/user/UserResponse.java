@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.responses;
+package com.hcmute.fit.toeicrise.dtos.responses.user;
 
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 import lombok.Builder;

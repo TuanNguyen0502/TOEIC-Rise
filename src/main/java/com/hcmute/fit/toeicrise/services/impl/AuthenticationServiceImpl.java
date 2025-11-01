@@ -2,9 +2,10 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.*;
-import com.hcmute.fit.toeicrise.dtos.responses.CurrentUserResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.RefreshTokenResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.authentication.*;
+import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;

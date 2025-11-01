@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
-import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptResponse;
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.ChatbotRatingRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotRatingDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotRatingResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatbotRatingRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotRatingDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotRatingResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.ChatbotRating;
