@@ -18,5 +18,5 @@ public interface IQuestionService {
 
     QuestionResponse getQuestionById(Long questionId);
 
-    Question getCorrectOptionByQuestionId(Long questionId);
+    Question getQuestionEntityById(Long questionId);
 }

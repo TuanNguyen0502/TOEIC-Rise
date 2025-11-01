@@ -61,7 +61,7 @@ public class UserTestServiceImpl implements IUserTestService {
         int correctAnswers = 0;
 
         for (UserAnswerRequest answerRequest : answers) {
-            Question question = questionService.getCorrectOptionByQuestionId(answerRequest.getQuestionId());
+            Question question = questionService.getQuestionEntityById(answerRequest.getQuestionId());
             boolean isCorrect = answerRequest.getAnswer() != null && answerRequest.getAnswer().equals(question.getCorrectOption());
             if (isCorrect) correctAnswers++;
 
@@ -83,15 +83,27 @@ public class UserTestServiceImpl implements IUserTestService {
         int listeningCorrect = 0;
         int readingCorrect = 0;
 
+        // Group answers by questionGroupId
         Map<Long, List<UserAnswerRequest>> groupedByGroupId =
                 answers.stream().collect(Collectors.groupingBy(UserAnswerRequest::getQuestionGroupId));
+
+        // Process each group
         for (Map.Entry<Long, List<UserAnswerRequest>> entry : groupedByGroupId.entrySet()) {
             Long groupId = entry.getKey();
             List<UserAnswerRequest> groupAnswers = entry.getValue();
 
-            boolean isListeningPart = questionGroupService.isListeningQuestionGroup(groupId);
+            // Fetch question group
+            QuestionGroup questionGroup = questionGroupService.isListeningQuestionGroup(groupId);
+            boolean isListeningPart = questionGroupService.isListeningPart(questionGroup.getPart());
+
+            // Create a map of questionId to Question for quick lookup
+            Map<Long, Question> questionMap = questionGroup.getQuestions().stream()
+                    .collect(Collectors.toMap(Question::getId, q -> q));
+
+            // Evaluate each answer in the group
             for (UserAnswerRequest answerRequest : groupAnswers) {
-                Question question = questionService.getCorrectOptionByQuestionId(answerRequest.getQuestionId());
+                // Fetch the corresponding question
+                Question question = questionMap.get(answerRequest.getQuestionId());
                 boolean isCorrect = answerRequest.getAnswer() != null && answerRequest.getAnswer().equals(question.getCorrectOption());
                 if (isCorrect) {
                     correctAnswers++;

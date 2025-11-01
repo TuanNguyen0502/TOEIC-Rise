@@ -62,8 +62,7 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public Question getCorrectOptionByQuestionId(Long questionId) {
-        return questionRepository.findById(questionId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+    public Question getQuestionEntityById(Long questionId) {
+        return questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
     }
 }

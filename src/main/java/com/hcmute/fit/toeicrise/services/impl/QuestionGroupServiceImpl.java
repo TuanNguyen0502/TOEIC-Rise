@@ -110,10 +110,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
-    public boolean isListeningQuestionGroup(Long questionGroupId) {
-        QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
+    public QuestionGroup isListeningQuestionGroup(Long questionGroupId) {
+        return questionGroupRepository.findWithQuestionsById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
-        return isListeningPart(questionGroup.getPart());
     }
 
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
@@ -192,7 +191,8 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
     }
 
-    private boolean isListeningPart(Part part) {
+    @Override
+    public boolean isListeningPart(Part part) {
         return part.getName().contains("1") ||
                 part.getName().contains("2") ||
                 part.getName().contains("3") ||
