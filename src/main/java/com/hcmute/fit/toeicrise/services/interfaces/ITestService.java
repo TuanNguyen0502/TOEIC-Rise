@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
@@ -42,4 +43,6 @@ public interface ITestService {
     boolean isValidFile(MultipartFile file);
 
     PageResponse searchTestsByName(PageRequest request);
+
+    LearnerTestDetailResponse getLearnerTestDetailById(Long id);
 }

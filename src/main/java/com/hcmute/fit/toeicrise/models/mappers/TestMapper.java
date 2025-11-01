@@ -3,13 +3,16 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.*;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import org.mapstruct.*;
 import org.apache.poi.ss.usermodel.*;
 
-import java.util.List;
+import java.util.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PartMapper.class})
 public interface TestMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
@@ -18,6 +21,19 @@ public interface TestMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     TestDetailResponse toDetailResponse(Test test, @Context List<PartResponse> partResponses);
+
+    default LearnerTestDetailResponse toLearnerTestDetailResponse(List<Object[]> objects, @Context PartMapper partMapper) {
+        if (objects == null || objects.isEmpty()){
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND,"Test");
+        }
+        Object[] object = objects.getFirst();
+        return LearnerTestDetailResponse.builder()
+                .testId(((Number) object[0]).longValue())
+                .testName((String) object[1])
+                .numberOfLearnedTests(((Number) object[2]).longValue())
+                .learnerPartResponses(objects.stream().map(partMapper::mapToLearnerPartResponse).toList())
+                .build();
+    }
 
     @AfterMapping
     default void setPartResponses(@MappingTarget TestDetailResponse dto,
