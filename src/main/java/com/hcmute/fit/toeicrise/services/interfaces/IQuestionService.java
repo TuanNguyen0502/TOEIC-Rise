@@ -11,7 +11,12 @@ import java.util.List;
 
 public interface IQuestionService {
     Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
+
     List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId);
+
     void updateQuestion(QuestionRequest questionRequest);
+
     QuestionResponse getQuestionById(Long questionId);
+
+    Question getCorrectOptionByQuestionId(Long questionId);
 }

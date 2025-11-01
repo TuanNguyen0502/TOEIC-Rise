@@ -53,7 +53,7 @@ public class MessageConstant {
     public static final String GENDER_NOT_NULL = "Gender must not be null.";
     public static final String ROLE_NOT_NULL = "Role must not be null.";
     public static final String IS_ACTIVE_NOT_NULL = "isActive must not be null.";
-//    Question related messages
+    // Question related messages
     public static final String QUESTION_ID_NOT_NULL = "Question must not be null.";
     public static final String QUESTION_GROUP_ID_NOT_NULL = "Question group must not be null.";
     public static final String CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
@@ -62,4 +62,8 @@ public class MessageConstant {
     public static final String EXPLAIN_NOT_NULL = "Explain must not be null.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
     public static final String TAG_NOT_EMPTY = "Tag must not be empty.";
+    // User Test related messages
+    public static final String TEST_ID_NOT_NULL = "Test ID must not be null.";
+    public static final String TIME_SPENT_NOT_NULL = "Time spent must not be null.";
+    public static final String ANSWERS_NOT_NULL = "Answers must not be null.";
 }
