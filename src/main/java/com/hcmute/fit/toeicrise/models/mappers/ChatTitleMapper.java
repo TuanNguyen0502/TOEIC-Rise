@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
-import com.hcmute.fit.toeicrise.dtos.responses.ChatTitleResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatTitleResponse;
 import com.hcmute.fit.toeicrise.models.entities.ChatTitle;
 import org.mapstruct.Mapper;
 

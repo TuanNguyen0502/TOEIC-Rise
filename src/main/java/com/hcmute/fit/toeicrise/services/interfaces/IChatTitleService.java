@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.ChatTitleUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatTitleResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatTitleUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatTitleResponse;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;

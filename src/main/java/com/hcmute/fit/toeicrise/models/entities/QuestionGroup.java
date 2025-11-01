@@ -4,6 +4,9 @@ import com.hcmute.fit.toeicrise.validators.annotations.QuestionGroupValidator;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "question_groups")
 @EqualsAndHashCode(callSuper = true)
@@ -35,4 +38,8 @@ public class QuestionGroup extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "part_id")
     private Part part;
+
+    @OneToMany(mappedBy = "questionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Question> questions = new ArrayList<>();
 }

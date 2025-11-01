@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.ChatbotRatingRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotRatingDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatbotRatingRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotRatingDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.models.enums.EChatbotRating;
 
