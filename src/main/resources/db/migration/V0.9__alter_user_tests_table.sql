@@ -6,7 +6,6 @@ CREATE TABLE user_tests
     id                        BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id                   BIGINT NOT NULL,
     test_id                   BIGINT NOT NULL,
-    mode                      ENUM('PRACTICE', 'EXAM') NOT NULL,
     -- General fields
     total_questions           INT,
     correct_answers           INT,
