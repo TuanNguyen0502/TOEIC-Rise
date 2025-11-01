@@ -36,6 +36,9 @@ public class UserTest {
     @Column(name = "time_spent")
     private Integer timeSpent; // in seconds
 
+    @Column(name = "correct_answers")
+    private Integer correctAnswers;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }
