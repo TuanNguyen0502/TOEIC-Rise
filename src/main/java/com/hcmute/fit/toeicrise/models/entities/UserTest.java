@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
 import com.hcmute.fit.toeicrise.commons.utils.StringListJsonConverter;
-import com.hcmute.fit.toeicrise.models.enums.EUserTestMode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,10 +21,6 @@ public class UserTest extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_id")
     private Test test;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "mode", nullable = false)
-    private EUserTestMode mode;
 
     // General fields
 
