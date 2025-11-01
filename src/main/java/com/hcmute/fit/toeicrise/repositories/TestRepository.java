@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.repositories;
 
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -16,6 +17,13 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
 
     List<Test> findAllByTestSet_Id(Long testSetId);
 
+    @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
+            "ut.id, ut.createdAt, ut.parts, ut.correctAnswers, ut.score, ut.timeSpent) " +
+            "FROM Test t " +
+            "INNER JOIN UserTest ut ON t.id = ut.test.id " +
+            "WHERE t.id = :id AND ut.user.account.email = :email")
+    List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
+  
     @Query(value = "SELECT t.id, t.name, t.number_of_learner_tests, p.name, p.id," +
             "group_concat(distinct tg.name order by tg.name separator '; ') as tags " +
             "FROM tests t " +
