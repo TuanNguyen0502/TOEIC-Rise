@@ -1,3 +1,7 @@
+ALTER TABLE user_answers
+DROP
+FOREIGN KEY user_answers_ibfk_1;
+
 DROP TABLE user_tests;
 
 -- User tests (kết quả làm bài của user)
@@ -24,3 +28,9 @@ CREATE TABLE user_tests
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (test_id) REFERENCES tests (id) ON DELETE CASCADE
 );
+
+ALTER TABLE user_answers
+    ADD CONSTRAINT user_answers_ibfk_1
+        FOREIGN KEY (user_test_id)
+            REFERENCES user_tests (id)
+            ON DELETE CASCADE;
