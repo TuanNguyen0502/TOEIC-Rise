@@ -19,6 +19,7 @@ public class Test extends BaseEntity {
     @Column(name = "status", nullable = false)
     private ETestStatus status;
 
+    @Column(name = "number_of_learner_tests")
     private Long numberOfLearnerTests;
 
     @ManyToOne
