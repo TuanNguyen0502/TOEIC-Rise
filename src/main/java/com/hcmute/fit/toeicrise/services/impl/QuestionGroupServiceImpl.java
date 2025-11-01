@@ -109,6 +109,13 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return questionGroupMapper.toResponse(getQuestionGroup(questionGroupId), questions);
     }
 
+    @Override
+    public boolean isListeningQuestionGroup(Long questionGroupId) {
+        QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+        return isListeningPart(questionGroup.getPart());
+    }
+
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
         boolean hasUrl = newUrl != null && !newUrl.isBlank();

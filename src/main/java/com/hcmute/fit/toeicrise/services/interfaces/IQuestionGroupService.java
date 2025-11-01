@@ -23,4 +23,6 @@ public interface IQuestionGroupService {
     QuestionGroup getQuestionGroup(Long questionGroupId);
 
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);
+
+    boolean isListeningQuestionGroup(Long questionGroupId);
 }
