@@ -1,2 +1,2 @@
 ALTER TABLE tests
-    ADD COLUMN numberOfLearnerTests BIGINT AFTER status;
+    ADD COLUMN number_of_learner_tests BIGINT AFTER status;
