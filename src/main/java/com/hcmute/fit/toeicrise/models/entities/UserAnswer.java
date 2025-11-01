@@ -22,7 +22,7 @@ public class UserAnswer extends BaseEntity {
     @Column(name = "question_group_id", nullable = false)
     private Long questionGroupId;
 
-    @Column(name = "answer", nullable = false, columnDefinition = "CHAR(1) NOT NULL")
+    @Column(name = "answer", columnDefinition = "CHAR(1)")
     private String answer;
 
     @Column(name = "is_correct", nullable = false)

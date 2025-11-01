@@ -7,7 +7,7 @@ CREATE TABLE user_answers
     user_test_id      BIGINT  NOT NULL,
     question_id       BIGINT  NOT NULL,
     question_group_id BIGINT  NOT NULL,
-    answer            CHAR(1) NOT NULL,
+    answer            CHAR(1),
     is_correct        BOOLEAN,
     created_at        DATETIME,
     updated_at        DATETIME,
