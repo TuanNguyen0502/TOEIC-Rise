@@ -23,4 +23,17 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
             "INNER JOIN UserTest ut ON t.id = ut.test.id " +
             "WHERE t.id = :id AND ut.user.account.email = :email")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
+  
+    @Query(value = "SELECT t.id, t.name, t.number_of_learner_tests, p.name, p.id," +
+            "group_concat(distinct tg.name order by tg.name separator '; ') as tags " +
+            "FROM tests t " +
+            "INNER JOIN question_groups qg ON qg.test_id = t.id " +
+            "INNER JOIN questions q ON q.question_group_id = qg.id " +
+            "INNER JOIN parts p ON qg.part_id = p.id " +
+            "LEFT JOIN questions_tags qtg ON qtg.question_id = q.id " +
+            "LEFT JOIN tags tg ON qtg.tag_id = tg.id " +
+            "WHERE t.id =:id " +
+            "GROUP BY t.id, t.name, t.number_of_learner_tests, p.name, p.id " +
+            "ORDER BY p.id", nativeQuery = true)
+    List<Object[]> findListTagByIdOrderByPartName(@Param("id") Long id);
 }

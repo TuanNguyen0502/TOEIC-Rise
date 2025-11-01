@@ -23,4 +23,9 @@ public class TestController {
     public ResponseEntity<?> getTestHistory(@PathVariable Long id) {
         return ResponseEntity.ok(testService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
     }
+ 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTestById(@PathVariable Long id) {
+        return ResponseEntity.ok(testService.getLearnerTestDetailById(id));
+    }
 }

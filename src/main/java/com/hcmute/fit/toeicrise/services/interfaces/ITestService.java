@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
@@ -45,4 +46,6 @@ public interface ITestService {
     PageResponse searchTestsByName(PageRequest request);
 
     List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email);
+  
+    LearnerTestDetailResponse getLearnerTestDetailById(Long id);
 }

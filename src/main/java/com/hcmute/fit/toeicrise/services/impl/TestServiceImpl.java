@@ -4,11 +4,13 @@ import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.*;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
+import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
@@ -46,7 +48,7 @@ public class TestServiceImpl implements ITestService {
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
     private final ITagService tagService;
-
+    private final PartMapper partMapper;
     private final TestMapper testMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -147,6 +149,7 @@ public class TestServiceImpl implements ITestService {
         test.setName(testName);
         test.setStatus(ETestStatus.PENDING);
         test.setTestSet(testSet);
+        test.setNumberOfLearnerTests(0L);
         return testRepository.save(test);
     }
 
@@ -180,7 +183,7 @@ public class TestServiceImpl implements ITestService {
         for (QuestionExcelRequest question : sortedQuestions) {
             Integer groupKey = Optional.ofNullable(extractGroupNumber(question.getQuestionGroupId()))
                     .orElse(-question.getNumberOfQuestions());
-            groupedQuestions.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(question);
+            groupedQuestions.computeIfAbsent(groupKey, _ -> new ArrayList<>()).add(question);
         }
         for (Map.Entry<Integer, List<QuestionExcelRequest>> entry : new ArrayList<>(groupedQuestions.entrySet())) {
             processQuestionGroup(test, entry.getValue());
@@ -190,11 +193,10 @@ public class TestServiceImpl implements ITestService {
     @Override
     public void processQuestionGroup(Test test, List<QuestionExcelRequest> groupQuestions) {
         try {
-            QuestionExcelRequest firstQuestion = groupQuestions.get(0);
+            QuestionExcelRequest firstQuestion = groupQuestions.getFirst();
             Part part = partService.getPartById(firstQuestion.getPartNumber());
             QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
-            for (int i = 0; i < groupQuestions.size(); i++) {
-                QuestionExcelRequest dto = groupQuestions.get(i);
+            for (QuestionExcelRequest dto : groupQuestions) {
                 List<Tag> tags = tagService.getTagsFromString(dto.getTags());
                 questionService.createQuestion(dto, questionGroup, tags);
             }
@@ -234,5 +236,10 @@ public class TestServiceImpl implements ITestService {
     @Override
     public List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email) {
         return testRepository.getLearnerTestHistoryByTest_IdAndUser_Email(testId, email);
+    }
+  
+    @Override
+    public LearnerTestDetailResponse getLearnerTestDetailById(Long id) {
+        return testMapper.toLearnerTestDetailResponse(testRepository.findListTagByIdOrderByPartName(id), partMapper);
     }
 }
