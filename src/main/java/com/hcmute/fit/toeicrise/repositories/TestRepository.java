@@ -3,6 +3,8 @@ package com.hcmute.fit.toeicrise.repositories;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,4 +15,17 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     Optional<Test> findByName(String name);
 
     List<Test> findAllByTestSet_Id(Long testSetId);
+
+    @Query(value = "SELECT t.id, t.name, t.number_of_learner_tests, p.name, p.id," +
+            "group_concat(distinct tg.name order by tg.name separator '; ') as tags " +
+            "FROM tests t " +
+            "INNER JOIN question_groups qg ON qg.test_id = t.id " +
+            "INNER JOIN questions q ON q.question_group_id = qg.id " +
+            "INNER JOIN parts p ON qg.part_id = p.id " +
+            "LEFT JOIN questions_tags qtg ON qtg.question_id = q.id " +
+            "LEFT JOIN tags tg ON qtg.tag_id = tg.id " +
+            "WHERE t.id =:id " +
+            "GROUP BY t.id, t.name, t.number_of_learner_tests, p.name, p.id " +
+            "ORDER BY p.id", nativeQuery = true)
+    List<Object[]> findListTagByIdOrderByPartName(@Param("id") Long id);
 }

@@ -5,10 +5,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController("LearnerTestController")
 @RequestMapping("/tests")
@@ -19,5 +16,10 @@ public class TestController {
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@Valid @ModelAttribute PageRequest pageRequest) {
         return ResponseEntity.ok(testService.searchTestsByName(pageRequest));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTestById(@PathVariable Long id) {
+        return ResponseEntity.ok(testService.getLearnerTestDetailById(id));
     }
 }
