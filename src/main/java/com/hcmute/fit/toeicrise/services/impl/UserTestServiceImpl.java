@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -31,6 +32,17 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserTestRepository userTestRepository;
     private final UserTestMapper userTestMapper;
 
+    @Override
+    public TestResultResponse getUserTestResultById(String email, Long userTestId) {
+        UserTest userTest = userTestRepository.findById(userTestId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
+        // Verify that the userTest belongs to the user with the given email
+        if (!userTest.getUser().getAccount().getEmail().equals(email)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Result");
+        }
+        return userTestMapper.toTestResultResponse(userTest);
+    }
+
     @Transactional
     @Override
     public TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request) {
@@ -54,7 +66,7 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         userTestRepository.save(userTest);
-        return userTestMapper.toTestResultResponse(userTest);
+        return userTestMapper.toTestResultOverallResponse(userTest);
     }
 
     private void calculatePracticeScore(UserTest userTest, List<UserAnswerRequest> answers) {
@@ -75,7 +87,7 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         userTest.setCorrectAnswers(correctAnswers);
-        userTest.setCorrectPercent((double) correctAnswers / answers.size());
+        userTest.setCorrectPercent(((double) correctAnswers / answers.size()) * 100);
     }
 
     private void calculateExamScore(UserTest userTest, List<UserAnswerRequest> answers) {
