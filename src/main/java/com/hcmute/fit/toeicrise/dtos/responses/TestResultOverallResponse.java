@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TestResultResponse {
+public class TestResultOverallResponse {
     private Long userTestId;
     private int totalQuestions;
     private int correctAnswers;

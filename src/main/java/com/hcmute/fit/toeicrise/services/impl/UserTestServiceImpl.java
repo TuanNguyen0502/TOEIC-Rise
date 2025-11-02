@@ -2,7 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -33,7 +33,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Transactional
     @Override
-    public TestResultResponse calculateAndSaveUserTestResult(String email, UserTestRequest request) {
+    public TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request) {
         User user = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         Test test = testRepository.findById(request.getTestId())

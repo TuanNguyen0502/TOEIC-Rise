@@ -2,7 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +19,9 @@ public class UserTestController {
     private final IUserTestService userTestService;
 
     @PostMapping("")
-    public ResponseEntity<TestResultResponse> submitTest(@Valid @RequestBody UserTestRequest request) {
+    public ResponseEntity<TestResultOverallResponse> submitTest(@Valid @RequestBody UserTestRequest request) {
         String email = SecurityUtils.getCurrentUser();
-        TestResultResponse result = userTestService.calculateAndSaveUserTestResult(email, request);
+        TestResultOverallResponse result = userTestService.calculateAndSaveUserTestResult(email, request);
         return ResponseEntity.ok(result);
     }
 }
