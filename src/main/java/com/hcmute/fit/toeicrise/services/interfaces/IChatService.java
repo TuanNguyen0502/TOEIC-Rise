@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.ChatRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.TitleRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import reactor.core.publisher.Flux;
 
 import java.io.InputStream;

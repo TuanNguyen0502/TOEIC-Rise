@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

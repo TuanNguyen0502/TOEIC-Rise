@@ -1,10 +1,10 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -33,7 +33,6 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     private final SystemPromptMapper systemPromptMapper;
     private final PageResponseMapper pageResponseMapper;
     private final IRedisService redisService;
-
 
 
     @Override

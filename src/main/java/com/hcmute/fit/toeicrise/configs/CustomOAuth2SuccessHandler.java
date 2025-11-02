@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hcmute.fit.toeicrise.dtos.responses.LoginResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +26,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     @Value("${frontend.callback-url}")
     private String frontendCallbackUrl;
+
     public CustomOAuth2SuccessHandler(@Lazy ObjectProvider<IAuthenticationService> authenticationServiceProvider,
                                       ObjectMapper objectMapper) {
         this.authenticationServiceProvider = authenticationServiceProvider;

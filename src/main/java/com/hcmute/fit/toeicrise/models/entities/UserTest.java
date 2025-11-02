@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.commons.utils.StringListJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -58,4 +59,8 @@ public class UserTest extends BaseEntity {
 
     @Column(name = "reading_correct_answers")
     private Integer readingCorrectAnswers;
+
+    @OneToMany(mappedBy = "userTest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserAnswer> userAnswers = new ArrayList<>();
 }

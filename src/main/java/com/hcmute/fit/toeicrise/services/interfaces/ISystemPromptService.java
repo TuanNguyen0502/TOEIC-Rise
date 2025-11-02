@@ -1,9 +1,9 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.SystemPromptDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 
 public interface ISystemPromptService {
     PageResponse getAllSystemPrompts(Boolean isActive,

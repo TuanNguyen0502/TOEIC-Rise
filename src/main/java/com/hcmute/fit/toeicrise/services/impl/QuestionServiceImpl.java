@@ -36,10 +36,10 @@ public class QuestionServiceImpl implements IQuestionService {
         }
         return question;
     }
-  
+
     @Override
     public List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId) {
-         return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
+        return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
                 .stream()
                 .map(questionMapper::toQuestionResponse)
                 .toList();
@@ -59,5 +59,10 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public QuestionResponse getQuestionById(Long questionId) {
         return questionMapper.toQuestionResponse(questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question")));
+    }
+
+    @Override
+    public Question getQuestionEntityById(Long questionId) {
+        return questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
     }
 }

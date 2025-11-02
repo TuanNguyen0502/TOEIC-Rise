@@ -6,14 +6,23 @@ import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
-import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import org.mapstruct.*;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface QuestionGroupMapper {
-    QuestionGroupResponse toResponse(QuestionGroup questionGroup, @Context List<QuestionResponse> questions);
+    default QuestionGroupResponse toResponse(QuestionGroup questionGroup, List<QuestionResponse> questions) {
+        return QuestionGroupResponse.builder()
+                .id(questionGroup.getId())
+                .audioUrl(questionGroup.getAudioUrl())
+                .imageUrl(questionGroup.getImageUrl())
+                .passage(questionGroup.getPassage())
+                .transcript(questionGroup.getTranscript())
+                .position(questionGroup.getPosition())
+                .questions(questions)
+                .build();
+    }
 
     default QuestionGroup toQuestionGroup(Test test, Part part, QuestionExcelRequest excelRequest) {
         QuestionGroup questionGroup = new QuestionGroup();
@@ -25,10 +34,5 @@ public interface QuestionGroupMapper {
         questionGroup.setPassage(excelRequest.getPassageText());
         questionGroup.setTranscript(excelRequest.getTranscript());
         return questionGroup;
-    }
-
-    @AfterMapping
-    default void linkQuestions(@MappingTarget QuestionGroupResponse questionGroupResponse, @Context List<QuestionResponse> questions) {
-        questionGroupResponse.setQuestions(questions);
     }
 }

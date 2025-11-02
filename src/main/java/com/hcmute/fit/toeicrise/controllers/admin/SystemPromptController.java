@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
-import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.SystemPromptUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ISystemPromptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

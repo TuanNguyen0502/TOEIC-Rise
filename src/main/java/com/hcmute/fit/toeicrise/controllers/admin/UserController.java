@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
-import com.hcmute.fit.toeicrise.dtos.requests.UserCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UserResetPasswordRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UserUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.user.UserCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.user.UserResetPasswordRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.user.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import jakarta.validation.Valid;

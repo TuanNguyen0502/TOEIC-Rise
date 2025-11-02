@@ -1,7 +1,10 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
-import com.hcmute.fit.toeicrise.dtos.requests.*;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatTitleUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatbotRatingRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;

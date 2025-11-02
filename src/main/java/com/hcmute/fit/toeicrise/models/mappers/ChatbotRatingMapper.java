@@ -1,9 +1,9 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotRatingDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotRatingResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotRatingDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotRatingResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.models.entities.ChatbotRating;
 import com.hcmute.fit.toeicrise.models.enums.EChatbotRating;
 import org.mapstruct.Mapper;
