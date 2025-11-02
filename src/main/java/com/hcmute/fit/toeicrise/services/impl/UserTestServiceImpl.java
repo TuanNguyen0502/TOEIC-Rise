@@ -45,6 +45,7 @@ public class UserTestServiceImpl implements IUserTestService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Result");
         }
 
+        // Prepare data structure to hold grouped answers
         Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>(Map.of());
         List<UserAnswer> userAnswers = userTest.getUserAnswers();
 
@@ -53,6 +54,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 .collect(Collectors.groupingBy(ua ->
                         questionGroupService.getPartNameByQuestionGroupId(ua.getQuestionGroupId())));
 
+        // Process each part
         for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
             String partName = entry.getKey();
             List<UserAnswer> answersInPart = entry.getValue();
@@ -66,8 +68,10 @@ public class UserTestServiceImpl implements IUserTestService {
                             Collectors.mapping(Map.Entry::getValue, Collectors.toList())
                     ));
 
+            // Prepare grouped responses for the part
             List<UserAnswerGroupedByTagResponse> groupedResponses = new ArrayList<>();
 
+            // Process each tag
             for (Map.Entry<String, List<UserAnswer>> tagEntry : answersByTag.entrySet()) {
                 String tag = tagEntry.getKey();
                 List<UserAnswer> answersForTag = tagEntry.getValue();
@@ -102,6 +106,7 @@ public class UserTestServiceImpl implements IUserTestService {
                             .build()
             );
 
+            // Add to the final map
             userAnswersByPart.put(partName, groupedResponses);
         }
 
