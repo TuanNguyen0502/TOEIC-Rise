@@ -11,6 +11,7 @@ public interface UserTestMapper {
                 .userTestId(userTest.getId())
                 .totalQuestions(userTest.getTotalQuestions())
                 .correctAnswers(userTest.getCorrectAnswers())
+                .score(userTest.getTotalScore() != null ? userTest.getTotalScore() : 0)
                 .timeSpent(userTest.getTimeSpent())
                 .build();
     }

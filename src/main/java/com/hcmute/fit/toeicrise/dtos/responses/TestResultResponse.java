@@ -9,5 +9,6 @@ public class TestResultResponse {
     private Long userTestId;
     private int totalQuestions;
     private int correctAnswers;
+    private int score;
     private int timeSpent; // in seconds
 }

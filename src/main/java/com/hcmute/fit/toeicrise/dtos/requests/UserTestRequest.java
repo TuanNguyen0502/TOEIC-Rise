@@ -16,6 +16,9 @@ public class UserTestRequest {
     @NotNull(message = MessageConstant.TIME_SPENT_NOT_NULL)
     private int timeSpent; // in seconds
 
+    // List of parts the user has completed
+    // parts != null is practice mode
+    // parts == null is full test mode
     private List<String> parts; // Part 1, Part 2, ...
 
     @NotNull(message = MessageConstant.ANSWERS_NOT_NULL)
