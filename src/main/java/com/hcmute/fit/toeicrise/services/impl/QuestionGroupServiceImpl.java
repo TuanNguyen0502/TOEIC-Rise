@@ -110,9 +110,17 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
-    public QuestionGroup isListeningQuestionGroup(Long questionGroupId) {
+    public QuestionGroup getQuestionGroupWithQuestionsEntity(Long questionGroupId) {
         return questionGroupRepository.findWithQuestionsById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+    }
+
+    @Override
+    public String getPartNameByQuestionGroupId(Long questionGroupId) {
+        QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+        System.out.println(questionGroup.getPart().getName());
+        return questionGroup.getPart().getName();
     }
 
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {

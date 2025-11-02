@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -22,4 +23,6 @@ public class TestResultResponse {
     private int listeningCorrectAnswers;
     private int readingScore;
     private int readingCorrectAnswers;
+
+    private Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart;
 }
