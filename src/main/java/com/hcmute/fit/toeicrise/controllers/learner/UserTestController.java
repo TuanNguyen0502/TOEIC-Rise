@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
+import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
@@ -28,5 +29,15 @@ public class UserTestController {
         String email = SecurityUtils.getCurrentUser();
         TestResultOverallResponse result = userTestService.calculateAndSaveUserTestResult(email, request);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/view-histories/{id}")
+    public ResponseEntity<?> getTestHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(userTestService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @Valid @RequestBody LearnerTestRequest learnerTestRequest) {
+        return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, learnerTestRequest));
     }
 }

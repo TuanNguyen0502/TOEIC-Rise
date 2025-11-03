@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -12,6 +14,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface QuestionGroupMapper {
+    LearnerTestQuestionGroupResponse toLearnerTestQuestionGroupResponse(QuestionGroup questionGroup, @Context List<LearnerTestQuestionResponse> questions);
+
     default QuestionGroupResponse toResponse(QuestionGroup questionGroup, List<QuestionResponse> questions) {
         return QuestionGroupResponse.builder()
                 .id(questionGroup.getId())

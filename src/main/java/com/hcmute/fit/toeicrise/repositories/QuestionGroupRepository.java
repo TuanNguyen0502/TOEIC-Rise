@@ -18,4 +18,6 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
     @Query("SELECT qg FROM QuestionGroup qg LEFT JOIN FETCH qg.questions WHERE qg.id = :id")
     Optional<QuestionGroup> findWithQuestionsById(@Param("id") Long id);
 
+    List<QuestionGroup> findByTest_IdAndPart_IdOrderByPositionAsc(Long testId, Long partId);
+
 }

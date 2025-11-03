@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -64,5 +65,13 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public Question getQuestionEntityById(Long questionId) {
         return questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+    }
+
+    @Override
+    public List<LearnerTestQuestionResponse> getLearnerTestQuestionsByQuestionGroupId(Long questionGroupId) {
+        return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
+                .stream()
+                .map(questionMapper::toLearnerTestQuestionResponse)
+                .toList();
     }
 }

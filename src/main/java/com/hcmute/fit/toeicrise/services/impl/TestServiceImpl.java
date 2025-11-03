@@ -3,7 +3,6 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.*;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
@@ -231,11 +230,6 @@ public class TestServiceImpl implements ITestService {
 
         Page<LearnerTestResponse> testResponses = testRepository.findAll(testSpecification, pageable).map(testMapper::toLearnerTestResponse);
         return pageResponseMapper.toPageResponse(testResponses);
-    }
-
-    @Override
-    public List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email) {
-        return testRepository.getLearnerTestHistoryByTest_IdAndUser_Email(testId, email);
     }
   
     @Override
