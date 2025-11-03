@@ -5,9 +5,11 @@ import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.UserAnswerMapper;
 import com.hcmute.fit.toeicrise.models.mappers.UserTestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
@@ -34,6 +36,7 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserRepository userRepository;
     private final UserTestRepository userTestRepository;
     private final UserTestMapper userTestMapper;
+    private final UserAnswerMapper userAnswerMapper;
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
@@ -111,6 +114,28 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         return userTestMapper.toTestResultResponse(userTest, userAnswersByPart);
+    }
+
+    @Override
+    public Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId) {
+        UserTest userTest = userTestRepository.findById(userTestId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
+
+        // Verify that the userTest belongs to the user with the given email
+        if (!userTest.getUser().getAccount().getEmail().equals(email)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Result");
+        }
+
+        Map<String, List<UserAnswerOverallResponse>> result = new HashMap<>();
+
+        for (UserAnswer userAnswer : userTest.getUserAnswers()) {
+            String partName = questionGroupService.getPartNameByQuestionGroupId(userAnswer.getQuestionGroupId());
+            UserAnswerOverallResponse answerResponse = userAnswerMapper.toUserAnswerOverallResponse(userAnswer);
+
+            result.computeIfAbsent(partName, _ -> new ArrayList<>()).add(answerResponse);
+        }
+
+        return result;
     }
 
     @Transactional

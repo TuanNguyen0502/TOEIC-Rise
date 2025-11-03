@@ -4,11 +4,15 @@ import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/learner/user-tests")
@@ -20,6 +24,13 @@ public class UserTestController {
     public ResponseEntity<TestResultResponse> getUserTestResultById(@PathVariable Long userTestId) {
         String email = SecurityUtils.getCurrentUser();
         TestResultResponse result = userTestService.getUserTestResultById(email, userTestId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/answers-overall/{userTestId}")
+    public ResponseEntity<?> getUserAnswersOverallGroupedByPart(@PathVariable Long userTestId) {
+        String email = SecurityUtils.getCurrentUser();
+        Map<String, List<UserAnswerOverallResponse>> result = userTestService.getUserAnswersGroupedByPart(email, userTestId);
         return ResponseEntity.ok(result);
     }
 
