@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailRespons
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
+import com.hcmute.fit.toeicrise.models.enums.ECacheDuration;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.SystemPromptMapper;
@@ -22,10 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import static com.hcmute.fit.toeicrise.commons.constants.Constant.ACTIVE_PROMPT_KEY;
-import static com.hcmute.fit.toeicrise.commons.constants.Constant.SYSTEM_PROMPT_CACHE;
-import static com.hcmute.fit.toeicrise.commons.constants.Constant.CACHE_DURATION;
-
 @Service
 @RequiredArgsConstructor
 public class SystemPromptServiceImpl implements ISystemPromptService {
@@ -34,6 +31,7 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     private final PageResponseMapper pageResponseMapper;
     private final IRedisService redisService;
 
+    public static final String ACTIVE_PROMPT_KEY = "active";
 
     @Override
     public PageResponse getAllSystemPrompts(Boolean isActive,
@@ -80,7 +78,7 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     public SystemPromptDetailResponse getActiveSystemPrompt() {
         // Try to get from cache first
         SystemPromptDetailResponse cachedPrompt = redisService.get(
-                SYSTEM_PROMPT_CACHE,
+                ECacheDuration.CACHE_SYSTEM_PROMPT.getCacheName(),
                 ACTIVE_PROMPT_KEY,
                 SystemPromptDetailResponse.class);
 
@@ -95,7 +93,9 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         SystemPromptDetailResponse response = systemPromptMapper.toDetailResponse(activePrompt);
 
         // Cache the result
-        redisService.put(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
+        redisService.put(ECacheDuration.CACHE_SYSTEM_PROMPT.getCacheName(),
+                ACTIVE_PROMPT_KEY, response,
+                ECacheDuration.CACHE_SYSTEM_PROMPT.getDuration());
 
         return response;
     }
@@ -183,13 +183,15 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
             systemPromptRepository.save(activePrompt);
 
             // Remove the active prompt from cache
-            redisService.remove(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY);
+            redisService.remove(ECacheDuration.CACHE_SYSTEM_PROMPT.getCacheName(),
+                    ACTIVE_PROMPT_KEY);
         }
     }
 
     private void updateActivePromptCache(SystemPrompt activePrompt) {
         // Cache the new active prompt (put() will overwrite any existing entry)
         SystemPromptDetailResponse response = systemPromptMapper.toDetailResponse(activePrompt);
-        redisService.put(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
+        redisService.put(ECacheDuration.CACHE_SYSTEM_PROMPT.getCacheName(),
+                ACTIVE_PROMPT_KEY, response, ECacheDuration.CACHE_SYSTEM_PROMPT.getDuration());
     }
 }

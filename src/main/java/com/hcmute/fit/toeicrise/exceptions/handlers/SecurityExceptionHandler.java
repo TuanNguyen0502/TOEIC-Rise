@@ -42,8 +42,8 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
                 .timestamp(LocalDateTime.now(
                         ZoneId.of(Constant.TIMEZONE_VIETNAM)))
                 .path(request.getRequestURI())
-                .code(httpStatus.value())
-                .status(httpStatus.name())
+                .httpStatusCode(httpStatus.value())
+                .errorCode(httpStatus.name())
                 .message(message)
                 .build();
         response.setStatus(httpStatus.value());

@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProfileUpdateRequest {
     @NotNull(message = MessageConstant.PROFILE_FULLNAME_NOT_NULL)
     @NotBlank(message = MessageConstant.PROFILE_FULLNAME_NOT_BLANK)
-    @Pattern(regexp = Constant.PROFILE_FULLNAME_PATTERN, message = MessageConstant.PROFILE_FULLNAME_INVALID)
+    @Pattern(regexp = Constant.FULLNAME_PATTERN, message = MessageConstant.PROFILE_FULLNAME_INVALID)
     private String fullName;
 
     @NotNull(message = MessageConstant.PROFILE_GENDER_NOT_NULL)

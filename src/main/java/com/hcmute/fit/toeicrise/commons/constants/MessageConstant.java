@@ -13,7 +13,7 @@ public class MessageConstant {
     // Page messages
     public static final String INVALID_INPUT_DATA = "Invalid input data";
     public static final String PAGE_MIN = "Page index must be zero or greater.";
-    public static final String SIZE_PAGE_MIN = "Size must be greater than ten.";
+    public static final String SIZE_PAGE_MIN = "Size must be greater than or equal to 10.";
     public static final String PAGE_MAX = "Page index must be less than or equal to 100.";
     public static final String SIZE_PAGE_MAX = "Size must be less than or equal to 50.";
     // Question Group messages
@@ -35,7 +35,7 @@ public class MessageConstant {
     public static final String CHAT_TITLE_INVALID = "Title can only contain letters, digits, spaces, and punctuation (.,!?()'\"-), and must be between 1 and 100 characters long.";
     public static final String CHAT_CONVERSATION_ID_INVALID = "Conversation ID is invalid.";
     public static final String MESSAGE_ID_NOT_BLANK = "Message ID must not be blank";
-    public static final String ECHATBOT_RATING_NOT_NULL = "Rating must not be null";
+    public static final String CHATBOT_RATING_NOT_NULL = "Rating must not be null";
     // Test related messages
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
@@ -57,7 +57,7 @@ public class MessageConstant {
     public static final String QUESTION_ID_NOT_NULL = "Question must not be null.";
     public static final String QUESTION_GROUP_ID_NOT_NULL = "Question group must not be null.";
     public static final String CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
-    public static final String CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
+    public static final String CORRECT_OPTION_NOT_BLANK = "Correct option must not be blank.";
     public static final String EXPLAIN_NOT_BLANK = "Explain must not be blank.";
     public static final String EXPLAIN_NOT_NULL = "Explain must not be null.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";

@@ -25,6 +25,6 @@ public class PageRequest {
 
     private List<Long> sort;
 
-    @NotBlankOrEmptyOptional(regexp = Constant.TEST_NAME_PATTERN, max = 100, message = MessageConstant.INVALID_INPUT_DATA)
+    @NotBlankOrEmptyOptional(regexp = Constant.TEST_SET_NAME_OR_TEST_NAME_PATTERN, max = 100, message = MessageConstant.INVALID_INPUT_DATA)
     private String name;
 }

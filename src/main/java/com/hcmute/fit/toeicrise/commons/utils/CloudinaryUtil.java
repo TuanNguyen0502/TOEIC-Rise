@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 @Component
@@ -24,9 +25,10 @@ public class CloudinaryUtil {
         return "https://res.cloudinary.com/toeic-rise/image/upload/v1761193814/default-avatar_hbm1bj.png";
     }
 
+    @SuppressWarnings("unchecked")
     public String uploadFile(MultipartFile file) {
         try {
-            Map data = cloudinary.uploader()
+            Map<String, Object> data = cloudinary.uploader()
                     .upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
             // Return the URL of the uploaded file
             return data.get("secure_url").toString();
@@ -76,15 +78,17 @@ public class CloudinaryUtil {
     }
 
     private boolean isValidSuffixImage(String img) {
-        return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
-                img.endsWith(".png") || img.endsWith(".gif") ||
-                img.endsWith(".bmp") || img.endsWith(".webp");
+        String lower = img.toLowerCase(Locale.ROOT);
+        return lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
+                lower.endsWith(".png") || lower.endsWith(".gif") ||
+                lower.endsWith(".bmp") || lower.endsWith(".webp");
     }
 
     private boolean isValidSuffixAudio(String audio) {
-        return audio.endsWith(".mp3") || audio.endsWith(".wav") ||
-                audio.endsWith(".aac") || audio.endsWith(".flac") ||
-                audio.endsWith(".ogg") || audio.endsWith(".m4a");
+        String lower = audio.toLowerCase(Locale.ROOT);
+        return lower.endsWith(".mp3") || lower.endsWith(".wav") ||
+                lower.endsWith(".aac") || lower.endsWith(".flac") ||
+                lower.endsWith(".ogg") || lower.endsWith(".m4a");
     }
 
     public boolean isCloudinaryUrl(String url) {
@@ -95,11 +99,12 @@ public class CloudinaryUtil {
         if (url == null || url.isEmpty()) return null;
         // URL: https://res.cloudinary.com/your_cloud/image/upload/v1234567890/filename.jpg
 
-        String[] parts = url.split("/");
-        if (parts.length < 2) return null; // Invalid URL
+        int uploadIndex = url.indexOf("/upload/");
+        if (uploadIndex == -1) return null;
 
-        String filename = parts[parts.length - 1]; // filename.jpg
-        // Remove file extension
-        return filename.contains(".") ? filename.split("\\.")[0] : filename;
+        String after = url.substring(uploadIndex + 8);
+        String cleaned = after.replaceAll("^v\\d+/","");
+
+        return cleaned.replaceFirst("\\.[^.]+$","");
     }
 }

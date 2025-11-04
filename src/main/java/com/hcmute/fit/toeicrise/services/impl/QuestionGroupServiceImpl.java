@@ -162,7 +162,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         // Validate audio file and URL
         if (hasAudioFile) {
-            if (audio.getSize() > Constant.QUESTION_GROUP_AUDIO_MAX_SIZE) {
+            if (audio.getSize() > Constant.QUESTION_GROUP_AUDIO_MAX_SIZE_BYTES) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Audio file size exceeds the maximum limit.");
             }
             cloudinaryUtil.validateAudioFile(audio);
@@ -186,7 +186,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         // Validate image file and URL
         if (hasImageFile) {
-            if (image.getSize() > Constant.QUESTION_GROUP_IMAGE_MAX_SIZE) {
+            if (image.getSize() > Constant.QUESTION_GROUP_IMAGE_MAX_SIZE_BYTES) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Image file size exceeds the maximum limit.");
             }
             cloudinaryUtil.validateImageFile(image);

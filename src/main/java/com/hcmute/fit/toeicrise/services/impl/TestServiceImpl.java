@@ -180,7 +180,7 @@ public class TestServiceImpl implements ITestService {
                 .toList();
         Map<Integer, List<QuestionExcelRequest>> groupedQuestions = new HashMap<>();
         for (QuestionExcelRequest question : sortedQuestions) {
-            Integer groupKey = Optional.ofNullable(extractGroupNumber(question.getQuestionGroupId()))
+            int groupKey = extractGroupNumber(question.getQuestionGroupId())
                     .orElse(-question.getNumberOfQuestions());
             groupedQuestions.computeIfAbsent(groupKey, _ -> new ArrayList<>()).add(question);
         }

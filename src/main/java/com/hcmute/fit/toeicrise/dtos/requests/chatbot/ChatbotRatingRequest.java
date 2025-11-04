@@ -13,6 +13,6 @@ public class ChatbotRatingRequest {
     @NotBlank(message = MessageConstant.MESSAGE_ID_NOT_BLANK)
     private String messageId;
 
-    @NotNull(message = MessageConstant.ECHATBOT_RATING_NOT_NULL)
+    @NotNull(message = MessageConstant.CHATBOT_RATING_NOT_NULL)
     private EChatbotRating rating;
 }

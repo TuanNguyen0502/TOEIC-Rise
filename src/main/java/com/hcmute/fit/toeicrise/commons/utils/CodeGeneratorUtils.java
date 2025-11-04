@@ -4,7 +4,8 @@ import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import org.springframework.util.StringUtils;
 
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.Optional;
 
 public class CodeGeneratorUtils {
 
@@ -13,7 +14,7 @@ public class CodeGeneratorUtils {
      * @return A string containing the 6-digit verification code
      */
     public static String generateVerificationCode() {
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
         int code = random.nextInt(900000) + 100000;
         return String.valueOf(code);
     }
@@ -23,18 +24,18 @@ public class CodeGeneratorUtils {
      * @param questionGroupId string like "p1_g1"
      * @return group number (1, 2, 3...) or null if invalid format
      */
-    public static Integer extractGroupNumber(String questionGroupId) {
+    public static Optional<Integer> extractGroupNumber(String questionGroupId) {
         if (!StringUtils.hasText(questionGroupId)) {
-            return null;
+            return Optional.empty();
         }
         try {
             String[] parts = questionGroupId.split("_g");
             if (parts.length == 2) {
-                return Integer.parseInt(parts[1]);
+                return Optional.of(Integer.parseInt(parts[1]));
             }
         } catch (NumberFormatException e) {
             throw new AppException(ErrorCode.VALIDATION_ERROR, "questionGroupId");
         }
-        return null;
+        return Optional.empty();
     }
 }

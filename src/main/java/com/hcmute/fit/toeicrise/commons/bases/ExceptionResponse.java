@@ -7,14 +7,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExceptionResponse {
     private String path;
-    private String status;
-    private int code;
+    private String errorCode;
+    private int httpStatusCode;
     private Object message;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constant.DATE_TIME_PATTERN, timezone = Constant.TIMEZONE_VIETNAM)
     private LocalDateTime timestamp;

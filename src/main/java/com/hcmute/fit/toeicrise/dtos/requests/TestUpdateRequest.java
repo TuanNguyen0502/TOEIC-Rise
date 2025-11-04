@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 @Builder
 public class TestUpdateRequest {
-    @Pattern(regexp = Constant.TEST_NAME_PATTERN, message = MessageConstant.TEST_NAME_INVALID)
+    @Pattern(regexp = Constant.TEST_SET_NAME_OR_TEST_NAME_PATTERN, message = MessageConstant.TEST_NAME_INVALID)
     @NotBlank(message = MessageConstant.TEST_NAME_NOT_BLANK)
     private String name;
 

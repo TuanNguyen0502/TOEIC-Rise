@@ -76,8 +76,8 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now(
                         ZoneId.of(Constant.TIMEZONE_VIETNAM)
                 )).path(path)
-                .code(errorCode.getHttpStatusCode())
-                .status(errorCode.name())
+                .httpStatusCode(errorCode.getHttpStatusCode())
+                .errorCode(errorCode.name())
                 .message(message)
                 .build();
     }
