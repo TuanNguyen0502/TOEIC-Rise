@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -31,4 +32,7 @@ public interface IQuestionGroupService {
     String getPartNameByQuestionGroupId(Long questionGroupId);
 
     boolean isListeningPart(Part part);
+
+    @Transactional(readOnly = true)
+    List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
 }

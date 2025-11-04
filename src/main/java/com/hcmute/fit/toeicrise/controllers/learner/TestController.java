@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
-import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.PageRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import jakarta.validation.Valid;
@@ -17,11 +16,6 @@ public class TestController {
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@Valid @ModelAttribute PageRequest pageRequest) {
         return ResponseEntity.ok(testService.searchTestsByName(pageRequest));
-    }
-
-    @GetMapping("/view-histories/{id}")
-    public ResponseEntity<?> getTestHistory(@PathVariable Long id) {
-        return ResponseEntity.ok(testService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
     }
  
     @GetMapping("/{id}")

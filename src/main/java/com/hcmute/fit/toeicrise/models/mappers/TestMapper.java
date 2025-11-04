@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -21,6 +22,9 @@ public interface TestMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     TestDetailResponse toDetailResponse(Test test, @Context List<PartResponse> partResponses);
+
+    @Mapping(source = "name", target = "testName")
+    LearnerTestPartsResponse toLearnerTestPartsResponse(Test test);
 
     default LearnerTestDetailResponse toLearnerTestDetailResponse(List<Object[]> objects, @Context PartMapper partMapper) {
         if (objects == null || objects.isEmpty()){

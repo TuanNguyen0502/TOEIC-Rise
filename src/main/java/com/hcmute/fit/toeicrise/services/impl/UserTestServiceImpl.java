@@ -1,14 +1,19 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.models.mappers.UserAnswerMapper;
 import com.hcmute.fit.toeicrise.models.mappers.UserTestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
@@ -36,6 +41,7 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserRepository userRepository;
     private final UserTestRepository userTestRepository;
     private final UserTestMapper userTestMapper;
+    private final TestMapper testMapper;
     private final UserAnswerMapper userAnswerMapper;
 
     @Override
@@ -232,5 +238,21 @@ public class UserTestServiceImpl implements IUserTestService {
         userTest.setCorrectPercent((double) correctAnswers / answers.size());
         userTest.setListeningCorrectAnswers(listeningCorrect);
         userTest.setReadingCorrectAnswers(readingCorrect);
+    }
+
+    @Override
+    public LearnerTestPartsResponse getTestByIdAndParts(Long testId, LearnerTestRequest learnerTestRequest) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+
+        List<LearnerTestPartResponse> partResponses = questionGroupService.getQuestionGroupsByTestIdGroupByParts(testId, learnerTestRequest.getParts());
+        LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(test);
+        learnerTestPartsResponse.setPartResponses(partResponses);
+        return learnerTestPartsResponse;
+    }
+
+    @Override
+    public List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email) {
+        return testRepository.getLearnerTestHistoryByTest_IdAndUser_Email(testId, email);
     }
 }

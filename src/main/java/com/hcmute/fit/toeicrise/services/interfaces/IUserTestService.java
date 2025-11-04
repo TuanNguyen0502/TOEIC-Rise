@@ -1,8 +1,11 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
+import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,4 +19,8 @@ public interface IUserTestService {
 
     @Transactional
     TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request);
+
+    List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email);
+
+    LearnerTestPartsResponse getTestByIdAndParts(Long testId, LearnerTestRequest learnerTestRequest);
 }

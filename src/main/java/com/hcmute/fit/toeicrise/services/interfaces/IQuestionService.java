@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
@@ -19,4 +20,6 @@ public interface IQuestionService {
     QuestionResponse getQuestionById(Long questionId);
 
     Question getQuestionEntityById(Long questionId);
+
+    List<LearnerTestQuestionResponse> getLearnerTestQuestionsByQuestionGroupId(Long questionGroupId);
 }

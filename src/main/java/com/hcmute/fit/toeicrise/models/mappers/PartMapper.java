@@ -3,11 +3,9 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +15,8 @@ import java.util.Optional;
 @Mapper(componentModel = "spring")
 public interface PartMapper {
     PartResponse toPartResponse(Part part, @Context List<QuestionGroupResponse> questionGroups);
+    @Mapping(source = "name", target = "partName")
+    LearnerTestPartResponse toLearnerTestPartResponse(Part part);
 
     @AfterMapping
     default void setQuestionGroups(@MappingTarget PartResponse dto,

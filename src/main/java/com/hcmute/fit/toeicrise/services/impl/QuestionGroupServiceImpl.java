@@ -4,6 +4,9 @@ import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -215,5 +219,27 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     private boolean isPart1(Part part) {
         return part.getName().contains("1");
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds) {
+        List<LearnerTestPartResponse> responses = new ArrayList<>();
+        for (Long partId : partIds) {
+            List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_IdOrderByPositionAsc(testId, partId);
+
+            Part part = questionGroups.getFirst().getPart();
+            List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroups.stream()
+                                .map(group -> {
+                                    List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
+                                    return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
+                                })
+                                .toList();
+            LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
+            partResponse.setQuestionGroups(questionGroupResponses);
+            responses.add(partResponse);
+        }
+        responses.sort(Comparator.comparing(LearnerTestPartResponse::getPartName));
+        return responses;
     }
 }
