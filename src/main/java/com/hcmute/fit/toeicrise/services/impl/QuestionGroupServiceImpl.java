@@ -120,6 +120,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
+    public QuestionGroup getQuestionGroupEntity(Long questionGroupId) {
+        return questionGroupRepository.findById(questionGroupId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+    }
+
+    @Override
     public String getPartNameByQuestionGroupId(Long questionGroupId) {
         QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
