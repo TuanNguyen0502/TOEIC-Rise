@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.configs;
 
+import com.hcmute.fit.toeicrise.configs.filters.JwtAuthenticationFilter;
 import com.hcmute.fit.toeicrise.exceptions.handlers.SecurityExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

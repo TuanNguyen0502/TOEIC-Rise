@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.configs;
+package com.hcmute.fit.toeicrise.configs.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
