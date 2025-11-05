@@ -11,7 +11,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
 import java.util.List;
 
 public interface IQuestionService {
-    Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
+    void createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
 
     List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId);
 
@@ -19,7 +19,7 @@ public interface IQuestionService {
 
     QuestionResponse getQuestionById(Long questionId);
 
-    Question getQuestionEntityById(Long questionId);
+    List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
 
     List<LearnerTestQuestionResponse> getLearnerTestQuestionsByQuestionGroupId(Long questionGroupId);
 }
