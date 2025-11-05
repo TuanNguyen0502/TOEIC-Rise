@@ -28,14 +28,13 @@ public class QuestionServiceImpl implements IQuestionService {
     private final ITagService tagService;
 
     @Override
-    public Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags) {
+    public void createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags) {
         Question question = questionMapper.toEntity(request, questionGroup);
         questionRepository.save(question);
         if (tags != null && !tags.isEmpty()) {
             question.setTags(new ArrayList<>(tags));
-            question = questionRepository.save(question);
+            questionRepository.save(question);
         }
-        return question;
     }
 
     @Override
@@ -63,8 +62,8 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public Question getQuestionEntityById(Long questionId) {
-        return questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+    public List<Question> getQuestionEntitiesByIds(List<Long> questionIds) {
+        return questionRepository.findAllById(questionIds);
     }
 
     @Override

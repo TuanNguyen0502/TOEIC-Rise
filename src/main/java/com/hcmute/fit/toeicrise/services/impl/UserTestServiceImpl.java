@@ -173,9 +173,28 @@ public class UserTestServiceImpl implements IUserTestService {
     private void calculatePracticeScore(UserTest userTest, List<UserAnswerRequest> answers) {
         int correctAnswers = 0;
 
+        // Fetch all questions involved in the answers
+        List<Long> questionIds = answers.stream()
+                .map(UserAnswerRequest::getQuestionId)
+                .distinct()
+                .toList();
+
+        // Retrieve questions from the database
+        List<Question> questions = questionService.getQuestionEntitiesByIds(questionIds);
+
+        // Create a map for quick lookup
+        Map<Long, Question> questionMap = questions.stream()
+                .collect(Collectors.toMap(Question::getId, q -> q));
+
         for (UserAnswerRequest answerRequest : answers) {
-            Question question = questionService.getQuestionEntityById(answerRequest.getQuestionId());
-            boolean isCorrect = answerRequest.getAnswer() != null && answerRequest.getAnswer().equals(question.getCorrectOption());
+            Question question = questionMap.get(answerRequest.getQuestionId());
+            if (question == null) {
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+            }
+
+            boolean isCorrect = answerRequest.getAnswer() != null &&
+                    answerRequest.getAnswer().equals(question.getCorrectOption());
+
             if (isCorrect) correctAnswers++;
 
             userTest.getUserAnswers().add(UserAnswer.builder()
