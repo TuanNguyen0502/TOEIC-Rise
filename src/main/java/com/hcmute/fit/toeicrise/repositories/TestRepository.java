@@ -32,7 +32,7 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
             "INNER JOIN parts p ON qg.part_id = p.id " +
             "LEFT JOIN questions_tags qtg ON qtg.question_id = q.id " +
             "LEFT JOIN tags tg ON qtg.tag_id = tg.id " +
-            "WHERE t.id =:id " +
+            "WHERE t.id =:id AND t.status = 'APPROVED'" +
             "GROUP BY t.id, t.name, t.number_of_learner_tests, p.name, p.id " +
             "ORDER BY p.id", nativeQuery = true)
     List<Object[]> findListTagByIdOrderByPartName(@Param("id") Long id);
