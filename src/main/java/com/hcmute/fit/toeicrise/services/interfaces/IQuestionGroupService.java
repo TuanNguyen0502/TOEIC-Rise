@@ -11,6 +11,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 public interface IQuestionGroupService {
     QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest request);
@@ -25,11 +26,11 @@ public interface IQuestionGroupService {
 
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);
 
-    QuestionGroup getQuestionGroupWithQuestionsEntity(Long questionGroupId);
-
     QuestionGroup getQuestionGroupEntity(Long questionGroupId);
 
     String getPartNameByQuestionGroupId(Long questionGroupId);
+
+    List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids);
 
     boolean isListeningPart(Part part);
 

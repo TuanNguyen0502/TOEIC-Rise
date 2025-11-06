@@ -26,10 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -219,13 +216,24 @@ public class UserTestServiceImpl implements IUserTestService {
         Map<Long, List<UserAnswerRequest>> groupedByGroupId =
                 answers.stream().collect(Collectors.groupingBy(UserAnswerRequest::getQuestionGroupId));
 
+        // Get all group IDs
+        Set<Long> groupIds = groupedByGroupId.keySet();
+
+        // Fetch all question groups with their questions
+        Map<Long, QuestionGroup> groupMap = questionGroupService.findAllByIdsWithQuestions(groupIds).stream()
+                .collect(Collectors.toMap(QuestionGroup::getId, g -> g));
+
         // Process each group
         for (Map.Entry<Long, List<UserAnswerRequest>> entry : groupedByGroupId.entrySet()) {
             Long groupId = entry.getKey();
             List<UserAnswerRequest> groupAnswers = entry.getValue();
 
             // Fetch question group
-            QuestionGroup questionGroup = questionGroupService.getQuestionGroupWithQuestionsEntity(groupId);
+            QuestionGroup questionGroup = groupMap.get(groupId);
+            if (questionGroup == null) {
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+            }
+
             boolean isListeningPart = questionGroupService.isListeningPart(questionGroup.getPart());
 
             // Create a map of questionId to Question for quick lookup
@@ -236,6 +244,10 @@ public class UserTestServiceImpl implements IUserTestService {
             for (UserAnswerRequest answerRequest : groupAnswers) {
                 // Fetch the corresponding question
                 Question question = questionMap.get(answerRequest.getQuestionId());
+                if (question == null) {
+                    throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+                }
+                
                 boolean isCorrect = answerRequest.getAnswer() != null && answerRequest.getAnswer().equals(question.getCorrectOption());
                 if (isCorrect) {
                     correctAnswers++;
