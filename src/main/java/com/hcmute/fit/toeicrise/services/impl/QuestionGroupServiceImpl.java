@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,12 +111,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
-    public QuestionGroup getQuestionGroupWithQuestionsEntity(Long questionGroupId) {
-        return questionGroupRepository.findWithQuestionsById(questionGroupId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
-    }
-
-    @Override
     public QuestionGroup getQuestionGroupEntity(Long questionGroupId) {
         return questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
@@ -132,6 +123,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         System.out.println(questionGroup.getPart().getName());
         return questionGroup.getPart().getName();
     }
+
+    @Override
+    public List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids) {
+        return questionGroupRepository.findAllByIdInFetchQuestions(ids);
+    }
+
 
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
@@ -230,11 +227,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
             Part part = questionGroups.getFirst().getPart();
             List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroups.stream()
-                                .map(group -> {
-                                    List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
-                                    return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
-                                })
-                                .toList();
+                    .map(group -> {
+                        List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
+                        return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
+                    })
+                    .toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
             partResponse.setQuestionGroups(questionGroupResponses);
             responses.add(partResponse);
