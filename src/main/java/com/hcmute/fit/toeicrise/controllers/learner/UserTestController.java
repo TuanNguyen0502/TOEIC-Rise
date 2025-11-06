@@ -47,8 +47,8 @@ public class UserTestController {
         return ResponseEntity.ok(userTestService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @Valid @RequestBody LearnerTestRequest learnerTestRequest) {
+    @GetMapping(value = "/exam/{id}")
+    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @Valid @ModelAttribute LearnerTestRequest learnerTestRequest) {
         return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, learnerTestRequest));
     }
 }
