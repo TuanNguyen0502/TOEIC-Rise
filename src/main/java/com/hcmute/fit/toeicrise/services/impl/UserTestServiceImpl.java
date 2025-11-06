@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
@@ -12,6 +11,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.models.mappers.UserAnswerMapper;
@@ -272,11 +272,11 @@ public class UserTestServiceImpl implements IUserTestService {
     }
 
     @Override
-    public LearnerTestPartsResponse getTestByIdAndParts(Long testId, LearnerTestRequest learnerTestRequest) {
-        Test test = testRepository.findById(testId)
+    public LearnerTestPartsResponse getTestByIdAndParts(Long testId, List<Long> parts) {
+        Test test = testRepository.findByIdAndStatus(testId, ETestStatus.APPROVED)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
 
-        List<LearnerTestPartResponse> partResponses = questionGroupService.getQuestionGroupsByTestIdGroupByParts(testId, learnerTestRequest.getParts());
+        List<LearnerTestPartResponse> partResponses = questionGroupService.getQuestionGroupsByTestIdGroupByParts(testId, parts);
         LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(test);
         learnerTestPartsResponse.setPartResponses(partResponses);
         return learnerTestPartsResponse;

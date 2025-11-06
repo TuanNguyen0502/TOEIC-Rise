@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
@@ -22,5 +21,5 @@ public interface IUserTestService {
 
     List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email);
 
-    LearnerTestPartsResponse getTestByIdAndParts(Long testId, LearnerTestRequest learnerTestRequest);
+    LearnerTestPartsResponse getTestByIdAndParts(Long testId, List<Long> parts);
 }

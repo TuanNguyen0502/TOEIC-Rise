@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
-import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
@@ -48,7 +47,7 @@ public class UserTestController {
     }
 
     @GetMapping(value = "/exam/{id}")
-    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @Valid @ModelAttribute LearnerTestRequest learnerTestRequest) {
-        return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, learnerTestRequest));
+    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
+        return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, parts));
     }
 }

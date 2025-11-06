@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -36,4 +37,6 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
             "GROUP BY t.id, t.name, t.number_of_learner_tests, p.name, p.id " +
             "ORDER BY p.id", nativeQuery = true)
     List<Object[]> findListTagByIdOrderByPartName(@Param("id") Long id);
+
+    Optional<Test> findByIdAndStatus(Long id, ETestStatus status);
 }
