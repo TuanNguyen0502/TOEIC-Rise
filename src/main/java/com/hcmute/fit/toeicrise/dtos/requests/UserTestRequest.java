@@ -1,6 +1,9 @@
 package com.hcmute.fit.toeicrise.dtos.requests;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +16,7 @@ public class UserTestRequest {
     @NotNull(message = MessageConstant.TEST_ID_NOT_NULL)
     private Long testId;
 
-    @NotNull(message = MessageConstant.TIME_SPENT_NOT_NULL)
+    @Min(value = 1, message = MessageConstant.TIME_SPENT_MIN)
     private int timeSpent; // in seconds
 
     // List of parts the user has completed
@@ -21,6 +24,6 @@ public class UserTestRequest {
     // parts == null is full test mode
     private List<String> parts; // Part 1, Part 2, ...
 
-    @NotNull(message = MessageConstant.ANSWERS_NOT_NULL)
-    private List<UserAnswerRequest> answers;
+    @NotEmpty(message = MessageConstant.ANSWERS_NOT_EMPTY)
+    private List<@Valid UserAnswerRequest> answers;
 }
