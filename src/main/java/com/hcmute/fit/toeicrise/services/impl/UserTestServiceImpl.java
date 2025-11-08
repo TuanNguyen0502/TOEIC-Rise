@@ -132,7 +132,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId) {
-        UserTest userTest = userTestRepository.findById(userTestId)
+        UserTest userTest = userTestRepository.findByIdWithAnswersAndQuestions(userTestId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
 
         // Verify that the userTest belongs to the user with the given email
