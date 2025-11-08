@@ -19,7 +19,7 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     List<Test> findAllByTestSet_Id(Long testSetId);
 
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
-            "ut.id, ut.createdAt, ut.parts, ut.correctAnswers, ut.totalScore, ut.timeSpent) " +
+            "ut.id, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
             "FROM Test t " +
             "INNER JOIN UserTest ut ON t.id = ut.test.id " +
             "WHERE t.id = :id AND ut.user.account.email = :email")
