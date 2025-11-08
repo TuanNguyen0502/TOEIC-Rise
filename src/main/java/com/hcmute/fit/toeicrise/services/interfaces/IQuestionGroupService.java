@@ -11,6 +11,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface IQuestionGroupService {
@@ -29,6 +30,8 @@ public interface IQuestionGroupService {
     QuestionGroup getQuestionGroupEntity(Long questionGroupId);
 
     String getPartNameByQuestionGroupId(Long questionGroupId);
+
+    Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds);
 
     List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids);
 

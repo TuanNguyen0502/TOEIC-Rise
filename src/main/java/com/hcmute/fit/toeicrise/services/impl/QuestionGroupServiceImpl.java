@@ -125,6 +125,16 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
+    public Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds) {
+        return questionGroupRepository.findAllById(questionGroupIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        QuestionGroup::getId,
+                        qg -> qg.getPart().getName()
+                ));
+    }
+
+    @Override
     public List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids) {
         return questionGroupRepository.findAllByIdInFetchQuestions(ids);
     }
