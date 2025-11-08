@@ -221,22 +221,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Transactional(readOnly = true)
     @Override
     public List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds) {
-        List<LearnerTestPartResponse> responses = new ArrayList<>();
-        for (Long partId : partIds) {
-            List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_IdOrderByPositionAsc(testId, partId);
-
-            Part part = questionGroups.getFirst().getPart();
-            List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroups.stream()
-                    .map(group -> {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_IdOrderByPositionAsc(testId, partIds);
+        Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream().collect(Collectors.groupingBy(QuestionGroup::getPart));
+        return groupedByPart.entrySet().stream().map(entry -> {
+            Part part = entry.getKey();
+            List<QuestionGroup> questionGroupList = entry.getValue();
+            List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroupList
+                    .stream().map(group -> {
                         List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
-                        return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
-                    })
-                    .toList();
+                        return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);}).toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
             partResponse.setQuestionGroups(questionGroupResponses);
-            responses.add(partResponse);
-        }
-        responses.sort(Comparator.comparing(LearnerTestPartResponse::getPartName));
-        return responses;
+            return partResponse;
+        }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
     }
 }

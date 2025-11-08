@@ -13,7 +13,13 @@ import java.util.Set;
 public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Long> {
     List<QuestionGroup> findByTest_IdOrderByPositionAsc(Long id);
 
-    List<QuestionGroup> findByTest_IdAndPart_IdOrderByPositionAsc(Long testId, Long partId);
+    @Query("SELECT DISTINCT qg " +
+            "FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH  qg.questions q " +
+            "LEFT JOIN FETCH qg.part p " +
+            "WHERE qg.test.id = :testId AND p.id IN :partIds " +
+            "ORDER BY p.id, qg.position, q.position")
+    List<QuestionGroup> findByTest_IdAndPart_IdOrderByPositionAsc(Long testId, List<Long> partIds);
 
     @Query("SELECT DISTINCT qg FROM QuestionGroup qg " +
             "LEFT JOIN FETCH qg.questions " +
