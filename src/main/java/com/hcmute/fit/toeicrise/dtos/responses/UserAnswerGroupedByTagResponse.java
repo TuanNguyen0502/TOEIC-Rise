@@ -12,5 +12,13 @@ public class UserAnswerGroupedByTagResponse {
     private int correctAnswers;
     private int wrongAnswers;
     private double correctPercent;
-    private List<Long> userAnswerIds;
+    private List<UserAnswerGroupedByTagResponse.UserAnswerOverallResponse> userAnswerOverallResponses;
+
+    @Data
+    @Builder
+    public class UserAnswerOverallResponse {
+        private Long userAnswerId;
+        private int position;
+        private boolean isCorrect;
+    }
 }
