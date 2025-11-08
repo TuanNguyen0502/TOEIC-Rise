@@ -43,8 +43,15 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
-        UserTest userTest = userTestRepository.findByIdWithAnswersQuestionsAndTags(userTestId)
+        UserTest userTest = userTestRepository.findByIdWithAnswersAndQuestions(userTestId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
+
+        // Get all tags involved in the user answers at once for better performance
+        int totalTags = userTest.getUserAnswers().stream()
+                .flatMap(ua -> ua.getQuestion().getTags().stream())
+                .map(Tag::getName)
+                .collect(Collectors.toSet())
+                .size();
 
         // Verify that the userTest belongs to the user with the given email
         if (!userTest.getUser().getAccount().getEmail().equals(email)) {
