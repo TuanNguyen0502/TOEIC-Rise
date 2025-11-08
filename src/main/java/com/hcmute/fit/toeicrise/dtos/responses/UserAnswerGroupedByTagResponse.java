@@ -16,7 +16,7 @@ public class UserAnswerGroupedByTagResponse {
 
     @Data
     @Builder
-    public class UserAnswerOverallResponse {
+    public static class UserAnswerOverallResponse {
         private Long userAnswerId;
         private int position;
         private boolean isCorrect;
