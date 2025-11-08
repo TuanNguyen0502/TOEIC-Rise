@@ -55,10 +55,19 @@ public class UserTestServiceImpl implements IUserTestService {
         Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>(Map.of());
         List<UserAnswer> userAnswers = userTest.getUserAnswers();
 
+        // Get unique question group IDs from user answers
+        Set<Long> questionGroupIds = userAnswers.stream()
+                .map(UserAnswer::getQuestionGroupId)
+                .collect(Collectors.toSet());
+
+        // Get part names by question group IDs
+        Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(questionGroupIds);
+
         // Group user answers by part and tag
         Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
                 .collect(Collectors.groupingBy(ua ->
-                        questionGroupService.getPartNameByQuestionGroupId(ua.getQuestionGroupId())));
+                        partNamesByGroupId.get(ua.getQuestionGroupId())
+                ));
 
         // Process each part
         for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
@@ -247,7 +256,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 if (question == null) {
                     throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
                 }
-                
+
                 boolean isCorrect = answerRequest.getAnswer() != null && answerRequest.getAnswer().equals(question.getCorrectOption());
                 if (isCorrect) {
                     correctAnswers++;
