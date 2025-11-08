@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -17,6 +18,15 @@ public interface UserAnswerMapper {
                 .position(question.getPosition())
                 .correctAnswer(question.getCorrectOption())
                 .userAnswer(userAnswer.getAnswer())
+                .build();
+    }
+
+    default UserAnswerGroupedByTagResponse.UserAnswerOverallResponse toUserAnswerGroupedByTagResponse(UserAnswer userAnswer) {
+        Question question = userAnswer.getQuestion();
+        return UserAnswerGroupedByTagResponse.UserAnswerOverallResponse.builder()
+                .userAnswerId(userAnswer.getId())
+                .position(question.getPosition())
+                .isCorrect(question.getCorrectOption().equals(userAnswer.getAnswer()))
                 .build();
     }
 

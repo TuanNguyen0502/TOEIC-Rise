@@ -43,7 +43,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
-        UserTest userTest = userTestRepository.findById(userTestId)
+        UserTest userTest = userTestRepository.findByIdWithAnswersAndQuestions(userTestId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
 
         // Verify that the userTest belongs to the user with the given email
@@ -94,14 +94,16 @@ public class UserTestServiceImpl implements IUserTestService {
                 int correctAnswers = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
                 int wrongAnswers = answersForTag.size() - correctAnswers;
                 double correctPercent = answersForTag.isEmpty() ? 0.0 : ((double) correctAnswers / answersForTag.size()) * 100;
-                List<Long> userAnswerIds = answersForTag.stream().map(UserAnswer::getId).toList();
+                List<UserAnswerGroupedByTagResponse.UserAnswerOverallResponse> userAnswerOverallResponses = answersForTag.stream()
+                        .map(userAnswerMapper::toUserAnswerGroupedByTagResponse)
+                        .toList();
 
                 groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
                         .tag(tag)
                         .correctAnswers(correctAnswers)
                         .wrongAnswers(wrongAnswers)
                         .correctPercent(correctPercent)
-                        .userAnswerIds(userAnswerIds)
+                        .userAnswerOverallResponses(userAnswerOverallResponses)
                         .build());
             }
 
@@ -117,7 +119,7 @@ public class UserTestServiceImpl implements IUserTestService {
                             .correctAnswers(totalCorrect)
                             .wrongAnswers(totalWrong)
                             .correctPercent(totalPercent)
-                            .userAnswerIds(null)
+                            .userAnswerOverallResponses(null)
                             .build()
             );
 
@@ -130,7 +132,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId) {
-        UserTest userTest = userTestRepository.findById(userTestId)
+        UserTest userTest = userTestRepository.findByIdWithAnswersAndQuestions(userTestId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
 
         // Verify that the userTest belongs to the user with the given email
