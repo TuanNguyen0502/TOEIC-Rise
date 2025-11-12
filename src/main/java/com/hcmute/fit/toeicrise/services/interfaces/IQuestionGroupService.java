@@ -35,6 +35,8 @@ public interface IQuestionGroupService {
 
     List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids);
 
+    void checkQuestionGroupsExistByIds(List<Long> ids);
+
     boolean isListeningPart(Part part);
 
     @Transactional(readOnly = true)
