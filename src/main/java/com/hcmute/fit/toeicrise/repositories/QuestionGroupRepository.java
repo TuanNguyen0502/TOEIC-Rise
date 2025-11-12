@@ -25,4 +25,7 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
             "LEFT JOIN FETCH qg.questions " +
             "WHERE qg.id IN :ids")
     List<QuestionGroup> findAllByIdInFetchQuestions(@Param("ids") Set<Long> ids);
+
+    @Query("SELECT DISTINCT qg.id FROM QuestionGroup qg WHERE qg.id IN :ids")
+    Set<Long> findExistingIdsByIds(List<Long> ids);
 }

@@ -167,6 +167,13 @@ public class UserTestServiceImpl implements IUserTestService {
         Test test = testRepository.findById(request.getTestId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
 
+        // Validate that all question groups in the answers exist
+        List<Long> questionGroupIds = request.getAnswers().stream()
+                .map(UserAnswerRequest::getQuestionGroupId)
+                .distinct()
+                .toList();
+        questionGroupService.checkQuestionGroupsExistByIds(questionGroupIds);
+
         UserTest userTest = UserTest.builder()
                 .user(user)
                 .test(test)

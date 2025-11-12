@@ -23,7 +23,7 @@ public class UserAnswerServiceImpl implements IUserAnswerService {
     public UserAnswerDetailResponse getUserAnswerDetailResponse(Long userAnswerId) {
         UserAnswer userAnswer = userAnswerRepository.findById(userAnswerId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Answer"));
-        QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(userAnswer.getQuestion().getId());
+        QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(userAnswer.getQuestionGroupId());
         return userAnswerMapper.toUserAnswerDetailResponse(userAnswer, questionGroup);
     }
 }

@@ -139,6 +139,16 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return questionGroupRepository.findAllByIdInFetchQuestions(ids);
     }
 
+    @Override
+    public void checkQuestionGroupsExistByIds(List<Long> ids) {
+        Set<Long> existingIds = questionGroupRepository.findExistingIdsByIds(ids);
+        for (Long id : ids) {
+            if (!existingIds.contains(id)) {
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+            }
+        }
+    }
+
 
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
@@ -239,7 +249,8 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroupList
                     .stream().map(group -> {
                         List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
-                        return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);}).toList();
+                        return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
+                    }).toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
             partResponse.setQuestionGroups(questionGroupResponses);
             return partResponse;
