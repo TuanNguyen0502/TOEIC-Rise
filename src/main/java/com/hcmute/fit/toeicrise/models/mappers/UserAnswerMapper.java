@@ -34,6 +34,7 @@ public interface UserAnswerMapper {
                                                                 QuestionGroup questionGroup) {
         Question question = userAnswer.getQuestion();
         return UserAnswerDetailResponse.builder()
+                .userAnswer(userAnswer.getAnswer())
                 .position(question.getPosition())
                 .tags(question.getTags().stream().map(Tag::getName).toList())
                 .audioUrl(questionGroup.getAudioUrl())

@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class UserAnswerDetailResponse {
+    private String userAnswer;
     private int position;
     private List<String> tags;
     private String audioUrl;
