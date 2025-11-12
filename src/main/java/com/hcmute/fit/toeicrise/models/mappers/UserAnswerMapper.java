@@ -9,6 +9,9 @@ import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
 import org.mapstruct.Mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UserAnswerMapper {
     default UserAnswerOverallResponse toUserAnswerOverallResponse(UserAnswer userAnswer) {
@@ -33,6 +36,14 @@ public interface UserAnswerMapper {
     default UserAnswerDetailResponse toUserAnswerDetailResponse(UserAnswer userAnswer,
                                                                 QuestionGroup questionGroup) {
         Question question = userAnswer.getQuestion();
+        List<String> options = new ArrayList<>();
+        if (questionGroup.getPart().getName().contains("2")) {
+            options.add(null);
+            options.add(null);
+            options.add(null);
+        } else {
+            options = question.getOptions();
+        }
         return UserAnswerDetailResponse.builder()
                 .userAnswer(userAnswer.getAnswer())
                 .position(question.getPosition())
@@ -42,7 +53,7 @@ public interface UserAnswerMapper {
                 .passage(questionGroup.getPassage())
                 .transcript(questionGroup.getTranscript())
                 .questionContent(question.getContent())
-                .options(question.getOptions())
+                .options(options)
                 .correctOption(question.getCorrectOption())
                 .explanation(question.getExplanation())
                 .build();
