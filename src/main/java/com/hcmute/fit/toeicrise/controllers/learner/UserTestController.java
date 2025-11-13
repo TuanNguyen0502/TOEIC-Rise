@@ -50,4 +50,9 @@ public class UserTestController {
     public ResponseEntity<?> getTestByParts(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
         return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, parts));
     }
+
+    @GetMapping("/detail/{userTestId}")
+    public ResponseEntity<?> getTestDetail(@PathVariable Long userTestId) {
+        return ResponseEntity.ok(userTestService.getUserTestDetail(userTestId));
+    }
 }

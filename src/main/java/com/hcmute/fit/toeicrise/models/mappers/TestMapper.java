@@ -24,6 +24,7 @@ public interface TestMapper {
     TestDetailResponse toDetailResponse(Test test, @Context List<PartResponse> partResponses);
 
     @Mapping(source = "name", target = "testName")
+    @Mapping(target = "partResponses", ignore = true)
     LearnerTestPartsResponse toLearnerTestPartsResponse(Test test);
 
     default LearnerTestDetailResponse toLearnerTestDetailResponse(List<Object[]> objects, @Context PartMapper partMapper) {
