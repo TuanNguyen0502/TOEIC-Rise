@@ -295,7 +295,7 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         userTest.setCorrectAnswers(correctAnswers);
-        userTest.setCorrectPercent((double) correctAnswers / answers.size());
+        userTest.setCorrectPercent(((double) correctAnswers / answers.size()) * 100);
         userTest.setListeningCorrectAnswers(listeningCorrect);
         userTest.setReadingCorrectAnswers(readingCorrect);
         userTest.setListeningScore(estimatedListeningScoreMap.get(listeningCorrect));
