@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
@@ -40,6 +41,9 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserTestMapper userTestMapper;
     private final TestMapper testMapper;
     private final UserAnswerMapper userAnswerMapper;
+
+    private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
+    private final Map<Integer, Integer> estimatedListeningScoreMap = Constant.estimatedListeningScoreMap;
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
@@ -291,9 +295,12 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         userTest.setCorrectAnswers(correctAnswers);
-        userTest.setCorrectPercent((double) correctAnswers / answers.size());
+        userTest.setCorrectPercent(((double) correctAnswers / answers.size()) * 100);
         userTest.setListeningCorrectAnswers(listeningCorrect);
         userTest.setReadingCorrectAnswers(readingCorrect);
+        userTest.setListeningScore(estimatedListeningScoreMap.get(listeningCorrect));
+        userTest.setReadingScore(estimatedReadingScoreMap.get(readingCorrect));
+        userTest.setTotalScore(userTest.getListeningScore() + userTest.getReadingScore());
     }
 
     @Override
