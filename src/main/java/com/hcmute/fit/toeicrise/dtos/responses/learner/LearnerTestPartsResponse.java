@@ -9,8 +9,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class
-LearnerTestPartsResponse {
+public class LearnerTestPartsResponse {
     private Long id;
     private String testName;
     private List<LearnerTestPartResponse> partResponses;

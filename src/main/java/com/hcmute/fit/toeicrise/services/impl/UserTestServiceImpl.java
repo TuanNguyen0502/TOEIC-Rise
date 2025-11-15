@@ -6,17 +6,13 @@ import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
-import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
-import com.hcmute.fit.toeicrise.models.mappers.UserAnswerMapper;
-import com.hcmute.fit.toeicrise.models.mappers.UserTestMapper;
+import com.hcmute.fit.toeicrise.models.mappers.*;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
@@ -41,6 +37,8 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserTestMapper userTestMapper;
     private final TestMapper testMapper;
     private final UserAnswerMapper userAnswerMapper;
+    private final PartMapper partMapper;
+    private final QuestionGroupMapper questionGroupMapper;
 
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
     private final Map<Integer, Integer> estimatedListeningScoreMap = Constant.estimatedListeningScoreMap;
@@ -310,6 +308,44 @@ public class UserTestServiceImpl implements IUserTestService {
 
         List<LearnerTestPartResponse> partResponses = questionGroupService.getQuestionGroupsByTestIdGroupByParts(testId, parts);
         LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(test);
+        learnerTestPartsResponse.setPartResponses(partResponses);
+        return learnerTestPartsResponse;
+    }
+
+    @Override
+    public LearnerTestPartsResponse getUserTestDetail(Long userTestId) {
+        UserTest userTest = userTestRepository.findUserTestById(userTestId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
+        LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(userTest.getTest());
+        Map<Part, List<UserAnswer>> answerByPart = userTest.getUserAnswers().stream()
+                .collect(Collectors.groupingBy(ua -> ua.getQuestion().getQuestionGroup().getPart()));
+        List<LearnerTestPartResponse> partResponses = answerByPart.entrySet()
+                .stream().map(entry -> {
+                    Part part = entry.getKey();
+                    List<UserAnswer> answers = entry.getValue();
+                    Map<QuestionGroup, List<UserAnswer>> answerByQuestionGroups = answers.stream()
+                            .collect(Collectors.groupingBy(ua -> ua.getQuestion().getQuestionGroup()));
+
+                    List<LearnerTestQuestionGroupResponse> questionGroupResponses = answerByQuestionGroups.entrySet().stream()
+                            .sorted(Comparator.comparing(e -> e.getKey().getPosition()))
+                            .map(groupEntry -> {
+                                QuestionGroup questionGroup = groupEntry.getKey();
+                                List<UserAnswer> userAnswers = groupEntry.getValue();
+
+                                List<LearnerAnswerResponse> questionAndAnswers = userAnswers.stream()
+                                        .sorted(Comparator.comparing(ua -> ua.getQuestion().getPosition()))
+                                        .map(userAnswerMapper::toLearnerAnswerResponse)
+                                        .toList();
+                                List<Object> questionsAsObject = new ArrayList<>(questionAndAnswers);
+                                LearnerTestQuestionGroupResponse questionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(questionGroup);
+                                questionGroupResponse.setQuestions(questionsAsObject);
+                                return questionGroupResponse;
+
+                            }).toList();
+                    LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
+                    partResponse.setQuestionGroups(questionGroupResponses);
+                    return partResponse;
+                }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName))
+                .toList();
         learnerTestPartsResponse.setPartResponses(partResponses);
         return learnerTestPartsResponse;
     }

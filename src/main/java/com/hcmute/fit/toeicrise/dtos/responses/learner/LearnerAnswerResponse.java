@@ -9,9 +9,13 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearnerTestQuestionResponse {
+public class LearnerAnswerResponse {
     private Long id;
     private Long position;
     private String content;
     private List<String> options;
+    private String userAnswer;
+    private String correctOption;
+    private String explanation;
+    private Boolean isCorrect;
 }

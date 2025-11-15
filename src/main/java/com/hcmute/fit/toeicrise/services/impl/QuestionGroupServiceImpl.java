@@ -9,10 +9,12 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupR
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Part;
+import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
+import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
@@ -36,6 +38,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final CloudinaryUtil cloudinaryUtil;
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
+    private final QuestionMapper questionMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -242,14 +245,23 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Override
     public List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds) {
         List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_IdOrderByPositionAsc(testId, partIds);
-        Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream().collect(Collectors.groupingBy(QuestionGroup::getPart));
+        Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream()
+                .distinct().collect(Collectors.groupingBy(QuestionGroup::getPart));
         return groupedByPart.entrySet().stream().map(entry -> {
             Part part = entry.getKey();
             List<QuestionGroup> questionGroupList = entry.getValue();
             List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroupList
-                    .stream().map(group -> {
-                        List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
-                        return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
+                    .stream()
+                    .sorted(Comparator.comparing(QuestionGroup::getPosition))
+                    .map(group -> {
+                        List<LearnerTestQuestionResponse> questionResponses = group.getQuestions()
+                                .stream().sorted(Comparator.comparing(Question::getPosition))
+                                .map(questionMapper::toLearnerTestQuestionResponse)
+                                .toList();
+                        List<Object> questionAsObject = new ArrayList<>(questionResponses);
+                        LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse =  questionGroupMapper.toLearnerTestQuestionGroupResponse(group);
+                        learnerTestQuestionGroupResponse.setQuestions(questionAsObject);
+                        return learnerTestQuestionGroupResponse;
                     }).toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
             partResponse.setQuestionGroups(questionGroupResponses);

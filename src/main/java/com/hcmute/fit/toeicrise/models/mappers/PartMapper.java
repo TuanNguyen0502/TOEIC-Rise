@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface PartMapper {
     PartResponse toPartResponse(Part part, @Context List<QuestionGroupResponse> questionGroups);
     @Mapping(source = "name", target = "partName")
+    @Mapping(target = "questionGroups", ignore = true)
     LearnerTestPartResponse toLearnerTestPartResponse(Part part);
 
     @AfterMapping

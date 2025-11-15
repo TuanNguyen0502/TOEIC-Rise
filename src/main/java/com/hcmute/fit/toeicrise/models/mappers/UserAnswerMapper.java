@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerAnswerResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
@@ -56,6 +57,20 @@ public interface UserAnswerMapper {
                 .options(options)
                 .correctOption(question.getCorrectOption())
                 .explanation(question.getExplanation())
+                .build();
+    }
+
+    default LearnerAnswerResponse toLearnerAnswerResponse(UserAnswer userAnswer){
+        return LearnerAnswerResponse.builder()
+                .id(userAnswer.getId())
+                .position(userAnswer.getQuestion().getPosition().longValue())
+                .content(userAnswer.getQuestion().getContent())
+                .options(userAnswer.getQuestion().getOptions())
+                .correctOption(userAnswer.getQuestion().getCorrectOption())
+                .explanation(userAnswer.getQuestion().getExplanation())
+                .userAnswer(userAnswer.getAnswer())
+                .correctOption(userAnswer.getQuestion().getCorrectOption())
+                .isCorrect(userAnswer.getIsCorrect())
                 .build();
     }
 }
