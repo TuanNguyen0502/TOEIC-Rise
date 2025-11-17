@@ -6,11 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
-public class ChatRequest {
+public class ChatAboutQuestionRequest {
     @NotBlank(message = MessageConstant.CHAT_CONVERSATION_ID_NOT_BLANK)
     @Pattern(regexp = Constant.CHAT_CONVERSATION_ID_PATTERN, message = MessageConstant.CHAT_CONVERSATION_ID_INVALID)
     private String conversationId;
@@ -18,5 +17,5 @@ public class ChatRequest {
     @NotBlank(message = MessageConstant.CHAT_MESSAGE_NOT_BLANK)
     private String message;
 
-    private MultipartFile image;
+    private Long userAnswerId;
 }
