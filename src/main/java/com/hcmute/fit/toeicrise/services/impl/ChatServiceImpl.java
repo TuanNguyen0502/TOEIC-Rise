@@ -149,7 +149,7 @@ public class ChatServiceImpl implements IChatService {
     public Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest) {
         Mono<String> promptMono;
 
-        if (chatAboutQuestionRequest.getUserAnswerId() != null) {
+        if (chatAboutQuestionRequest.getConversationId() == null || chatAboutQuestionRequest.getConversationId().isEmpty()) {
             promptMono = Mono.fromCallable(() -> {
                 UserAnswer userAnswer = userAnswerRepository.findById(chatAboutQuestionRequest.getUserAnswerId())
                         .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
