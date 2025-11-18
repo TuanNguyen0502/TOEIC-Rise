@@ -22,7 +22,8 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
             "ut.id, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
             "FROM Test t " +
             "INNER JOIN UserTest ut ON t.id = ut.test.id " +
-            "WHERE t.id = :id AND ut.user.account.email = :email")
+            "WHERE t.id = :id AND ut.user.account.email = :email " +
+            "ORDER BY ut.createdAt DESC ")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
 
     @Query(value = "SELECT t.id, t.name, t.number_of_learner_tests, p.name, p.id," +

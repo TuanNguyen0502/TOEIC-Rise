@@ -53,6 +53,6 @@ public class UserTestController {
 
     @GetMapping("/detail/{userTestId}")
     public ResponseEntity<?> getTestDetail(@PathVariable Long userTestId) {
-        return ResponseEntity.ok(userTestService.getUserTestDetail(userTestId));
+        return ResponseEntity.ok(userTestService.getUserTestDetail(userTestId, SecurityUtils.getCurrentUser()));
     }
 }
