@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatbotRatingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -26,6 +28,7 @@ import java.time.Duration;
 @RequestMapping("/learner/chatbot")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ChatbotController {
     private final IChatService chatService;
     private final IChatTitleService chatTitleService;
@@ -82,7 +85,7 @@ public class ChatbotController {
     }
 
     @PostMapping(path = "/chat-about-question", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChatbotResponse> chatAboutQuestion(@ModelAttribute ChatAboutQuestionRequest chatAboutQuestionRequest) {
+    public Flux<ChatbotResponse> chatAboutQuestion(@Valid @ModelAttribute ChatAboutQuestionRequest chatAboutQuestionRequest) {
         return chatService.chatAboutQuestion(chatAboutQuestionRequest).delayElements(Duration.ofMillis(50));
     }
 

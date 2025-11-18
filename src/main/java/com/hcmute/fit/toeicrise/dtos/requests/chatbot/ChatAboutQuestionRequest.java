@@ -10,7 +10,6 @@ import lombok.Data;
 @Data
 @Builder
 public class ChatAboutQuestionRequest {
-    @NotBlank(message = MessageConstant.CHAT_CONVERSATION_ID_NOT_BLANK)
     @Pattern(regexp = Constant.CHAT_CONVERSATION_ID_PATTERN, message = MessageConstant.CHAT_CONVERSATION_ID_INVALID)
     private String conversationId;
 
