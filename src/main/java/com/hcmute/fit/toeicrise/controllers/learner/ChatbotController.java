@@ -1,9 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatTitleUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatbotRatingRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -82,6 +79,11 @@ public class ChatbotController {
                 return Flux.error(new AppException(ErrorCode.IMAGE_PROCESSING_ERROR));
             }
         }
+    }
+
+    @PostMapping(path = "/chat-about-question", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> chatAboutQuestion(@ModelAttribute ChatAboutQuestionRequest chatAboutQuestionRequest) {
+        return chatService.chatAboutQuestion(chatAboutQuestionRequest).delayElements(Duration.ofMillis(50));
     }
 
     @PostMapping("/generate-title")
