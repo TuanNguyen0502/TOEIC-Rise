@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
-import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
@@ -15,6 +15,7 @@ import java.util.Optional;
 @Mapper(componentModel = "spring")
 public interface PartMapper {
     PartResponse toPartResponse(Part part, @Context List<QuestionGroupResponse> questionGroups);
+
     @Mapping(source = "name", target = "partName")
     @Mapping(target = "questionGroups", ignore = true)
     LearnerTestPartResponse toLearnerTestPartResponse(Part part);
@@ -25,7 +26,7 @@ public interface PartMapper {
         dto.setQuestionGroups(questionGroups);
     }
 
-    default LearnerPartResponse mapToLearnerPartResponse(Object[] objects){
+    default LearnerPartResponse mapToLearnerPartResponse(Object[] objects) {
         String tagNamesStr = (String) objects[5];
         List<String> tagNames = Optional.ofNullable(tagNamesStr)
                 .filter(s -> !s.isEmpty())

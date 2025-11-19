@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerDetailResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserAnswerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

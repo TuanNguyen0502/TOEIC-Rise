@@ -1,6 +1,7 @@
-package com.hcmute.fit.toeicrise.dtos.requests;
+package com.hcmute.fit.toeicrise.dtos.requests.usertest;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
+import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;

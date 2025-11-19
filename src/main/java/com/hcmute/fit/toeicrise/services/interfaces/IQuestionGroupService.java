@@ -1,13 +1,13 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
-import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

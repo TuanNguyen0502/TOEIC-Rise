@@ -1,12 +1,16 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
-import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.*;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
@@ -83,7 +87,7 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public boolean deleteTestById(Long id) {
+    public boolean changeTestStatusById(Long id) {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
         test.setStatus(ETestStatus.DELETED);
@@ -214,7 +218,7 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public PageResponse searchTestsByName(com.hcmute.fit.toeicrise.dtos.requests.PageRequest request) {
+    public PageResponse searchTestsByName(com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest request) {
         Specification<Test> testSpecification = (_, _, cb) -> cb.conjunction();
         testSpecification = testSpecification.and(TestSpecification.testSetIdsIn(request.getSort()));
 

@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.controllers;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
-import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UserChangePasswordRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.user.ProfileUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import jakarta.validation.Valid;

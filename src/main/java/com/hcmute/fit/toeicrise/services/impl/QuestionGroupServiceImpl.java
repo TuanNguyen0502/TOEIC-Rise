@@ -2,8 +2,8 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
@@ -17,9 +17,9 @@ import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
@@ -259,7 +259,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                                 .map(questionMapper::toLearnerTestQuestionResponse)
                                 .toList();
                         List<Object> questionAsObject = new ArrayList<>(questionResponses);
-                        LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse =  questionGroupMapper.toLearnerTestQuestionGroupResponse(group);
+                        LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(group);
                         learnerTestQuestionGroupResponse.setQuestions(questionAsObject);
                         return learnerTestQuestionGroupResponse;
                     }).toList();

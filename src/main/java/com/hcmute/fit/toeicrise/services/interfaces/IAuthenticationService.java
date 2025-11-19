@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.requests.authentication.*;
+import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;

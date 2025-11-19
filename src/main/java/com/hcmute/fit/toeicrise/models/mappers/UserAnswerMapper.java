@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerAnswerResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -60,7 +60,7 @@ public interface UserAnswerMapper {
                 .build();
     }
 
-    default LearnerAnswerResponse toLearnerAnswerResponse(UserAnswer userAnswer){
+    default LearnerAnswerResponse toLearnerAnswerResponse(UserAnswer userAnswer) {
         return LearnerAnswerResponse.builder()
                 .id(userAnswer.getId())
                 .position(userAnswer.getQuestion().getPosition().longValue())

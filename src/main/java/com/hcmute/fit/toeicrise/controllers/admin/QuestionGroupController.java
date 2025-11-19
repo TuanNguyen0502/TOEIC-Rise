@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

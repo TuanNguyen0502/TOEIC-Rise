@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.requests;
+package com.hcmute.fit.toeicrise.dtos.requests.test;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
