@@ -23,6 +23,6 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
             "LEFT JOIN FETCH ua.question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +
             "LEFT JOIN FETCH qg.part p " +
-            "WHERE ut.id = :id ")
-    Optional<UserTest> findUserTestById(@Param("id") Long id);
+            "WHERE ut.id = :id AND ut.user.account.email = :email")
+    Optional<UserTest> findUserTestById(@Param("id") Long id, @Param("email") String email);
 }

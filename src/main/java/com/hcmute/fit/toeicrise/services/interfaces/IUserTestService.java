@@ -23,5 +23,5 @@ public interface IUserTestService {
 
     LearnerTestPartsResponse getTestByIdAndParts(Long testId, List<Long> parts);
 
-    LearnerTestPartsResponse getUserTestDetail(Long userTestId);
+    LearnerTestPartsResponse getUserTestDetail(Long userTestId, String email);
 }

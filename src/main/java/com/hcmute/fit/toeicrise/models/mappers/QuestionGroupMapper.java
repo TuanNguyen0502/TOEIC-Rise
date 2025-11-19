@@ -14,6 +14,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface QuestionGroupMapper {
+    @Mapping(target = "position", source = "position")
     LearnerTestQuestionGroupResponse toLearnerTestQuestionGroupResponse(QuestionGroup questionGroup);
 
     default QuestionGroupResponse toResponse(QuestionGroup questionGroup, List<QuestionResponse> questions) {

@@ -15,5 +15,6 @@ public class LearnerTestQuestionGroupResponse {
     private String imageUrl;
     private String passage;
     private Long position;
+    private String transcript;
     List<Object> questions;
 }
