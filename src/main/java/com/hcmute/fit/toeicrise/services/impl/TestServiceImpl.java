@@ -78,7 +78,6 @@ public class TestServiceImpl implements ITestService {
 
         // Update fields
         existingTest.setName(testUpdateRequest.getName());
-        existingTest.setStatus(testUpdateRequest.getStatus());
         Test updatedTest = testRepository.save(existingTest);
         return testMapper.toResponse(updatedTest);
     }
@@ -199,10 +198,9 @@ public class TestServiceImpl implements ITestService {
                 List<Tag> tags = tagService.getTagsFromString(dto.getTags());
                 questionService.createQuestion(dto, questionGroup, tags);
             }
-        } catch (ConstraintViolationException e){
+        } catch (ConstraintViolationException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new AppException(ErrorCode.FILE_READ_ERROR);
         }
     }
@@ -231,7 +229,7 @@ public class TestServiceImpl implements ITestService {
         Page<LearnerTestResponse> testResponses = testRepository.findAll(testSpecification, pageable).map(testMapper::toLearnerTestResponse);
         return pageResponseMapper.toPageResponse(testResponses);
     }
-  
+
     @Override
     public LearnerTestDetailResponse getLearnerTestDetailById(Long id) {
         return testMapper.toLearnerTestDetailResponse(testRepository.findListTagByIdOrderByPartName(id), partMapper);
