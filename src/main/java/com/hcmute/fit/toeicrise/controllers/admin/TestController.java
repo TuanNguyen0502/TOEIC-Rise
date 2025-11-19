@@ -46,7 +46,7 @@ public class TestController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> changeStatus(@PathVariable Long id) {
-        return ResponseEntity.ok(testService.changeTestStatusById(id));
+    public ResponseEntity<?> changeStatus(@PathVariable Long id, @Valid @RequestParam ETestStatus status) {
+        return ResponseEntity.ok(testService.changeTestStatusById(id, status));
     }
 }

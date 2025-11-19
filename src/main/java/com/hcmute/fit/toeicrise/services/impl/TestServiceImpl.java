@@ -87,10 +87,10 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public boolean changeTestStatusById(Long id) {
+    public boolean changeTestStatusById(Long id, ETestStatus status) {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
-        test.setStatus(ETestStatus.DELETED);
+        test.setStatus(status);
         testRepository.save(test);
         return true;
     }

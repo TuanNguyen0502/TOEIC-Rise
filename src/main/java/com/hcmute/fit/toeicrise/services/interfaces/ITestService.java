@@ -23,7 +23,7 @@ public interface ITestService {
 
     TestResponse updateTest(Long id, TestUpdateRequest testUpdateRequest);
 
-    boolean changeTestStatusById(Long id);
+    boolean changeTestStatusById(Long id, ETestStatus status);
 
     @Async
     void deleteTestsByTestSetId(Long testSetId);
