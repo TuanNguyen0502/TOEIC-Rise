@@ -23,9 +23,11 @@ public interface IAuthenticationService {
 
     void resetPassword(ResetPasswordRequest resetPasswordRequest, String token);
 
-    RefreshTokenResponse refreshToken(String refreshToken, String email);
+    RefreshTokenResponse refreshToken(String refreshToken);
 
-    String createRefreshToken(String email);
+    String createRefreshTokenWithEmail(String email);
+
+    String createRefreshTokenWithRefreshToken(String refreshToken);
 
     long getRefreshTokenDurationMs();
 

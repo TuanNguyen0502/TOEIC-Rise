@@ -34,7 +34,7 @@ public class AuthenticationController {
         // 1. Xác thực người dùng và tạo JWT token
         LoginResponse loginResponse = authenticationServiceImpl.login(loginRequest);
         // 2. Tạo refresh token
-        String refreshToken = authenticationServiceImpl.createRefreshToken(loginRequest.getEmail());
+        String refreshToken = authenticationServiceImpl.createRefreshTokenWithEmail(loginRequest.getEmail());
         long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
         // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
         ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
@@ -58,12 +58,10 @@ public class AuthenticationController {
     @GetMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token") String refreshToken) {
         try {
-
-            String email = SecurityUtils.getCurrentUser();
             // 2. Tạo refresh token
-            RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken, email);
+            RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken);
             // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
-            String newRefreshToken = authenticationServiceImpl.createRefreshToken(email);
+            String newRefreshToken = authenticationServiceImpl.createRefreshTokenWithRefreshToken(refreshToken);
             long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
             // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
             ResponseCookie responseCookie = ResponseCookie.from("refresh_token", newRefreshToken)

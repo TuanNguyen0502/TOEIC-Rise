@@ -296,8 +296,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    public RefreshTokenResponse refreshToken(String refreshToken, String email) {
-        Account account = accountRepository.findByRefreshTokenAndEmail(refreshToken, email)
+    public RefreshTokenResponse refreshToken(String refreshToken) {
+        Account account = accountRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         if (account.getRefreshTokenExpiryDate().isBefore(Instant.now())) {
@@ -313,7 +313,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    public String createRefreshToken(String email) {
+    public String createRefreshTokenWithEmail(String email) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
         // Create new refresh token
@@ -322,6 +322,18 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setRefreshTokenExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         accountRepository.save(account);
         return refreshToken;
+    }
+
+    @Override
+    public String createRefreshTokenWithRefreshToken(String refreshToken) {
+        Account account = accountRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+        // Create new refresh token
+        String newRefreshToken = UUID.randomUUID().toString();
+        account.setRefreshToken(newRefreshToken);
+        account.setRefreshTokenExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        accountRepository.save(account);
+        return newRefreshToken;
     }
 
     @Override
