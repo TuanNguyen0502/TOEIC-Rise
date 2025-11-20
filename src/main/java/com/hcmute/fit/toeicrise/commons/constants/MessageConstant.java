@@ -39,7 +39,6 @@ public class MessageConstant {
     // Test related messages
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
-    public static final String TEST_STATUS_NOT_NULL = "Test's status must not be null.";
     // User related messages
     public static final String EMAIL_NOT_NULL = "Email must not be null.";
     public static final String EMAIL_NOT_BLANK = "Email must not be blank.";

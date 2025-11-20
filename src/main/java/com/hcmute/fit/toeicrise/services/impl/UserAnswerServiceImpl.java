@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.UserAnswer;

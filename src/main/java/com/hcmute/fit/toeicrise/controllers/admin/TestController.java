@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
-import com.hcmute.fit.toeicrise.dtos.requests.TestRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ public class TestController {
         testService.importTest(file, testRequest);
         return ResponseEntity.ok("Test imported");
     }
-  
+
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@RequestParam(required = false) String name,
                                          @RequestParam(required = false) ETestStatus status,
@@ -45,8 +45,8 @@ public class TestController {
         return ResponseEntity.ok(testService.updateTest(id, testUpdateRequest));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTest(@PathVariable Long id) {
-        return ResponseEntity.ok(testService.deleteTestById(id));
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> changeStatus(@PathVariable Long id, @Valid @RequestParam ETestStatus status) {
+        return ResponseEntity.ok(testService.changeTestStatusById(id, status));
     }
 }

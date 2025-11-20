@@ -1,21 +1,24 @@
-package com.hcmute.fit.toeicrise.dtos.requests;
+package com.hcmute.fit.toeicrise.dtos.requests.test;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
-import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
-public class TestUpdateRequest {
+@NoArgsConstructor
+@AllArgsConstructor
+public class TestRequest {
     @Pattern(regexp = Constant.TEST_NAME_PATTERN, message = MessageConstant.TEST_NAME_INVALID)
     @NotBlank(message = MessageConstant.TEST_NAME_NOT_BLANK)
-    private String name;
+    private String testName;
 
-    @NotNull(message = MessageConstant.TEST_STATUS_NOT_NULL)
-    private ETestStatus status;
+    @NotNull(message = "Test set id is required")
+    @Min(value = 1, message = "Test set id must be greater than 0")
+    private Long testSetId;
 }

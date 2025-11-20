@@ -2,12 +2,12 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
-import com.hcmute.fit.toeicrise.dtos.requests.ProfileUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.user.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.user.UserCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.user.UserResetPasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.user.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.user.ProfileResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.user.UserDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.user.UserResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;

@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
-import com.hcmute.fit.toeicrise.dtos.requests.PageRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class TestController {
     public ResponseEntity<?> getAllTests(@Valid @ModelAttribute PageRequest pageRequest) {
         return ResponseEntity.ok(testService.searchTestsByName(pageRequest));
     }
- 
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getTestById(@PathVariable Long id) {
         return ResponseEntity.ok(testService.getLearnerTestDetailById(id));

@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.requests;
+package com.hcmute.fit.toeicrise.dtos.requests.question;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionByPart;

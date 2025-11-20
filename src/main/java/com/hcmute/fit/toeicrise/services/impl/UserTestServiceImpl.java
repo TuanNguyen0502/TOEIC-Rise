@@ -1,13 +1,13 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
-import com.hcmute.fit.toeicrise.dtos.requests.UserAnswerRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerGroupedByTagResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;

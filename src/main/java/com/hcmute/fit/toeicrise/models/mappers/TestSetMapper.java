@@ -2,8 +2,8 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestSetDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import org.mapstruct.*;
 

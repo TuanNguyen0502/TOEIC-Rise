@@ -1,11 +1,11 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

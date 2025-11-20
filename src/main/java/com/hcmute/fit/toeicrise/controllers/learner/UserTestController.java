@@ -1,10 +1,10 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
-import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

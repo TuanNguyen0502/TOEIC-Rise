@@ -1,12 +1,12 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 
 import java.util.List;
 

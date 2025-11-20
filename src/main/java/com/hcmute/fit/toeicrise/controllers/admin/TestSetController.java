@@ -2,8 +2,8 @@ package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
-import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

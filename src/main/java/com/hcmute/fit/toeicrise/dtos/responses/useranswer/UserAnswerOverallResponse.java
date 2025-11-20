@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.responses;
+package com.hcmute.fit.toeicrise.dtos.responses.useranswer;
 
 import lombok.Builder;
 import lombok.Data;

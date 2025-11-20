@@ -1,8 +1,7 @@
 package com.hcmute.fit.toeicrise.validators.constraints;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionByPart;
 import jakarta.validation.ConstraintValidator;
@@ -23,15 +22,15 @@ public class QuestionByPartValidation implements ConstraintValidator<ValidQuesti
             return false;
         }
         boolean valid = true;
-        switch ((int) questionGroup.getPart().getId().longValue()){
-            case 3,4,5,7 -> {
+        switch ((int) questionGroup.getPart().getId().longValue()) {
+            case 3, 4, 5, 7 -> {
                 if (value.getContent() == null || value.getContent().isEmpty()) {
                     context.buildConstraintViolationWithTemplate("Content is required for Part " +
                                     questionGroup.getPart().getId())
                             .addPropertyNode("question").addConstraintViolation();
                     valid = false;
                 }
-                if (value.getOptions() == null|| value.getOptions().isEmpty()) {
+                if (value.getOptions() == null || value.getOptions().isEmpty()) {
                     context.buildConstraintViolationWithTemplate("Options are required for Part " +
                                     questionGroup.getPart().getId())
                             .addPropertyNode("option").addConstraintViolation();
@@ -41,7 +40,7 @@ public class QuestionByPartValidation implements ConstraintValidator<ValidQuesti
             case 6 -> {
                 if (value.getOptions() == null) {
                     context.buildConstraintViolationWithTemplate("Options are required for Part " +
-                            questionGroup.getPart().getId())
+                                    questionGroup.getPart().getId())
                             .addPropertyNode("option").addConstraintViolation();
                     valid = false;
                 }
