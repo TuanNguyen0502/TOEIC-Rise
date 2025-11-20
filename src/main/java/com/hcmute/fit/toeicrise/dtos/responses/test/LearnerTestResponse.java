@@ -11,5 +11,5 @@ public class LearnerTestResponse {
     private Long id;
     private String testName;
     private String testSetName;
-    private Long numberOfLearnedTests;
+    private Long numberOfLearnerTests;
 }

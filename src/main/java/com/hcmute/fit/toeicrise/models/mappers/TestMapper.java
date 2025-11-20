@@ -91,6 +91,7 @@ public interface TestMapper {
 
     @Mapping(source = "name", target = "testName")
     @Mapping(source = "testSet.name", target = "testSetName")
+    @Mapping(source = "numberOfLearnerTests", target = "numberOfLearnerTests")
     LearnerTestResponse toLearnerTestResponse(Test test);
 
     default QuestionExcelRequest mapRowToDTO(Row row) {
