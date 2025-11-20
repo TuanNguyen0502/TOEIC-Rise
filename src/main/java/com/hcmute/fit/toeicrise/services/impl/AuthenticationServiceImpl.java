@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -317,7 +316,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
         // Create new refresh token
-        String refreshToken = UUID.randomUUID().toString();
+        String refreshToken = jwtService.generateToken(account);
         account.setRefreshToken(refreshToken);
         account.setRefreshTokenExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         accountRepository.save(account);
