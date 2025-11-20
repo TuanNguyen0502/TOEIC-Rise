@@ -82,6 +82,7 @@ public class TestServiceImpl implements ITestService {
 
         // Update fields
         existingTest.setName(testUpdateRequest.getName());
+        existingTest.setStatus(ETestStatus.PENDING);
         Test updatedTest = testRepository.save(existingTest);
         return testMapper.toResponse(updatedTest);
     }
