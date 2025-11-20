@@ -7,7 +7,6 @@ import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenRespon
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
-import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final IAuthenticationService authenticationServiceImpl;
-    private final IJwtService jwtServiceImpl;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -61,7 +59,7 @@ public class AuthenticationController {
     public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token") String refreshToken) {
         try {
 
-            String email = jwtServiceImpl.extractUsername(refreshToken);
+            String email = SecurityUtils.getCurrentUser();
             // 2. Tạo refresh token
             RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken, email);
             // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
