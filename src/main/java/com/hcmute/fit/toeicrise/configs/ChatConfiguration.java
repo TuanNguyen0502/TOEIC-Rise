@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.configs;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.ChatMemoryAdvisor;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import org.springframework.ai.chat.client.ChatClient;
@@ -19,7 +20,7 @@ public class ChatConfiguration {
     @Bean
     public ChatMemoryAdvisor chatMemoryAdvisor(ChatMemoryRepository repository) {
         return ChatMemoryAdvisor.builder(repository)
-                .chatMemoryRetrieveSize(100)
+                .chatMemoryRetrieveSize(Constant.CHAT_MEMORY_RETRIEVE_SIZE)
                 .defaultConversationId("default")
                 .build();
     }

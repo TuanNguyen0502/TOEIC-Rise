@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
-    private final ITokenBlacklistService tokenBlacklistServiceImpl;
+    private final ITokenBlacklistService tokenBlacklistService;
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -21,7 +21,7 @@ public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             // Add token to blacklist
-            tokenBlacklistServiceImpl.blacklistToken(token);
+            tokenBlacklistService.blacklistToken(token);
         }
 
         // Clear any JWT cookies that might exist

@@ -1,5 +1,7 @@
 package com.hcmute.fit.toeicrise.configs;
 
+import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +11,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
@@ -18,13 +19,13 @@ public class ApplicationConfiguration {
     private final AccountRepository accountRepository;
 
     @Bean
-    UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService() {
         return username -> accountRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
     }
 
     @Bean
-    BCryptPasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -34,11 +35,10 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-        authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
+                                                         BCryptPasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
 
         return authProvider;
     }

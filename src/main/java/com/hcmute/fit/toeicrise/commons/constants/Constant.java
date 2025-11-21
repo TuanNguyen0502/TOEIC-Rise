@@ -219,6 +219,7 @@ public class Constant {
     // Test and test set name patterns
     public static final String TEST_SET_NAME_OR_TEST_NAME_PATTERN = "^[\\p{L}0-9 ()]+$";
     // Chatbot patterns
+    public static final int CHAT_MEMORY_RETRIEVE_SIZE = 100;
     public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{20,}$";
     public static final String CHAT_TITLE_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{1,100}$";
     public static final String CHAT_CONVERSATION_ID_PATTERN = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
