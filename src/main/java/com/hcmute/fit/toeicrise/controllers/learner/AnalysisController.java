@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalysisController {
     private final IAnalysisService analysisService;
 
-    @GetMapping("")
+    @GetMapping("/result")
     public ResponseEntity<?> getAnalysis(@RequestParam(value = "days") EDays days,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
