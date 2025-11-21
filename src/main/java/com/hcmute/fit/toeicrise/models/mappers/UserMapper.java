@@ -2,7 +2,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.ProfileResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.user.ProfileResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.user.UserDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.user.UserResponse;
 import com.hcmute.fit.toeicrise.models.entities.Account;

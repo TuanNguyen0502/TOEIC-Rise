@@ -1,17 +1,17 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 
 import java.util.List;
 
 public interface IQuestionService {
-    Question createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
+    void createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
 
     List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId);
 
@@ -19,7 +19,7 @@ public interface IQuestionService {
 
     QuestionResponse getQuestionById(Long questionId);
 
-    Question getQuestionEntityById(Long questionId);
+    List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
 
     List<LearnerTestQuestionResponse> getLearnerTestQuestionsByQuestionGroupId(Long questionGroupId);
 }

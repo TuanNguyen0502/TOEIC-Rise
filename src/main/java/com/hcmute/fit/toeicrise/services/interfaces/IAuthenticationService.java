@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.*;
 import com.hcmute.fit.toeicrise.dtos.requests.authentication.*;
+import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
@@ -23,9 +23,11 @@ public interface IAuthenticationService {
 
     void resetPassword(ResetPasswordRequest resetPasswordRequest, String token);
 
-    RefreshTokenResponse refreshToken(String refreshToken, String email);
+    RefreshTokenResponse refreshToken(String refreshToken);
 
-    String createRefreshToken(String email);
+    String createRefreshTokenWithEmail(String email);
+
+    String createRefreshTokenWithRefreshToken(String refreshToken);
 
     long getRefreshTokenDurationMs();
 

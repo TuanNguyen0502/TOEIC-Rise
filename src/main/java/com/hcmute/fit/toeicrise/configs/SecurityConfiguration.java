@@ -45,8 +45,10 @@ public class SecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
                                 "/admin/question-groups/**").hasRole("ADMIN")
+                        .requestMatchers("/staff/tests/**", "/staff/question-reports/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
-                                "/learner/user-tests/**", "/learner/user-answers/**").hasRole("LEARNER")
+                                "/learner/user-tests/**", "/learner/user-answers/**",
+                                "/learner/question-reports/**", "/learner/analysis").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -77,7 +79,7 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "x-no-retry"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

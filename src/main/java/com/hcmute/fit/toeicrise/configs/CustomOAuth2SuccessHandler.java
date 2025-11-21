@@ -51,7 +51,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             LoginResponse loginResponse = authenticationService.loginWithGoogle(email, name, picture);
 
             // Create refresh token
-            String refreshToken = authenticationService.createRefreshToken(email);
+            String refreshToken = authenticationService.createRefreshTokenWithEmail(email);
             long refreshTokenExpirationTime = authenticationService.getRefreshTokenDurationMs();
 
             // Create an HttpOnly cookie with the refresh token

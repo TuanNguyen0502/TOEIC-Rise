@@ -6,18 +6,26 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Long> {
-    Optional<QuestionGroup> findById(Long id);
-
     List<QuestionGroup> findByTest_IdOrderByPositionAsc(Long id);
 
-    @Query("SELECT qg FROM QuestionGroup qg LEFT JOIN FETCH qg.questions WHERE qg.id = :id")
-    Optional<QuestionGroup> findWithQuestionsById(@Param("id") Long id);
+    @Query("SELECT DISTINCT qg " +
+            "FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH  qg.questions q " +
+            "LEFT JOIN FETCH qg.part p " +
+            "WHERE qg.test.id = :testId AND p.id IN :partIds " +
+            "ORDER BY p.id, qg.position, q.position")
+    List<QuestionGroup> findByTest_IdAndPart_IdOrderByPositionAsc(Long testId, List<Long> partIds);
 
-    List<QuestionGroup> findByTest_IdAndPart_IdOrderByPositionAsc(Long testId, Long partId);
+    @Query("SELECT DISTINCT qg FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH qg.questions " +
+            "WHERE qg.id IN :ids")
+    List<QuestionGroup> findAllByIdInFetchQuestions(@Param("ids") Set<Long> ids);
 
+    @Query("SELECT DISTINCT qg.id FROM QuestionGroup qg WHERE qg.id IN :ids")
+    Set<Long> findExistingIdsByIds(List<Long> ids);
 }

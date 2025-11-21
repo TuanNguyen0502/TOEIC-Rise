@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
@@ -23,7 +23,7 @@ public class UserAnswerServiceImpl implements IUserAnswerService {
     public UserAnswerDetailResponse getUserAnswerDetailResponse(Long userAnswerId) {
         UserAnswer userAnswer = userAnswerRepository.findById(userAnswerId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Answer"));
-        QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(userAnswer.getQuestion().getId());
+        QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(userAnswer.getQuestionGroupId());
         return userAnswerMapper.toUserAnswerDetailResponse(userAnswer, questionGroup);
     }
 }

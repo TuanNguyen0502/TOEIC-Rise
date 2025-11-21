@@ -2,22 +2,24 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Part;
+import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
+import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.dtos.responses.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +38,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final CloudinaryUtil cloudinaryUtil;
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
+    private final QuestionMapper questionMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -114,12 +114,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
-    public QuestionGroup getQuestionGroupWithQuestionsEntity(Long questionGroupId) {
-        return questionGroupRepository.findWithQuestionsById(questionGroupId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
-    }
-
-    @Override
     public QuestionGroup getQuestionGroupEntity(Long questionGroupId) {
         return questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
@@ -132,6 +126,32 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         System.out.println(questionGroup.getPart().getName());
         return questionGroup.getPart().getName();
     }
+
+    @Override
+    public Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds) {
+        return questionGroupRepository.findAllById(questionGroupIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        QuestionGroup::getId,
+                        qg -> qg.getPart().getName()
+                ));
+    }
+
+    @Override
+    public List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids) {
+        return questionGroupRepository.findAllByIdInFetchQuestions(ids);
+    }
+
+    @Override
+    public void checkQuestionGroupsExistByIds(List<Long> ids) {
+        Set<Long> existingIds = questionGroupRepository.findExistingIdsByIds(ids);
+        for (Long id : ids) {
+            if (!existingIds.contains(id)) {
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+            }
+        }
+    }
+
 
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
@@ -224,22 +244,28 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Transactional(readOnly = true)
     @Override
     public List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds) {
-        List<LearnerTestPartResponse> responses = new ArrayList<>();
-        for (Long partId : partIds) {
-            List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_IdOrderByPositionAsc(testId, partId);
-
-            Part part = questionGroups.getFirst().getPart();
-            List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroups.stream()
-                                .map(group -> {
-                                    List<LearnerTestQuestionResponse> questions = questionService.getLearnerTestQuestionsByQuestionGroupId(group.getId());
-                                    return questionGroupMapper.toLearnerTestQuestionGroupResponse(group, questions);
-                                })
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdAndPart_IdOrderByPositionAsc(testId, partIds);
+        Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream()
+                .distinct().collect(Collectors.groupingBy(QuestionGroup::getPart));
+        return groupedByPart.entrySet().stream().map(entry -> {
+            Part part = entry.getKey();
+            List<QuestionGroup> questionGroupList = entry.getValue();
+            List<LearnerTestQuestionGroupResponse> questionGroupResponses = questionGroupList
+                    .stream()
+                    .sorted(Comparator.comparing(QuestionGroup::getPosition))
+                    .map(group -> {
+                        List<LearnerTestQuestionResponse> questionResponses = group.getQuestions()
+                                .stream().sorted(Comparator.comparing(Question::getPosition))
+                                .map(questionMapper::toLearnerTestQuestionResponse)
                                 .toList();
+                        List<Object> questionAsObject = new ArrayList<>(questionResponses);
+                        LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(group);
+                        learnerTestQuestionGroupResponse.setQuestions(questionAsObject);
+                        return learnerTestQuestionGroupResponse;
+                    }).toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
             partResponse.setQuestionGroups(questionGroupResponses);
-            responses.add(partResponse);
-        }
-        responses.sort(Comparator.comparing(LearnerTestPartResponse::getPartName));
-        return responses;
+            return partResponse;
+        }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
     }
 }

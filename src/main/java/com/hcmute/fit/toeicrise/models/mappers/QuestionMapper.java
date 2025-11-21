@@ -1,11 +1,11 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.dtos.responses.QuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import org.mapstruct.*;
 
@@ -44,12 +44,12 @@ public interface QuestionMapper {
     Question toEntity(QuestionRequest questionRequest, @MappingTarget Question question);
 
     @Named("mapToList")
-    default List<String> mapToList(Map<String, String> options){
+    default List<String> mapToList(Map<String, String> options) {
         return options.entrySet().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
     }
 
     @Named("mapTagsToNames")
-    default List<String> mapTagsToNames(List<Tag> tags){
+    default List<String> mapTagsToNames(List<Tag> tags) {
         if (tags == null) return null;
         return tags.stream().map(Tag::getName).collect(Collectors.toList());
     }

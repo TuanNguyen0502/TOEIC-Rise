@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LearnerTestQuestionResponse {
     private Long id;
-    private String position;
+    private Long position;
     private String content;
     private List<String> options;
 }

@@ -1,10 +1,10 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.TestSetRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UpdateTestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestSetDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestSetResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;

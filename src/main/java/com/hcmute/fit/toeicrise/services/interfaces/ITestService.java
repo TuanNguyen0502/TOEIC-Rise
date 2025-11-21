@@ -1,13 +1,15 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.*;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
-import com.hcmute.fit.toeicrise.dtos.requests.TestUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +23,7 @@ public interface ITestService {
 
     TestResponse updateTest(Long id, TestUpdateRequest testUpdateRequest);
 
-    boolean deleteTestById(Long id);
+    boolean changeTestStatusById(Long id, ETestStatus status);
 
     @Async
     void deleteTestsByTestSetId(Long testSetId);

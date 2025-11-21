@@ -1,11 +1,10 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
-import com.hcmute.fit.toeicrise.dtos.requests.LearnerTestRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TestResultResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +46,13 @@ public class UserTestController {
         return ResponseEntity.ok(userTestService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @Valid @RequestBody LearnerTestRequest learnerTestRequest) {
-        return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, learnerTestRequest));
+    @GetMapping(value = "/exam/{id}")
+    public ResponseEntity<?> getTestByParts(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
+        return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, parts));
+    }
+
+    @GetMapping("/detail/{userTestId}")
+    public ResponseEntity<?> getTestDetail(@PathVariable Long userTestId) {
+        return ResponseEntity.ok(userTestService.getUserTestDetail(userTestId, SecurityUtils.getCurrentUser()));
     }
 }
