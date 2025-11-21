@@ -47,7 +47,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/staff/tests/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
-                                "/learner/question-reports/**").hasRole("LEARNER")
+                                "/learner/question-reports/**", "/learner/analysis").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

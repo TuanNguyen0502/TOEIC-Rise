@@ -1,10 +1,12 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 import java.util.Map;
@@ -44,4 +46,7 @@ public interface UserTestMapper {
 
         return builder.build();
     }
+
+    @Mapping(source = "test.name", target = "name")
+    LearnerTestHistoryResponse toLearnerTestHistoryResponse(UserTest userTest);
 }
