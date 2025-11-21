@@ -65,4 +65,6 @@ public class MessageConstant {
     public static final String TEST_ID_NOT_NULL = "Test ID must not be null.";
     public static final String TIME_SPENT_MIN = "Time spent must be at least 1 second.";
     public static final String ANSWERS_NOT_EMPTY = "Answers must not be empty.";
+    // Question Report related messages
+    public static final String QUESTION_REPORT_REASONS_NOT_EMPTY = "Report reasons must not be empty.";
 }
