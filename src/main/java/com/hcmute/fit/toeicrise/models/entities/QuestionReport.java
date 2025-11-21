@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
-import com.hcmute.fit.toeicrise.commons.utils.StringListJsonConverter;
+import com.hcmute.fit.toeicrise.commons.utils.QuestionReportReasonListJsonConverter;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportReason;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
 import jakarta.persistence.*;
@@ -28,7 +28,7 @@ public class QuestionReport extends BaseEntity {
     @JoinColumn(name = "resolver_id")
     private User resolver;
 
-    @Convert(converter = StringListJsonConverter.class)
+    @Convert(converter = QuestionReportReasonListJsonConverter.class)
     @Column(columnDefinition = "json")
     private List<EQuestionReportReason> reasons;
 
