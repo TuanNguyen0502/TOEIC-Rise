@@ -46,6 +46,8 @@ public interface UserAnswerMapper {
             options = question.getOptions();
         }
         return UserAnswerDetailResponse.builder()
+                .userAnswerId(userAnswer.getId())
+                .questionId(question.getId())
                 .userAnswer(userAnswer.getAnswer())
                 .position(question.getPosition())
                 .tags(question.getTags().stream().map(Tag::getName).toList())
