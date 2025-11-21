@@ -17,6 +17,7 @@ import com.hcmute.fit.toeicrise.models.enums.EExamType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.*;
+import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class UserTestServiceImpl implements IUserTestService {
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
+    private final QuestionRepository questionRepository;
     private final TestRepository testRepository;
     private final UserRepository userRepository;
     private final UserTestRepository userTestRepository;
@@ -364,6 +366,32 @@ public class UserTestServiceImpl implements IUserTestService {
     public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
         LocalDateTime localDateTime = LocalDateTime.now().minusDays(days.getDays());
         List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime);
+
+        Set<Long> questionIds = userTests.stream()
+                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
+                .flatMap(ut -> ut.getUserAnswers().stream())
+                .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        if (!questionIds.isEmpty()) {
+            List<Question> questionsWithTags = questionRepository.findAllByIdWithTags(questionIds);
+            Map<Long, Question> questionMap = questionsWithTags.stream()
+                    .collect(Collectors.toMap(Question::getId, q -> q));
+            
+            userTests.forEach(ut -> {
+                if (ut.getUserAnswers() != null) {
+                    ut.getUserAnswers().forEach(ua -> {
+                        if (ua.getQuestion() != null) {
+                            Question questionWithTags = questionMap.get(ua.getQuestion().getId());
+                            if (questionWithTags != null && questionWithTags.getTags() != null) {
+                                ua.getQuestion().setTags(questionWithTags.getTags());
+                            }
+                        }
+                    });
+                }
+            });
+        }
 
         Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
         Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
