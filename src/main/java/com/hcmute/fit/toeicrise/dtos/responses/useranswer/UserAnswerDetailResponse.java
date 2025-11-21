@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 @Builder
 public class UserAnswerDetailResponse {
+    private Long userAnswerId;
+    private Long questionId;
     private String userAnswer;
     private int position;
     private List<String> tags;
