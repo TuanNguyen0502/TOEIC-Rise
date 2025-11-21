@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,4 +27,11 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
             "LEFT JOIN FETCH qg.part p " +
             "WHERE ut.id = :id AND ut.user.account.email = :email")
     Optional<UserTest> findUserTestById(@Param("id") Long id, @Param("email") String email);
+
+    @Query("SELECT DISTINCT ut " +
+            "FROM UserTest ut " +
+            "LEFT JOIN FETCH ut.userAnswers ua " +
+            "LEFT JOIN FETCH ua.question q " +
+            "WHERE ut.user.account.email = :email AND ut.createdAt >= :days")
+    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days);
 }
