@@ -17,7 +17,7 @@ public class AnalysisController {
     private final IAnalysisService analysisService;
 
     @GetMapping("")
-    public ResponseEntity<?> getAnalysis(@RequestParam EDays days,
+    public ResponseEntity<?> getAnalysis(@RequestParam(value = "days") EDays days,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
         String email = SecurityUtils.getCurrentUser();

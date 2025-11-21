@@ -12,21 +12,21 @@ import java.util.List;
 public class LearnerTestHistoryResponse {
     private Long id;
     private String name;
-    private LocalDate createAt;
-    private List<String> partNames;
+    private LocalDate createdAt;
+    private List<String> parts;
     private Integer correctAnswers;
     private Integer totalQuestions;
-    private Integer score;
+    private Integer totalScore;
     private Integer timeSpent;
 
-    public LearnerTestHistoryResponse(Long id, String name, LocalDateTime createAt, List<String> partNames, Integer correctAnswers, Integer totalQuestions, Integer score, Integer timeSpent) {
+    public LearnerTestHistoryResponse(Long id, String name, LocalDateTime createdAt, List<String> parts, Integer correctAnswers, Integer totalQuestions, Integer totalScore, Integer timeSpent) {
         this.id = id;
         this.name = name;
-        this.createAt = createAt.toLocalDate();
-        this.partNames = partNames;
+        this.createdAt = createdAt.toLocalDate();
+        this.parts = parts;
         this.correctAnswers = correctAnswers;
         this.totalQuestions = totalQuestions;
-        this.score = score;
+        this.totalScore = totalScore;
         this.timeSpent = timeSpent;
     }
 }
