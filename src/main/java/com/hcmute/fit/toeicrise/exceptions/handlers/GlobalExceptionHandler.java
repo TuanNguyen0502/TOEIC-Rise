@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,24 +24,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleGenericException(Exception exception, HttpServletRequest request) {
+        log.error("Unhandled exception at [{}]", request.getRequestURI(), exception);
         return buildResponseEntity(ErrorCode.UNCATEGORIZED_EXCEPTION, request.getRequestURI(), ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
     }
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ExceptionResponse> handleAppException(AppException exception, HttpServletRequest request) {
+        log.warn("AppException at [{}]: {} ({})", request.getRequestURI(),
+                exception.getMessage(), exception.getErrorCode().name());
         return buildResponseEntity(exception.getErrorCode(), request.getRequestURI(), exception.getMessage());
     }
 
-    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<ExceptionResponse> handleAccessDenied(AccessDeniedException exception, HttpServletRequest request) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Access denied at [{}]: {}", request.getRequestURI(), ex.getMessage());
         return buildResponseEntity(ErrorCode.UNAUTHORIZED, request.getRequestURI(), ErrorCode.UNAUTHORIZED.getMessage());
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<ExceptionResponse> handleValidationExceptions(Exception ex, HttpServletRequest request) {
+        log.debug("Validation error at [{}]: {}", request.getRequestURI(), ex.getMessage());
         if (ex instanceof MethodArgumentNotValidException validationEx) {
             Map<String, String> messages = new HashMap<>();
             for (FieldError fieldError : validationEx.getBindingResult().getFieldErrors()) {
@@ -53,12 +60,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
-    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceeded(MultipartException ex, HttpServletRequest request) {
+        log.warn("File upload size exceeded at [{}]: {}", request.getRequestURI(), ex.getMessage());
         return buildResponseEntity(ErrorCode.FILE_SIZE_EXCEEDED, request.getRequestURI(), ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<ExceptionResponse> handleConstraintViolation(ConstraintViolationException exception, HttpServletRequest request) {
+        log.debug("ConstraintViolation at [{}]: {}", request.getRequestURI(), exception.getMessage());
         Map<String, String> messages = new HashMap<>();
         for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
             messages.putIfAbsent(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
