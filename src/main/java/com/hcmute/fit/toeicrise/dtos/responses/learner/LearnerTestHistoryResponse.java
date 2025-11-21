@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LearnerTestHistoryResponse {
     private Long id;
+    private String name;
     private LocalDate createAt;
     private List<String> partNames;
     private Integer correctAnswers;
@@ -18,8 +19,9 @@ public class LearnerTestHistoryResponse {
     private Integer score;
     private Integer timeSpent;
 
-    public LearnerTestHistoryResponse(Long id, LocalDateTime createAt, List<String> partNames, Integer correctAnswers, Integer totalQuestions, Integer score, Integer timeSpent) {
+    public LearnerTestHistoryResponse(Long id, String name, LocalDateTime createAt, List<String> partNames, Integer correctAnswers, Integer totalQuestions, Integer score, Integer timeSpent) {
         this.id = id;
+        this.name = name;
         this.createAt = createAt.toLocalDate();
         this.partNames = partNames;
         this.correctAnswers = correctAnswers;
