@@ -115,4 +115,10 @@ public class ChatbotController {
         chatTitleService.renameChatTitle(email, request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping(path = "/analysis", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public ResponseEntity<?> getAnalysis(@RequestBody ChatAnalysisRequest chatAnalysisRequest) {
+        System.out.println(SecurityContextHolder.getContext().getAuthentication().getName());
+        return ResponseEntity.ok(chatService.chatAnalysisData(chatAnalysisRequest).delayElements(Duration.ofMillis(50)));
+    }
 }
