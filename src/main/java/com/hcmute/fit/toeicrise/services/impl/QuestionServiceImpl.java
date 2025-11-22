@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.report.QuestionUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
@@ -78,5 +79,14 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public Optional<Question> findById(Long aLong) {
         return questionRepository.findById(aLong);
+    }
+
+    @Override
+    public void updateQuestion(Question question, QuestionUpdateRequest request) {
+        question.setContent(request.getContent());
+        question.setOptions(request.getOptions());
+        question.setCorrectOption(request.getCorrectOption());
+        question.setExplanation(request.getExplanation());
+        questionRepository.save(question);
     }
 }

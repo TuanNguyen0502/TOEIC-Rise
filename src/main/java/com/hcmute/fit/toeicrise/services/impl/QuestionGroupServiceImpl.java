@@ -84,6 +84,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     public void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request) {
         QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
+        updateQuestionGroupWithEntity(questionGroup, request);
+    }
+
+    @Override
+    public void updateQuestionGroupWithEntity(QuestionGroup questionGroup, QuestionGroupUpdateRequest request) {
         Part part = questionGroup.getPart();
 
         // Validate
