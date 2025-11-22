@@ -9,4 +9,9 @@ public class QuestionReportSpecification {
         return (root, _, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), status);
     }
+
+    public static Specification<QuestionReport> hasResolverId(Long resolverId) {
+        return (root, _, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("resolver").get("id"), resolverId);
+    }
 }

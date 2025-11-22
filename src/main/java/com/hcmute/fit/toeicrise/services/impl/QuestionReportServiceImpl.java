@@ -79,9 +79,12 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
     }
 
     @Override
-    public PageResponse getAllReports(int page, int size) {
+    public PageResponse getAllReports(String email, int page, int size) {
+        User resolver = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         Specification<QuestionReport> specification = (_, _, cb) -> cb.conjunction();
-        specification = specification.and(QuestionReportSpecification.hasStatus(EQuestionReportStatus.PENDING));
+        specification = specification.and(QuestionReportSpecification.hasResolverId(resolver.getId()));
+        specification = specification.or(QuestionReportSpecification.hasStatus(EQuestionReportStatus.PENDING));
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<QuestionReportResponse> questionReports = questionReportRepository.findAll(specification, pageable).map(questionReportMapper::toQuestionReportResponse);
