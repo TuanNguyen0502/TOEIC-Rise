@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
@@ -8,6 +9,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.repositories.specifications.UserTestSpecification;
@@ -33,5 +35,7 @@ public interface IUserTestService {
 
     LearnerTestPartsResponse getUserTestDetail(Long userTestId, String email);
 
+    AnalysisResultResponse getAnalysisResult(String email, EDays days);
+  
     PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable);
 }

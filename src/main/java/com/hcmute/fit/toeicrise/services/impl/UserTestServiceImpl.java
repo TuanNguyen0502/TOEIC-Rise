@@ -3,6 +3,8 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
@@ -12,9 +14,12 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
+import com.hcmute.fit.toeicrise.models.enums.EDays;
+import com.hcmute.fit.toeicrise.models.enums.EExamType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.*;
+import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
@@ -29,6 +34,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +43,7 @@ import java.util.stream.Collectors;
 public class UserTestServiceImpl implements IUserTestService {
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
+    private final QuestionRepository questionRepository;
     private final TestRepository testRepository;
     private final UserRepository userRepository;
     private final UserTestRepository userTestRepository;
@@ -361,6 +368,242 @@ public class UserTestServiceImpl implements IUserTestService {
         return learnerTestPartsResponse;
     }
 
+    @Override
+    public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
+        LocalDateTime localDateTime = LocalDateTime.now().minusDays(days.getDays());
+        List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime);
+
+        Set<Long> questionIds = userTests.stream()
+                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
+                .flatMap(ut -> ut.getUserAnswers().stream())
+                .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        if (!questionIds.isEmpty()) {
+            List<Question> questionsWithTags = questionRepository.findAllByIdWithTags(questionIds);
+            Map<Long, Question> questionMap = questionsWithTags.stream()
+                    .collect(Collectors.toMap(Question::getId, q -> q));
+            
+            userTests.forEach(ut -> {
+                if (ut.getUserAnswers() != null) {
+                    ut.getUserAnswers().forEach(ua -> {
+                        if (ua.getQuestion() != null) {
+                            Question questionWithTags = questionMap.get(ua.getQuestion().getId());
+                            if (questionWithTags != null && questionWithTags.getTags() != null) {
+                                ua.getQuestion().setTags(questionWithTags.getTags());
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
+        Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
+
+        for (EExamType examType : EExamType.values()) {
+            rawDataByExamType.put(examType, new HashMap<>());
+            rawPartStatsByExamType.put(examType, new HashMap<>());
+        }
+
+        long totalSpent = 0L;
+        int listeningTestCount = 0;
+        int readingTestCount = 0;
+        long listeningTimeSpent = 0L;
+        long readingTimeSpent = 0L;
+        List<Integer> listeningScores = new ArrayList<>();
+        List<Integer> readingScores = new ArrayList<>();
+
+        for (UserTest userTest : userTests) {
+            totalSpent += userTest.getTimeSpent() != null ? userTest.getTimeSpent() : 0;
+            
+            List<UserAnswer> userAnswers = userTest.getUserAnswers();
+            if (userAnswers == null || userAnswers.isEmpty()) continue;
+
+            Set<Long> questionGroupIds = userAnswers.stream()
+                    .map(UserAnswer::getQuestionGroupId)
+                    .collect(Collectors.toSet());
+
+            Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(questionGroupIds);
+
+            Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
+                    .collect(Collectors.groupingBy(ua ->
+                            partNamesByGroupId.get(ua.getQuestionGroupId())
+                    ));
+
+            boolean hasListening = false;
+            boolean hasReading = false;
+
+            for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
+                String partName = entry.getKey();
+                List<UserAnswer> answersInPart = entry.getValue();
+
+                if (partName == null) continue;
+
+                EExamType examType = isListeningPart(partName) ? EExamType.LISTENING : EExamType.READING;
+                
+                if (examType == EExamType.LISTENING) {
+                    hasListening = true;
+                } else {
+                    hasReading = true;
+                }
+
+                Map<String, Map<String, TagStats>> examTypeRawData = rawDataByExamType.get(examType);
+                Map<String, PartStats> examTypePartStats = rawPartStatsByExamType.get(examType);
+
+                examTypeRawData.computeIfAbsent(partName,_ -> new HashMap<>());
+                examTypePartStats.computeIfAbsent(partName,_ -> new PartStats());
+
+                Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
+                        .flatMap(ua -> ua.getQuestion().getTags().stream()
+                                .map(tag -> Map.entry(tag.getName(), ua)))
+                        .collect(Collectors.groupingBy(
+                                Map.Entry::getKey,
+                                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                        ));
+
+                Map<String, TagStats> tagStatsMap = examTypeRawData.get(partName);
+                answersByTag.forEach((tagName, answersForTag) -> {
+                    int correct = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
+                    int wrong = answersForTag.size() - correct;
+
+                    TagStats tagStats = tagStatsMap.computeIfAbsent(tagName,_ -> new TagStats());
+                    tagStats.add(correct, wrong);
+                });
+
+                int partCorrect = (int) answersInPart.stream().filter(UserAnswer::getIsCorrect).count();
+                int partWrong = answersInPart.size() - partCorrect;
+
+                PartStats partStats = examTypePartStats.get(partName);
+                partStats.add(partCorrect, partWrong);
+            }
+
+            if (hasListening) {
+                listeningTestCount++;
+                listeningTimeSpent += userTest.getTimeSpent() != null ? userTest.getTimeSpent() : 0;
+                if (userTest.getListeningScore() != null) {
+                    listeningScores.add(userTest.getListeningScore());
+                }
+            }
+            if (hasReading) {
+                readingTestCount++;
+                readingTimeSpent += userTest.getTimeSpent() != null ? userTest.getTimeSpent() : 0;
+                if (userTest.getReadingScore() != null) {
+                    readingScores.add(userTest.getReadingScore());
+                }
+            }
+        }
+
+        ExamTypeStatsResponse listening = buildExamTypeStatsResponse(
+                listeningTestCount,
+                listeningTimeSpent,
+                listeningScores,
+                rawDataByExamType.get(EExamType.LISTENING),
+                rawPartStatsByExamType.get(EExamType.LISTENING)
+        );
+
+        ExamTypeStatsResponse reading = buildExamTypeStatsResponse(
+                readingTestCount,
+                readingTimeSpent,
+                readingScores,
+                rawDataByExamType.get(EExamType.READING),
+                rawPartStatsByExamType.get(EExamType.READING)
+        );
+
+        return AnalysisResultResponse.builder()
+                .numberOfTests(userTests.size())
+                .totalTimes(totalSpent)
+                .examList(List.of(listening, reading))
+                .build();
+    }
+
+    private boolean isListeningPart(String partName) {
+        return partName != null && (
+                partName.contains("1") ||
+                partName.contains("2") ||
+                partName.contains("3") ||
+                partName.contains("4")
+        );
+    }
+
+    // Helper class để lưu dữ liệu thô của tag
+    private static class TagStats {
+        int correct = 0;
+        int wrong = 0;
+        void add(int correctDelta, int wrongDelta) {
+            this.correct += correctDelta;
+            this.wrong += wrongDelta;
+        }
+    }
+
+    // Helper class để lưu dữ liệu thô của part
+    private static class PartStats {
+        int correct = 0;
+        int wrong = 0;
+        void add(int correctDelta, int wrongDelta) {
+            this.correct += correctDelta;
+            this.wrong += wrongDelta;
+        }
+    }
+
+    private ExamTypeStatsResponse buildExamTypeStatsResponse(
+            int numberOfTests,
+            long timeSpent,
+            List<Integer> scores,
+            Map<String, Map<String, TagStats>> rawDataByPart,
+            Map<String, PartStats> rawPartStats
+    ) {
+        Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>();
+
+        if (rawDataByPart != null) {
+            for (Map.Entry<String, Map<String, TagStats>> partEntry : rawDataByPart.entrySet()) {
+                String partName = partEntry.getKey();
+                Map<String, TagStats> tagStatsMap = partEntry.getValue();
+
+                List<UserAnswerGroupedByTagResponse> groupedResponses = new ArrayList<>();
+
+                tagStatsMap.forEach((tag, stats) -> {
+                    int total = stats.correct + stats.wrong;
+                    double correctPercent = total == 0 ? 0.0 : ((double) stats.correct / total) * 100;
+                    groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
+                            .tag(tag)
+                            .correctAnswers(stats.correct)
+                            .wrongAnswers(stats.wrong)
+                            .correctPercent(correctPercent)
+                            .userAnswerOverallResponses(null)
+                            .build());
+                });
+                PartStats partStats = rawPartStats.get(partName);
+                if (partStats != null) {
+                    int totalForPart = partStats.correct + partStats.wrong;
+                    double totalPercent = totalForPart == 0 ? 0.0 : ((double) partStats.correct / totalForPart) * 100;
+
+                    groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
+                            .tag("Total")
+                            .correctAnswers(partStats.correct)
+                            .wrongAnswers(partStats.wrong)
+                            .correctPercent(totalPercent)
+                            .userAnswerOverallResponses(null)
+                            .build());
+                }
+                userAnswersByPart.put(partName, groupedResponses);
+            }
+        }
+        int averageScore = scores.isEmpty() ? 0 :
+                (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        int maxScore = scores.isEmpty() ? 0 : 
+                scores.stream().mapToInt(Integer::intValue).max().orElse(0);
+
+        return ExamTypeStatsResponse.builder()
+                .numberOfTests(numberOfTests)
+                .timeSpent(timeSpent)
+                .averageScore(averageScore)
+                .maxScore(maxScore)
+                .userAnswersByPart(userAnswersByPart)
+                .build();
+    }
+  
     @Override
     public PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable) {
         Page<LearnerTestHistoryResponse> learnerTestResponses = userTestRepository.findAll(userTestSpecification, pageable).map(userTestMapper::toLearnerTestHistoryResponse);

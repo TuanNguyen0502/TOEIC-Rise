@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.models.enums;
 
 import lombok.Getter;
-
 import java.time.Duration;
 
 @Getter
