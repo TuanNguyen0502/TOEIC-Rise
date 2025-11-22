@@ -44,10 +44,10 @@ public class SecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
                                 "/admin/question-groups/**").hasRole("ADMIN")
-                        .requestMatchers("/staff/tests/**").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers("/staff/tests/**", "/staff/question-reports/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
-                                "/learner/question-reports/**").hasRole("LEARNER")
+                                "/learner/question-reports/**", "/learner/analysis").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

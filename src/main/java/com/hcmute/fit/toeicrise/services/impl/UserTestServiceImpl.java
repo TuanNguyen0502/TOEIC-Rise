@@ -5,6 +5,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
@@ -26,6 +28,9 @@ import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +53,7 @@ public class UserTestServiceImpl implements IUserTestService {
     private final PartMapper partMapper;
     private final QuestionGroupMapper questionGroupMapper;
     private final IAuthenticationService authenticationService;
+    private final PageResponseMapper pageResponseMapper;
 
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
     private final Map<Integer, Integer> estimatedListeningScoreMap = Constant.estimatedListeningScoreMap;
@@ -597,9 +603,15 @@ public class UserTestServiceImpl implements IUserTestService {
                 .userAnswersByPart(userAnswersByPart)
                 .build();
     }
+  
+    @Override
+    public PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable) {
+        Page<LearnerTestHistoryResponse> learnerTestResponses = userTestRepository.findAll(userTestSpecification, pageable).map(userTestMapper::toLearnerTestHistoryResponse);
+        return pageResponseMapper.toPageResponse(learnerTestResponses);
+    }
 
     @Override
     public List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email) {
-        return testRepository.getLearnerTestHistoryByTest_IdAndUser_Email(testId, email);
+        return userTestRepository.getLearnerTestHistoryByTest_IdAndUser_Email(testId, email);
     }
 }
