@@ -11,6 +11,8 @@ import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import org.springframework.ai.document.Document;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.scheduling.annotation.Async;
 
@@ -45,4 +47,7 @@ public interface ITestService {
     PageResponse searchTestsByName(PageRequest request);
 
     LearnerTestDetailResponse getLearnerTestDetailById(Long id);
+
+    @Transactional(readOnly = true)
+    List<Document> loadTestsForVectorDB();
 }

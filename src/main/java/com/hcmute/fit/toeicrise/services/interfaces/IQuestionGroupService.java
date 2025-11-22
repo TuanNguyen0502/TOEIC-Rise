@@ -41,4 +41,6 @@ public interface IQuestionGroupService {
 
     @Transactional(readOnly = true)
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
+
+    List<QuestionGroup> findAllByTestId(Long testId);
 }

@@ -268,4 +268,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             return partResponse;
         }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
     }
+
+    @Override
+    public List<QuestionGroup> findAllByTestId(Long testId) {
+        return questionGroupRepository.findByTest_IdOrderByPositionAsc(testId);
+    }
 }

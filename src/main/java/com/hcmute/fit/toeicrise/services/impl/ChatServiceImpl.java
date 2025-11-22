@@ -24,6 +24,10 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
@@ -33,6 +37,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,6 +51,22 @@ public class ChatServiceImpl implements IChatService {
     private final ISystemPromptService systemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
+    private final VectorStore vectorStore;
+
+    private static PromptTemplate getPromptTemplate() {
+        String promptTemplate = """
+                Bạn là một trợ lý học tập thông minh.
+                Người dùng đang yêu cầu: "{query}"
+                
+                Dưới đây là danh sách các bài test có trong cơ sở dữ liệu phù hợp nhất với yêu cầu:
+                {context}
+                
+                Hãy phân tích và gợi ý cho người dùng nên làm bài test nào.
+                Giải thích ngắn gọn tại sao bài test đó phù hợp dựa trên nội dung, transcript hoặc tags.
+                Trả về định dạng JSON gồm: tên bài test, test_id, và lý do gợi ý.
+                """;
+        return new PromptTemplate(promptTemplate);
+    }
 
     @Override
     public List<ChatbotResponse> getChatHistory(String conversationId) {
@@ -217,6 +238,35 @@ public class ChatServiceImpl implements IChatService {
                         .message(prompt)
                         .build())
         );
+    }
+
+    @Override
+    public String recommendTests(String userQuery) {
+        // 1. Tìm kiếm Similarity trong ChromaDB
+        // Lấy top 3 bài test phù hợp nhất
+        List<Document> similarDocs = vectorStore.similaritySearch(SearchRequest.builder()
+                .query(userQuery)
+                .topK(3)
+                .build());
+
+        // 2. Trích xuất thông tin để đưa vào Prompt
+        StringBuilder context = new StringBuilder();
+        for (Document doc : similarDocs) {
+            context.append("--- TEST ID: ").append(doc.getMetadata().get("test_id")).append(" ---\n");
+            context.append(doc.getFormattedContent()).append("\n\n");
+        }
+
+        // 3. Tạo Prompt
+        PromptTemplate template = getPromptTemplate();
+        Map<String, Object> params = Map.of(
+                "query", userQuery,
+                "context", context.toString()
+        );
+
+        // 4. Gọi LLM
+        return chatClient.prompt(template.create(params))
+                .call()
+                .content();
     }
 
     private String getActiveSystemPrompt() {

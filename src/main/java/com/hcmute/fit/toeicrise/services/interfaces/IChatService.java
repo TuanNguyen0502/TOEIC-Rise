@@ -19,4 +19,6 @@ public interface IChatService {
     String generateConversationTitle(String email, TitleRequest titleRequest);
 
     Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest);
+
+    String recommendTests(String userQuery);
 }
