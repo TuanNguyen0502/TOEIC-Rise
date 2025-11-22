@@ -64,7 +64,8 @@ public interface UserAnswerMapper {
 
     default LearnerAnswerResponse toLearnerAnswerResponse(UserAnswer userAnswer) {
         return LearnerAnswerResponse.builder()
-                .id(userAnswer.getId())
+                .learnerAnswerId(userAnswer.getId())
+                .questionId(userAnswer.getQuestion().getId())
                 .position(userAnswer.getQuestion().getPosition().longValue())
                 .content(userAnswer.getQuestion().getContent())
                 .options(userAnswer.getQuestion().getOptions())
