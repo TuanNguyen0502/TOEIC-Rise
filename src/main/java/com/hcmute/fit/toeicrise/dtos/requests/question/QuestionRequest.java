@@ -25,12 +25,12 @@ public class QuestionRequest {
     private String content;
     private Map<String, String> options;
 
-    @NotBlank(message = MessageConstant.CORRECT_OPTION_NOT_BLANK)
-    @NotNull(message = MessageConstant.CORRECT_OPTION_NOT_NULL)
+    @NotBlank(message = MessageConstant.QUESTION_CORRECT_OPTION_NOT_BLANK)
+    @NotNull(message = MessageConstant.QUESTION_CORRECT_OPTION_NOT_NULL)
     private String correctOption;
 
-    @NotBlank(message = MessageConstant.EXPLAIN_NOT_BLANK)
-    @NotNull(message = MessageConstant.EXPLAIN_NOT_NULL)
+    @NotBlank(message = MessageConstant.QUESTION_EXPLANATION_NOT_BLANK)
+    @NotNull(message = MessageConstant.QUESTION_EXPLANATION_NOT_NULL)
     private String explanation;
 
     @NotNull(message = MessageConstant.TAG_NOT_NULL)

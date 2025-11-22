@@ -21,6 +21,7 @@ public interface QuestionReportMapper {
                 .questionId(question.getId())
                 .questionContent(question.getContent())
                 .questionOptions(question.getOptions())
+                .questionCorrectOption(question.getCorrectOption())
                 .questionExplanation(question.getExplanation())
                 .questionGroupId(questionGroup.getId())
                 .questionGroupAudioUrl(questionGroup.getAudioUrl())
@@ -40,6 +41,7 @@ public interface QuestionReportMapper {
                 .resolvedNote(questionReport.getResolvedNote())
                 .build();
     }
+
     @Mapping(source = "question.questionGroup.test.name", target = "testName")
     @Mapping(source = "reporter.fullName", target = "reporterName")
     @Mapping(source = "resolver.fullName", target = "resolverName")
