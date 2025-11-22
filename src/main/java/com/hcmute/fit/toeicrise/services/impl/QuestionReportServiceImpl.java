@@ -58,9 +58,11 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
 
     @Override
     public QuestionReportDetailResponse getReportDetail(String email, Long reportId) {
+        User currentUser = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         QuestionReport questionReport = questionReportRepository.findById(reportId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question Report"));
-        checkStaffPermission(email, questionReport);
+        checkStaffPermission(currentUser, questionReport);
         return questionReportMapper.toQuestionReportDetailResponse(questionReport);
     }
 
@@ -86,7 +88,7 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         Question question = questionReport.getQuestion();
         QuestionGroup questionGroup = question.getQuestionGroup();
 
-        checkStaffPermission(email, questionReport);
+        checkStaffPermission(resolver, questionReport);
 
         if (request.getQuestionUpdate() != null) {
             questionService.updateQuestion(question, request.getQuestionUpdate());
@@ -100,9 +102,7 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         questionReportRepository.save(questionReport);
     }
 
-    private void checkStaffPermission(String email, QuestionReport questionReport) {
-        User currentUser = userRepository.findByAccount_Email(email)
-                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+    private void checkStaffPermission(User currentUser, QuestionReport questionReport) {
         // If the staff, they can only access the report assigned to them or the pending reports
         if (currentUser.getRole().getName().equals(ERole.STAFF)) {
             if (questionReport.getResolver() != null) {
