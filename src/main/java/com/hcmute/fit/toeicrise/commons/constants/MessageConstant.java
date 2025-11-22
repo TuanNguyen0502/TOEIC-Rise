@@ -55,10 +55,10 @@ public class MessageConstant {
     // Question related messages
     public static final String QUESTION_ID_NOT_NULL = "Question must not be null.";
     public static final String QUESTION_GROUP_ID_NOT_NULL = "Question group must not be null.";
-    public static final String CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
-    public static final String CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
-    public static final String EXPLAIN_NOT_BLANK = "Explain must not be blank.";
-    public static final String EXPLAIN_NOT_NULL = "Explain must not be null.";
+    public static final String QUESTION_CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
+    public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
+    public static final String QUESTION_EXPLANATION_NOT_BLANK = "Explain must not be blank.";
+    public static final String QUESTION_EXPLANATION_NOT_NULL = "Explain must not be null.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
     public static final String TAG_NOT_EMPTY = "Tag must not be empty.";
     // User Test related messages
@@ -67,4 +67,6 @@ public class MessageConstant {
     public static final String ANSWERS_NOT_EMPTY = "Answers must not be empty.";
     // Question Report related messages
     public static final String QUESTION_REPORT_REASONS_NOT_EMPTY = "Report reasons must not be empty.";
+    public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_NULL = "Resolved note must not be null.";
+    public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_BLANK = "Resolved note must not be blank.";
 }

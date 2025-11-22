@@ -1,11 +1,13 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.report.QuestionReportRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.report.QuestionReportResolveRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
+import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.QuestionReport;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
@@ -14,10 +16,12 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionReportMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionReportRepository;
-import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.QuestionReportSpecification;
+import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionReportService;
+import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,8 +34,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class QuestionReportServiceImpl implements IQuestionReportService {
     private final UserRepository userRepository;
-    private final QuestionRepository questionRepository;
     private final QuestionReportRepository questionReportRepository;
+    private final IQuestionService questionService;
+    private final IQuestionGroupService questionGroupService;
     private final QuestionReportMapper questionReportMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -39,7 +44,7 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
     public void createReport(String email, QuestionReportRequest questionReportRequest) {
         User reporter = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-        Question question = questionRepository.findById(questionReportRequest.getQuestionId())
+        Question question = questionService.findById(questionReportRequest.getQuestionId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
 
         QuestionReport questionReport = new QuestionReport();
@@ -53,9 +58,11 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
 
     @Override
     public QuestionReportDetailResponse getReportDetail(String email, Long reportId) {
+        User currentUser = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         QuestionReport questionReport = questionReportRepository.findById(reportId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question Report"));
-        checkStaffPermission(email, questionReport);
+        checkStaffPermission(currentUser, questionReport);
         return questionReportMapper.toQuestionReportDetailResponse(questionReport);
     }
 
@@ -81,15 +88,38 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         return pageResponseMapper.toPageResponse(questionReports);
     }
 
-    private void checkStaffPermission(String email, QuestionReport questionReport) {
-        User currentUser = userRepository.findByAccount_Email(email)
+    @Transactional
+    @Override
+    public void resolveReport(String email, Long reportId, QuestionReportResolveRequest request) {
+        User resolver = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-        // If the staff, they can only access reports assigned to them and still pending
+        QuestionReport questionReport = questionReportRepository.findById(reportId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question Report"));
+        Question question = questionReport.getQuestion();
+        QuestionGroup questionGroup = question.getQuestionGroup();
+
+        checkStaffPermission(resolver, questionReport);
+
+        if (request.getQuestionUpdate() != null) {
+            questionService.updateQuestion(question, request.getQuestionUpdate());
+        }
+        if (request.getQuestionGroupUpdate() != null) {
+            questionGroupService.updateQuestionGroupWithEntity(questionGroup, request.getQuestionGroupUpdate());
+        }
+        questionReport.setResolver(resolver);
+        questionReport.setResolvedNote(request.getResolvedNote());
+        questionReport.setStatus(request.getStatus());
+        questionReportRepository.save(questionReport);
+    }
+
+    private void checkStaffPermission(User currentUser, QuestionReport questionReport) {
+        // If the staff, they can only access the report assigned to them or the pending reports
         if (currentUser.getRole().getName().equals(ERole.STAFF)) {
-            if (questionReport.getResolver() != null &&
-                    !questionReport.getResolver().getId().equals(currentUser.getId())) {
-                throw new AppException(ErrorCode.UNAUTHORIZED);
-            } else if (!questionReport.getStatus().equals(EQuestionReportStatus.PENDING)) {
+            if (questionReport.getResolver() != null) {
+                if (!questionReport.getResolver().getId().equals(currentUser.getId())) {
+                    throw new AppException(ErrorCode.UNAUTHORIZED);
+                }
+            } else if (questionReport.getStatus() != EQuestionReportStatus.PENDING) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
         }
