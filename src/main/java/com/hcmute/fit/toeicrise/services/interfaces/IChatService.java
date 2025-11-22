@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAboutQuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAnalysisRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
@@ -19,4 +20,6 @@ public interface IChatService {
     String generateConversationTitle(String email, TitleRequest titleRequest);
 
     Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest);
+
+    Flux<ChatbotResponse> chatAnalysisData(ChatAnalysisRequest chatRequest);
 }
