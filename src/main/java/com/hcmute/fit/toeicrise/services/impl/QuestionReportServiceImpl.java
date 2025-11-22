@@ -71,6 +71,16 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         return pageResponseMapper.toPageResponse(questionReports);
     }
 
+    @Override
+    public PageResponse getAllReports(int page, int size) {
+        Specification<QuestionReport> specification = (_, _, cb) -> cb.conjunction();
+        specification = specification.and(QuestionReportSpecification.hasStatus(EQuestionReportStatus.PENDING));
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<QuestionReportResponse> questionReports = questionReportRepository.findAll(specification, pageable).map(questionReportMapper::toQuestionReportResponse);
+        return pageResponseMapper.toPageResponse(questionReports);
+    }
+
     private void checkStaffPermission(String email, QuestionReport questionReport) {
         User currentUser = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
