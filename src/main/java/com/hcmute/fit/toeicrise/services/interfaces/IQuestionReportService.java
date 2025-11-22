@@ -13,6 +13,8 @@ public interface IQuestionReportService {
     QuestionReportDetailResponse getReportDetail(String email, Long reportId);
 
     PageResponse getAllReports(EQuestionReportStatus status, int page, int size);
+  
+    PageResponse getAllReports(int page, int size);
 
     @Transactional
     void resolveReport(String email, Long reportId, QuestionReportResolveRequest request);

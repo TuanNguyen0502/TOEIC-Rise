@@ -78,6 +78,16 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         return pageResponseMapper.toPageResponse(questionReports);
     }
 
+    @Override
+    public PageResponse getAllReports(int page, int size) {
+        Specification<QuestionReport> specification = (_, _, cb) -> cb.conjunction();
+        specification = specification.and(QuestionReportSpecification.hasStatus(EQuestionReportStatus.PENDING));
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<QuestionReportResponse> questionReports = questionReportRepository.findAll(specification, pageable).map(questionReportMapper::toQuestionReportResponse);
+        return pageResponseMapper.toPageResponse(questionReports);
+    }
+
     @Transactional
     @Override
     public void resolveReport(String email, Long reportId, QuestionReportResolveRequest request) {
