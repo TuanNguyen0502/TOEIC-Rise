@@ -14,10 +14,10 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionReportMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionReportRepository;
-import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.QuestionReportSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionReportService;
+import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,8 +30,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class QuestionReportServiceImpl implements IQuestionReportService {
     private final UserRepository userRepository;
-    private final QuestionRepository questionRepository;
     private final QuestionReportRepository questionReportRepository;
+    private final IQuestionService questionService;
     private final QuestionReportMapper questionReportMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -39,7 +39,7 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
     public void createReport(String email, QuestionReportRequest questionReportRequest) {
         User reporter = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-        Question question = questionRepository.findById(questionReportRequest.getQuestionId())
+        Question question = questionService.findById(questionReportRequest.getQuestionId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
 
         QuestionReport questionReport = new QuestionReport();

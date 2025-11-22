@@ -9,6 +9,7 @@ import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IQuestionService {
     void createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
@@ -22,4 +23,6 @@ public interface IQuestionService {
     List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
 
     List<LearnerTestQuestionResponse> getLearnerTestQuestionsByQuestionGroupId(Long questionGroupId);
+
+    Optional<Question> findById(Long aLong);
 }

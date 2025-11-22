@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,5 +73,10 @@ public class QuestionServiceImpl implements IQuestionService {
                 .stream()
                 .map(questionMapper::toLearnerTestQuestionResponse)
                 .toList();
+    }
+
+    @Override
+    public Optional<Question> findById(Long aLong) {
+        return questionRepository.findById(aLong);
     }
 }
