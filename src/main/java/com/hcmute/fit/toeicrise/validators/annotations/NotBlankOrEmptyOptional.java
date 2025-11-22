@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = NotBlankOrEmptyOptionalValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotBlankOrEmptyOptional {
-    String message() default "{fieldName} is not blank or empty";
+    String message() default "";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
     String regexp();

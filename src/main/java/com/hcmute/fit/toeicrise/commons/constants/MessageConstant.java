@@ -67,4 +67,6 @@ public class MessageConstant {
     public static final String ANSWERS_NOT_EMPTY = "Answers must not be empty.";
     // Question Report related messages
     public static final String QUESTION_REPORT_REASONS_NOT_EMPTY = "Report reasons must not be empty.";
+    // Part related messages
+    public static final String PART_NOT_BLANK = "Part is required.";
 }
