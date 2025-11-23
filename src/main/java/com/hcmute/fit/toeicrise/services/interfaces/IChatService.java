@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAboutQuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.TestSuggestionResponse;
 import reactor.core.publisher.Flux;
 
 import java.io.InputStream;
@@ -20,5 +21,5 @@ public interface IChatService {
 
     Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest);
 
-    String recommendTests(String userQuery);
+    List<TestSuggestionResponse> recommendTests(String userQuery);
 }

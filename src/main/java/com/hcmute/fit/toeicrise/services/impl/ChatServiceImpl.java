@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.TestSuggestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -28,6 +29,7 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
@@ -63,7 +65,8 @@ public class ChatServiceImpl implements IChatService {
                 
                 Hãy phân tích và gợi ý cho người dùng nên làm bài test nào.
                 Giải thích ngắn gọn tại sao bài test đó phù hợp dựa trên nội dung, transcript hoặc tags.
-                Trả về định dạng JSON gồm: tên bài test, test_id, và lý do gợi ý.
+                Trả về định dạng JSON gồm: "testId": <ID của bài test được gợi ý>, "testName": "<Tên bài test>", "reason": "<Lý do gợi ý>"
+                Do NOT include any text, explanation, markdown formatting (e.g. triple backticks ```) or surrounding quotes.
                 """;
         return new PromptTemplate(promptTemplate);
     }
@@ -241,7 +244,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public String recommendTests(String userQuery) {
+    public List<TestSuggestionResponse> recommendTests(String userQuery) {
         // 1. Tìm kiếm Similarity trong ChromaDB
         // Lấy top 3 bài test phù hợp nhất
         List<Document> similarDocs = vectorStore.similaritySearch(SearchRequest.builder()
@@ -264,9 +267,11 @@ public class ChatServiceImpl implements IChatService {
         );
 
         // 4. Gọi LLM
-        return chatClient.prompt(template.create(params))
+        return chatClient
+                .prompt(template.create(params))
                 .call()
-                .content();
+                .entity(new ParameterizedTypeReference<List<TestSuggestionResponse>>() {
+                });
     }
 
     private String getActiveSystemPrompt() {

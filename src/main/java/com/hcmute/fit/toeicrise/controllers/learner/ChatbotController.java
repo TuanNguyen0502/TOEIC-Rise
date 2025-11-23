@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.TestSuggestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
@@ -23,6 +24,7 @@ import jakarta.annotation.PostConstruct;
 
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/learner/chatbot")
@@ -117,8 +119,8 @@ public class ChatbotController {
     }
 
     @GetMapping("/suggest")
-    public ResponseEntity<String> suggest(@RequestParam String query) {
-        String response = chatService.recommendTests(query);
+    public ResponseEntity<List<TestSuggestionResponse>> suggest(@RequestParam String query) {
+        List<TestSuggestionResponse> response = chatService.recommendTests(query);
         return ResponseEntity.ok(response);
     }
 }
