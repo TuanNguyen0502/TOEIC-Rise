@@ -7,7 +7,6 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatbotRatingService;
-import com.hcmute.fit.toeicrise.services.interfaces.IVectorStoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,6 @@ public class ChatbotController {
     private final IChatService chatService;
     private final IChatTitleService chatTitleService;
     private final IChatbotRatingService chatbotRatingService;
-    private final IVectorStoreService vectorStoreService;
 
     // Suppress all common error sources for reactive endpoints
     @PostConstruct
@@ -116,12 +114,6 @@ public class ChatbotController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         chatTitleService.renameChatTitle(email, request);
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/sync")
-    public ResponseEntity<String> syncData() {
-        vectorStoreService.initTestEmbeddings();
-        return ResponseEntity.ok("Data synced to ChromaDB");
     }
 
     @GetMapping("/suggest")

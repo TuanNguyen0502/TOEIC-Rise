@@ -56,6 +56,7 @@ public class TestServiceImpl implements ITestService {
     private final PartMapper partMapper;
     private final TestMapper testMapper;
     private final PageResponseMapper pageResponseMapper;
+    private final IVectorStoreService vectorStoreService;
 
     @Override
     public PageResponse getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
@@ -90,11 +91,18 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean changeTestStatusById(Long id, ETestStatus status) {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
         test.setStatus(status);
         testRepository.save(test);
+        if (status == ETestStatus.APPROVED) {
+            Document document = loadTestForVectorDB(test);
+            vectorStoreService.initTestEmbedding(document);
+        } else {
+            vectorStoreService.deleteTestById(test.getId());
+        }
         return true;
     }
 
@@ -242,58 +250,47 @@ public class TestServiceImpl implements ITestService {
         return testMapper.toLearnerTestDetailResponse(testRepository.findListTagByIdOrderByPartName(id), partMapper);
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<Document> loadTestsForVectorDB() {
-        // 1. Lấy các bài test đã APPROVED
-        List<Test> tests = testRepository.findAllByStatus(ETestStatus.APPROVED);
+    private Document loadTestForVectorDB(Test test) {
+        StringBuilder contentBuilder = new StringBuilder();
 
-        List<Document> documents = new ArrayList<>();
+        // Xây dựng nội dung mô tả bài test (Context Window)
+        contentBuilder.append("Test Name: ").append(test.getName()).append("\n");
 
-        for (Test test : tests) {
-            StringBuilder contentBuilder = new StringBuilder();
+        List<QuestionGroup> questionGroups = questionGroupService.findAllByTestId(test.getId());
 
-            // Xây dựng nội dung mô tả bài test (Context Window)
-            contentBuilder.append("Test Name: ").append(test.getName()).append("\n");
-
-            List<QuestionGroup> questionGroups = questionGroupService.findAllByTestId(test.getId());
-
-            // Duyệt qua các Question Groups
-            for (QuestionGroup group : questionGroups) {
-                if (group.getPart() != null) {
-                    contentBuilder.append("Part: ").append(group.getPart().getName()).append("\n");
-                }
-                if (group.getTranscript() != null) {
-                    contentBuilder.append("Transcript: ").append(group.getTranscript()).append("\n");
-                }
-
-                // Duyệt qua các Questions
-                for (Question question : group.getQuestions()) {
-                    contentBuilder.append("Question: ").append(question.getContent()).append("\n");
-                    if (question.getExplanation() != null) {
-                        contentBuilder.append("Explanation: ").append(question.getExplanation()).append("\n");
-                    }
-
-                    // Duyệt Tags
-                    String tags = question.getTags().stream()
-                            .map(Tag::getName)
-                            .collect(Collectors.joining(", "));
-                    if (!tags.isEmpty()) {
-                        contentBuilder.append("Tags: ").append(tags).append("\n");
-                    }
-                }
+        // Duyệt qua các Question Groups
+        for (QuestionGroup group : questionGroups) {
+            if (group.getPart() != null) {
+                contentBuilder.append("Part: ").append(group.getPart().getName()).append("\n");
+            }
+            if (group.getTranscript() != null) {
+                contentBuilder.append("Transcript: ").append(group.getTranscript()).append("\n");
             }
 
-            // 2. Tạo Metadata
-            Map<String, Object> metadata = new HashMap<>();
-            metadata.put("test_id", test.getId());
-            metadata.put("status", test.getStatus().toString());
-            metadata.put("popularity", test.getNumberOfLearnerTests());
+            // Duyệt qua các Questions
+            for (Question question : group.getQuestions()) {
+                contentBuilder.append("Question: ").append(question.getContent()).append("\n");
+                if (question.getExplanation() != null) {
+                    contentBuilder.append("Explanation: ").append(question.getExplanation()).append("\n");
+                }
 
-            // 3. Tạo Document của Spring AI
-            Document doc = new Document(contentBuilder.toString(), metadata);
-            documents.add(doc);
+                // Duyệt Tags
+                String tags = question.getTags().stream()
+                        .map(Tag::getName)
+                        .collect(Collectors.joining(", "));
+                if (!tags.isEmpty()) {
+                    contentBuilder.append("Tags: ").append(tags).append("\n");
+                }
+            }
         }
-        return documents;
+
+        // 2. Tạo Metadata
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("test_id", test.getId());
+        metadata.put("status", test.getStatus().toString());
+        metadata.put("popularity", test.getNumberOfLearnerTests());
+
+        // 3. Tạo Document của Spring AI
+        return new Document(contentBuilder.toString(), metadata);
     }
 }
