@@ -269,6 +269,9 @@ public class ChatServiceImpl implements IChatService {
         // 4. Gọi LLM
         return chatClient
                 .prompt(template.create(params))
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString());
+                })
                 .call()
                 .entity(new ParameterizedTypeReference<List<TestSuggestionResponse>>() {
                 });
