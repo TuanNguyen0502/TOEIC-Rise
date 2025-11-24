@@ -44,4 +44,6 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "WHERE t.id = :id AND ut.user.account.email = :email " +
             "ORDER BY ut.createdAt DESC ")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
+
+    Optional<UserTest> findFirstByOrderByCreatedAtDesc();
 }

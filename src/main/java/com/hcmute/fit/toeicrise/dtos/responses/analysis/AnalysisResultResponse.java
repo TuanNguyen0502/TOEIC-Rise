@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AnalysisResultResponse {
     private int numberOfTests;
+    private int numberOfSubmissions;
     private long totalTimes;
     List<ExamTypeStatsResponse> examList;
 }
