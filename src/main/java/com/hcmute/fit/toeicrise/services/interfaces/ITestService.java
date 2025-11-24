@@ -24,7 +24,7 @@ public interface ITestService {
 
     TestResponse updateTest(Long id, TestUpdateRequest testUpdateRequest);
 
-    @Transactional(readOnly = true)
+    @Transactional
     boolean changeTestStatusById(Long id, ETestStatus status);
 
     @Async

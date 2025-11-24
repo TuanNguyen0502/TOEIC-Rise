@@ -91,7 +91,7 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public boolean changeTestStatusById(Long id, ETestStatus status) {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
