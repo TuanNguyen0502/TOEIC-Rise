@@ -534,12 +534,15 @@ public class UserTestServiceImpl implements IUserTestService {
             Map<String, PartStats> rawPartStats
     ) {
         Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>();
+        double overallCorrectPercent = totalQuestionExamType == 0 ? 0.0 : ((double) correctAnswerExamType / totalQuestionExamType) * 100;
+
         if (rawDataByPart != null) {
             for (Map.Entry<String, Map<String, TagStats>> partEntry : rawDataByPart.entrySet()) {
                 String partName = partEntry.getKey();
                 Map<String, TagStats> tagStatsMap = partEntry.getValue();
 
                 List<UserAnswerGroupedByTagResponse> groupedResponses = new ArrayList<>();
+                UserAnswerGroupedByTagResponse totalPartResponse = null;
 
                 tagStatsMap.forEach((tag, stats) -> {
                     int total = stats.correct + stats.wrong;
@@ -557,22 +560,25 @@ public class UserTestServiceImpl implements IUserTestService {
                     int totalForPart = partStats.correct + partStats.wrong;
                     double totalPercent = totalForPart == 0 ? 0.0 : ((double) partStats.correct / totalForPart) * 100;
 
-                    groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
+                    totalPartResponse = UserAnswerGroupedByTagResponse.builder()
                             .tag("Total")
                             .correctAnswers(partStats.correct)
                             .wrongAnswers(partStats.wrong)
                             .correctPercent(totalPercent)
                             .userAnswerOverallResponses(null)
-                            .build());
+                            .build();
                 }
+                groupedResponses.sort(Comparator.comparing(UserAnswerGroupedByTagResponse::getCorrectPercent));
+                groupedResponses.add(totalPartResponse);
                 userAnswersByPart.put(partName, groupedResponses);
+
             }
         }
 
         return ExamTypeStatsResponse.builder()
                 .totalCorrectAnswers(correctAnswerExamType)
                 .totalQuestions(totalQuestionExamType)
-                .correctPercent(((double) correctAnswerExamType / totalQuestionExamType) * 100)
+                .correctPercent(overallCorrectPercent)
                 .userAnswersByPart(userAnswersByPart)
                 .build();
     }
