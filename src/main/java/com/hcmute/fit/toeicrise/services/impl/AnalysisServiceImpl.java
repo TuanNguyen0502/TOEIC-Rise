@@ -2,7 +2,6 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
-import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.enums.EDirection;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.repositories.specifications.UserTestSpecification;
@@ -21,10 +20,9 @@ public class AnalysisServiceImpl implements IAnalysisService {
     private final IUserTestService userTestService;
 
     @Override
-    public PageResponse getAllTestHistory(EDays days, int page, int size, String email) {
+    public PageResponse getAllTestHistory(int page, int size, String email) {
         Specification<UserTest> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(UserTestSpecification.statusEquals(ETestStatus.APPROVED));
-        specification = specification.and(UserTestSpecification.createdAtBetween(days.getDays()));
         specification = specification.and(UserTestSpecification.accountHasEmail(email));
         Sort sort = Sort.by(Sort.Direction.fromString(EDirection.DES.getValue()), "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
