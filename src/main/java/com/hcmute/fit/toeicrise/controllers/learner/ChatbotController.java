@@ -116,9 +116,8 @@ public class ChatbotController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(path = "/analysis", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping("/analysis")
     public ResponseEntity<?> getAnalysis(@RequestBody ChatAnalysisRequest chatAnalysisRequest) {
-        System.out.println(SecurityContextHolder.getContext().getAuthentication().getName());
-        return ResponseEntity.ok(chatService.chatAnalysisData(chatAnalysisRequest).delayElements(Duration.ofMillis(50)));
+        return ResponseEntity.ok(chatService.chatAnalysisData(chatAnalysisRequest));
     }
 }

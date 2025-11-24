@@ -1,11 +1,11 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAboutQuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAnalysisRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -30,6 +30,8 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -49,6 +51,7 @@ public class ChatServiceImpl implements IChatService {
     private final ISystemPromptService systemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
+    private final TemplateEngine templateEngine;
 
     @Override
     public List<ChatbotResponse> getChatHistory(String conversationId) {
@@ -221,90 +224,25 @@ public class ChatServiceImpl implements IChatService {
                         .build())
         );
     }
+
     @Override
-    public Flux<ChatbotResponse> chatAnalysisData(ChatAnalysisRequest chatRequest) {
+    public ChatbotAnalysisResponse chatAnalysisData(ChatAnalysisRequest chatRequest) {
         AnalysisResultResponse response = chatRequest.getAnalysisResult();
-        Mono<String> prompts = Mono.fromCallable(() -> {
-            String systemPrompt = """
-                 'Bạn là TOEIC Rise – một hệ thống phân tích kết quả làm bài TOEIC thông minh. ',
-                 'Vai trò của bạn là đánh giá hiệu suất của người học dựa trên dữ liệu thống kê mà hệ thống backend cung cấp. ',
-                 'Bạn phải luôn duy trì vai trò này trong suốt quá trình phân tích.\\n',
-                 \\n',
-                 
-                 'Vai trò và nhiệm vụ:\\n',
-                 '1. Phân tích kết quả TOEIC\\n',
-                 '+ Đánh giá hiệu suất từng Part (1–7): tỷ lệ đúng/sai, mức độ ổn định, phần yếu và mạnh.\\n',
-                 '+ Phân tích theo Tag/Kỹ năng: vocabulary, grammar, inference, paraphrasing, detail, logic,...\\n',
-                 '+ Phân tích tốc độ làm bài: nhanh, chậm, đoán mò, phân bổ thời gian chưa hợp lý.\\n',
-                 '+ Phân tích xu hướng qua nhiều bài: tiến bộ, giảm phong độ, phần nào thay đổi nhiều nhất.\\n',
-                 '\\n',
-                 
-                 '2. Xác định điểm mạnh và điểm yếu\\n',
-                 '+ Nêu rõ kỹ năng mạnh dựa trên dữ liệu.\\n',
-                 '+ Xác định kỹ năng yếu và giải thích nguyên nhân (ví dụ: paraphrasing thấp vì sai nhiều ở Part 3-4).\\n',
-                 '+ Chỉ ra Part nào cần cải thiện ưu tiên.\\n',
-                 '\\n',
-                 
-                 '3. Đưa ra khuyến nghị học tập\\n',
-                 '+ Gợi ý cách luyện từng kỹ năng yếu.\\n',
-                 '+ Đề xuất chiến lược làm bài theo từng Part.\\n',
-                 '+ Gợi ý bài tập hoặc chủ đề học phù hợp.\\n',
-                 '+ Đề xuất kế hoạch học tập ngắn hạn và dài hạn.\\n',
-                 '\\n',
-                 'Nguyên tắc:\\n',
-                 '+ Phạm vi: chỉ hỗ trợ TOEIC và tiếng Anh liên quan đến TOEIC.\\n',
-                 '+ Phong cách: thân thiện, rõ ràng, dễ hiểu, luôn khuyến khích người học.\\n',
-                 '+ Tính an toàn: không cung cấp nội dung sai lệch, nhạy cảm hoặc nguy hiểm.\\n',
-                 '\\n',
-                 'Yêu cầu về đầu vào\\n',
-                 '+ Bạn chỉ được phân tích dựa trên dữ liệu được gửi, không tự tạo dữ liệu mới.\\n',
-                 '\\n',
-                 
-                 'Yêu cầu về đầu ra\\n',
-                 '+ Phải trả về dữ liệu phân tích ở dạng JSON rõ ràng, có cấu trúc.\\n',
-                 '+ Cấu trúc JSON bắt buộc:\\n',
-                 '  {\\n',
-                 '    "overallSummary": "...",\\n',
-                 '    "strengths": [...],\\n',
-                 '    "weaknesses": [...],\\n',
-                 '    "partAnalysis": { ... },\\n',
-                 '    "tagAnalysis": { ... },\\n',
-                 '    "timingAnalysis": "...",\\n',
-                 '    "trendAnalysis": "...",\\n',
-                 '    "recommendations": [...],\\n',
-                 '    "studyPlan": {\\n',
-                 '        "shortTerm": [...],\\n',
-                 '        "longTerm": [...]\\n',
-                 '    }\\n',
-                 '  }\\n',
-                 '+ Tất cả nội dung phải dựa trên dữ liệu và bối cảnh TOEIC.\\n',
-                 '\\n',
-                 
-                 'Phong cách phản hồi\\n',
-                 '+ Ngắn gọn, chính xác, rõ ràng, mang tính chuyên môn.\\n',
-                 '+ Không lan man, không lặp lại dữ liệu đầu vào.\\n',
-                 '+ Giống như một giáo viên TOEIC chuyên nghiệp đang đánh giá bài.\\n',
-                 '\\n',
-                 
-                 'Bạn luôn tuân thủ các quy tắc trên khi phân tích mọi đề thi TOEIC.'
-                 'Dưới đây là dữ liệu cần phân tích:'
-                 """;
-            String jsonData = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response);
-            return systemPrompt + "\n" + jsonData;
-        }).subscribeOn(Schedulers.boundedElastic());
+        Context context = new Context();
+        context.setVariable("analysisData", response);
+        String prompts = templateEngine.process("analysis-result", context);
 
-        return prompts.flatMapMany(prompt ->{
-            String conversationId = chatRequest.getConversationId();
-            if (conversationId == null || conversationId.isEmpty()) {
-                conversationId = UUID.randomUUID().toString();
-            }
-            return chat(ChatRequest.builder()
-                    .conversationId(conversationId)
-                    .message(prompt)
-                    .build());
-        });
+        return chatClient.prompt(prompts)
+                        .advisors(advisorSpec -> {
+                            String conversationId = chatRequest.getConversationId();
+                            if (conversationId == null || conversationId.isEmpty()) {
+                                conversationId = UUID.randomUUID().toString();
+                            }
+                            advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId);
+                        })
+                                .call()
+                                        .entity(ChatbotAnalysisResponse.class);
     }
-
 
     private String getActiveSystemPrompt() {
         SystemPromptDetailResponse response = systemPromptService.getActiveSystemPrompt();
