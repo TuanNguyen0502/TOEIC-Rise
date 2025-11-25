@@ -20,10 +20,6 @@ public class CloudinaryUtil {
         this.cloudinary = cloudinary;
     }
 
-    public String getDefaultAvatarUrl() {
-        return "https://res.cloudinary.com/toeic-rise/image/upload/v1761193814/default-avatar_hbm1bj.png";
-    }
-
     public String uploadFile(MultipartFile file) {
         try {
             Map data = cloudinary.uploader()
@@ -43,7 +39,8 @@ public class CloudinaryUtil {
     public void deleteFile(String url) {
         try {
             String publicId = extractPublicId(url);
-            cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "auto"));
+            String resourceType = getResourceTypeFromUrl(url);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", resourceType));
         } catch (IOException e) {
             throw new AppException(ErrorCode.FILE_DELETE_FAILED);
         }
@@ -89,6 +86,22 @@ public class CloudinaryUtil {
 
     public boolean isCloudinaryUrl(String url) {
         return url.contains("res.cloudinary.com");
+    }
+
+    private String getResourceType(String filename) {
+        if (filename == null) return "raw";
+        if (isValidSuffixImage(filename)) return "image";
+        if (isValidSuffixAudio(filename)) return "video"; // Audio files use 'video' resource type
+        return "raw";
+    }
+
+    private String getResourceTypeFromUrl(String url) {
+        if (url == null) return "raw";
+        if (url.contains("/image/")) return "image";
+        if (url.contains("/video/")) return "video";
+        if (url.contains("/raw/")) return "raw";
+        // Fallback based on file extension
+        return getResourceType(url);
     }
 
     private String extractPublicId(String url) {
