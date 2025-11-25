@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -46,4 +47,6 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
 
     Optional<UserTest> findFirstByOrderByCreatedAtDesc();
+
+    List<UserTest> findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable);
 }

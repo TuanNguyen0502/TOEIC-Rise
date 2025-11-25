@@ -30,4 +30,9 @@ public class AnalysisController {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(analysisService.getAllTestHistory(days, page, size, email));
     }
+
+    @GetMapping("/full-test")
+    public ResponseEntity<?> getFullTest(@RequestParam(defaultValue = "5") int size){
+        return ResponseEntity.ok(userTestService.getFullTestResult(SecurityUtils.getCurrentUser(), size));
+    }
 }

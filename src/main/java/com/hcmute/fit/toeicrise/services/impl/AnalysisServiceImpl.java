@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.FullTestResultResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.enums.EDirection;
