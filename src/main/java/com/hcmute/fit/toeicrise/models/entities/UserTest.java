@@ -60,6 +60,12 @@ public class UserTest extends BaseEntity {
     @Column(name = "reading_correct_answers")
     private Integer readingCorrectAnswers;
 
+    @Column(name = "total_listening_questions")
+    private Integer totalListeningQuestions;
+
+    @Column(name = "total_reading_questions")
+    private Integer totalReadingQuestions;
+
     @OneToMany(mappedBy = "userTest", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<UserAnswer> userAnswers = new ArrayList<>();

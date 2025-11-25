@@ -6,7 +6,6 @@ import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
@@ -370,8 +369,14 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
-        LocalDateTime localDateTime = LocalDateTime.now().minusDays(days.getDays());
+        Optional<UserTest> userTest = userTestRepository.findFirstByOrderByCreatedAtDesc();
+        LocalDateTime localDateTime = userTest.map(user -> user.getCreatedAt().minusDays(days.getDays()))
+                .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
         List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime);
+        int numberOfTests = (int)userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
 
         Set<Long> questionIds = userTests.stream()
                 .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
@@ -408,17 +413,19 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         long totalSpent = 0L;
-        int listeningTestCount = 0;
-        int readingTestCount = 0;
-        long listeningTimeSpent = 0L;
-        long readingTimeSpent = 0L;
-        List<Integer> listeningScores = new ArrayList<>();
-        List<Integer> readingScores = new ArrayList<>();
+        int totalQuestionsListening = 0;
+        int correctAnswersListening = 0;
+        int totalQuestionsReading = 0;
+        int correctAnswersReading = 0;
 
-        for (UserTest userTest : userTests) {
-            totalSpent += userTest.getTimeSpent() != null ? userTest.getTimeSpent() : 0;
+        for (UserTest ut : userTests) {
+            totalSpent += ut.getTimeSpent() != null ? ut.getTimeSpent() : 0;
+            totalQuestionsListening += ut.getTotalListeningQuestions() != null ? ut.getTotalListeningQuestions() : 0;
+            correctAnswersListening += ut.getListeningCorrectAnswers() != null ? ut.getListeningCorrectAnswers() : 0;
+            totalQuestionsReading += ut.getTotalReadingQuestions() != null ? ut.getTotalReadingQuestions() : 0;
+            correctAnswersReading += ut.getReadingCorrectAnswers() != null ? ut.getReadingCorrectAnswers() : 0;
             
-            List<UserAnswer> userAnswers = userTest.getUserAnswers();
+            List<UserAnswer> userAnswers = ut.getUserAnswers();
             if (userAnswers == null || userAnswers.isEmpty()) continue;
 
             Set<Long> questionGroupIds = userAnswers.stream()
@@ -432,9 +439,6 @@ public class UserTestServiceImpl implements IUserTestService {
                             partNamesByGroupId.get(ua.getQuestionGroupId())
                     ));
 
-            boolean hasListening = false;
-            boolean hasReading = false;
-
             for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
                 String partName = entry.getKey();
                 List<UserAnswer> answersInPart = entry.getValue();
@@ -442,12 +446,6 @@ public class UserTestServiceImpl implements IUserTestService {
                 if (partName == null) continue;
 
                 EExamType examType = isListeningPart(partName) ? EExamType.LISTENING : EExamType.READING;
-                
-                if (examType == EExamType.LISTENING) {
-                    hasListening = true;
-                } else {
-                    hasReading = true;
-                }
 
                 Map<String, Map<String, TagStats>> examTypeRawData = rawDataByExamType.get(examType);
                 Map<String, PartStats> examTypePartStats = rawPartStatsByExamType.get(examType);
@@ -478,41 +476,25 @@ public class UserTestServiceImpl implements IUserTestService {
                 PartStats partStats = examTypePartStats.get(partName);
                 partStats.add(partCorrect, partWrong);
             }
-
-            if (hasListening) {
-                listeningTestCount++;
-                listeningTimeSpent += userTest.getTimeSpent() != null ? userTest.getTimeSpent() : 0;
-                if (userTest.getListeningScore() != null) {
-                    listeningScores.add(userTest.getListeningScore());
-                }
-            }
-            if (hasReading) {
-                readingTestCount++;
-                readingTimeSpent += userTest.getTimeSpent() != null ? userTest.getTimeSpent() : 0;
-                if (userTest.getReadingScore() != null) {
-                    readingScores.add(userTest.getReadingScore());
-                }
-            }
         }
 
         ExamTypeStatsResponse listening = buildExamTypeStatsResponse(
-                listeningTestCount,
-                listeningTimeSpent,
-                listeningScores,
+                totalQuestionsListening,
+                correctAnswersListening,
                 rawDataByExamType.get(EExamType.LISTENING),
                 rawPartStatsByExamType.get(EExamType.LISTENING)
         );
 
         ExamTypeStatsResponse reading = buildExamTypeStatsResponse(
-                readingTestCount,
-                readingTimeSpent,
-                readingScores,
+                totalQuestionsReading,
+                correctAnswersReading,
                 rawDataByExamType.get(EExamType.READING),
                 rawPartStatsByExamType.get(EExamType.READING)
         );
 
         return AnalysisResultResponse.builder()
-                .numberOfTests(userTests.size())
+                .numberOfTests(numberOfTests)
+                .numberOfSubmissions(userTests.size())
                 .totalTimes(totalSpent)
                 .examList(List.of(listening, reading))
                 .build();
@@ -527,7 +509,6 @@ public class UserTestServiceImpl implements IUserTestService {
         );
     }
 
-    // Helper class để lưu dữ liệu thô của tag
     private static class TagStats {
         int correct = 0;
         int wrong = 0;
@@ -537,7 +518,6 @@ public class UserTestServiceImpl implements IUserTestService {
         }
     }
 
-    // Helper class để lưu dữ liệu thô của part
     private static class PartStats {
         int correct = 0;
         int wrong = 0;
@@ -548,13 +528,13 @@ public class UserTestServiceImpl implements IUserTestService {
     }
 
     private ExamTypeStatsResponse buildExamTypeStatsResponse(
-            int numberOfTests,
-            long timeSpent,
-            List<Integer> scores,
+            int totalQuestionExamType,
+            int correctAnswerExamType,
             Map<String, Map<String, TagStats>> rawDataByPart,
             Map<String, PartStats> rawPartStats
     ) {
         Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>();
+        double overallCorrectPercent = totalQuestionExamType == 0 ? 0.0 : ((double) correctAnswerExamType / totalQuestionExamType) * 100;
 
         if (rawDataByPart != null) {
             for (Map.Entry<String, Map<String, TagStats>> partEntry : rawDataByPart.entrySet()) {
@@ -562,6 +542,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 Map<String, TagStats> tagStatsMap = partEntry.getValue();
 
                 List<UserAnswerGroupedByTagResponse> groupedResponses = new ArrayList<>();
+                UserAnswerGroupedByTagResponse totalPartResponse = null;
 
                 tagStatsMap.forEach((tag, stats) -> {
                     int total = stats.correct + stats.wrong;
@@ -579,27 +560,25 @@ public class UserTestServiceImpl implements IUserTestService {
                     int totalForPart = partStats.correct + partStats.wrong;
                     double totalPercent = totalForPart == 0 ? 0.0 : ((double) partStats.correct / totalForPart) * 100;
 
-                    groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
+                    totalPartResponse = UserAnswerGroupedByTagResponse.builder()
                             .tag("Total")
                             .correctAnswers(partStats.correct)
                             .wrongAnswers(partStats.wrong)
                             .correctPercent(totalPercent)
                             .userAnswerOverallResponses(null)
-                            .build());
+                            .build();
                 }
+                groupedResponses.sort(Comparator.comparing(UserAnswerGroupedByTagResponse::getCorrectPercent));
+                groupedResponses.add(totalPartResponse);
                 userAnswersByPart.put(partName, groupedResponses);
+
             }
         }
-        int averageScore = scores.isEmpty() ? 0 :
-                (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-        int maxScore = scores.isEmpty() ? 0 : 
-                scores.stream().mapToInt(Integer::intValue).max().orElse(0);
 
         return ExamTypeStatsResponse.builder()
-                .numberOfTests(numberOfTests)
-                .timeSpent(timeSpent)
-                .averageScore(averageScore)
-                .maxScore(maxScore)
+                .totalCorrectAnswers(correctAnswerExamType)
+                .totalQuestions(totalQuestionExamType)
+                .correctPercent(overallCorrectPercent)
                 .userAnswersByPart(userAnswersByPart)
                 .build();
     }

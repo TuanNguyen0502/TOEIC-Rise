@@ -12,9 +12,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExamTypeStatsResponse {
-    private int numberOfTests;
-    private Long timeSpent;
-    private int averageScore;
-    private int maxScore;
+    private int totalQuestions;
+    private int totalCorrectAnswers;
+    private double correctPercent;
     Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart;
 }

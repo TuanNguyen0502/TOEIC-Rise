@@ -19,8 +19,7 @@ public class AnalysisController {
 
     @GetMapping("")
     public ResponseEntity<?> analysis(@RequestParam(value = "days") EDays days){
-        String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(userTestService.getAnalysisResult(email, days));    
+        return ResponseEntity.ok(userTestService.getAnalysisResult(SecurityUtils.getCurrentUser(), days));
     }
 
     @GetMapping("/result")
