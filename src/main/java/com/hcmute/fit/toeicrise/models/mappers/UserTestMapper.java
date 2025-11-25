@@ -1,5 +1,7 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeFullTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
@@ -49,4 +51,8 @@ public interface UserTestMapper {
 
     @Mapping(source = "test.name", target = "name")
     LearnerTestHistoryResponse toLearnerTestHistoryResponse(UserTest userTest);
+
+    @Mapping(source = "test.name", target = "name")
+    @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
+    ExamTypeFullTestResponse toExamTypeFullTestResponse(UserTest userTest);
 }

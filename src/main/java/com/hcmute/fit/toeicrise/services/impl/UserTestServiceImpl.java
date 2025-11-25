@@ -625,205 +625,35 @@ public class UserTestServiceImpl implements IUserTestService {
             size = 10;
         Pageable limit = PageRequest.of(0, size);
         List<UserTest> userTests = userTestRepository.findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, limit);
-        int numberOfTests = (int)userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
-                .filter(Objects::nonNull)
-                .distinct()
-                .count();
-
-        Set<Long> questionIds = userTests.stream()
-                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
-                .flatMap(ut -> ut.getUserAnswers().stream())
-                .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        if (!questionIds.isEmpty()) {
-            List<Question> questionsWithTags = questionRepository.findAllByIdWithTags(questionIds);
-            Map<Long, Question> questionMap = questionsWithTags.stream()
-                    .collect(Collectors.toMap(Question::getId, q -> q));
-
-            userTests.forEach(ut -> {
-                if (ut.getUserAnswers() != null) {
-                    ut.getUserAnswers().forEach(ua -> {
-                        if (ua.getQuestion() != null) {
-                            Question questionWithTags = questionMap.get(ua.getQuestion().getId());
-                            if (questionWithTags != null && questionWithTags.getTags() != null) {
-                                ua.getQuestion().setTags(questionWithTags.getTags());
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
-        Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
-
-        for (EExamType examType : EExamType.values()) {
-            rawDataByExamType.put(examType, new HashMap<>());
-            rawPartStatsByExamType.put(examType, new HashMap<>());
-        }
+        List<ExamTypeFullTestResponse> examTypeFullTestResponses = new ArrayList<>();
 
         List<Integer> scores = new ArrayList<>();
         List<Integer> listeningScore = new ArrayList<>();
         List<Integer> readingScore = new ArrayList<>();
-        int totalQuestionsListening = 0;
-        int correctAnswersListening = 0;
-        int totalQuestionsReading = 0;
-        int correctAnswersReading = 0;
 
         for (UserTest ut : userTests) {
             scores.add(ut.getTotalScore());
             listeningScore.add(ut.getListeningScore());
             readingScore.add(ut.getReadingScore());
-            totalQuestionsListening += ut.getTotalListeningQuestions() != null ? ut.getTotalListeningQuestions() : 0;
-            correctAnswersListening += ut.getListeningCorrectAnswers() != null ? ut.getListeningCorrectAnswers() : 0;
-            totalQuestionsReading += ut.getTotalReadingQuestions() != null ? ut.getTotalReadingQuestions() : 0;
-            correctAnswersReading += ut.getReadingCorrectAnswers() != null ? ut.getReadingCorrectAnswers() : 0;
-
-            List<UserAnswer> userAnswers = ut.getUserAnswers();
-            if (userAnswers == null || userAnswers.isEmpty()) continue;
-
-            Set<Long> questionGroupIds = userAnswers.stream()
-                    .map(UserAnswer::getQuestionGroupId)
-                    .collect(Collectors.toSet());
-
-            Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(questionGroupIds);
-
-            Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
-                    .collect(Collectors.groupingBy(ua ->
-                            partNamesByGroupId.get(ua.getQuestionGroupId())
-                    ));
-
-            for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
-                String partName = entry.getKey();
-                List<UserAnswer> answersInPart = entry.getValue();
-
-                if (partName == null) continue;
-
-                EExamType examType = isListeningPart(partName) ? EExamType.LISTENING : EExamType.READING;
-
-                Map<String, Map<String, TagStats>> examTypeRawData = rawDataByExamType.get(examType);
-                Map<String, PartStats> examTypePartStats = rawPartStatsByExamType.get(examType);
-
-                examTypeRawData.computeIfAbsent(partName,_ -> new HashMap<>());
-                examTypePartStats.computeIfAbsent(partName,_ -> new PartStats());
-
-                Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
-                        .flatMap(ua -> ua.getQuestion().getTags().stream()
-                                .map(tag -> Map.entry(tag.getName(), ua)))
-                        .collect(Collectors.groupingBy(
-                                Map.Entry::getKey,
-                                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-                        ));
-
-                Map<String, TagStats> tagStatsMap = examTypeRawData.get(partName);
-                answersByTag.forEach((tagName, answersForTag) -> {
-                    int correct = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
-                    int wrong = answersForTag.size() - correct;
-
-                    TagStats tagStats = tagStatsMap.computeIfAbsent(tagName,_ -> new TagStats());
-                    tagStats.add(correct, wrong);
-                });
-
-                int partCorrect = (int) answersInPart.stream().filter(UserAnswer::getIsCorrect).count();
-                int partWrong = answersInPart.size() - partCorrect;
-
-                PartStats partStats = examTypePartStats.get(partName);
-                partStats.add(partCorrect, partWrong);
-            }
+            ExamTypeFullTestResponse examTypeFullTestResponse = userTestMapper.toExamTypeFullTestResponse(ut);
+            examTypeFullTestResponses.add(examTypeFullTestResponse);
         }
-
-        ExamTypeFullTestResponse listening = buildExamTypeFullTestResponse(
-                totalQuestionsListening,
-                correctAnswersListening,
-                listeningScore,
-                rawDataByExamType.get(EExamType.LISTENING),
-                rawPartStatsByExamType.get(EExamType.LISTENING)
-        );
-
-        ExamTypeFullTestResponse reading = buildExamTypeFullTestResponse(
-                totalQuestionsReading,
-                correctAnswersReading,
-                readingScore,
-                rawDataByExamType.get(EExamType.READING),
-                rawPartStatsByExamType.get(EExamType.READING)
-        );
 
         int averageScore = scores.isEmpty() ? 0 :
                 (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
         int maxScore = scores.isEmpty() ? 0 :
                 scores.stream().mapToInt(Integer::intValue).max().orElse(0);
+        int averageListeningScore = listeningScore.isEmpty() ? 0 :
+                (int) listeningScore.stream().mapToInt(Integer::intValue).average().orElse(0);
+        int averageReadingScore = readingScore.isEmpty() ? 0 :
+                (int) readingScore.stream().mapToInt(Integer::intValue).average().orElse(0);
 
         return FullTestResultResponse.builder()
-                .numberOfTests(numberOfTests)
                 .averageScore(averageScore)
                 .highestScore(maxScore)
-                .examTypeFullTestResponses(List.of(listening, reading))
-                .build();
-    }
-
-    private ExamTypeFullTestResponse buildExamTypeFullTestResponse(
-            int totalQuestionExamType,
-            int correctAnswerExamType,
-            List<Integer> scores,
-            Map<String, Map<String, TagStats>> rawDataByPart,
-            Map<String, PartStats> rawPartStats
-    ) {
-        Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>();
-        double overallCorrectPercent = totalQuestionExamType == 0 ? 0.0 : ((double) correctAnswerExamType / totalQuestionExamType) * 100;
-
-        if (rawDataByPart != null) {
-            for (Map.Entry<String, Map<String, TagStats>> partEntry : rawDataByPart.entrySet()) {
-                String partName = partEntry.getKey();
-                Map<String, TagStats> tagStatsMap = partEntry.getValue();
-
-                List<UserAnswerGroupedByTagResponse> groupedResponses = new ArrayList<>();
-                UserAnswerGroupedByTagResponse totalPartResponse = null;
-
-                tagStatsMap.forEach((tag, stats) -> {
-                    int total = stats.correct + stats.wrong;
-                    double correctPercent = total == 0 ? 0.0 : ((double) stats.correct / total) * 100;
-                    groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
-                            .tag(tag)
-                            .correctAnswers(stats.correct)
-                            .wrongAnswers(stats.wrong)
-                            .correctPercent(correctPercent)
-                            .userAnswerOverallResponses(null)
-                            .build());
-                });
-                PartStats partStats = rawPartStats.get(partName);
-                if (partStats != null) {
-                    int totalForPart = partStats.correct + partStats.wrong;
-                    double totalPercent = totalForPart == 0 ? 0.0 : ((double) partStats.correct / totalForPart) * 100;
-
-                    totalPartResponse = UserAnswerGroupedByTagResponse.builder()
-                            .tag("Total")
-                            .correctAnswers(partStats.correct)
-                            .wrongAnswers(partStats.wrong)
-                            .correctPercent(totalPercent)
-                            .userAnswerOverallResponses(null)
-                            .build();
-                }
-                groupedResponses.sort(Comparator.comparing(UserAnswerGroupedByTagResponse::getCorrectPercent));
-                groupedResponses.add(totalPartResponse);
-                userAnswersByPart.put(partName, groupedResponses);
-
-            }
-        }
-
-        int averageScore = scores.isEmpty() ? 0 :
-                (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-        int maxScore = scores.isEmpty() ? 0 :
-                scores.stream().mapToInt(Integer::intValue).max().orElse(0);
-
-        return ExamTypeFullTestResponse.builder()
-                .totalCorrectAnswers(correctAnswerExamType)
-                .totalQuestions(totalQuestionExamType)
-                .correctPercent(overallCorrectPercent)
-                .averageScore(averageScore)
-                .highestScore(maxScore)
-                .userAnswersByPart(userAnswersByPart)
+                .averageListeningScore(averageListeningScore)
+                .averageReadingScore(averageReadingScore)
+                .examTypeFullTestResponses(examTypeFullTestResponses)
                 .build();
     }
 
