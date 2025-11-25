@@ -14,5 +14,7 @@ public class FullTestResultResponse {
     private int highestScore;
     private double averageListeningScore;
     private double averageReadingScore;
+    private int maxListeningScore;
+    private int maxReadingScore;
     List<ExamTypeFullTestResponse> examTypeFullTestResponses;
 }
