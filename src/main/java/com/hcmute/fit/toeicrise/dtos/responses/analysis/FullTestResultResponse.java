@@ -10,10 +10,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FullTestResultResponse {
-    private double averageScore;
+    private int averageScore;
     private int highestScore;
-    private double averageListeningScore;
-    private double averageReadingScore;
+    private int averageListeningScore;
+    private int averageReadingScore;
     private int maxListeningScore;
     private int maxReadingScore;
     List<ExamTypeFullTestResponse> examTypeFullTestResponses;
