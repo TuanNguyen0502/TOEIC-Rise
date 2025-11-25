@@ -27,4 +27,9 @@ public class AnalysisController {
                                          @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(analysisService.getAllTestHistory(page, size, SecurityUtils.getCurrentUser()));
     }
+
+    @GetMapping("/full-test")
+    public ResponseEntity<?> getFullTest(@RequestParam(defaultValue = "5") int size){
+        return ResponseEntity.ok(userTestService.getFullTestResult(SecurityUtils.getCurrentUser(), size));
+    }
 }

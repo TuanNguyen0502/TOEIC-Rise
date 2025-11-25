@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.FullTestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
@@ -38,4 +39,6 @@ public interface IUserTestService {
     AnalysisResultResponse getAnalysisResult(String email, EDays days);
   
     PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable);
+
+    FullTestResultResponse getFullTestResult(String email, int size);
 }
