@@ -619,8 +619,6 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public FullTestResultResponse getFullTestResult(String email, int size) {
-        if (size < 5)
-            size = 5;
         if (size > 10)
             size = 10;
         Pageable limit = PageRequest.of(0, size);
@@ -639,20 +637,26 @@ public class UserTestServiceImpl implements IUserTestService {
             examTypeFullTestResponses.add(examTypeFullTestResponse);
         }
 
-        int averageScore = scores.isEmpty() ? 0 :
+        double averageScore = scores.isEmpty() ? 0 :
                 (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
         int maxScore = scores.isEmpty() ? 0 :
                 scores.stream().mapToInt(Integer::intValue).max().orElse(0);
-        int averageListeningScore = listeningScore.isEmpty() ? 0 :
+        double averageListeningScore = listeningScore.isEmpty() ? 0 :
                 (int) listeningScore.stream().mapToInt(Integer::intValue).average().orElse(0);
-        int averageReadingScore = readingScore.isEmpty() ? 0 :
+        double averageReadingScore = readingScore.isEmpty() ? 0 :
                 (int) readingScore.stream().mapToInt(Integer::intValue).average().orElse(0);
+        int maxListeningScore = listeningScore.isEmpty() ? 0 :
+                listeningScore.stream().mapToInt(Integer::intValue).max().orElse(0);
+        int maxReadingScore = readingScore.isEmpty() ? 0 :
+                readingScore.stream().mapToInt(Integer::intValue).max().orElse(0);
 
         return FullTestResultResponse.builder()
                 .averageScore(averageScore)
                 .highestScore(maxScore)
                 .averageListeningScore(averageListeningScore)
                 .averageReadingScore(averageReadingScore)
+                .maxListeningScore(maxListeningScore)
+                .maxReadingScore(maxReadingScore)
                 .examTypeFullTestResponses(examTypeFullTestResponses)
                 .build();
     }
