@@ -637,13 +637,13 @@ public class UserTestServiceImpl implements IUserTestService {
             examTypeFullTestResponses.add(examTypeFullTestResponse);
         }
 
-        double averageScore = scores.isEmpty() ? 0 :
+        int averageScore = scores.isEmpty() ? 0 :
                 (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
         int maxScore = scores.isEmpty() ? 0 :
                 scores.stream().mapToInt(Integer::intValue).max().orElse(0);
-        double averageListeningScore = listeningScore.isEmpty() ? 0 :
+        int averageListeningScore = listeningScore.isEmpty() ? 0 :
                 (int) listeningScore.stream().mapToInt(Integer::intValue).average().orElse(0);
-        double averageReadingScore = readingScore.isEmpty() ? 0 :
+        int averageReadingScore = readingScore.isEmpty() ? 0 :
                 (int) readingScore.stream().mapToInt(Integer::intValue).average().orElse(0);
         int maxListeningScore = listeningScore.isEmpty() ? 0 :
                 listeningScore.stream().mapToInt(Integer::intValue).max().orElse(0);
@@ -651,14 +651,18 @@ public class UserTestServiceImpl implements IUserTestService {
                 readingScore.stream().mapToInt(Integer::intValue).max().orElse(0);
 
         return FullTestResultResponse.builder()
-                .averageScore(averageScore)
+                .averageScore(roundToNearest5(averageScore))
                 .highestScore(maxScore)
-                .averageListeningScore(averageListeningScore)
-                .averageReadingScore(averageReadingScore)
+                .averageListeningScore(roundToNearest5(averageListeningScore))
+                .averageReadingScore(roundToNearest5(averageReadingScore))
                 .maxListeningScore(maxListeningScore)
                 .maxReadingScore(maxReadingScore)
                 .examTypeFullTestResponses(examTypeFullTestResponses)
                 .build();
+    }
+
+    private int roundToNearest5(int number) {
+        return (int) (Math.round(number / 5.0) * 5);
     }
 
     @Override
