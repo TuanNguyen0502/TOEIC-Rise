@@ -233,13 +233,7 @@ public class ChatServiceImpl implements IChatService {
         String prompts = templateEngine.process("analysis-result", context);
 
         return chatClient.prompt(prompts)
-                        .advisors(advisorSpec -> {
-                            String conversationId = chatRequest.getConversationId();
-                            if (conversationId == null || conversationId.isEmpty()) {
-                                conversationId = UUID.randomUUID().toString();
-                            }
-                            advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId);
-                        })
+                        .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
                                 .call()
                                         .entity(ChatbotAnalysisResponse.class);
     }
