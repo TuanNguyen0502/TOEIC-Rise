@@ -1,8 +1,11 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAboutQuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAnalysisRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -27,6 +30,8 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -46,6 +51,7 @@ public class ChatServiceImpl implements IChatService {
     private final ISystemPromptService systemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
+    private final TemplateEngine templateEngine;
 
     @Override
     public List<ChatbotResponse> getChatHistory(String conversationId) {
@@ -217,6 +223,19 @@ public class ChatServiceImpl implements IChatService {
                         .message(prompt)
                         .build())
         );
+    }
+
+    @Override
+    public ChatbotAnalysisResponse chatAnalysisData(ChatAnalysisRequest chatRequest) {
+        AnalysisResultResponse response = chatRequest.getAnalysisResult();
+        Context context = new Context();
+        context.setVariable("analysisData", response);
+        String prompts = templateEngine.process("analysis-result", context);
+
+        return chatClient.prompt(prompts)
+                        .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
+                                .call()
+                                        .entity(ChatbotAnalysisResponse.class);
     }
 
     private String getActiveSystemPrompt() {

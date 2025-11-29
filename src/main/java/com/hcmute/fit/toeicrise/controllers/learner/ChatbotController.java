@@ -115,4 +115,9 @@ public class ChatbotController {
         chatTitleService.renameChatTitle(email, request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/analysis")
+    public ResponseEntity<?> getAnalysis(@RequestBody ChatAnalysisRequest chatAnalysisRequest) {
+        return ResponseEntity.ok(chatService.chatAnalysisData(chatAnalysisRequest));
+    }
 }
