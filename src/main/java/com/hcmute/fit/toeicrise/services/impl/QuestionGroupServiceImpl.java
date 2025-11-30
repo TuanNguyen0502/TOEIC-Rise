@@ -197,7 +197,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     private void validateImageForPart(Part part, MultipartFile image, String imageUrl) {
         boolean isListening = isListeningPart(part);
-        boolean isPart1 = isPart1(part);
+        boolean hasImage = hasImage(part);
         boolean hasImageFile = image != null && !image.isEmpty();
         boolean hasImageUrl = imageUrl != null && !imageUrl.isBlank();
 
@@ -205,9 +205,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         if (!isListening && (hasImageFile || hasImageUrl)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Image should not be provided for non-listening parts.");
         }
-        // Part 1 requires an image
-        if (isPart1 && !hasImageFile && !hasImageUrl) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for part 1.");
+        // Parts that require images must have one
+        if (hasImage && !hasImageFile && !hasImageUrl) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for part " + part.getName() + ".");
         }
         // Validate image file and URL
         if (hasImageFile) {
@@ -221,16 +221,14 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
 
     private void validatePassageForPart(Part part, String passage) {
-        if (passage != null && !passage.isBlank()) {
-            if (isListeningPart(part) || part.getName().contains("5")) {
-                throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
-            } else {
+        // Parts 6 and 7 require a passage
+        // Other parts should not have a passage
+        if (part.getName().contains("6") || part.getName().contains("7")) {
+            if (passage == null || passage.isBlank()) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
             }
         } else {
-            if (part.getName().contains("6") || part.getName().contains("7")) {
-                throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
-            }
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
         }
     }
 
@@ -242,8 +240,10 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 part.getName().contains("4");
     }
 
-    private boolean isPart1(Part part) {
-        return part.getName().contains("1");
+    private boolean hasImage(Part part) {
+        return part.getName().contains("1") ||
+                part.getName().contains("4") ||
+                part.getName().contains("7");
     }
 
     @Transactional(readOnly = true)
