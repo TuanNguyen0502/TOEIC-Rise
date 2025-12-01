@@ -196,18 +196,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     private void validateImageForPart(Part part, MultipartFile image, String imageUrl) {
-        boolean isListening = isListeningPart(part);
-        boolean hasImage = hasImage(part);
         boolean hasImageFile = image != null && !image.isEmpty();
         boolean hasImageUrl = imageUrl != null && !imageUrl.isBlank();
-
-        // Non-listening parts should not have images
-        if (!isListening && (hasImageFile || hasImageUrl)) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Image should not be provided for non-listening parts.");
-        }
-        // Parts that require images must have one
-        if (hasImage && !hasImageFile && !hasImageUrl) {
+        // Specific part rules
+        // Part 1 requires an image
+        if (part.getName().contains("1") && (!hasImageFile && !hasImageUrl)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for part " + part.getName() + ".");
+        }
+        // Parts 2, 3, 5, and 6 should not have images
+        if (part.getName().contains("2") || part.getName().contains("3") || part.getName().contains("5") || part.getName().contains("6")) {
+            if (hasImageFile || hasImageUrl) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Image should not be provided for part " + part.getName() + ".");
+            }
         }
         // Validate image file and URL
         if (hasImageFile) {
@@ -238,12 +238,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 part.getName().contains("2") ||
                 part.getName().contains("3") ||
                 part.getName().contains("4");
-    }
-
-    private boolean hasImage(Part part) {
-        return part.getName().contains("1") ||
-                part.getName().contains("4") ||
-                part.getName().contains("7");
     }
 
     @Transactional(readOnly = true)
