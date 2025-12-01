@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.Map;
+import java.util.List;
 
 @Setter
 @Getter
@@ -23,7 +23,7 @@ public class QuestionRequest {
     private Long questionGroupId;
 
     private String content;
-    private Map<String, String> options;
+    private List<String> options;
 
     @NotBlank(message = MessageConstant.QUESTION_CORRECT_OPTION_NOT_BLANK)
     @NotNull(message = MessageConstant.QUESTION_CORRECT_OPTION_NOT_NULL)

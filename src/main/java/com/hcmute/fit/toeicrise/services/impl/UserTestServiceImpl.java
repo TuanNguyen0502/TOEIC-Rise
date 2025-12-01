@@ -24,7 +24,6 @@ import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
@@ -54,7 +53,6 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserAnswerMapper userAnswerMapper;
     private final PartMapper partMapper;
     private final QuestionGroupMapper questionGroupMapper;
-    private final IAuthenticationService authenticationService;
     private final PageResponseMapper pageResponseMapper;
 
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
@@ -358,7 +356,6 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public LearnerTestPartsResponse getUserTestDetail(Long userTestId, String email) {
-        authenticationService.getCurrentUser(email);
         UserTest userTest = userTestRepository.findUserTestById(userTestId, email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
         LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(userTest.getTest());
         Map<Part, List<UserAnswer>> answerByPart = userTest.getUserAnswers().stream()
