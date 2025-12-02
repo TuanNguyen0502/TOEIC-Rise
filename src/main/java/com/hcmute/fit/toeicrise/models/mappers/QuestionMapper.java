@@ -39,14 +39,8 @@ public interface QuestionMapper {
     }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "options", source = "options", qualifiedByName = "mapToList")
     @Mapping(target = "tags", ignore = true)
     Question toEntity(QuestionRequest questionRequest, @MappingTarget Question question);
-
-    @Named("mapToList")
-    default List<String> mapToList(Map<String, String> options) {
-        return options.entrySet().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
-    }
 
     @Named("mapTagsToNames")
     default List<String> mapTagsToNames(List<Tag> tags) {

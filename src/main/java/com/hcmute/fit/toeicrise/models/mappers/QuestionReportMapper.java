@@ -1,11 +1,13 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.QuestionReport;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface QuestionReportMapper {
@@ -19,6 +21,7 @@ public interface QuestionReportMapper {
                 .questionId(question.getId())
                 .questionContent(question.getContent())
                 .questionOptions(question.getOptions())
+                .questionCorrectOption(question.getCorrectOption())
                 .questionExplanation(question.getExplanation())
                 .questionGroupId(questionGroup.getId())
                 .questionGroupAudioUrl(questionGroup.getAudioUrl())
@@ -38,4 +41,9 @@ public interface QuestionReportMapper {
                 .resolvedNote(questionReport.getResolvedNote())
                 .build();
     }
+
+    @Mapping(source = "question.questionGroup.test.name", target = "testName")
+    @Mapping(source = "reporter.fullName", target = "reporterName")
+    @Mapping(source = "resolver.fullName", target = "resolverName")
+    QuestionReportResponse toQuestionReportResponse(QuestionReport questionReport);
 }

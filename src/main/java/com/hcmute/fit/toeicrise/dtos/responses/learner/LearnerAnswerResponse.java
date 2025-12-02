@@ -10,7 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LearnerAnswerResponse {
-    private Long id;
+    private Long learnerAnswerId;
+    private Long questionId;
     private Long position;
     private String content;
     private List<String> options;

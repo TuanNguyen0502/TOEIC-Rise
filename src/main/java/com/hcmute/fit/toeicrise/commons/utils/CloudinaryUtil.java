@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Map;
 
 @Component
@@ -21,14 +20,9 @@ public class CloudinaryUtil {
         this.cloudinary = cloudinary;
     }
 
-    public String getDefaultAvatarUrl() {
-        return "https://res.cloudinary.com/toeic-rise/image/upload/v1761193814/default-avatar_hbm1bj.png";
-    }
-
-    @SuppressWarnings("unchecked")
     public String uploadFile(MultipartFile file) {
         try {
-            Map<String, Object> data = cloudinary.uploader()
+            Map data = cloudinary.uploader()
                     .upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
             // Return the URL of the uploaded file
             return data.get("secure_url").toString();
@@ -45,7 +39,8 @@ public class CloudinaryUtil {
     public void deleteFile(String url) {
         try {
             String publicId = extractPublicId(url);
-            cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "auto"));
+            String resourceType = getResourceTypeFromUrl(url);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", resourceType));
         } catch (IOException e) {
             throw new AppException(ErrorCode.FILE_DELETE_FAILED);
         }
@@ -78,33 +73,46 @@ public class CloudinaryUtil {
     }
 
     private boolean isValidSuffixImage(String img) {
-        String lower = img.toLowerCase(Locale.ROOT);
-        return lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
-                lower.endsWith(".png") || lower.endsWith(".gif") ||
-                lower.endsWith(".bmp") || lower.endsWith(".webp");
+        return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
+                img.endsWith(".png") || img.endsWith(".gif") ||
+                img.endsWith(".bmp") || img.endsWith(".webp");
     }
 
     private boolean isValidSuffixAudio(String audio) {
-        String lower = audio.toLowerCase(Locale.ROOT);
-        return lower.endsWith(".mp3") || lower.endsWith(".wav") ||
-                lower.endsWith(".aac") || lower.endsWith(".flac") ||
-                lower.endsWith(".ogg") || lower.endsWith(".m4a");
+        return audio.endsWith(".mp3") || audio.endsWith(".wav") ||
+                audio.endsWith(".aac") || audio.endsWith(".flac") ||
+                audio.endsWith(".ogg") || audio.endsWith(".m4a");
     }
 
     public boolean isCloudinaryUrl(String url) {
         return url.contains("res.cloudinary.com");
     }
 
+    private String getResourceType(String filename) {
+        if (filename == null) return "raw";
+        if (isValidSuffixImage(filename)) return "image";
+        if (isValidSuffixAudio(filename)) return "video"; // Audio files use 'video' resource type
+        return "raw";
+    }
+
+    private String getResourceTypeFromUrl(String url) {
+        if (url == null) return "raw";
+        if (url.contains("/image/")) return "image";
+        if (url.contains("/video/")) return "video";
+        if (url.contains("/raw/")) return "raw";
+        // Fallback based on file extension
+        return getResourceType(url);
+    }
+
     private String extractPublicId(String url) {
         if (url == null || url.isEmpty()) return null;
         // URL: https://res.cloudinary.com/your_cloud/image/upload/v1234567890/filename.jpg
 
-        int uploadIndex = url.indexOf("/upload/");
-        if (uploadIndex == -1) return null;
+        String[] parts = url.split("/");
+        if (parts.length < 2) return null; // Invalid URL
 
-        String after = url.substring(uploadIndex + 8);
-        String cleaned = after.replaceAll("^v\\d+/","");
-
-        return cleaned.replaceFirst("\\.[^.]+$","");
+        String filename = parts[parts.length - 1]; // filename.jpg
+        // Remove file extension
+        return filename.contains(".") ? filename.split("\\.")[0] : filename;
     }
 }

@@ -2,12 +2,14 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +31,13 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "WHERE ut.id = :id AND ut.user.account.email = :email")
     Optional<UserTest> findUserTestById(@Param("id") Long id, @Param("email") String email);
 
+    @Query("SELECT DISTINCT ut " +
+            "FROM UserTest ut " +
+            "LEFT JOIN FETCH ut.userAnswers ua " +
+            "LEFT JOIN FETCH ua.question q " +
+            "WHERE ut.user.account.email = :email AND ut.createdAt >= :days")
+    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days);
+
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
             "ut.id, t.name, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
             "FROM Test t " +
@@ -36,4 +45,8 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "WHERE t.id = :id AND ut.user.account.email = :email " +
             "ORDER BY ut.createdAt DESC ")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
+
+    Optional<UserTest> findFirstByOrderByCreatedAtDesc();
+
+    List<UserTest> findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable);
 }

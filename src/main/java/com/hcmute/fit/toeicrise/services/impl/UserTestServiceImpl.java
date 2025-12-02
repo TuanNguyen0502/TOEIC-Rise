@@ -3,8 +3,11 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeFullTestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.analysis.FullTestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
@@ -12,23 +15,27 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
+import com.hcmute.fit.toeicrise.models.enums.EDays;
+import com.hcmute.fit.toeicrise.models.enums.EExamType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.*;
+import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +44,7 @@ import java.util.stream.Collectors;
 public class UserTestServiceImpl implements IUserTestService {
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
+    private final QuestionRepository questionRepository;
     private final TestRepository testRepository;
     private final UserRepository userRepository;
     private final UserTestRepository userTestRepository;
@@ -45,7 +53,6 @@ public class UserTestServiceImpl implements IUserTestService {
     private final UserAnswerMapper userAnswerMapper;
     private final PartMapper partMapper;
     private final QuestionGroupMapper questionGroupMapper;
-    private final IAuthenticationService authenticationService;
     private final PageResponseMapper pageResponseMapper;
 
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
@@ -206,6 +213,10 @@ public class UserTestServiceImpl implements IUserTestService {
 
     private void calculatePracticeScore(UserTest userTest, List<UserAnswerRequest> answers) {
         int correctAnswers = 0;
+        int listeningQuestion = 0;
+        int readingQuestion = 0;
+        int listeningCorrectAnswers = 0;
+        int readingCorrectAnswers = 0;
 
         // Fetch all questions involved in the answers
         List<Long> questionIds = answers.stream()
@@ -229,6 +240,17 @@ public class UserTestServiceImpl implements IUserTestService {
             boolean isCorrect = answerRequest.getAnswer() != null &&
                     answerRequest.getAnswer().equals(question.getCorrectOption());
 
+            boolean isListeningPart = questionGroupService.isListeningPart(question.getQuestionGroup().getPart());
+            if (isListeningPart){
+                listeningQuestion++;
+                if (isCorrect)
+                    listeningCorrectAnswers++;
+            }
+            else {
+                readingQuestion++;
+                if (isCorrect)
+                    readingCorrectAnswers++;
+            }
             if (isCorrect) correctAnswers++;
 
             userTest.getUserAnswers().add(UserAnswer.builder()
@@ -241,6 +263,10 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         userTest.setCorrectAnswers(correctAnswers);
+        userTest.setTotalListeningQuestions(listeningQuestion);
+        userTest.setTotalReadingQuestions(readingQuestion);
+        userTest.setReadingCorrectAnswers(readingCorrectAnswers);
+        userTest.setListeningCorrectAnswers(listeningCorrectAnswers);
         userTest.setCorrectPercent(((double) correctAnswers / answers.size()) * 100);
     }
 
@@ -248,6 +274,8 @@ public class UserTestServiceImpl implements IUserTestService {
         int correctAnswers = 0;
         int listeningCorrect = 0;
         int readingCorrect = 0;
+        int listeningQuestion = 0;
+        int readingQuestion = 0;
 
         // Group answers by questionGroupId
         Map<Long, List<UserAnswerRequest>> groupedByGroupId =
@@ -291,7 +319,9 @@ public class UserTestServiceImpl implements IUserTestService {
                     if (isListeningPart) listeningCorrect++;
                     else readingCorrect++;
                 }
-
+                if (isListeningPart)
+                    listeningQuestion++;
+                else readingQuestion++;
                 userTest.getUserAnswers().add(UserAnswer.builder()
                         .userTest(userTest)
                         .question(question)
@@ -309,6 +339,8 @@ public class UserTestServiceImpl implements IUserTestService {
         userTest.setListeningScore(estimatedListeningScoreMap.get(listeningCorrect));
         userTest.setReadingScore(estimatedReadingScoreMap.get(readingCorrect));
         userTest.setTotalScore(userTest.getListeningScore() + userTest.getReadingScore());
+        userTest.setTotalListeningQuestions(listeningQuestion);
+        userTest.setTotalReadingQuestions(readingQuestion);
     }
 
     @Override
@@ -324,7 +356,6 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public LearnerTestPartsResponse getUserTestDetail(Long userTestId, String email) {
-        authenticationService.getCurrentUser(email);
         UserTest userTest = userTestRepository.findUserTestById(userTestId, email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
         LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(userTest.getTest());
         Map<Part, List<UserAnswer>> answerByPart = userTest.getUserAnswers().stream()
@@ -362,9 +393,273 @@ public class UserTestServiceImpl implements IUserTestService {
     }
 
     @Override
+    public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
+        Optional<UserTest> userTest = userTestRepository.findFirstByOrderByCreatedAtDesc();
+        LocalDateTime localDateTime = userTest.map(user -> user.getCreatedAt().minusDays(days.getDays()))
+                .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
+        List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime);
+        int numberOfTests = (int)userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
+
+        Set<Long> questionIds = userTests.stream()
+                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
+                .flatMap(ut -> ut.getUserAnswers().stream())
+                .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        if (!questionIds.isEmpty()) {
+            List<Question> questionsWithTags = questionRepository.findAllByIdWithTags(questionIds);
+            Map<Long, Question> questionMap = questionsWithTags.stream()
+                    .collect(Collectors.toMap(Question::getId, q -> q));
+            
+            userTests.forEach(ut -> {
+                if (ut.getUserAnswers() != null) {
+                    ut.getUserAnswers().forEach(ua -> {
+                        if (ua.getQuestion() != null) {
+                            Question questionWithTags = questionMap.get(ua.getQuestion().getId());
+                            if (questionWithTags != null && questionWithTags.getTags() != null) {
+                                ua.getQuestion().setTags(questionWithTags.getTags());
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
+        Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
+
+        for (EExamType examType : EExamType.values()) {
+            rawDataByExamType.put(examType, new HashMap<>());
+            rawPartStatsByExamType.put(examType, new HashMap<>());
+        }
+
+        long totalSpent = 0L;
+        int totalQuestionsListening = 0;
+        int correctAnswersListening = 0;
+        int totalQuestionsReading = 0;
+        int correctAnswersReading = 0;
+
+        for (UserTest ut : userTests) {
+            totalSpent += ut.getTimeSpent() != null ? ut.getTimeSpent() : 0;
+            totalQuestionsListening += ut.getTotalListeningQuestions() != null ? ut.getTotalListeningQuestions() : 0;
+            correctAnswersListening += ut.getListeningCorrectAnswers() != null ? ut.getListeningCorrectAnswers() : 0;
+            totalQuestionsReading += ut.getTotalReadingQuestions() != null ? ut.getTotalReadingQuestions() : 0;
+            correctAnswersReading += ut.getReadingCorrectAnswers() != null ? ut.getReadingCorrectAnswers() : 0;
+            
+            List<UserAnswer> userAnswers = ut.getUserAnswers();
+            if (userAnswers == null || userAnswers.isEmpty()) continue;
+
+            Set<Long> questionGroupIds = userAnswers.stream()
+                    .map(UserAnswer::getQuestionGroupId)
+                    .collect(Collectors.toSet());
+
+            Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(questionGroupIds);
+
+            Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
+                    .collect(Collectors.groupingBy(ua ->
+                            partNamesByGroupId.get(ua.getQuestionGroupId())
+                    ));
+
+            for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
+                String partName = entry.getKey();
+                List<UserAnswer> answersInPart = entry.getValue();
+
+                if (partName == null) continue;
+
+                EExamType examType = isListeningPart(partName) ? EExamType.LISTENING : EExamType.READING;
+
+                Map<String, Map<String, TagStats>> examTypeRawData = rawDataByExamType.get(examType);
+                Map<String, PartStats> examTypePartStats = rawPartStatsByExamType.get(examType);
+
+                examTypeRawData.computeIfAbsent(partName,_ -> new HashMap<>());
+                examTypePartStats.computeIfAbsent(partName,_ -> new PartStats());
+
+                Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
+                        .flatMap(ua -> ua.getQuestion().getTags().stream()
+                                .map(tag -> Map.entry(tag.getName(), ua)))
+                        .collect(Collectors.groupingBy(
+                                Map.Entry::getKey,
+                                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                        ));
+
+                Map<String, TagStats> tagStatsMap = examTypeRawData.get(partName);
+                answersByTag.forEach((tagName, answersForTag) -> {
+                    int correct = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
+                    int wrong = answersForTag.size() - correct;
+
+                    TagStats tagStats = tagStatsMap.computeIfAbsent(tagName,_ -> new TagStats());
+                    tagStats.add(correct, wrong);
+                });
+
+                int partCorrect = (int) answersInPart.stream().filter(UserAnswer::getIsCorrect).count();
+                int partWrong = answersInPart.size() - partCorrect;
+
+                PartStats partStats = examTypePartStats.get(partName);
+                partStats.add(partCorrect, partWrong);
+            }
+        }
+
+        ExamTypeStatsResponse listening = buildExamTypeStatsResponse(
+                totalQuestionsListening,
+                correctAnswersListening,
+                rawDataByExamType.get(EExamType.LISTENING),
+                rawPartStatsByExamType.get(EExamType.LISTENING)
+        );
+
+        ExamTypeStatsResponse reading = buildExamTypeStatsResponse(
+                totalQuestionsReading,
+                correctAnswersReading,
+                rawDataByExamType.get(EExamType.READING),
+                rawPartStatsByExamType.get(EExamType.READING)
+        );
+
+        return AnalysisResultResponse.builder()
+                .numberOfTests(numberOfTests)
+                .numberOfSubmissions(userTests.size())
+                .totalTimes(totalSpent)
+                .examList(List.of(listening, reading))
+                .build();
+    }
+
+    private boolean isListeningPart(String partName) {
+        return partName != null && (
+                partName.contains("1") ||
+                partName.contains("2") ||
+                partName.contains("3") ||
+                partName.contains("4")
+        );
+    }
+
+    private static class TagStats {
+        int correct = 0;
+        int wrong = 0;
+        void add(int correctDelta, int wrongDelta) {
+            this.correct += correctDelta;
+            this.wrong += wrongDelta;
+        }
+    }
+
+    private static class PartStats {
+        int correct = 0;
+        int wrong = 0;
+        void add(int correctDelta, int wrongDelta) {
+            this.correct += correctDelta;
+            this.wrong += wrongDelta;
+        }
+    }
+
+    private ExamTypeStatsResponse buildExamTypeStatsResponse(
+            int totalQuestionExamType,
+            int correctAnswerExamType,
+            Map<String, Map<String, TagStats>> rawDataByPart,
+            Map<String, PartStats> rawPartStats
+    ) {
+        Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart = new HashMap<>();
+        double overallCorrectPercent = totalQuestionExamType == 0 ? 0.0 : ((double) correctAnswerExamType / totalQuestionExamType) * 100;
+
+        if (rawDataByPart != null) {
+            for (Map.Entry<String, Map<String, TagStats>> partEntry : rawDataByPart.entrySet()) {
+                String partName = partEntry.getKey();
+                Map<String, TagStats> tagStatsMap = partEntry.getValue();
+
+                List<UserAnswerGroupedByTagResponse> groupedResponses = new ArrayList<>();
+                UserAnswerGroupedByTagResponse totalPartResponse = null;
+
+                tagStatsMap.forEach((tag, stats) -> {
+                    int total = stats.correct + stats.wrong;
+                    double correctPercent = total == 0 ? 0.0 : ((double) stats.correct / total) * 100;
+                    groupedResponses.add(UserAnswerGroupedByTagResponse.builder()
+                            .tag(tag)
+                            .correctAnswers(stats.correct)
+                            .wrongAnswers(stats.wrong)
+                            .correctPercent(correctPercent)
+                            .userAnswerOverallResponses(null)
+                            .build());
+                });
+                PartStats partStats = rawPartStats.get(partName);
+                if (partStats != null) {
+                    int totalForPart = partStats.correct + partStats.wrong;
+                    double totalPercent = totalForPart == 0 ? 0.0 : ((double) partStats.correct / totalForPart) * 100;
+
+                    totalPartResponse = UserAnswerGroupedByTagResponse.builder()
+                            .tag("Total")
+                            .correctAnswers(partStats.correct)
+                            .wrongAnswers(partStats.wrong)
+                            .correctPercent(totalPercent)
+                            .userAnswerOverallResponses(null)
+                            .build();
+                }
+                groupedResponses.sort(Comparator.comparing(UserAnswerGroupedByTagResponse::getCorrectPercent));
+                groupedResponses.add(totalPartResponse);
+                userAnswersByPart.put(partName, groupedResponses);
+
+            }
+        }
+
+        return ExamTypeStatsResponse.builder()
+                .totalCorrectAnswers(correctAnswerExamType)
+                .totalQuestions(totalQuestionExamType)
+                .correctPercent(overallCorrectPercent)
+                .userAnswersByPart(userAnswersByPart)
+                .build();
+    }
+  
+    @Override
     public PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable) {
         Page<LearnerTestHistoryResponse> learnerTestResponses = userTestRepository.findAll(userTestSpecification, pageable).map(userTestMapper::toLearnerTestHistoryResponse);
         return pageResponseMapper.toPageResponse(learnerTestResponses);
+    }
+
+    @Override
+    public FullTestResultResponse getFullTestResult(String email, int size) {
+        if (size > 10)
+            size = 10;
+        Pageable limit = PageRequest.of(0, size);
+        List<UserTest> userTests = userTestRepository.findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, limit);
+        List<ExamTypeFullTestResponse> examTypeFullTestResponses = new ArrayList<>();
+
+        List<Integer> scores = new ArrayList<>();
+        List<Integer> listeningScore = new ArrayList<>();
+        List<Integer> readingScore = new ArrayList<>();
+
+        for (UserTest ut : userTests) {
+            scores.add(ut.getTotalScore());
+            listeningScore.add(ut.getListeningScore());
+            readingScore.add(ut.getReadingScore());
+            ExamTypeFullTestResponse examTypeFullTestResponse = userTestMapper.toExamTypeFullTestResponse(ut);
+            examTypeFullTestResponses.add(examTypeFullTestResponse);
+        }
+
+        int averageScore = scores.isEmpty() ? 0 :
+                (int) scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        int maxScore = scores.isEmpty() ? 0 :
+                scores.stream().mapToInt(Integer::intValue).max().orElse(0);
+        int averageListeningScore = listeningScore.isEmpty() ? 0 :
+                (int) listeningScore.stream().mapToInt(Integer::intValue).average().orElse(0);
+        int averageReadingScore = readingScore.isEmpty() ? 0 :
+                (int) readingScore.stream().mapToInt(Integer::intValue).average().orElse(0);
+        int maxListeningScore = listeningScore.isEmpty() ? 0 :
+                listeningScore.stream().mapToInt(Integer::intValue).max().orElse(0);
+        int maxReadingScore = readingScore.isEmpty() ? 0 :
+                readingScore.stream().mapToInt(Integer::intValue).max().orElse(0);
+
+        return FullTestResultResponse.builder()
+                .averageScore(roundToNearest5(averageScore))
+                .highestScore(maxScore)
+                .averageListeningScore(roundToNearest5(averageListeningScore))
+                .averageReadingScore(roundToNearest5(averageReadingScore))
+                .maxListeningScore(maxListeningScore)
+                .maxReadingScore(maxReadingScore)
+                .examTypeFullTestResponses(examTypeFullTestResponses)
+                .build();
+    }
+
+    private int roundToNearest5(int number) {
+        return (int) (Math.round(number / 5.0) * 5);
     }
 
     @Override

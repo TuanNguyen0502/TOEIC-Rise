@@ -23,6 +23,8 @@ public interface IQuestionGroupService {
     @Transactional
     void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request);
 
+    void updateQuestionGroupWithEntity(QuestionGroup questionGroup, QuestionGroupUpdateRequest questionGroupUpdateRequest);
+
     QuestionGroup getQuestionGroup(Long questionGroupId);
 
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);

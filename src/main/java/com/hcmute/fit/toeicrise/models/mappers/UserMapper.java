@@ -19,7 +19,7 @@ public interface UserMapper {
     @Mapping(source = "avatar", target = "avatar")
     @Mapping(source = "account.email", target = "email")
     @Mapping(target = "role", expression = "java(user.getRole().getName().name())")
-    @Mapping(target = "hasPassword", expression = "java(user.getAccount().getPassword() != null && !user.getAccount().getPassword().isEmpty())")
+    @Mapping(target = "hasPassword", expression = "java(user.getAccount() != null && !\"{oauth2}\".equals(user.getAccount().getPassword()))")
     CurrentUserResponse toCurrentUserResponse(User user);
 
     default ProfileResponse toProfileResponse(String email, User user) {
