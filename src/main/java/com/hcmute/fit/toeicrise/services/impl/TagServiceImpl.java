@@ -1,9 +1,19 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.TagResponse;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
+import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
+import com.hcmute.fit.toeicrise.models.mappers.TagMapper;
 import com.hcmute.fit.toeicrise.repositories.TagRepository;
+import com.hcmute.fit.toeicrise.repositories.specifications.TagSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +23,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TagServiceImpl implements ITagService {
     private final TagRepository tagRepository;
+    private final TagMapper tagMapper;
+    private final PageResponseMapper pageResponseMapper;
 
     @Override
     public List<Tag> getTagsFromString(String tagsString) {
@@ -28,6 +40,19 @@ public class TagServiceImpl implements ITagService {
             }
         }
         return tags;
+    }
+
+    @Override
+    public PageResponse getAllTags(int page, int pageSize, String tagsName) {
+        Specification<Tag> specification = (_, _, cb) -> cb.conjunction();
+        if (StringUtils.hasText(tagsName)) {
+            specification = specification.and(TagSpecification.nameContains(tagsName));
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+
+        Page<TagResponse> tags = tagRepository.findAll(specification, pageable).map(tagMapper::toTagResponse);
+        return pageResponseMapper.toPageResponse(tags);
     }
 
     private Tag findOrCreateTag(String tagName) {

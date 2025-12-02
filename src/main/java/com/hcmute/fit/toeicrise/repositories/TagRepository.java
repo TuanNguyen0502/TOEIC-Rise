@@ -2,11 +2,12 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface TagRepository extends JpaRepository<Tag, Long> {
+public interface TagRepository extends JpaRepository<Tag, Long>, JpaSpecificationExecutor<Tag> {
     Optional<Tag> findByName(String name);
 }
