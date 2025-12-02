@@ -168,6 +168,9 @@ public class UserServiceImpl implements IUserService {
     public void changeAccountStatus(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        if (user.getRole().getName().equals(ERole.ADMIN)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Cannot change status of ADMIN");
+        }
         user.getAccount().setIsActive(!user.getAccount().getIsActive());
         userRepository.save(user);
     }
