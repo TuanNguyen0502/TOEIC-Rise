@@ -69,4 +69,9 @@ public class MessageConstant {
     public static final String QUESTION_REPORT_REASONS_NOT_EMPTY = "Report reasons must not be empty.";
     public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_NULL = "Resolved note must not be null.";
     public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_BLANK = "Resolved note must not be blank.";
+    // Flashcard related messages
+    public static final String FLASHCARD_NAME_NOT_NULL = "Flashcard name must not be null.";
+    public static final String FLASHCARD_NAME_NOT_BLANK = "Flashcard name must not be blank.";
+    public static final String FLASHCARD_NAME_INVALID = "Flashcard name can only contain letters, digits, spaces, and special characters ().,'- and must be between 1 and 100 characters long.";
+    public static final String FLASHCARD_ACCESS_TYPE_NOT_NULL = "Flashcard access type must not be null.";
 }
