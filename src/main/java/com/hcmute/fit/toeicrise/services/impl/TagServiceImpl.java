@@ -2,9 +2,13 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.TagByPartResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.TagMapper;
+import com.hcmute.fit.toeicrise.repositories.PartRepository;
 import com.hcmute.fit.toeicrise.repositories.TagRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TagSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
@@ -22,6 +26,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class TagServiceImpl implements ITagService {
+    private final PartRepository partRepository;
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -53,6 +58,16 @@ public class TagServiceImpl implements ITagService {
 
         Page<TagResponse> tags = tagRepository.findAll(specification, pageable).map(tagMapper::toTagResponse);
         return pageResponseMapper.toPageResponse(tags);
+    }
+
+    @Override
+    public List<TagByPartResponse> getTagsByPartId(Long partId) {
+        if (!partRepository.existsById(partId)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part");
+        }
+        return tagRepository.findTagsByPartId(partId).stream()
+                .map(tagMapper::mapToTagByPartResponse)
+                .toList();
     }
 
     private Tag findOrCreateTag(String tagName) {
