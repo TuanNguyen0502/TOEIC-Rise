@@ -96,12 +96,6 @@ public class TestServiceImpl implements ITestService {
         return true;
     }
 
-    @Override
-    public void changeTestStatus(Test test, ETestStatus status) {
-        test.setStatus(status);
-        testRepository.save(test);
-    }
-
     @Async
     @Override
     public void deleteTestsByTestSetId(Long testSetId) {

@@ -25,8 +25,6 @@ public interface ITestService {
 
     boolean changeTestStatusById(Long id, ETestStatus status);
 
-    void changeTestStatus(Test test, ETestStatus status);
-
     @Async
     void deleteTestsByTestSetId(Long testSetId);
 
