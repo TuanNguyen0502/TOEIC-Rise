@@ -28,6 +28,9 @@ public class Flashcard extends BaseEntity {
     @Column(name = "access_type", nullable = false)
     private EFlashcardAccessType accessType;
 
+    @Column(name = "favourite_count", columnDefinition = "INT DEFAULT 0")
+    private Integer favouriteCount;
+
     @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<FlashcardItem> flashcardItems;
 
