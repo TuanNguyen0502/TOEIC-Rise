@@ -2,11 +2,17 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardFavourite;
+import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardFavouriteRepository;
+import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
+import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.FlashcardFavouriteSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +26,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService {
+    private final UserRepository userRepository;
+    private final FlashcardRepository flashcardRepository;
     private final FlashcardFavouriteRepository flashcardFavouriteRepository;
     private final FlashcardMapper flashcardMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -41,5 +49,31 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
         Page<FlashcardResponse> flashcardPage = flashcardFavouriteRepository.findAll(specification, pageable)
                 .map(flashcardMapper::toFlashcardResponse);
         return pageResponseMapper.toPageResponse(flashcardPage);
+    }
+
+    @Override
+    public void addFavourite(String email, Long flashcardId) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+
+        // Only allow adding public flashcards or own flashcards
+        if (flashcard.getAccessType() != EFlashcardAccessType.PUBLIC &&
+                !flashcard.getUser().getId().equals(user.getId())) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+        }
+
+        // Check if already favourite
+        boolean exists = flashcardFavouriteRepository.existsByFlashcardAndUser(flashcard, user);
+        if (exists) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard favourite");
+        }
+
+        FlashcardFavourite flashcardFavourite = FlashcardFavourite.builder()
+                .user(user)
+                .flashcard(flashcard)
+                .build();
+        flashcardFavouriteRepository.save(flashcardFavourite);
     }
 }

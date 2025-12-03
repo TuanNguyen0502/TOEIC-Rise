@@ -52,7 +52,7 @@ public class FlashcardController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "favouriteCount") String sortBy,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") String direction
     ) {
         String email = SecurityUtils.getCurrentUser();
@@ -63,6 +63,13 @@ public class FlashcardController {
     public ResponseEntity<?> createFlashcard(@Valid @RequestBody FlashcardCreateRequest flashcardCreateRequest) {
         String email = SecurityUtils.getCurrentUser();
         flashcardService.createFlashcard(email, flashcardCreateRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/favourite/{flashcardId}")
+    public ResponseEntity<?> addFlashcardToFavourite(@PathVariable("flashcardId") Long flashcardId) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardFavouriteService.addFavourite(email, flashcardId);
         return ResponseEntity.ok().build();
     }
 
