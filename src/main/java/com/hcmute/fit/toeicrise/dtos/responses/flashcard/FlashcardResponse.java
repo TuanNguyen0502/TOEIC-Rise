@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class FlashcardResponse {
     private Long id;
+    private String authorFullName;
     private String name;
     private EFlashcardAccessType accessType;
     private int itemCount;
