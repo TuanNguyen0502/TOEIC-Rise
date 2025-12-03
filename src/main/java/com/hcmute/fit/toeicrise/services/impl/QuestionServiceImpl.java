@@ -7,13 +7,16 @@ import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
+import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
+import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +27,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements IQuestionService {
-    private final IQuestionGroupService questionGroupService;
+    private final TestRepository testRepository;
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
     private final ITagService tagService;
@@ -77,6 +80,16 @@ public class QuestionServiceImpl implements IQuestionService {
         question.setTags(tags);
         questionRepository.save(question);
 
-        questionGroupService.changeTestStatusToPending(question.getQuestionGroup());
+        // Change test status to PENDING
+        changeTestStatus(question);
+    }
+
+    @Async
+    public void changeTestStatus(Question question) {
+        Test test = question.getQuestionGroup().getTest();
+        if (test.getStatus() != ETestStatus.PENDING) {
+            test.setStatus(ETestStatus.PENDING);
+            testRepository.save(test);
+        }
     }
 }

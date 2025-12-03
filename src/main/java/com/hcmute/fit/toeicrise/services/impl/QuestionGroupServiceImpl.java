@@ -17,14 +17,15 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
+import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
-import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class QuestionGroupServiceImpl implements IQuestionGroupService {
-    private final ITestService testService;
+    private final TestRepository testRepository;
     private final QuestionGroupRepository questionGroupRepository;
     private final IQuestionService questionService;
     private final CloudinaryUtil cloudinaryUtil;
@@ -108,10 +109,10 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         questionGroup.setPassage(request.getPassage());
         questionGroup.setTranscript(request.getTranscript());
 
+        questionGroupRepository.save(questionGroup);
+
         // Set test status to PENDING
         changeTestStatusToPending(questionGroup);
-
-        questionGroupRepository.save(questionGroup);
     }
 
     @Override
@@ -275,9 +276,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
     }
 
-    @Override
+    @Async
     public void changeTestStatusToPending(QuestionGroup questionGroup) {
         Test test = questionGroup.getTest();
-        testService.changeTestStatus(test, ETestStatus.PENDING);
+        if (test.getStatus() != ETestStatus.PENDING) {
+            test.setStatus(ETestStatus.PENDING);
+            testRepository.save(test);
+        }
     }
 }
