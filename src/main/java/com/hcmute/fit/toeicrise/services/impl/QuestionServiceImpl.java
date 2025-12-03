@@ -10,6 +10,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
+import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements IQuestionService {
+    private final IQuestionGroupService questionGroupService;
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
     private final ITagService tagService;
@@ -74,5 +76,7 @@ public class QuestionServiceImpl implements IQuestionService {
         question = questionMapper.toEntity(request, question);
         question.setTags(tags);
         questionRepository.save(question);
+
+        questionGroupService.changeTestStatusToPending(question.getQuestionGroup());
     }
 }

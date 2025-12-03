@@ -43,4 +43,6 @@ public interface IQuestionGroupService {
 
     @Transactional(readOnly = true)
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
+
+    void changeTestStatusToPending(QuestionGroup questionGroup);
 }

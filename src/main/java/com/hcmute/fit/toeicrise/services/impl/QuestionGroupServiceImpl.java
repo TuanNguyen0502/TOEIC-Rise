@@ -109,8 +109,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         questionGroup.setTranscript(request.getTranscript());
 
         // Set test status to PENDING
-        Test test = questionGroup.getTest();
-        testService.changeTestStatus(test, ETestStatus.PENDING);
+        changeTestStatusToPending(questionGroup);
 
         questionGroupRepository.save(questionGroup);
     }
@@ -274,5 +273,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             partResponse.setQuestionGroups(questionGroupResponses);
             return partResponse;
         }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
+    }
+
+    @Override
+    public void changeTestStatusToPending(QuestionGroup questionGroup) {
+        Test test = questionGroup.getTest();
+        testService.changeTestStatus(test, ETestStatus.PENDING);
     }
 }
