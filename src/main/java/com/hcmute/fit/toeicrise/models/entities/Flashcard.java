@@ -31,9 +31,9 @@ public class Flashcard extends BaseEntity {
     @Column(name = "favourite_count", columnDefinition = "INT DEFAULT 0")
     private Integer favouriteCount;
 
-    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<FlashcardItem> flashcardItems;
 
-    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<FlashcardFavourite> favourites;
 }

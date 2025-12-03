@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface IFlashcardService {
     FlashcardDetailResponse getFlashcardDetailById(String email, Long flashcardId);
 
     void createFlashcard(String email, FlashcardCreateRequest flashcardCreateRequest);
+
+    @Transactional
+    void deleteFlashcard(String email, Long flashcardId);
 }

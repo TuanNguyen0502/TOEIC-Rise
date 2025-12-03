@@ -48,4 +48,11 @@ public class FlashcardController {
         flashcardService.createFlashcard(email, flashcardCreateRequest);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{flashcardId}")
+    public ResponseEntity<?> deleteFlashcard(@PathVariable("flashcardId") Long flashcardId) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardService.deleteFlashcard(email, flashcardId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -91,5 +92,19 @@ public class FlashcardServiceImpl implements IFlashcardService {
         flashcard.setAccessType(flashcardCreateRequest.getAccessType());
         flashcard.setFavouriteCount(0);
         flashcardRepository.save(flashcard);
+    }
+
+    @Transactional
+    @Override
+    public void deleteFlashcard(String email, Long flashcardId) {
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+
+        // Check if user owns the flashcard
+        if (!flashcard.getUser().getAccount().getEmail().equals(email)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+        }
+
+        flashcardRepository.delete(flashcard);
     }
 }
