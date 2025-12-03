@@ -2,19 +2,21 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.report.QuestionUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
+import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
+import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements IQuestionService {
+    private final TestRepository testRepository;
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
     private final ITagService tagService;
@@ -52,10 +55,7 @@ public class QuestionServiceImpl implements IQuestionService {
     public void updateQuestion(QuestionRequest questionRequest) {
         Question question = questionRepository.findById(questionRequest.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
-        List<Tag> tags = tagService.getTagsFromString(questionRequest.getTags());
-        question = questionMapper.toEntity(questionRequest, question);
-        question.setTags(tags);
-        questionRepository.save(question);
+        updateQuestionWithEntity(question, questionRequest);
     }
 
     @Override
@@ -69,24 +69,27 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public List<LearnerTestQuestionResponse> getLearnerTestQuestionsByQuestionGroupId(Long questionGroupId) {
-        return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
-                .stream()
-                .map(questionMapper::toLearnerTestQuestionResponse)
-                .toList();
-    }
-
-    @Override
     public Optional<Question> findById(Long aLong) {
         return questionRepository.findById(aLong);
     }
 
     @Override
-    public void updateQuestion(Question question, QuestionUpdateRequest request) {
-        question.setContent(request.getContent());
-        question.setOptions(request.getOptions());
-        question.setCorrectOption(request.getCorrectOption());
-        question.setExplanation(request.getExplanation());
+    public void updateQuestionWithEntity(Question question, QuestionRequest request) {
+        List<Tag> tags = tagService.getTagsFromString(request.getTags());
+        question = questionMapper.toEntity(request, question);
+        question.setTags(tags);
         questionRepository.save(question);
+
+        // Change test status to PENDING
+        changeTestStatus(question);
+    }
+
+    @Async
+    public void changeTestStatus(Question question) {
+        Test test = question.getQuestionGroup().getTest();
+        if (test.getStatus() != ETestStatus.PENDING) {
+            test.setStatus(ETestStatus.PENDING);
+            testRepository.save(test);
+        }
     }
 }

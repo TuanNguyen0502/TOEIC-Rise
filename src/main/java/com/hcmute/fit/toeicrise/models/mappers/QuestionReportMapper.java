@@ -2,10 +2,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportResponse;
-import com.hcmute.fit.toeicrise.models.entities.Question;
-import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.models.entities.QuestionReport;
-import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -23,6 +20,7 @@ public interface QuestionReportMapper {
                 .questionOptions(question.getOptions())
                 .questionCorrectOption(question.getCorrectOption())
                 .questionExplanation(question.getExplanation())
+                .questionTags(question.getTags().stream().map(Tag::getName).toList())
                 .questionGroupId(questionGroup.getId())
                 .questionGroupAudioUrl(questionGroup.getAudioUrl())
                 .questionGroupImageUrl(questionGroup.getImageUrl())

@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.dtos.requests.report;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +16,7 @@ public class QuestionReportResolveRequest {
     private EQuestionReportStatus status;
 
     @Valid
-    private QuestionUpdateRequest questionUpdate;
+    private QuestionRequest questionUpdate;
 
     @Valid
     private QuestionGroupUpdateRequest questionGroupUpdate;
