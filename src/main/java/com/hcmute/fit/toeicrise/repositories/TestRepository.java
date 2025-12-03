@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.repositories;
 
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -12,6 +12,7 @@ import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
@@ -22,6 +23,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
+import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class QuestionGroupServiceImpl implements IQuestionGroupService {
+    private final ITestService testService;
     private final QuestionGroupRepository questionGroupRepository;
     private final IQuestionService questionService;
     private final CloudinaryUtil cloudinaryUtil;
@@ -104,6 +107,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
         questionGroup.setTranscript(request.getTranscript());
+
+        // Set test status to PENDING
+        Test test = questionGroup.getTest();
+        testService.changeTestStatus(test, ETestStatus.PENDING);
+
         questionGroupRepository.save(questionGroup);
     }
 

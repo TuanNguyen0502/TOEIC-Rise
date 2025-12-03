@@ -25,5 +25,5 @@ public interface IQuestionService {
 
     Optional<Question> findById(Long aLong);
 
-    void updateQuestion(Question question, QuestionRequest request);
+    void updateQuestionWithEntity(Question question, QuestionRequest request);
 }
