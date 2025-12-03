@@ -38,17 +38,20 @@ public class FlashcardServiceImpl implements IFlashcardService {
     private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public List<FlashcardResponse> getAllFlashcardsByEmail(String email) {
-        return flashcardRepository.findAllByUser_Account_Email(email)
-                .stream()
-                .map(flashcardMapper::toFlashcardResponse)
-                .toList();
+    public PageResponse getAllMyFlashcards(String email, String name, int page, int size, String sortBy, String direction) {
+        Specification<Flashcard> specification = (_, _, cb) -> cb.conjunction();
+        specification = specification.and(FlashcardSpecification.ownerEmailEquals(email));
+        return getPageResponse(name, page, size, sortBy, direction, specification);
     }
 
     @Override
     public PageResponse getAllPublicFlashcards(String name, int page, int size, String sortBy, String direction) {
         Specification<Flashcard> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(FlashcardSpecification.accessTypeEquals(EFlashcardAccessType.PUBLIC));
+        return getPageResponse(name, page, size, sortBy, direction, specification);
+    }
+
+    private PageResponse getPageResponse(String name, int page, int size, String sortBy, String direction, Specification<Flashcard> specification) {
         if (name != null && !name.isBlank()) {
             specification = specification.and(FlashcardSpecification.nameContains(name));
         }

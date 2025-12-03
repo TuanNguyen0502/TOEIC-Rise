@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface IFlashcardService {
-    List<FlashcardResponse> getAllFlashcardsByEmail(String email);
+    PageResponse getAllMyFlashcards(String email, String name, int page, int size, String sortBy, String direction);
 
     PageResponse getAllPublicFlashcards(String name, int page, int size, String sortBy, String direction);
 
