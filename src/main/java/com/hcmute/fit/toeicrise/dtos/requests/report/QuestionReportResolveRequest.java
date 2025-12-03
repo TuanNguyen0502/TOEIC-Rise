@@ -5,12 +5,13 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateReques
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuestionReportResolveRequest {
     private EQuestionReportStatus status;
 
@@ -20,7 +21,6 @@ public class QuestionReportResolveRequest {
     @Valid
     private QuestionGroupUpdateRequest questionGroupUpdate;
 
-    @NotNull(message = MessageConstant.QUESTION_REPORT_RESOLVED_NOTE_NOT_NULL)
     @NotBlank(message = MessageConstant.QUESTION_REPORT_RESOLVED_NOTE_NOT_BLANK)
     private String resolvedNote;
 }

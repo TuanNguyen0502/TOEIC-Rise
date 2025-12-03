@@ -15,5 +15,5 @@ public class ExamTypeStatsResponse {
     private int totalQuestions;
     private int totalCorrectAnswers;
     private double correctPercent;
-    Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart;
+    private Map<String, List<UserAnswerGroupedByTagResponse>> userAnswersByPart;
 }

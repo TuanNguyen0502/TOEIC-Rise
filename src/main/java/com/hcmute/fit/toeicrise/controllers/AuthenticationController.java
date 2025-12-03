@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.services.interfaces.IAccountService;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final IAuthenticationService authenticationServiceImpl;
+    private final IAccountService accountService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -35,7 +37,7 @@ public class AuthenticationController {
         LoginResponse loginResponse = authenticationServiceImpl.login(loginRequest);
         // 2. Tạo refresh token
         String refreshToken = authenticationServiceImpl.createRefreshTokenWithEmail(loginRequest.getEmail());
-        long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
+        long refreshTokenExpirationTime = accountService.getRefreshTokenDurationMs();
         // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
         ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true) // Không thể đọc bằng JavaScript → tăng bảo mật
@@ -62,7 +64,7 @@ public class AuthenticationController {
             RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken);
             // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
             String newRefreshToken = authenticationServiceImpl.createRefreshTokenWithRefreshToken(refreshToken);
-            long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
+            long refreshTokenExpirationTime = accountService.getRefreshTokenDurationMs();
             // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
             ResponseCookie responseCookie = ResponseCookie.from("refresh_token", newRefreshToken)
                     .httpOnly(true) // Không thể đọc bằng JavaScript → tăng bảo mật

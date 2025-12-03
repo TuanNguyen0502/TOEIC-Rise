@@ -29,8 +29,6 @@ public interface IAuthenticationService {
 
     String createRefreshTokenWithRefreshToken(String refreshToken);
 
-    long getRefreshTokenDurationMs();
-
     CurrentUserResponse getCurrentUser(String email);
 
     void changePassword(UserChangePasswordRequest userChangePasswordRequest, String email);

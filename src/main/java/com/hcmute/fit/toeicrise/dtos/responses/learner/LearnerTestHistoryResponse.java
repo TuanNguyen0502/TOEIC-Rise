@@ -8,6 +8,8 @@ import java.util.List;
 
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class LearnerTestHistoryResponse {
     private Long id;

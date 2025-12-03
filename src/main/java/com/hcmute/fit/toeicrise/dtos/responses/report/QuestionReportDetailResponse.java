@@ -2,13 +2,15 @@ package com.hcmute.fit.toeicrise.dtos.responses.report;
 
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportReason;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuestionReportDetailResponse {
     private Long questionReportId;
     private Long questionId;

@@ -1,10 +1,12 @@
 package com.hcmute.fit.toeicrise.dtos.responses.authentication;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+@Setter
+@Getter
 @Builder
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RefreshTokenResponse {
     private String accessToken;
     private long accessTokenExpirationTime;

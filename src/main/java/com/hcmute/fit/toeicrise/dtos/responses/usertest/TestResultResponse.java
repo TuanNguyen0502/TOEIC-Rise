@@ -1,13 +1,15 @@
 package com.hcmute.fit.toeicrise.dtos.responses.usertest;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TestResultResponse {
     private Long testId;
     private Long userTestId;

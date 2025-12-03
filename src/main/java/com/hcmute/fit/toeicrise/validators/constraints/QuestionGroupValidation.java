@@ -8,6 +8,9 @@ import com.hcmute.fit.toeicrise.validators.annotations.QuestionGroupValidator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 public class QuestionGroupValidation implements ConstraintValidator<QuestionGroupValidator, QuestionGroup> {
 
     @Override
@@ -18,51 +21,32 @@ public class QuestionGroupValidation implements ConstraintValidator<QuestionGrou
         EPart part;
         try {
             part = EPart.getEPart(value.getPart().getName());
-        } catch (AppException e) {
+        } catch (AppException _) {
             ValidationUtils.addViolation(context, "Invalid part name: "+ value.getPart().getName(), "part");
             return false;
         }
-        boolean valid = true;
-        if (!validateRequiredAudio(context, value, part))
-            valid = false;
-        if (!validateRequiredImage(context, value, part))
-            valid = false;
-        if (!validateRequiredPassage(context, value, part))
-            valid = false;
-        return valid;
+        return validateRequiredField(context, value, part, EPart::isRequiredAudio,
+                QuestionGroup::getAudioUrl, "Audio", "audioUrl")
+                && validateRequiredField(context, value, part, EPart::isRequiredImage,
+                QuestionGroup::getImageUrl, "Image", "imageUrl")
+                && validateRequiredField(context, value, part, EPart::isRequiredPassage,
+                QuestionGroup::getPassage, "Passage", "passage");
     }
 
-    private boolean validateRequiredAudio(ConstraintValidatorContext context, QuestionGroup value, EPart part) {
-        if (!part.isRequiredAudio())
+    private boolean validateRequiredField(ConstraintValidatorContext context, QuestionGroup value, EPart part,
+                                          Predicate<EPart> isRequiredField,
+                                          Function<QuestionGroup, String> getFieldValue,
+                                          String fieldName, String fieldPath) {
+        if (!isRequiredField.test(part))
             return true;
-        if (isBlank(value.getAudioUrl())){
-            ValidationUtils.addViolation(context, "Audio is required for " + part.getName(), "audioUrl");
+        if (isBlank(getFieldValue.apply(value))) {
+            ValidationUtils.addViolation(context, "Field " + fieldName + " is required for " + part.getName(), fieldPath);
             return false;
         }
         return true;
     }
 
-    private boolean validateRequiredImage(ConstraintValidatorContext context, QuestionGroup value, EPart part) {
-        if (!part.isRequiredImage())
-            return true;
-        if (isBlank(value.getImageUrl())){
-            ValidationUtils.addViolation(context, "Image is required for " + part.getName(), "imageUrl");
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateRequiredPassage(ConstraintValidatorContext context, QuestionGroup value, EPart part) {
-        if (!part.isRequiredPassage())
-            return true;
-        if (isBlank(value.getPassage())){
-            ValidationUtils.addViolation(context, "Passage is required for " + part.getName(), "passage");
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isBlank(String str){
+    private boolean isBlank(String str) {
         return str == null || str.trim().isEmpty();
     }
 }

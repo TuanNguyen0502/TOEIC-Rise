@@ -18,7 +18,7 @@ public class TestRequest {
     @NotBlank(message = MessageConstant.TEST_NAME_NOT_BLANK)
     private String testName;
 
-    @NotNull(message = "Test set id is required")
-    @Min(value = 1, message = "Test set id must be greater than 0")
+    @NotNull(message = MessageConstant.TEST_SET_ID_NOT_NULL)
+    @Min(value = 1, message = MessageConstant.INVALID_TEST_SET_ID_MIN)
     private Long testSetId;
 }

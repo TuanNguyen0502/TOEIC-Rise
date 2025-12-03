@@ -20,9 +20,10 @@ public class CloudinaryUtil {
         this.cloudinary = cloudinary;
     }
 
+    @SuppressWarnings("unchecked")
     public String uploadFile(MultipartFile file) {
         try {
-            Map data = cloudinary.uploader()
+            Map<String, Object> data = (Map<String, Object>) cloudinary.uploader()
                     .upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
             // Return the URL of the uploaded file
             return data.get("secure_url").toString();

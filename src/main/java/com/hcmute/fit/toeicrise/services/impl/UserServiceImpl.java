@@ -172,6 +172,11 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(user);
     }
 
+    @Override
+    public User findByAccount_Id(Long accountId) {
+        return userRepository.findByAccount_Id(accountId).orElse(null);
+    }
+
     private boolean isDuplicateEmail(String email) {
         return accountRepository.findByEmail(email).isPresent();
     }

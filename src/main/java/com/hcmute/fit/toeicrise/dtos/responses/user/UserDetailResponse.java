@@ -3,11 +3,13 @@ package com.hcmute.fit.toeicrise.dtos.responses.user;
 import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import com.hcmute.fit.toeicrise.models.enums.EGender;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailResponse {
     private Long userId;
     private String email;

@@ -1,14 +1,12 @@
 package com.hcmute.fit.toeicrise.dtos.responses.chatbot;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class SystemPromptDetailResponse {
     private Long id;
     private String content;

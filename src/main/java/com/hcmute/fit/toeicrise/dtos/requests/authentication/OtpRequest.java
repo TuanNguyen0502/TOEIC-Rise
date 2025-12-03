@@ -14,6 +14,7 @@ import lombok.*;
 public class OtpRequest {
     @Email(message = MessageConstant.INVALID_EMAIL)
     private String email;
+
     @Pattern(regexp = Constant.OTP_PATTERN, message = MessageConstant.INVALID_OTP)
     private String otp;
 }

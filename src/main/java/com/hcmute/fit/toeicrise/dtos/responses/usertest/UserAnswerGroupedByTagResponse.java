@@ -1,12 +1,14 @@
 package com.hcmute.fit.toeicrise.dtos.responses.usertest;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserAnswerGroupedByTagResponse {
     private String tag;
     private int correctAnswers;

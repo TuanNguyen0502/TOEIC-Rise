@@ -26,6 +26,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     @Value("${frontend.callback-url}")
     private String frontendCallbackUrl;
+    @Value("${server.servlet.session.cookie.secure}")
+    private boolean secure;
+    @Value("${security.jwt.refresh-token.expiration}")
+    private Long refreshTokenDurationMs;
 
     public CustomOAuth2SuccessHandler(@Lazy ObjectProvider<IAuthenticationService> authenticationServiceProvider,
                                       ObjectMapper objectMapper) {
@@ -52,12 +56,12 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
             // Create refresh token
             String refreshToken = authenticationService.createRefreshTokenWithEmail(email);
-            long refreshTokenExpirationTime = authenticationService.getRefreshTokenDurationMs();
+            long refreshTokenExpirationTime = refreshTokenDurationMs;
 
             // Create an HttpOnly cookie with the refresh token
             ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
                     .httpOnly(true) // Cannot be accessed by JavaScript → enhances security
-                    .secure(false) // Set to false for localhost development
+                    .secure(secure) // Set to false for localhost development
                     .path("/") // Cookie is valid for the entire system
                     .maxAge(refreshTokenExpirationTime) // Cookie lifetime
                     .build();
@@ -79,7 +83,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         } catch (Exception e) {
             String redirectUrl = frontendCallbackUrl +
                     "?google_error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-
             response.sendRedirect(redirectUrl);
         }
     }

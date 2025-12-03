@@ -4,11 +4,15 @@ import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportReason;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuestionReportRequest {
     @NotNull(message = MessageConstant.QUESTION_ID_NOT_NULL)
     private Long questionId;

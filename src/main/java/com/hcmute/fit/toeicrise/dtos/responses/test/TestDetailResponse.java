@@ -1,13 +1,15 @@
 package com.hcmute.fit.toeicrise.dtos.responses.test;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TestDetailResponse {
     private Long id;
     private String name;

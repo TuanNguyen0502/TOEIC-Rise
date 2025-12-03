@@ -6,14 +6,15 @@ import com.hcmute.fit.toeicrise.models.enums.EGender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProfileUpdateRequest {
-    @NotNull(message = MessageConstant.PROFILE_FULLNAME_NOT_NULL)
     @NotBlank(message = MessageConstant.PROFILE_FULLNAME_NOT_BLANK)
     @Pattern(regexp = Constant.FULLNAME_PATTERN, message = MessageConstant.PROFILE_FULLNAME_INVALID)
     private String fullName;

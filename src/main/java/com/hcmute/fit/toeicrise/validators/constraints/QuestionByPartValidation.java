@@ -24,7 +24,7 @@ public class QuestionByPartValidation implements ConstraintValidator<ValidQuesti
         QuestionGroup questionGroup = questionGroupService.getQuestionGroup(value.getQuestionGroupId());
         context.disableDefaultConstraintViolation();
         if (questionGroup == null) {
-            ValidationUtils.addViolation(context, "Question group" + ErrorCode.RESOURCE_NOT_FOUND.getMessage(), "questionGroupId");
+            ValidationUtils.addViolation(context, "Question group " + ErrorCode.RESOURCE_NOT_FOUND.getMessage(), " questionGroupId");
             return false;
         }
         if (questionGroup.getPart() == null || questionGroup.getPart().getId() == null) {
@@ -35,8 +35,8 @@ public class QuestionByPartValidation implements ConstraintValidator<ValidQuesti
         try {
             String partName = questionGroup.getPart().getName();
             part = EPart.getEPart(partName);
-        }catch (AppException e){
-            ValidationUtils.addViolation(context, "Invalid part name: "+ questionGroup.getPart().getName(), "part");
+        } catch (AppException _){
+            ValidationUtils.addViolation(context, "Invalid part name: "+ questionGroup.getPart().getName(), " part");
             return false;
         }
         return switch (part){

@@ -1,12 +1,12 @@
 package com.hcmute.fit.toeicrise.dtos.responses;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PageResponse {
     private Meta meta;
     private Object result;

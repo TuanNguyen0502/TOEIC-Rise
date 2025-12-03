@@ -2,7 +2,7 @@ package com.hcmute.fit.toeicrise.exceptions.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.commons.bases.ExceptionResponse;
-import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.commons.utils.ErrorResponseUtil;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,8 +16,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
@@ -27,13 +25,13 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        log.warn("Unauthenticated access to [{}]: {}", request.getRequestURI(), authException.getMessage(), authException);
+        log.error("Unauthenticated access to [{}]", request.getRequestURI(), authException);
         handleSecurityException(request, response, HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHENTICATED);
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        log.warn("Access denied on [{}]: {}", request.getRequestURI(), accessDeniedException.getMessage(), accessDeniedException);
+        log.warn("Access denied on [{}]", request.getRequestURI(), accessDeniedException);
         handleSecurityException(request, response, HttpStatus.FORBIDDEN, ErrorCode.UNAUTHORIZED);
     }
 
@@ -41,18 +39,10 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
                                          HttpServletResponse response,
                                          HttpStatus httpStatus,
                                          ErrorCode errorCode) throws IOException {
-        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
-                .timestamp(LocalDateTime.now(
-                        ZoneId.of(Constant.TIMEZONE_VIETNAM)))
-                .path(request.getRequestURI())
-                .httpStatusCode(httpStatus.value())
-                .errorCode(errorCode.name())
-                .message(errorCode.getMessage())
-                .build();
+        ExceptionResponse exceptionResponse = ErrorResponseUtil.buildResponseForSecurity(request.getRequestURI(), httpStatus, errorCode);
         response.setStatus(httpStatus.value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.
-                writeValueAsString(exceptionResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(exceptionResponse));
     }
 }

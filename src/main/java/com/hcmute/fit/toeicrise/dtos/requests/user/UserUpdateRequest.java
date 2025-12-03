@@ -7,14 +7,15 @@ import com.hcmute.fit.toeicrise.models.enums.ERole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserUpdateRequest {
-    @NotNull(message = MessageConstant.FULLNAME_NOT_NULL)
     @NotBlank(message = MessageConstant.FULLNAME_NOT_BLANK)
     @Pattern(regexp = Constant.FULLNAME_PATTERN, message = MessageConstant.FULLNAME_INVALID)
     private String fullName;

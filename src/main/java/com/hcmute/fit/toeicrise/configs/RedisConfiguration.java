@@ -36,7 +36,7 @@ public class RedisConfiguration {
         return template;
     }
 
-    private void configurationSerializers(RedisTemplate<?, ?> template,
+    private static void configurationSerializers(RedisTemplate<?, ?> template,
                                           RedisSerializer<?> keySerializer,
                                           RedisSerializer<?> valueSerializer) {
         template.setKeySerializer(keySerializer);

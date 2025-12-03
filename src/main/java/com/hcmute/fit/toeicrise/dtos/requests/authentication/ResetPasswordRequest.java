@@ -13,5 +13,6 @@ import lombok.*;
 public class ResetPasswordRequest {
     @Pattern(regexp = Constant.PASSWORD_PATTERN, message = MessageConstant.INVALID_PASSWORD)
     private String password;
+
     private String confirmPassword;
 }

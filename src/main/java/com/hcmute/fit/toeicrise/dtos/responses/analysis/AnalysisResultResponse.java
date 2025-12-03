@@ -13,5 +13,5 @@ public class AnalysisResultResponse {
     private int numberOfTests;
     private int numberOfSubmissions;
     private long totalTimes;
-    List<ExamTypeStatsResponse> examList;
+    private List<ExamTypeStatsResponse> examList;
 }

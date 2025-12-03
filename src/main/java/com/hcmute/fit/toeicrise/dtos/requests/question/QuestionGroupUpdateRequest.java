@@ -3,15 +3,16 @@ package com.hcmute.fit.toeicrise.dtos.requests.question;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuestionGroupUpdateRequest {
     private MultipartFile audio;
 
@@ -28,6 +29,5 @@ public class QuestionGroupUpdateRequest {
     private String passage;
 
     @NotBlank(message = MessageConstant.QUESTION_GROUP_TRANSCRIPT_NOT_BLANK)
-    @NotNull(message = MessageConstant.QUESTION_GROUP_TRANSCRIPT_NOT_NULL)
     private String transcript;
 }

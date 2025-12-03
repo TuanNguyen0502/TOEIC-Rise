@@ -12,12 +12,12 @@ import lombok.*;
 @Setter
 @Getter
 public class UserChangePasswordRequest {
-    @NotBlank(message = "Please enter your old password!")
+    @NotBlank(message = MessageConstant.PASSWORD_NOT_BLANK)
     private String oldPassword;
 
     @Pattern(regexp = Constant.PASSWORD_PATTERN, message = MessageConstant.INVALID_PASSWORD)
     private String newPassword;
 
-    @NotBlank(message = "Please enter your confirm password!")
+    @NotBlank(message = MessageConstant.CONFIRM_PASSWORD_NOT_BLANK)
     private String confirmPassword;
 }
