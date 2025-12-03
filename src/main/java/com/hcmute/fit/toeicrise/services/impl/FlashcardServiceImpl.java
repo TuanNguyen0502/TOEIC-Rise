@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
@@ -41,17 +42,6 @@ public class FlashcardServiceImpl implements IFlashcardService {
     public PageResponse getAllMyFlashcards(String email, String name, int page, int size, String sortBy, String direction) {
         Specification<Flashcard> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(FlashcardSpecification.ownerEmailEquals(email));
-        return getPageResponse(name, page, size, sortBy, direction, specification);
-    }
-
-    @Override
-    public PageResponse getAllPublicFlashcards(String name, int page, int size, String sortBy, String direction) {
-        Specification<Flashcard> specification = (_, _, cb) -> cb.conjunction();
-        specification = specification.and(FlashcardSpecification.accessTypeEquals(EFlashcardAccessType.PUBLIC));
-        return getPageResponse(name, page, size, sortBy, direction, specification);
-    }
-
-    private PageResponse getPageResponse(String name, int page, int size, String sortBy, String direction, Specification<Flashcard> specification) {
         if (name != null && !name.isBlank()) {
             specification = specification.and(FlashcardSpecification.nameContains(name));
         }
@@ -61,6 +51,30 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
         Page<FlashcardResponse> flashcardPage = flashcardRepository.findAll(specification, pageable)
                 .map(flashcardMapper::toFlashcardResponse);
+        return pageResponseMapper.toPageResponse(flashcardPage);
+    }
+
+    @Override
+    public PageResponse getAllPublicFlashcards(String email, String name, int page, int size, String sortBy, String direction) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Object[]> results = flashcardRepository.findPublicFlashcardsWithFavouriteStatus(
+                user.getId(),
+                EFlashcardAccessType.PUBLIC,
+                name,
+                pageable
+        );
+
+        Page<FlashcardPublicResponse> flashcardPage = results.map(result -> {
+            Flashcard flashcard = (Flashcard) result[0];
+            boolean isFavourite = (boolean) result[1];
+            return flashcardMapper.toFlashcardPublicResponse(flashcard, isFavourite);
+        });
+
         return pageResponseMapper.toPageResponse(flashcardPage);
     }
 

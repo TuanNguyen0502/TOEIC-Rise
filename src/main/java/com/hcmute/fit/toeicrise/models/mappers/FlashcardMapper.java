@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardFavourite;
@@ -31,6 +32,18 @@ public interface FlashcardMapper {
                 .accessType(flashcard.getAccessType())
                 .itemCount(flashcard.getFlashcardItems().size())
                 .favouriteCount(flashcard.getFavouriteCount())
+                .build();
+    }
+
+    default FlashcardPublicResponse toFlashcardPublicResponse(Flashcard flashcard, boolean isFavourite) {
+        return FlashcardPublicResponse.builder()
+                .id(flashcard.getId())
+                .authorFullName(flashcard.getUser().getFullName())
+                .name(flashcard.getName())
+                .accessType(flashcard.getAccessType())
+                .itemCount(flashcard.getFlashcardItems().size())
+                .favouriteCount(flashcard.getFavouriteCount())
+                .isFavourite(isFavourite)
                 .build();
     }
 

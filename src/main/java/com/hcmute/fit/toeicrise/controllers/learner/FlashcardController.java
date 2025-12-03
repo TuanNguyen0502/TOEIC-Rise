@@ -38,7 +38,8 @@ public class FlashcardController {
             @RequestParam(value = "sortBy", defaultValue = "favouriteCount") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") String direction
     ) {
-        return flashcardService.getAllPublicFlashcards(name, page, size, sortBy, direction);
+        String email = SecurityUtils.getCurrentUser();
+        return flashcardService.getAllPublicFlashcards(email, name, page, size, sortBy, direction);
     }
 
     @GetMapping("/{flashcardId}")
