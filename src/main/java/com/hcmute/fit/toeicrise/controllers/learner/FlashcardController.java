@@ -1,11 +1,14 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,5 +40,12 @@ public class FlashcardController {
     public FlashcardDetailResponse getFlashcardDetail(@PathVariable("flashcardId") Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         return flashcardService.getFlashcardDetailById(email, flashcardId);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> createFlashcard(@Valid @RequestBody FlashcardCreateRequest flashcardCreateRequest) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardService.createFlashcard(email, flashcardCreateRequest);
+        return ResponseEntity.ok().build();
     }
 }

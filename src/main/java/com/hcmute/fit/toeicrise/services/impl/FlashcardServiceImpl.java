@@ -1,17 +1,20 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
+import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardItemMapper;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
+import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.FlashcardSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FlashcardServiceImpl implements IFlashcardService {
+    private final UserRepository userRepository;
     private final FlashcardRepository flashcardRepository;
     private final FlashcardMapper flashcardMapper;
     private final FlashcardItemMapper flashcardItemMapper;
@@ -73,5 +77,19 @@ public class FlashcardServiceImpl implements IFlashcardService {
                 .toList();
 
         return flashcardMapper.toFlashcardDetailResponse(flashcard, items);
+    }
+
+    @Override
+    public void createFlashcard(String email, FlashcardCreateRequest flashcardCreateRequest) {
+        User author = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        Flashcard flashcard = new Flashcard();
+        flashcard.setUser(author);
+        flashcard.setName(flashcardCreateRequest.getName());
+        flashcard.setDescription(flashcardCreateRequest.getDescription());
+        flashcard.setAccessType(flashcardCreateRequest.getAccessType());
+        flashcard.setFavouriteCount(0);
+        flashcardRepository.save(flashcard);
     }
 }

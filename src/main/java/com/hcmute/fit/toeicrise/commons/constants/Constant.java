@@ -215,7 +215,6 @@ public class Constant {
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String TIMEZONE_VIETNAM = "Asia/Ho_Chi_Minh";
     // User authentication patterns
-    public static final String EMAIL_PATTERN = "(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}";
     public static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[.@#$%^&+=])(?=\\S+$).{8,20}$";
     public static final String OTP_PATTERN = "^\\d{6}$";
     // Test and test set name patterns
@@ -240,4 +239,6 @@ public class Constant {
     // User constants
     public static final String FULLNAME_PATTERN = "^[\\p{L} ]+$";
     public static final int AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    // Flashcard constants
+    public static final String FLASHCARD_NAME_PATTERN = "^[\\p{L}0-9 ().,'-]{1,100}$";
 }
