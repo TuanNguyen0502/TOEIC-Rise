@@ -18,6 +18,7 @@ public class QuestionReportDetailResponse {
     private List<String> questionOptions;
     private String questionCorrectOption;
     private String questionExplanation;
+    private List<String> questionTags;
     private Long questionGroupId;
     private String questionGroupAudioUrl;
     private String questionGroupImageUrl;

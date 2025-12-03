@@ -104,7 +104,7 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         checkStaffPermission(resolver, questionReport);
 
         if (request.getQuestionUpdate() != null) {
-            questionService.updateQuestion(question, request.getQuestionUpdate());
+            questionService.updateQuestionWithEntity(question, request.getQuestionUpdate());
         }
         if (request.getQuestionGroupUpdate() != null) {
             questionGroupService.updateQuestionGroupWithEntity(questionGroup, request.getQuestionGroupUpdate());
