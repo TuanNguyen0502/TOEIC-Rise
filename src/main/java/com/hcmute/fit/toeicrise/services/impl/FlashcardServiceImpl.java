@@ -1,9 +1,14 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.FlashcardItemMapper;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
@@ -24,6 +29,7 @@ import java.util.List;
 public class FlashcardServiceImpl implements IFlashcardService {
     private final FlashcardRepository flashcardRepository;
     private final FlashcardMapper flashcardMapper;
+    private final FlashcardItemMapper flashcardItemMapper;
     private final PageResponseMapper pageResponseMapper;
 
     @Override
@@ -48,5 +54,24 @@ public class FlashcardServiceImpl implements IFlashcardService {
         Page<FlashcardResponse> flashcardPage = flashcardRepository.findAll(specification, pageable)
                 .map(flashcardMapper::toFlashcardResponse);
         return pageResponseMapper.toPageResponse(flashcardPage);
+    }
+
+    @Override
+    public FlashcardDetailResponse getFlashcardDetailById(String email, Long flashcardId) {
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+
+        // Check access
+        if (flashcard.getAccessType() == EFlashcardAccessType.PRIVATE &&
+                !flashcard.getUser().getAccount().getEmail().equals(email)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+        }
+
+        List<FlashcardItemDetailResponse> items = flashcard.getFlashcardItems()
+                .stream()
+                .map(flashcardItemMapper::toFlashcardItemDetailResponse)
+                .toList();
+
+        return flashcardMapper.toFlashcardDetailResponse(flashcard, items);
     }
 }
