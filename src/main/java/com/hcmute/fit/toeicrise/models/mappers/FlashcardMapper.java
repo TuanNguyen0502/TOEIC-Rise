@@ -12,7 +12,7 @@ public interface FlashcardMapper {
                 .name(flashcard.getName())
                 .accessType(flashcard.getAccessType())
                 .itemCount(flashcard.getFlashcardItems().size())
-                .favouriteCount(flashcard.getFavourites().size())
+                .favouriteCount(flashcard.getFavouriteCount())
                 .build();
     }
 }
