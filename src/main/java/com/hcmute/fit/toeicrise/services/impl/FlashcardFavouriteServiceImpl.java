@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardFavourite;
+import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardFavouriteRepository;
@@ -26,7 +27,10 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
     @Override
     public PageResponse getAllMyFavouriteFlashcards(String email, String name, int page, int size, String sortBy, String direction) {
         Specification<FlashcardFavourite> specification = (_, _, cb) -> cb.conjunction();
+        // Filter by user's email
         specification = specification.and(FlashcardFavouriteSpecification.emailEquals(email));
+        // Only public flashcards
+        specification = specification.and(FlashcardFavouriteSpecification.accessTypeEquals(EFlashcardAccessType.PUBLIC));
         if (name != null && !name.isBlank()) {
             specification = specification.and(FlashcardFavouriteSpecification.nameContains(name));
         }
