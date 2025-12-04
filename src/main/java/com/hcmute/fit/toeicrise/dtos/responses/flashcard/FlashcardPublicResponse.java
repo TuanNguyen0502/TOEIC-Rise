@@ -6,11 +6,12 @@ import lombok.Data;
 
 @Data
 @Builder
-public class FlashcardResponse {
+public class FlashcardPublicResponse {
     private Long id;
     private String authorFullName;
     private String name;
     private EFlashcardAccessType accessType;
     private int itemCount;
     private int favouriteCount;
+    private boolean isFavourite;
 }
