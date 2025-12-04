@@ -1,11 +1,14 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface FlashcardItemMapper {
+    FlashcardItem toFlashcardItem(FlashcardItemRequest flashcardItemRequest);
+
     default FlashcardItemDetailResponse toFlashcardItemDetailResponse(FlashcardItem flashcardItem) {
         return FlashcardItemDetailResponse.builder()
                 .id(flashcardItem.getId())

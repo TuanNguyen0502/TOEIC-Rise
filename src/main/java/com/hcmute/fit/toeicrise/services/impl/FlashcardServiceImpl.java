@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -136,5 +137,10 @@ public class FlashcardServiceImpl implements IFlashcardService {
         flashcardMapper.updateFlashcard(flashcardCreateRequest, flashcard);
         flashcardRepository.save(flashcard);
         return flashcardMapper.toFlashcardResponse(flashcard);
+    }
+
+    @Override
+    public Optional<Flashcard> findFlashcardById(Long flashcardId) {
+        return flashcardRepository.findById(flashcardId);
     }
 }

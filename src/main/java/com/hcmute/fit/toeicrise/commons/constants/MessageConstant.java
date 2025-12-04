@@ -74,4 +74,10 @@ public class MessageConstant {
     public static final String FLASHCARD_NAME_NOT_BLANK = "Flashcard name must not be blank.";
     public static final String FLASHCARD_NAME_INVALID = "Flashcard name can only contain letters, digits, spaces, and special characters ().,'- and must be between 1 and 100 characters long.";
     public static final String FLASHCARD_ACCESS_TYPE_NOT_NULL = "Flashcard access type must not be null.";
+    public static final String FLASHCARD_ID_NOT_NULL = "Flashcard ID must not be null.";
+    // Flashcard item related messages
+    public static final String FLASHCARD_ITEM_VOCABULARY_NOT_BLANK = "Vocabulary must not be blank.";
+    public static final String FLASHCARD_ITEM_VOCABULARY_INVALID = "Vocabulary can only contains letters, apostrophes, hyphens, and spaces.";
+    public static final String FLASHCARD_ITEM_DEFINITION_NOT_BLANK = "Definition must not be blank";
+    public static final String FLASHCARD_ITEM_DEFINITION_SIZE = "Definition must be less than or equal to 3000.";
 }
