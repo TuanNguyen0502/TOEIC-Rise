@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface IFlashcardService {
