@@ -7,4 +7,5 @@ import org.springframework.transaction.annotation.Transactional;
 public interface IFlashcardItemService {
     @Transactional
     FlashcardItemDetailResponse createFlashcardItem(FlashcardItemRequest flashcardItemRequest, String email);
+    FlashcardItemDetailResponse getFlashcardItemDetail(Long id);
 }

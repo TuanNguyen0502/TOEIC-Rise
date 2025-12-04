@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,5 +76,14 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
                 .flashcard(flashcard)
                 .build();
         flashcardFavouriteRepository.save(flashcardFavourite);
+    }
+
+    @Transactional
+    @Override
+    public void deleteFavourite(String email, Long favouriteFlashcardId) {
+        userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        FlashcardFavourite flashcardFavourite = flashcardFavouriteRepository.findById(favouriteFlashcardId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Favourite flashcard"));
+        flashcardFavouriteRepository.delete(flashcardFavourite);
     }
 }

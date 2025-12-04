@@ -8,12 +8,14 @@ import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
+import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardItemMapper;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
+import com.hcmute.fit.toeicrise.repositories.FlashcardItemRepository;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.FlashcardSpecification;
@@ -35,6 +37,7 @@ import java.util.Optional;
 public class FlashcardServiceImpl implements IFlashcardService {
     private final UserRepository userRepository;
     private final FlashcardRepository flashcardRepository;
+    private final FlashcardItemRepository flashcardItemRepository;
     private final FlashcardMapper flashcardMapper;
     private final FlashcardItemMapper flashcardItemMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -109,7 +112,24 @@ public class FlashcardServiceImpl implements IFlashcardService {
         flashcard.setDescription(flashcardCreateRequest.getDescription());
         flashcard.setAccessType(flashcardCreateRequest.getAccessType());
         flashcard.setFavouriteCount(0);
-        flashcardRepository.save(flashcard);
+
+        // Save flashcard first to get the ID
+        final Flashcard savedFlashcard = flashcardRepository.save(flashcard);
+
+        // Create flashcard items if provided
+        if (flashcardCreateRequest.getItems() != null && !flashcardCreateRequest.getItems().isEmpty()) {
+            List<FlashcardItem> flashcardItems = flashcardCreateRequest.getItems().stream()
+                    .map(itemRequest -> FlashcardItem.builder()
+                            .flashcard(savedFlashcard)
+                            .vocabulary(itemRequest.getVocabulary())
+                            .definition(itemRequest.getDefinition())
+                            .audioUrl(itemRequest.getAudioUrl())
+                            .pronunciation(itemRequest.getPronunciation())
+                            .build())
+                    .toList();
+
+            flashcardItemRepository.saveAll(flashcardItems);
+        }
     }
 
     @Transactional
@@ -130,9 +150,11 @@ public class FlashcardServiceImpl implements IFlashcardService {
     @Override
     public FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardCreateRequest flashcardCreateRequest) {
         Flashcard flashcard = flashcardRepository.findById(flashcardId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
-        if (!flashcard.getUser().getAccount().getEmail().equals(email)) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+        if (!flashcard.getUser().getAccount().getEmail().equals(email))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
         Flashcard oldFlashcard = flashcardRepository.findByNameAndUser_Account_Email(flashcardCreateRequest.getName(), email).orElse(null);
-        if (oldFlashcard != null && !oldFlashcard.getId().equals(flashcard.getId())) throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard");
+        if (oldFlashcard != null && !oldFlashcard.getId().equals(flashcard.getId()))
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard");
 
         flashcardMapper.updateFlashcard(flashcardCreateRequest, flashcard);
         flashcardRepository.save(flashcard);

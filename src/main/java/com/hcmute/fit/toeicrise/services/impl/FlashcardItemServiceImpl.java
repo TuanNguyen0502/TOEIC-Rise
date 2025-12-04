@@ -34,4 +34,10 @@ public class FlashcardItemServiceImpl implements IFlashcardItemService {
         flashcardItem = flashcardItemRepository.save(flashcardItem);
         return flashcardItemMapper.toFlashcardItemDetailResponse(flashcardItem);
     }
+  
+    @Override
+    public FlashcardItemDetailResponse getFlashcardItemDetail(Long id) {
+        FlashcardItem flashcardItem = flashcardItemRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard item"));
+        return flashcardItemMapper.toFlashcardItemDetailResponse(flashcardItem);
+    }
 }
