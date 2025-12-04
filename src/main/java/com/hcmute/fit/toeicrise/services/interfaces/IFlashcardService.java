@@ -16,4 +16,7 @@ public interface IFlashcardService {
 
     @Transactional
     void deleteFlashcard(String email, Long flashcardId);
+
+    @Transactional
+    FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardCreateRequest flashcardCreateRequest);
 }

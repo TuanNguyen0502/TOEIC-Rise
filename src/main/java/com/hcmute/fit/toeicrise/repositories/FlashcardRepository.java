@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, JpaSpecificationExecutor<Flashcard> {
     @Query("SELECT f, " +
@@ -24,4 +27,6 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, Jpa
             @Param("name") String name,
             Pageable pageable
     );
+    List<Flashcard> findAllByUser_Account_Email(String userAccountEmail);
+    Optional<Flashcard> findByNameAndUser_Account_Email(String name, String userAccountEmail);
 }
