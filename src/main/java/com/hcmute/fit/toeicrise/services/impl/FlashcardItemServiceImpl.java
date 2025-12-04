@@ -6,7 +6,6 @@ import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardItemMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardItemRepository;
-import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
