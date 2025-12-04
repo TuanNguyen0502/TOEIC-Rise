@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class FlashcardCreateRequest {
@@ -21,4 +23,6 @@ public class FlashcardCreateRequest {
 
     @NotNull(message = MessageConstant.FLASHCARD_ACCESS_TYPE_NOT_NULL)
     private EFlashcardAccessType accessType;
+
+    private List<FlashcardItemCreateRequest> items;
 }
