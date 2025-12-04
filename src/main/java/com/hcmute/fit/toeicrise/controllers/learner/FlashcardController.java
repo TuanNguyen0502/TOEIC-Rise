@@ -85,4 +85,11 @@ public class FlashcardController {
         flashcardService.deleteFlashcard(email, flashcardId);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/favourite/{flashcardId}")
+    public ResponseEntity<?> deleteFavourite(@PathVariable("flashcardId") Long favouriteFlashcardId) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardFavouriteService.deleteFavourite(email, favouriteFlashcardId);
+        return ResponseEntity.ok().build();
+    }
 }
