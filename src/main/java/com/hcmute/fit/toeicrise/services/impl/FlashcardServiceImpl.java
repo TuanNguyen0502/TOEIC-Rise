@@ -107,4 +107,17 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
         flashcardRepository.delete(flashcard);
     }
+
+    @Transactional
+    @Override
+    public FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardCreateRequest flashcardCreateRequest) {
+        Flashcard flashcard = flashcardRepository.findById(flashcardId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+        if (!flashcard.getUser().getAccount().getEmail().equals(email)) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+        Flashcard oldFlashcard = flashcardRepository.findByNameAndUser_Account_Email(flashcardCreateRequest.getName(), email).orElse(null);
+        if (oldFlashcard != null && !oldFlashcard.getId().equals(flashcard.getId())) throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard");
+
+        flashcardMapper.updateFlashcard(flashcardCreateRequest, flashcard);
+        flashcardRepository.save(flashcard);
+        return flashcardMapper.toFlashcardResponse(flashcard);
+    }
 }

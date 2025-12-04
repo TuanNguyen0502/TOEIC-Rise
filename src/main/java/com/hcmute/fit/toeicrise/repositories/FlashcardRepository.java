@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, JpaSpecificationExecutor<Flashcard> {
     List<Flashcard> findAllByUser_Account_Email(String userAccountEmail);
+    Optional<Flashcard> findByNameAndUser_Account_Email(String name, String userAccountEmail);
 }

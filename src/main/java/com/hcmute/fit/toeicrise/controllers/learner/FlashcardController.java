@@ -49,6 +49,11 @@ public class FlashcardController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{flashcardId}")
+    public ResponseEntity<?> updateFlashcard(@PathVariable("flashcardId") Long flashcardId, @RequestBody FlashcardCreateRequest flashcardCreateRequest) {
+        return ResponseEntity.ok(flashcardService.updateFlashcard(SecurityUtils.getCurrentUser(), flashcardId, flashcardCreateRequest));
+    }
+
     @DeleteMapping("/{flashcardId}")
     public ResponseEntity<?> deleteFlashcard(@PathVariable("flashcardId") Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
