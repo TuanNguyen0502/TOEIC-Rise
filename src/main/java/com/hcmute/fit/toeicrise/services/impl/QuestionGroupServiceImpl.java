@@ -165,7 +165,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
     }
 
-
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
         boolean hasUrl = newUrl != null && !newUrl.isBlank();
@@ -177,7 +176,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             }
             return cloudinaryUtil.uploadFile(newFile);
         }
-        return hasUrl ? newUrl : oldUrl;
+        if (hasUrl) {
+            // If the URL has changed and the old file is in Cloudinary, delete the old file
+            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl)) {
+                cloudinaryUtil.deleteFile(oldUrl);
+            }
+            return newUrl;
+        }
+        // If neither new file nor new URL is provided, delete the old file if it exists
+        if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl)) {
+            cloudinaryUtil.deleteFile(oldUrl);
+        }
+        return null;
     }
 
     private void validateAudioForPart(Part part, MultipartFile audio, String audioUrl) {
