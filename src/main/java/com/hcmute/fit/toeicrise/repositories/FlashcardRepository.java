@@ -28,5 +28,4 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, Jpa
             Pageable pageable
     );
     List<Flashcard> findAllByUser_Account_Email(String userAccountEmail);
-    Optional<Flashcard> findByNameAndUser_Account_Email(String name, String userAccountEmail);
 }

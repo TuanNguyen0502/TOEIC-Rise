@@ -31,14 +31,12 @@ public class FlashcardItemServiceImpl implements IFlashcardItemService {
         flashcardItemRepository.saveAll(flashcardItems);
     }
 
-    @Transactional
     @Override
     public FlashcardItem updateFlashcardItem(FlashcardItemUpdateRequest flashcardItemUpdateRequest) {
         FlashcardItem flashcardItem = flashcardItemMapper.toFlashcardItem(flashcardItemUpdateRequest);
         return flashcardItemRepository.save(flashcardItem);
     }
 
-    @Transactional
     @Override
     public void deleteFlashcardItem(Long id) {
         flashcardItemRepository.findById(id).ifPresent(flashcardItemRepository::delete);

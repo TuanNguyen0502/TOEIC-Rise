@@ -156,10 +156,6 @@ public class FlashcardServiceImpl implements IFlashcardService {
         if (!flashcard.getUser().getAccount().getEmail().equals(email))
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
 
-        Flashcard oldFlashcard = flashcardRepository.findByNameAndUser_Account_Email(flashcardUpdateRequest.getName(), email).orElse(null);
-        if (oldFlashcard != null && !oldFlashcard.getId().equals(flashcard.getId()))
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard");
-
         List<FlashcardItem> currentItems = flashcard.getFlashcardItems();
         Map<Long, FlashcardItem> existingItems = currentItems.stream()
                 .collect(Collectors.toMap(FlashcardItem::getId, item -> item));
