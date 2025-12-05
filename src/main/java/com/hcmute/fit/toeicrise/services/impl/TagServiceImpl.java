@@ -53,7 +53,7 @@ public class TagServiceImpl implements ITagService {
         if (StringUtils.hasText(tagsName)) {
             specification = specification.and(TagSpecification.nameContains(tagsName));
         }
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Sort sort = Sort.by(Sort.Direction.ASC, "name");
         Pageable pageable = PageRequest.of(page, pageSize, sort);
 
         Page<TagResponse> tags = tagRepository.findAll(specification, pageable).map(tagMapper::toTagResponse);
