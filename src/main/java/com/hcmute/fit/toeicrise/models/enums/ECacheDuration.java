@@ -7,7 +7,8 @@ import java.time.Duration;
 @Getter
 public enum ECacheDuration {
     CACHE_REGISTRATION("cacheRegistration", Duration.ofHours(12)),
-    CACHE_FULLNAME_REGISTRATION("cacheRegistrationFullName", Duration.ofHours(12)),;
+    CACHE_FULLNAME_REGISTRATION("cacheRegistrationFullName", Duration.ofHours(12)),
+    CACHE_LIMIT_VERIFY_OTP("cacheLimitVerifyOtp", Duration.ofMinutes(5)),;
 
     private final String cacheName;
     private final Duration duration;
