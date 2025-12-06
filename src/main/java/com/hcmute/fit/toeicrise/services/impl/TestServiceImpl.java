@@ -200,7 +200,7 @@ public class TestServiceImpl implements ITestService {
             Part part = partService.getPartById(firstQuestion.getPartNumber());
             QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
             for (QuestionExcelRequest dto : groupQuestions) {
-                List<Tag> tags = tagService.getTagsFromString(dto.getTags());
+                List<Tag> tags = tagService.parseTagsAllowCreate(dto.getTags());
                 questionService.createQuestion(dto, questionGroup, tags);
             }
         } catch (ConstraintViolationException e) {

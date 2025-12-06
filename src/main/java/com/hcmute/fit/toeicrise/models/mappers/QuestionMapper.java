@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
@@ -18,6 +19,10 @@ import java.util.stream.Collectors;
 public interface QuestionMapper {
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
     QuestionResponse toQuestionResponse(Question question);
+
+    @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
+    @Mapping(source = "options", target = "options")
+    MiniTestQuestionResponse toMiniTestQuestionResponse(Question question);
 
     LearnerTestQuestionResponse toLearnerTestQuestionResponse(Question question);
 
