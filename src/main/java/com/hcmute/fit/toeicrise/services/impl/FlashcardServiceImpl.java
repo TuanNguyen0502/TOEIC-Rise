@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
@@ -15,10 +17,10 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardItemMapper;
 import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
-import com.hcmute.fit.toeicrise.repositories.FlashcardItemRepository;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.FlashcardSpecification;
+import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,13 +32,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FlashcardServiceImpl implements IFlashcardService {
     private final UserRepository userRepository;
     private final FlashcardRepository flashcardRepository;
-    private final FlashcardItemRepository flashcardItemRepository;
+    private final IFlashcardItemService flashcardItemService;
     private final FlashcardMapper flashcardMapper;
     private final FlashcardItemMapper flashcardItemMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -127,7 +131,7 @@ public class FlashcardServiceImpl implements IFlashcardService {
                             .build())
                     .toList();
 
-            flashcardItemRepository.saveAll(flashcardItems);
+            flashcardItemService.saveAll(flashcardItems);
         }
     }
 
@@ -147,15 +151,31 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
     @Transactional
     @Override
-    public FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardCreateRequest flashcardCreateRequest) {
+    public FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardUpdateRequest flashcardUpdateRequest) {
         Flashcard flashcard = flashcardRepository.findById(flashcardId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
         if (!flashcard.getUser().getAccount().getEmail().equals(email))
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
-        Flashcard oldFlashcard = flashcardRepository.findByNameAndUser_Account_Email(flashcardCreateRequest.getName(), email).orElse(null);
-        if (oldFlashcard != null && !oldFlashcard.getId().equals(flashcard.getId()))
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard");
 
-        flashcardMapper.updateFlashcard(flashcardCreateRequest, flashcard);
+        List<FlashcardItem> currentItems = flashcard.getFlashcardItems();
+        Map<Long, FlashcardItem> existingItems = currentItems.stream()
+                .collect(Collectors.toMap(FlashcardItem::getId, item -> item));
+        currentItems.clear();
+
+        for (FlashcardItemUpdateRequest flashcardItem : flashcardUpdateRequest.getItems()) {
+            if (flashcardItem.getId() != null && existingItems.containsKey(flashcardItem.getId())) {
+                FlashcardItem item = flashcardItemService.updateFlashcardItem(flashcardItem);
+                currentItems.add(item);
+                existingItems.remove(flashcardItem.getId());
+            }
+            else {
+                FlashcardItem newItem = flashcardItemService.createFlashcardItem(flashcardItem, flashcard);
+                currentItems.add(newItem);
+            }
+        }
+        for (FlashcardItem itemToDelete : existingItems.values()) {
+            flashcardItemService.deleteFlashcardItem(itemToDelete.getId());
+        }
+        flashcardMapper.updateFlashcard(flashcardUpdateRequest, flashcard);
         flashcardRepository.save(flashcard);
         return flashcardMapper.toFlashcardResponse(flashcard);
     }

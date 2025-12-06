@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
@@ -75,8 +76,8 @@ public class FlashcardController {
     }
 
     @PutMapping("/{flashcardId}")
-    public ResponseEntity<?> updateFlashcard(@PathVariable("flashcardId") Long flashcardId, @RequestBody FlashcardCreateRequest flashcardCreateRequest) {
-        return ResponseEntity.ok(flashcardService.updateFlashcard(SecurityUtils.getCurrentUser(), flashcardId, flashcardCreateRequest));
+    public ResponseEntity<?> updateFlashcard(@PathVariable("flashcardId") Long flashcardId, @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
+        return ResponseEntity.ok(flashcardService.updateFlashcard(SecurityUtils.getCurrentUser(), flashcardId, flashcardUpdateRequest));
     }
 
     @DeleteMapping("/{flashcardId}")

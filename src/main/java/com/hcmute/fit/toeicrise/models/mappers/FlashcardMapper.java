@@ -1,6 +1,6 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
-import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface FlashcardMapper {
-    void updateFlashcard(FlashcardCreateRequest flashcardCreateRequest, @MappingTarget Flashcard flashcard);
+    void updateFlashcard(FlashcardUpdateRequest flashcardUpdateRequest, @MappingTarget Flashcard flashcard);
 
     default FlashcardResponse toFlashcardResponse(Flashcard flashcard) {
         return FlashcardResponse.builder()
