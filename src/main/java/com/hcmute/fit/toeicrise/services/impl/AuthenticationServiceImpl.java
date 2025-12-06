@@ -234,6 +234,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
             emailService.sendVerificationEmail(account);
+            redisService.put(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(),
+                    account.getEmail(), 0, ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getDuration());
             if (isRegister) {
                 redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
             } else accountRepository.save(account);
