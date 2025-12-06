@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface PartMapper {
+    @Mapping(target = "questionGroups", ignore = true)
     PartResponse toPartResponse(Part part, @Context List<QuestionGroupResponse> questionGroups);
 
     @Mapping(source = "name", target = "partName")

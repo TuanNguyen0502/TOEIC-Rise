@@ -231,4 +231,6 @@ public class Constant {
     // User constants
     public static final String FULLNAME_PATTERN = "^[\\p{L} ]+$";
     public static final long AVATAR_MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+    // Flashcard constants
+    public static final String FLASHCARD_NAME_PATTERN = "^[\\p{L}0-9 ().,'-]{1,100}$";
 }

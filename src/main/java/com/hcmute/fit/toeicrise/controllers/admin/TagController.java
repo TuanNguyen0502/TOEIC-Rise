@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/admin/tags")
 @RequiredArgsConstructor
 public class TagController {
+
     private final ITagService tagService;
 
     @GetMapping
-    public ResponseEntity<?> getAllTags(@RequestParam(defaultValue = "0") int size,
-                                        @RequestParam(defaultValue = "10") int page,
-                                        @RequestParam String tagName) {
-        return ResponseEntity.ok(tagService.getAllTags(size, page, tagName));
+    public ResponseEntity<?> getAllTags(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int size,
+                                        @RequestParam(defaultValue = "") String tagName) {
+        return ResponseEntity.ok(tagService.getAllTags(page, size, tagName));
     }
 }
