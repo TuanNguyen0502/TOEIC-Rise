@@ -40,6 +40,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final UserMapper userMapper;
     @Value("${security.jwt.refresh-token.expiration}")
     private Long refreshTokenDurationMs;
+    private static final int MAX_VERIFY_OTP_TIMES = 15;
 
     @Override
     public boolean register(RegisterRequest input) {
@@ -233,6 +234,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             account.setVerificationCode(CodeGeneratorUtils.generateVerificationCode());
             account.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
             emailService.sendVerificationEmail(account);
+            redisService.put(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(),
+                    account.getEmail(), 0, ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getDuration());
             if (isRegister) {
                 redisService.put(ECacheDuration.CACHE_REGISTRATION.getCacheName(), account.getEmail(), account, ECacheDuration.CACHE_REGISTRATION.getDuration());
             } else accountRepository.save(account);
@@ -261,6 +264,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setResendVerificationAttempts(account.getResendVerificationAttempts() + 1);
         accountRepository.save(account);
         emailService.sendVerificationEmail(account);
+        redisService.put(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(),
+                forgotPasswordRequest.getEmail(), 0, ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getDuration());
     }
 
     @Override
@@ -268,11 +273,18 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Account account = accountRepository.findByEmail(otp.getEmail()).orElseThrow(()
                 -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
         if (!account.getVerificationCode().equals(otp.getOtp())) {
+            Integer times = redisService.get(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(), otp.getEmail(), Integer.class);
+            times = times == null ? 1 : times+1;
+            if (times > MAX_VERIFY_OTP_TIMES)
+                throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, MAX_VERIFY_OTP_TIMES);
+            redisService.put(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(),
+                    otp.getEmail(), times, ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getDuration());
             throw new AppException(ErrorCode.INVALID_OTP, "User's");
         }
         if (account.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new AppException(ErrorCode.OTP_EXPIRED);
         }
+        redisService.remove(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(), otp.getEmail());
         account.setVerificationCode(null);
         account.setVerificationCodeExpiresAt(null);
         accountRepository.save(account);
