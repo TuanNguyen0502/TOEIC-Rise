@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -75,13 +77,18 @@ public class QuestionServiceImpl implements IQuestionService {
 
     @Override
     public void updateQuestionWithEntity(Question question, QuestionRequest request) {
-        List<Tag> tags = tagService.getTagsFromString(request.getTags());
+        List<Tag> tags = tagService.parseTagsAllowCreate(request.getTags());
         question = questionMapper.toEntity(request, question);
         question.setTags(tags);
         questionRepository.save(question);
 
         // Change test status to PENDING
         changeTestStatus(question);
+    }
+
+    @Override
+    public List<Question> getAllQuestionsByPartAndTags(Set<Long> tags, Long partId) {
+        return questionRepository.findAllByPartIdAndTags(tags, partId);
     }
 
     @Async

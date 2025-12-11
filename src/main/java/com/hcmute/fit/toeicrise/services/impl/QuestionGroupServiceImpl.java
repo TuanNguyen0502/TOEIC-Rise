@@ -11,11 +11,9 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupR
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.Part;
-import com.hcmute.fit.toeicrise.models.entities.Question;
-import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
@@ -29,6 +27,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
+import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -49,6 +48,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final PartMapper partMapper;
     private final QuestionMapper questionMapper;
     private final IAuthenticationService authenticationService;
+    private final ITagService tagService;
 
     @Transactional(readOnly = true)
     @Override
@@ -171,7 +171,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
     }
 
-
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
         boolean hasUrl = newUrl != null && !newUrl.isBlank();
@@ -183,7 +182,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             }
             return cloudinaryUtil.uploadFile(newFile);
         }
-        return hasUrl ? newUrl : oldUrl;
+        if (hasUrl) {
+            // If the URL has changed and the old file is in Cloudinary, delete the old file
+            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl)) {
+                cloudinaryUtil.deleteFile(oldUrl);
+            }
+            return newUrl;
+        }
+        // If neither new file nor new URL is provided, delete the old file if it exists
+        if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl)) {
+            cloudinaryUtil.deleteFile(oldUrl);
+        }
+        return null;
     }
 
     private void validateAudioForPart(Part part, MultipartFile audio, String audioUrl) {
@@ -324,6 +334,26 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 .totalQuestions(questionIds.size())
                 .correctAnswers(correctAnswers)
                 .questionGroups(groupResponses).build();
+    }
+  
+    @Override
+    public List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, String tags, int numberQuestion) {
+        List<Tag> tagList = tagService.parseTagsOrThrow(tags);
+        Set<Long> tagIds = tagList.stream().filter(Objects::nonNull).map(Tag::getId).collect(Collectors.toSet());
+        List<Question> questionList = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
+
+        Collections.shuffle(questionList);
+        questionList = questionList.subList(0,Math.min(questionList.size(), numberQuestion));
+        Map<QuestionGroup, List<Question>> groupEntities = questionList.stream().collect(Collectors.groupingBy(Question::getQuestionGroup));
+        return groupEntities.entrySet().stream().map(
+                        entry -> {
+                            List<Question> questions = entry.getValue();
+                            List<MiniTestQuestionResponse> learnerTestQuestionResponses = questions.stream().map(questionMapper::toMiniTestQuestionResponse).toList();
+                            LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(entry.getKey());
+                            learnerTestQuestionGroupResponse.setQuestions(new ArrayList<>(learnerTestQuestionResponses));
+                            return learnerTestQuestionGroupResponse;
+                        })
+                .toList();
     }
 
     @Async

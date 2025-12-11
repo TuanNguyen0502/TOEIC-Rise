@@ -6,15 +6,16 @@ import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
 @Builder
-public class FlashcardCreateRequest {
-    @NotNull(message = MessageConstant.FLASHCARD_NAME_NOT_NULL)
+@AllArgsConstructor
+@NoArgsConstructor
+public class FlashcardUpdateRequest {
     @NotBlank(message = MessageConstant.FLASHCARD_NAME_NOT_BLANK)
     @Pattern(regexp = Constant.FLASHCARD_NAME_PATTERN, message = MessageConstant.FLASHCARD_NAME_INVALID)
     private String name;
@@ -24,5 +25,5 @@ public class FlashcardCreateRequest {
     @NotNull(message = MessageConstant.FLASHCARD_ACCESS_TYPE_NOT_NULL)
     private EFlashcardAccessType accessType;
 
-    private List<FlashcardItemCreateRequest> items;
+    private List<FlashcardItemUpdateRequest> items;
 }

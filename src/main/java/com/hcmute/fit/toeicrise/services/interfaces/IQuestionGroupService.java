@@ -4,9 +4,11 @@ import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
+import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
@@ -47,4 +49,6 @@ public interface IQuestionGroupService {
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
 
     MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request, String email);
+    
+    List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, String tagIds, int numberQuestion);
 }

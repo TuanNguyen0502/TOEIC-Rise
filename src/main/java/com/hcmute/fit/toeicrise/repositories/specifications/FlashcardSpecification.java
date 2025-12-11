@@ -1,13 +1,12 @@
 package com.hcmute.fit.toeicrise.repositories.specifications;
 
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
-import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import org.springframework.data.jpa.domain.Specification;
 
 public class FlashcardSpecification {
-    public static Specification<Flashcard> accessTypeEquals(EFlashcardAccessType accessType) {
+    public static Specification<Flashcard> ownerEmailEquals(String email) {
         return (root, _, criteriaBuilder) ->
-                accessType == null ? null : criteriaBuilder.equal(root.get("accessType"), accessType);
+                email == null ? null : criteriaBuilder.equal(root.get("user").get("account").get("email"), email);
     }
 
     public static Specification<Flashcard> nameContains(String name) {
