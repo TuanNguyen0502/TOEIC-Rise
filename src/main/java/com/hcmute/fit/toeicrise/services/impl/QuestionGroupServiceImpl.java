@@ -2,11 +2,15 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
+import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
@@ -16,6 +20,7 @@ import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
+import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
@@ -42,6 +47,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
     private final QuestionMapper questionMapper;
+    private final IAuthenticationService authenticationService;
     private final ITagService tagService;
 
     @Transactional(readOnly = true)
@@ -286,6 +292,50 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
     }
 
+    @Override
+    public MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request, String email) {
+        authenticationService.getCurrentUser(email);
+        int correctAnswers = 0;
+        List<MiniTestAnswerQuestionResponse> miniTestAnswerQuestionResponses = new ArrayList<>();
+
+        List<Long> questionIds = request.getUserAnswerRequests().stream()
+                .map(UserAnswerRequest::getQuestionId)
+                .distinct().toList();
+        List<Question> questions = questionService.getQuestionEntitiesByIds(questionIds);
+        Map<Long, Question> questionMap = questions.stream()
+                .collect(Collectors.toMap(Question::getId, q -> q));
+        for (UserAnswerRequest userAnswerRequest : request.getUserAnswerRequests()) {
+            Question question = questionMap.get(userAnswerRequest.getQuestionId());
+            if (question == null)
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+            boolean isCorrect = userAnswerRequest.getAnswer() != null && question.getCorrectOption().equals(userAnswerRequest.getAnswer());
+            if (isCorrect) correctAnswers++;
+            miniTestAnswerQuestionResponses.add(MiniTestAnswerQuestionResponse.builder()
+                    .questionId(question.getId())
+                    .position(question.getPosition())
+                    .content(question.getContent())
+                    .options(question.getOptions())
+                    .userAnswer(userAnswerRequest.getAnswer())
+                    .correctOption(question.getCorrectOption())
+                    .explanation(question.getExplanation())
+                    .isCorrect(isCorrect)
+                    .build());
+        }
+        Map<QuestionGroup, List<MiniTestAnswerQuestionResponse>> groupListMap = miniTestAnswerQuestionResponses.stream()
+                .collect(Collectors.groupingBy(response -> questionMap.get(response.getQuestionId()).getQuestionGroup()));
+        List<LearnerTestQuestionGroupResponse> groupResponses = groupListMap.entrySet().stream().map(entry -> {
+            List<MiniTestAnswerQuestionResponse> questionResponses = entry.getValue();
+            LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(entry.getKey());
+            learnerTestQuestionGroupResponse.setQuestions(new ArrayList<>(questionResponses));
+            return learnerTestQuestionGroupResponse;
+        }).toList();
+
+        return MiniTestOverallResponse.builder()
+                .totalQuestions(questionIds.size())
+                .correctAnswers(correctAnswers)
+                .questionGroups(groupResponses).build();
+    }
+  
     @Override
     public List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, String tags, int numberQuestion) {
         List<Tag> tagList = tagService.parseTagsOrThrow(tags);

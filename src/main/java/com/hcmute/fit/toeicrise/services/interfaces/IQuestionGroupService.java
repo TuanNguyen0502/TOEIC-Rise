@@ -1,7 +1,9 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
+import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
@@ -46,5 +48,7 @@ public interface IQuestionGroupService {
     @Transactional(readOnly = true)
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
 
+    MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request, String email);
+    
     List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, String tagIds, int numberQuestion);
 }
