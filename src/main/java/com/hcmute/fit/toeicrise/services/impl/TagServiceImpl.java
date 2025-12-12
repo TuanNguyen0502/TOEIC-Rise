@@ -2,7 +2,6 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.TagResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.TagByPartResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
@@ -12,7 +11,6 @@ import com.hcmute.fit.toeicrise.models.mappers.TagMapper;
 import com.hcmute.fit.toeicrise.repositories.PartRepository;
 import com.hcmute.fit.toeicrise.repositories.TagRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TagSpecification;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +23,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -86,5 +83,11 @@ public class TagServiceImpl implements ITagService {
                         .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,
                                 "Tag name: "+ name))
         );
+    }
+
+    @Override
+    public void checkExistsIds(Set<Long> tagIds){
+        for (Long id : tagIds)
+            tagRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag"));
     }
 }

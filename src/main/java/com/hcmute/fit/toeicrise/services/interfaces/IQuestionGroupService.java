@@ -50,5 +50,5 @@ public interface IQuestionGroupService {
 
     MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request, String email);
     
-    List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, String tagIds, int numberQuestion);
+    List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
 }

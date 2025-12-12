@@ -337,9 +337,8 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
   
     @Override
-    public List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, String tags, int numberQuestion) {
-        List<Tag> tagList = tagService.parseTagsOrThrow(tags);
-        Set<Long> tagIds = tagList.stream().filter(Objects::nonNull).map(Tag::getId).collect(Collectors.toSet());
+    public List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion) {
+        tagService.checkExistsIds(tagIds);
         List<Question> questionList = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
 
         Collections.shuffle(questionList);
