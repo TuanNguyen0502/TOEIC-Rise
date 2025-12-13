@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long>, JpaSpecificationExecutor<Tag> {
@@ -21,4 +22,6 @@ public interface TagRepository extends JpaRepository<Tag, Long>, JpaSpecificatio
             "JOIN q.tags t " +
             "WHERE p.id = :partId")
     List<Tag> findTagsByPartId(@Param("partId") Long partId);
+
+    Long countByIdIn(Set<Long> ids);
 }

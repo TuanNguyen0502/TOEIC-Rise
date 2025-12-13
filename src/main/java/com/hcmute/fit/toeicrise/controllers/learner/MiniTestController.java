@@ -37,8 +37,8 @@ public class MiniTestController {
                                                @Size(min = 1, max = 3, message = MessageConstant.TAGS_SIZE)
                                                    Set<Long> tagIds,
                                                @RequestParam(defaultValue = "5")
-                                                       @Min(value = 1, message = MessageConstant.QUESTION_MIN)
-                                                       @Max(value = 5, message = MessageConstant.QUESTION_MAX)
+                                                       @Min(value = 5, message = MessageConstant.QUESTION_MIN)
+                                                       @Max(value = 60, message = MessageConstant.QUESTION_MAX)
                                                    int numberQuestion){
         return ResponseEntity.ok(questionGroupService.getLearnerTestQuestionGroupResponsesByTags(partId, tagIds, numberQuestion));
     }

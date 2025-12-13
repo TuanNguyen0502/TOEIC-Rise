@@ -87,7 +87,7 @@ public class TagServiceImpl implements ITagService {
 
     @Override
     public void checkExistsIds(Set<Long> tagIds){
-        for (Long id : tagIds)
-            tagRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag"));
+        if (tagRepository.countByIdIn(tagIds) < tagIds.size())
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag");
     }
 }

@@ -59,8 +59,8 @@ public class MessageConstant {
     public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
     public static final String QUESTION_EXPLANATION_NOT_BLANK = "Explain must not be blank.";
     public static final String QUESTION_EXPLANATION_NOT_NULL = "Explain must not be null.";
-    public static final String QUESTION_MIN = "Question size must be greater than 0.";
-    public static final String QUESTION_MAX = "Question size must be less than 20.";
+    public static final String QUESTION_MIN = "Question size must be greater than 5.";
+    public static final String QUESTION_MAX = "Question size must be less than 60.";
     // User Test related messages
     public static final String TEST_ID_NOT_NULL = "Test ID must not be null.";
     public static final String TIME_SPENT_MIN = "Time spent must be at least 1 second.";
