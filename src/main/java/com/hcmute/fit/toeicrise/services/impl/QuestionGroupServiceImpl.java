@@ -356,14 +356,49 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         return MiniTestResponse.builder()
                 .questionGroups(miniTestQuestionGroupResponses)
-                .totalQuestions(globalQuestionPosition-1).build();
+                .totalQuestions(globalQuestionPosition - 1).build();
     }
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion){
-        List<Question> questionList = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
-        ShuffleUtil.shuffle(questionList, numberQuestion);
-        questionList = new ArrayList<>(questionList.subList(0, Math.min(questionList.size(), numberQuestion)));
-        return questionList.stream().collect(Collectors.groupingBy(Question::getQuestionGroup, LinkedHashMap::new, Collectors.toList()));
+        Map<Long, List<Question>> questionsByTag = new LinkedHashMap<>();
+
+        for (Long tagId : tagIds) {
+            List<Question> questionList = questionService.getAllQuestionsByPartAndTag(tagId, partId);
+            ShuffleUtil.shuffle(questionList);
+            questionsByTag.put(tagId, questionList);
+        }
+        List<Question> selectedQuestions = new ArrayList<>();
+        Set<Long> usedQuestionIds = new HashSet<>();
+
+        Map<Long, Integer> tagIndices = new HashMap<>();
+        tagIds.forEach(tagId -> tagIndices.put(tagId, 0));
+
+        while (selectedQuestions.size() < numberQuestion) {
+            boolean addedInThisRound = false;
+
+            for (Long tagId : tagIds){
+                if (selectedQuestions.size() >= numberQuestion)
+                    break;
+                List<Question> tagQuestions = questionsByTag.get(tagId);
+                Integer currentIndex = tagIndices.get(tagId);
+
+                while (currentIndex < tagQuestions.size()){
+                    Question tagQuestion = tagQuestions.get(currentIndex);
+                    currentIndex++;
+
+                    if (!usedQuestionIds.contains(tagQuestion.getId())){
+                        selectedQuestions.add(tagQuestion);
+                        usedQuestionIds.add(tagQuestion.getId());
+                        addedInThisRound = true;
+                        break;
+                    }
+                }
+                tagIndices.put(tagId, currentIndex);
+            }
+            if (!addedInThisRound)
+                break;
+        }
+        return selectedQuestions.stream().collect(Collectors.groupingBy(Question::getQuestionGroup, LinkedHashMap::new, Collectors.toList()));
     }
 
     @Async

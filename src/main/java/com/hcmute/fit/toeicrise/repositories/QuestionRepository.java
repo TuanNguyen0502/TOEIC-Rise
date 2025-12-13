@@ -22,6 +22,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             "FROM Question q " +
             "LEFT JOIN q.tags tg " +
             "LEFT JOIN q.questionGroup.part p " +
-            "WHERE p.id=:partId AND tg.id IN :ids AND q.questionGroup.test.status=:status")
-    List<Question> findAllByPartIdAndTags(@Param("ids") Set<Long> ids, @Param("partId") Long partId, @Param("status")ETestStatus status);
+            "WHERE p.id=:partId AND tg.id=:id AND q.questionGroup.test.status=:status")
+    List<Question> findAllByPartIdAndTag(@Param("id") Long ids, @Param("partId") Long partId, @Param("status")ETestStatus status);
 }
