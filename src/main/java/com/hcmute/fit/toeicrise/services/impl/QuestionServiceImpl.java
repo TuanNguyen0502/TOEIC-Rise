@@ -87,7 +87,7 @@ public class QuestionServiceImpl implements IQuestionService {
 
     @Override
     public List<Question> getAllQuestionsByPartAndTags(Set<Long> tags, Long partId) {
-        return questionRepository.findAllByPartIdAndTags(tags, partId);
+        return questionRepository.findAllByPartIdAndTags(tags, partId, ETestStatus.APPROVED);
     }
 
     @Async

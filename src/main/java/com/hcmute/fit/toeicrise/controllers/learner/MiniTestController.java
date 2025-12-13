@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
-import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.TagByPartResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
@@ -45,6 +44,6 @@ public class MiniTestController {
 
     @PostMapping("")
     public ResponseEntity<?> submitTest(@RequestBody MiniTestRequest miniTestRequest){
-        return ResponseEntity.ok(questionGroupService.getMiniTestOverallResponse(miniTestRequest, SecurityUtils.getCurrentUser()));
+        return ResponseEntity.ok(questionGroupService.getMiniTestOverallResponse(miniTestRequest));
     }
 }

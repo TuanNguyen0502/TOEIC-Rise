@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
+import com.hcmute.fit.toeicrise.commons.utils.ShuffleUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
@@ -12,15 +13,17 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionRespon
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.MiniTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.MiniTestMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
@@ -47,8 +50,8 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
     private final QuestionMapper questionMapper;
-    private final IAuthenticationService authenticationService;
     private final ITagService tagService;
+    private final MiniTestMapper miniTestMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -293,8 +296,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
-    public MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request, String email) {
-        authenticationService.getCurrentUser(email);
+    public MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request) {
         int correctAnswers = 0;
         List<MiniTestAnswerQuestionResponse> miniTestAnswerQuestionResponses = new ArrayList<>();
 
@@ -310,16 +312,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
             boolean isCorrect = userAnswerRequest.getAnswer() != null && question.getCorrectOption().equals(userAnswerRequest.getAnswer());
             if (isCorrect) correctAnswers++;
-            miniTestAnswerQuestionResponses.add(MiniTestAnswerQuestionResponse.builder()
-                    .questionId(question.getId())
-                    .position(question.getPosition())
-                    .content(question.getContent())
-                    .options(question.getOptions())
-                    .userAnswer(userAnswerRequest.getAnswer())
-                    .correctOption(question.getCorrectOption())
-                    .explanation(question.getExplanation())
-                    .isCorrect(isCorrect)
-                    .build());
+            MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse = miniTestMapper.toMiniTestAnswerQuestionResponse(question);
+            miniTestAnswerQuestionResponse.setIsCorrect(isCorrect);
+            miniTestAnswerQuestionResponses.add(miniTestAnswerQuestionResponse);
         }
         Map<QuestionGroup, List<MiniTestAnswerQuestionResponse>> groupListMap = miniTestAnswerQuestionResponses.stream()
                 .collect(Collectors.groupingBy(response -> questionMap.get(response.getQuestionId()).getQuestionGroup()));
@@ -335,24 +330,40 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 .correctAnswers(correctAnswers)
                 .questionGroups(groupResponses).build();
     }
-  
-    @Override
-    public List<LearnerTestQuestionGroupResponse> getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion) {
-        tagService.checkExistsIds(tagIds);
-        List<Question> questionList = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
 
-        Collections.shuffle(questionList);
-        questionList = questionList.subList(0,Math.min(questionList.size(), numberQuestion));
-        Map<QuestionGroup, List<Question>> groupEntities = questionList.stream().collect(Collectors.groupingBy(Question::getQuestionGroup));
-        return groupEntities.entrySet().stream().map(
-                        entry -> {
-                            List<Question> questions = entry.getValue();
-                            List<MiniTestQuestionResponse> learnerTestQuestionResponses = questions.stream().map(questionMapper::toMiniTestQuestionResponse).toList();
-                            LearnerTestQuestionGroupResponse learnerTestQuestionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(entry.getKey());
-                            learnerTestQuestionGroupResponse.setQuestions(new ArrayList<>(learnerTestQuestionResponses));
-                            return learnerTestQuestionGroupResponse;
-                        })
-                .toList();
+    @Override
+    public MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion) {
+        tagService.checkExistsIds(tagIds);
+
+        Map<QuestionGroup, List<Question>> groupEntities = getAllQuestionGroup(partId, tagIds, numberQuestion);
+        groupEntities.values().forEach(ShuffleUtil::shuffle);
+        List<MiniTestQuestionGroupResponse> miniTestQuestionGroupResponses = new ArrayList<>();
+        long groupPosition = 1;
+        long globalQuestionPosition = 1;
+
+        for (Map.Entry<QuestionGroup, List<Question>> entry : groupEntities.entrySet()){
+            MiniTestQuestionGroupResponse groupResponse = questionGroupMapper.toMiniTestQuestionGroupResponse(entry.getKey());
+            groupResponse.setPosition(groupPosition++);
+
+            List<MiniTestQuestionResponse> questionResponses = new ArrayList<>();
+            for (Question question : entry.getValue()) {
+                MiniTestQuestionResponse questionResponse = questionMapper.toMiniTestQuestionResponse(question);
+                questionResponse.setPosition(globalQuestionPosition++);
+                questionResponses.add(questionResponse);
+            }
+            groupResponse.setQuestions(Collections.singletonList(questionResponses));
+            miniTestQuestionGroupResponses.add(groupResponse);
+        }
+        return MiniTestResponse.builder()
+                .questionGroups(miniTestQuestionGroupResponses)
+                .totalQuestions(globalQuestionPosition).build();
+    }
+
+    private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion){
+        List<Question> questionList = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
+        ShuffleUtil.shuffle(questionList, numberQuestion);
+        questionList = new ArrayList<>(questionList.subList(0, Math.min(questionList.size(), numberQuestion)));
+        return questionList.stream().collect(Collectors.groupingBy(Question::getQuestionGroup, LinkedHashMap::new, Collectors.toList()));
     }
 
     @Async

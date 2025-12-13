@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.Question;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +22,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             "FROM Question q " +
             "LEFT JOIN q.tags tg " +
             "LEFT JOIN q.questionGroup.part p " +
-            "WHERE p.id=:partId AND tg.id IN :ids")
-    List<Question> findAllByPartIdAndTags(@Param("ids") Set<Long> ids, @Param("partId") Long partId);
+            "WHERE p.id=:partId AND tg.id IN :ids AND q.questionGroup.test.status=:status")
+    List<Question> findAllByPartIdAndTags(@Param("ids") Set<Long> ids, @Param("partId") Long partId, @Param("status")ETestStatus status);
 }
