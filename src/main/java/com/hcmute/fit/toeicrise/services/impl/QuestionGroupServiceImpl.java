@@ -356,7 +356,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         return MiniTestResponse.builder()
                 .questionGroups(miniTestQuestionGroupResponses)
-                .totalQuestions(globalQuestionPosition).build();
+                .totalQuestions(globalQuestionPosition-1).build();
     }
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion){
