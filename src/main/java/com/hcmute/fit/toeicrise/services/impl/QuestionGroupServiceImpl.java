@@ -23,6 +23,7 @@ import com.hcmute.fit.toeicrise.models.mappers.MiniTestMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
+import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
@@ -52,6 +53,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionMapper questionMapper;
     private final ITagService tagService;
     private final MiniTestMapper miniTestMapper;
+    private final QuestionRepository questionRepository;
 
     @Transactional(readOnly = true)
     @Override
@@ -400,6 +402,103 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }
         return selectedQuestions.stream().collect(Collectors.groupingBy(Question::getQuestionGroup, LinkedHashMap::new, Collectors.toList()));
     }
+
+//    @Override
+//    public MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion) {
+//        tagService.checkExistsIds(tagIds);
+//
+//        List<Question> allQuestions = questionRepository.findQuestionsForMiniTest(partId, tagIds, ETestStatus.APPROVED);
+//
+//        List<Question> selectedQuestions = selectQuestionsRoundRobin(allQuestions, tagIds, numberQuestion);
+//
+//        // Key: GroupID (Long), Value: List<Question>
+//        Map<Long, List<Question>> groupedById = selectedQuestions.stream()
+//                .collect(Collectors.groupingBy(
+//                        q -> q.getQuestionGroup().getId(),
+//                        LinkedHashMap::new,
+//                        Collectors.toList()
+//                ));
+//
+//        List<MiniTestQuestionGroupResponse> groupResponses = new ArrayList<>();
+//        long groupPosition = 1;
+//        long globalQuestionPosition = 1;
+//
+//        for (List<Question> questionsInGroup : groupedById.values()) {
+//            if (questionsInGroup.isEmpty()) continue;
+//            QuestionGroup groupEntity = questionsInGroup.getFirst().getQuestionGroup();
+//
+//            // Map Group
+//            MiniTestQuestionGroupResponse groupResp = questionGroupMapper.toMiniTestQuestionGroupResponse(groupEntity);
+//            groupResp.setPosition(groupPosition++);
+//
+//            List<MiniTestQuestionResponse> questionResps = new ArrayList<>();
+//            for (Question q : questionsInGroup) {
+//                MiniTestQuestionResponse qResp = questionMapper.toMiniTestQuestionResponse(q);
+//                qResp.setPosition(globalQuestionPosition++);
+//                questionResps.add(qResp);
+//            }
+//
+//            groupResp.setQuestions(new ArrayList<>(questionResps));
+//            groupResponses.add(groupResp);
+//        }
+//
+//        return MiniTestResponse.builder()
+//                .questionGroups(groupResponses)
+//                .totalQuestions(globalQuestionPosition - 1)
+//                .build();
+//    }
+//
+//    private List<Question> selectQuestionsRoundRobin(List<Question> allQuestions, Set<Long> tagIds, int limit) {
+//        Map<Long, List<Question>> pools = new HashMap<>();
+//        for (Long id : tagIds) pools.put(id, new ArrayList<>());
+//
+//        for (Question q : allQuestions) {
+//            for (Tag t : q.getTags()) {
+//                if (pools.containsKey(t.getId())) {
+//                    pools.get(t.getId()).add(q);
+//                }
+//            }
+//        }
+//
+//        // Shuffle
+//        pools.values().forEach(ShuffleUtil::shuffle);
+//
+//        // Round-Robin pick
+//        List<Question> result = new ArrayList<>();
+//        Set<Long> pickedIds = new HashSet<>();
+//        List<Long> tagLoop = new ArrayList<>(tagIds);
+//        int index = 0;
+//        int emptyCount = 0;
+//
+//        while (result.size() < limit && emptyCount < tagLoop.size()) {
+//            emptyCount = 0;
+//            for (int i = 0; i < tagLoop.size(); i++) {
+//                if (result.size() >= limit) break;
+//
+//                Long tagId = tagLoop.get((index + i) % tagLoop.size());
+//                List<Question> pool = pools.get(tagId);
+//
+//                Question candidate = null;
+//                while (!pool.isEmpty()) {
+//                    Question q = pool.removeFirst();
+//                    if (!pickedIds.contains(q.getId())) {
+//                        candidate = q;
+//                        break;
+//                    }
+//                }
+//
+//                if (candidate != null) {
+//                    result.add(candidate);
+//                    pickedIds.add(candidate.getId());
+//                } else {
+//                    emptyCount++;
+//                }
+//            }
+//            index++;
+//        }
+//
+//        return result;
+//    }
 
     @Async
     public void changeTestStatusToPending(QuestionGroup questionGroup) {
