@@ -17,7 +17,7 @@ public interface QuestionGroupMapper {
     @Mapping(target = "position", source = "position")
     LearnerTestQuestionGroupResponse toLearnerTestQuestionGroupResponse(QuestionGroup questionGroup);
 
-//    @Mapping(target = "questions", ignore = true)
+    @Mapping(target = "questions", ignore = true)
     MiniTestQuestionGroupResponse toMiniTestQuestionGroupResponse(QuestionGroup questionGroup);
 
     default QuestionGroupResponse toResponse(QuestionGroup questionGroup, List<QuestionResponse> questions) {

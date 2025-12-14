@@ -21,26 +21,16 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
 
     @Query("SELECT DISTINCT q " +
             "FROM Question q " +
-            "LEFT JOIN q.tags tg " +
-            "LEFT JOIN q.questionGroup.part p " +
-            "WHERE p.id=:partId AND tg.id=:id AND q.questionGroup.test.status=:status")
-    List<Question> findAllByPartIdAndTag(@Param("id") Long ids, @Param("partId") Long partId, @Param("status")ETestStatus status);
-
-    @EntityGraph(attributePaths = {
-            "questionGroup",
-            "questionGroup.test",
-            "questionGroup.part",
-            "tags"
-    })
-    @Query("SELECT DISTINCT q FROM Question q " +
-            "WHERE q.questionGroup.part.id = :partId " +
-            "AND q.questionGroup.test.status = :status " +
-            "AND EXISTS (SELECT t FROM q.tags t WHERE t.id IN :tagIds)") // Subquery check tag tồn tại
-    List<Question> findQuestionsForMiniTest(
-            @Param("partId") Long partId,
-            @Param("tagIds") Set<Long> tagIds,
-            @Param("status") ETestStatus status
-    );
+            "LEFT JOIN FETCH q.questionGroup qg " +
+            "LEFT JOIN FETCH qg.part p " +
+            "LEFT JOIN FETCH qg.test t " +
+            "LEFT JOIN FETCH q.tags tags " +
+            "WHERE p.id = :partId " +
+            "AND EXISTS (" +
+            "      SELECT 1 FROM q.tags tg " +
+            "      WHERE tg.id IN :tagIds) " +
+            "AND t.status = :status")
+    List<Question> findAllByPartIdAndTag(@Param("tagIds") Set<Long> tagIds, @Param("partId") Long partId, @Param("status") ETestStatus status);
 
     @Query("SELECT DISTINCT q FROM Question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +

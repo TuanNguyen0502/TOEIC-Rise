@@ -378,16 +378,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion){
+        List<Question> allQuestions = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
+        ShuffleUtil.shuffle(allQuestions);
         Map<Long, List<Question>> questionsByTag = new LinkedHashMap<>();
 
         for (Long tagId : tagIds) {
-            List<Question> questionList = questionService.getAllQuestionsByPartAndTag(tagId, partId);
-            ShuffleUtil.shuffle(questionList);
-            questionsByTag.put(tagId, questionList);
+            List<Question> tagQuestions = allQuestions.stream().filter(
+                    question -> question.getTags().stream().anyMatch(
+                            tag -> tag.getId().equals(tagId))).collect(Collectors.toList());
+            questionsByTag.put(tagId, tagQuestions);
         }
         List<Question> selectedQuestions = new ArrayList<>();
         Set<Long> usedQuestionIds = new HashSet<>();
-
         Map<Long, Integer> tagIndices = new HashMap<>();
         tagIds.forEach(tagId -> tagIndices.put(tagId, 0));
 
@@ -398,12 +400,12 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 if (selectedQuestions.size() >= numberQuestion)
                     break;
                 List<Question> tagQuestions = questionsByTag.get(tagId);
+                if (tagQuestions == null|| tagQuestions.isEmpty()) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
                 Integer currentIndex = tagIndices.get(tagId);
 
                 while (currentIndex < tagQuestions.size()){
                     Question tagQuestion = tagQuestions.get(currentIndex);
                     currentIndex++;
-
                     if (!usedQuestionIds.contains(tagQuestion.getId())){
                         selectedQuestions.add(tagQuestion);
                         usedQuestionIds.add(tagQuestion.getId());

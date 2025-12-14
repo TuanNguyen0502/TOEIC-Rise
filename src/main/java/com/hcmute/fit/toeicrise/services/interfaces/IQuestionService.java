@@ -21,7 +21,7 @@ public interface IQuestionService {
     List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
     Optional<Question> findById(Long aLong);
     void updateQuestionWithEntity(Question question, QuestionRequest request);
-    List<Question> getAllQuestionsByPartAndTag(Long tagId, Long partId);
+    List<Question> getAllQuestionsByPartAndTags(Set<Long> tagIds, Long partId);
     List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds);
     void validateQuestion(List<Long> questionIds, List<Question> questions);
 }
