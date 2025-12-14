@@ -141,6 +141,7 @@ public class TestServiceImpl implements ITestService {
         if (!isValidFile(file))
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
         TestSet testSet = testSetRepository.findById(request.getTestSetId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Set"));
+        if (testRepository.existsByName(request.getTestName())) throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
         Test test = createTest(request.getTestName(), testSet);
         List<QuestionExcelRequest> questionExcelRequests = readFile(file);
         processQuestions(test, questionExcelRequests);

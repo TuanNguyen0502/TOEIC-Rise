@@ -31,4 +31,6 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     List<Object[]> findListTagByIdOrderByPartName(@Param("id") Long id);
 
     Optional<Test> findByIdAndStatus(Long id, ETestStatus status);
+
+    boolean existsByName(String name);
 }
