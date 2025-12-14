@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MiniTestAnswerQuestionResponse {
-    private Long questionId;
+    private Long id;
     private int position;
     private String content;
     private List<String> options;

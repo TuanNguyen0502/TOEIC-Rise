@@ -41,4 +41,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             @Param("tagIds") Set<Long> tagIds,
             @Param("status") ETestStatus status
     );
+
+    @Query("SELECT DISTINCT q FROM Question q " +
+            "LEFT JOIN FETCH q.questionGroup qg " +
+            "WHERE q.id IN :questionIds")
+    List<Question> findAllByIdWithGroups(@Param("questionIds") List<Long> questionIds);
 }

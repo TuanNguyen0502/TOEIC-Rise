@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,6 +89,27 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public List<Question> getAllQuestionsByPartAndTag(Long tagId, Long partId) {
         return questionRepository.findAllByPartIdAndTag(tagId, partId, ETestStatus.APPROVED);
+    }
+
+    @Override
+    public List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds) {
+        if (questionIds == null || questionIds.isEmpty())
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+        return questionRepository.findAllByIdWithGroups(questionIds);
+    }
+
+    @Override
+    public void validateQuestion(List<Long> questionIds, List<Question> questions) {
+        if (questions.size() != questionIds.size()){
+            Set<Long> foundIds = questions.stream().map(Question::getId)
+                    .collect(Collectors.toSet());
+            if (!foundIds.containsAll(questionIds))
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+        }
+        List<Long> questionsWithoutGroup = questions.stream().filter(question -> question.getQuestionGroup() == null)
+                .map(Question::getId).toList();
+        if (!questionsWithoutGroup.isEmpty())
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question without Question group");
     }
 
     @Async
