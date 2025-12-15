@@ -12,8 +12,11 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MiniTestRequest {
+public class MiniQuestionGroupRequest {
     @NotNull(message = MessageConstant.QUESTION_GROUP_ID_NOT_NULL)
-    @NotEmpty(message = MessageConstant.QUESTION_GROUP_ID_NOT_EMPTY)
-    List<MiniQuestionGroupRequest> questionGroups;
+    Long questionGroupId;
+
+    @NotNull(message = MessageConstant.USER_ANSWER_NOT_NULL)
+    @NotEmpty(message = MessageConstant.USER_ANSWER_NOT_EMPTY)
+    List<UserAnswerMiniTestRequest> userAnswerRequests;
 }

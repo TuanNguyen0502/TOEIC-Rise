@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.responses.learner;
+package com.hcmute.fit.toeicrise.dtos.responses.minitest;
 
 import lombok.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class MiniTestQuestionResponse {
     private Long id;
     private Long position;
-    private Long newPosition;
+    private Long index;
     private String content;
     private List<String> options;
     private List<String> tags;

@@ -11,11 +11,13 @@ import java.util.List;
 @NoArgsConstructor
 public class MiniTestAnswerQuestionResponse {
     private Long id;
-    private int position;
+    private Long position;
+    private Long index;
     private String content;
     private List<String> options;
     private String userAnswer;
     private String correctOption;
     private String explanation;
     private Boolean isCorrect;
+    private List<String> tags;
 }

@@ -11,9 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 public class MiniTestQuestionGroupResponse {
     private Long id;
+    private int index;
     private String audioUrl;
     private String imageUrl;
     private String passage;
-    private Long position;
     List<Object> questions;
 }

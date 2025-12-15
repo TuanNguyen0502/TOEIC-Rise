@@ -55,12 +55,15 @@ public class MessageConstant {
     // Question related messages
     public static final String QUESTION_ID_NOT_NULL = "Question must not be null.";
     public static final String QUESTION_GROUP_ID_NOT_NULL = "Question group must not be null.";
+    public static final String QUESTION_GROUP_ID_NOT_EMPTY = "Question group must not be empty";
     public static final String QUESTION_CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
     public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
     public static final String QUESTION_EXPLANATION_NOT_BLANK = "Explain must not be blank.";
     public static final String QUESTION_EXPLANATION_NOT_NULL = "Explain must not be null.";
     public static final String QUESTION_MIN = "Question size must be greater than 5.";
     public static final String QUESTION_MAX = "Question size must be less than 60.";
+    public static final String USER_ANSWER_NOT_NULL = "User answer must not be null.";
+    public static final String USER_ANSWER_NOT_EMPTY = "User answer must not be empty.";
     // User Test related messages
     public static final String TEST_ID_NOT_NULL = "Test ID must not be null.";
     public static final String TIME_SPENT_MIN = "Time spent must be at least 1 second.";

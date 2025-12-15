@@ -3,23 +3,23 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.ShuffleUtil;
+import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniQuestionGroupRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.minitest.UserAnswerMiniTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.MiniTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
-import com.hcmute.fit.toeicrise.models.mappers.MiniTestMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
@@ -51,7 +51,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final PartMapper partMapper;
     private final QuestionMapper questionMapper;
     private final ITagService tagService;
-    private final MiniTestMapper miniTestMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -297,8 +296,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     @Override
     public MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request) {
-        List<Long> questionIds = request.getUserAnswerRequests().stream()
-                .map(UserAnswerRequest::getQuestionId)
+        List<Long> questionIds = request.getQuestionGroups().stream()
+                .flatMap(group -> group.getUserAnswerRequests().stream())
+                .map(UserAnswerMiniTestRequest::getQuestionId)
                 .filter(Objects::nonNull)
                 .distinct().toList();
 
@@ -306,44 +306,47 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         questionService.validateQuestion(questionIds,questions);
         Map<Long, Question> questionMap = questions.stream()
                 .collect(Collectors.toMap(Question::getId, q -> q));
-        MiniTestOverallResponse miniTestOverallResponse = calculatorAnswerMiniTest(request.getUserAnswerRequests(), questionMap);
+        MiniTestOverallResponse miniTestOverallResponse = calculatorAnswerMiniTest(request, questionMap);
         miniTestOverallResponse.setTotalQuestions(questions.size());
         return miniTestOverallResponse;
     }
 
-    private MiniTestOverallResponse calculatorAnswerMiniTest(List<UserAnswerRequest> userAnswerRequests, Map<Long, Question> questionMap) {
+    private MiniTestOverallResponse calculatorAnswerMiniTest(MiniTestRequest miniTestRequest, Map<Long, Question> questionMap) {
         int correctAnswers = 0;
-        List<MiniTestAnswerQuestionResponse> miniTestAnswerQuestionResponses = new ArrayList<>();
+        Map<QuestionGroup, List<MiniTestAnswerQuestionResponse>> miniTestAnswerQuestionResponses = new LinkedHashMap<>();
+        int groupPosition = 1;
+        long globalQuestionPosition = 1;
 
-        for (UserAnswerRequest userAnswerRequest : userAnswerRequests) {
-            if(userAnswerRequest.getQuestionId() == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-            Question question = questionMap.get(userAnswerRequest.getQuestionId());
-            if (question == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+        for (MiniQuestionGroupRequest questionGroupRequest : miniTestRequest.getQuestionGroups()) {
+            if(questionGroupRequest.getQuestionGroupId() == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
 
-            boolean isCorrect = userAnswerRequest.getAnswer() != null && question.getCorrectOption() != null && question.getCorrectOption().equals(userAnswerRequest.getAnswer());
-            if (isCorrect) correctAnswers++;
-            MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse = miniTestMapper.toMiniTestAnswerQuestionResponse(question);
-            miniTestAnswerQuestionResponse.setId(question.getId());
-            miniTestAnswerQuestionResponse.setUserAnswer(userAnswerRequest.getAnswer());
-            miniTestAnswerQuestionResponse.setIsCorrect(isCorrect);
-            miniTestAnswerQuestionResponses.add(miniTestAnswerQuestionResponse);
+            for (UserAnswerMiniTestRequest userAnswerRequest : questionGroupRequest.getUserAnswerRequests()) {
+                if (userAnswerRequest.getQuestionId() == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+                Question question = questionMap.get(userAnswerRequest.getQuestionId());
+                if (question == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+                if (!question.getQuestionGroup().getId().equals(questionGroupRequest.getQuestionGroupId())) throw new AppException(ErrorCode.VALIDATION_ERROR);
+
+                boolean isCorrect = userAnswerRequest.getAnswer() != null && question.getCorrectOption() != null
+                        && question.getCorrectOption().equals(userAnswerRequest.getAnswer());
+                if (isCorrect) correctAnswers++;
+
+                MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse = questionMapper.toMiniTestAnswerQuestionResponse(question);
+                miniTestAnswerQuestionResponse.setUserAnswer(userAnswerRequest.getAnswer());
+                miniTestAnswerQuestionResponse.setIsCorrect(isCorrect);
+
+                miniTestAnswerQuestionResponses.computeIfAbsent(question.getQuestionGroup(), _ -> new ArrayList<>()).add(miniTestAnswerQuestionResponse);
+            }
         }
-        Map<QuestionGroup, List<MiniTestAnswerQuestionResponse>> groupedResponses = new LinkedHashMap<>();
-        for (MiniTestAnswerQuestionResponse response : miniTestAnswerQuestionResponses){
-            if (response.getId() == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-            Question question = questionMap.get(response.getId());
-            if (question == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-            QuestionGroup questionGroup = question.getQuestionGroup();
-            if (questionGroup == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "QuestionGroup");
-
-            groupedResponses.computeIfAbsent(questionGroup, _ -> new ArrayList<>()).add(response);
+        List<MiniTestQuestionGroupResponse> groupResponses = new ArrayList<>();
+        for (Map.Entry<QuestionGroup, List<MiniTestAnswerQuestionResponse>>entry : miniTestAnswerQuestionResponses.entrySet()){
+            MiniTestQuestionGroupResponse miniTestQuestionGroupResponse = questionGroupMapper.toMiniTestQuestionGroupResponse(entry.getKey());
+            miniTestQuestionGroupResponse.setIndex(groupPosition++);
+            for (MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse : entry.getValue()){
+                miniTestAnswerQuestionResponse.setIndex(globalQuestionPosition++);
+            }
+            miniTestQuestionGroupResponse.setQuestions(Collections.singletonList(entry.getValue()));
+            groupResponses.add(miniTestQuestionGroupResponse);
         }
-        List<LearnerTestQuestionGroupResponse> groupResponses = groupedResponses.entrySet().stream()
-                .map(value -> {
-                    LearnerTestQuestionGroupResponse response = questionGroupMapper.toLearnerTestQuestionGroupResponse(value.getKey());
-                    response.setQuestions(new ArrayList<>(value.getValue()));
-                    return response;
-                }).toList();
         return MiniTestOverallResponse.builder()
                 .correctAnswers(correctAnswers)
                 .questionGroups(groupResponses).build();
@@ -356,17 +359,16 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         Map<QuestionGroup, List<Question>> groupEntities = getAllQuestionGroup(partId, tagIds, numberQuestion);
         groupEntities.values().forEach(questions -> questions.sort(Comparator.comparing(Question::getPosition)));
         List<MiniTestQuestionGroupResponse> miniTestQuestionGroupResponses = new ArrayList<>();
-        long groupPosition = 1;
+        int groupPosition = 1;
         long globalQuestionPosition = 1;
 
         for (Map.Entry<QuestionGroup, List<Question>> entry : groupEntities.entrySet()){
             MiniTestQuestionGroupResponse groupResponse = questionGroupMapper.toMiniTestQuestionGroupResponse(entry.getKey());
-            groupResponse.setPosition(groupPosition++);
-
+            groupResponse.setIndex(groupPosition++);
             List<MiniTestQuestionResponse> questionResponses = new ArrayList<>();
             for (Question question : entry.getValue()) {
                 MiniTestQuestionResponse questionResponse = questionMapper.toMiniTestQuestionResponse(question);
-                questionResponse.setNewPosition(globalQuestionPosition++);
+                questionResponse.setIndex(globalQuestionPosition++);
                 questionResponses.add(questionResponse);
             }
             groupResponse.setQuestions(Collections.singletonList(questionResponses));
