@@ -336,7 +336,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             QuestionGroup questionGroup = question.getQuestionGroup();
             if (questionGroup == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "QuestionGroup");
 
-            groupedResponses.computeIfAbsent(questionGroup, k -> new ArrayList<>()).add(response);
+            groupedResponses.computeIfAbsent(questionGroup, _ -> new ArrayList<>()).add(response);
         }
         List<LearnerTestQuestionGroupResponse> groupResponses = groupedResponses.entrySet().stream()
                 .map(value -> {
@@ -354,7 +354,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         tagService.checkExistsIds(tagIds);
 
         Map<QuestionGroup, List<Question>> groupEntities = getAllQuestionGroup(partId, tagIds, numberQuestion);
-        groupEntities.values().forEach(ShuffleUtil::shuffle);
+        groupEntities.values().forEach(questions -> questions.sort(Comparator.comparing(Question::getPosition)));
         List<MiniTestQuestionGroupResponse> miniTestQuestionGroupResponses = new ArrayList<>();
         long groupPosition = 1;
         long globalQuestionPosition = 1;
@@ -366,7 +366,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             List<MiniTestQuestionResponse> questionResponses = new ArrayList<>();
             for (Question question : entry.getValue()) {
                 MiniTestQuestionResponse questionResponse = questionMapper.toMiniTestQuestionResponse(question);
-                questionResponse.setPosition(globalQuestionPosition++);
+                questionResponse.setNewPosition(globalQuestionPosition++);
                 questionResponses.add(questionResponse);
             }
             groupResponse.setQuestions(Collections.singletonList(questionResponses));

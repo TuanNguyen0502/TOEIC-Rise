@@ -12,6 +12,7 @@ import java.util.List;
 public class MiniTestQuestionResponse {
     private Long id;
     private Long position;
+    private Long newPosition;
     private String content;
     private List<String> options;
     private List<String> tags;
