@@ -18,4 +18,6 @@ public interface IQuestionReportService {
 
     @Transactional
     void resolveReport(String email, Long reportId, QuestionReportResolveRequest request);
+
+    Long totalReports();
 }

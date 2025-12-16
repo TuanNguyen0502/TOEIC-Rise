@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
+import com.hcmute.fit.toeicrise.models.enums.ERole;
 
 public interface IAuthenticationService {
     boolean register(RegisterRequest input);
@@ -34,4 +35,6 @@ public interface IAuthenticationService {
     CurrentUserResponse getCurrentUser(String email);
 
     void changePassword(UserChangePasswordRequest userChangePasswordRequest, String email);
+
+    Long countAllUsersWithRole(ERole role);
 }

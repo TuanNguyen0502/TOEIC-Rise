@@ -115,6 +115,11 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
         questionReportRepository.save(questionReport);
     }
 
+    @Override
+    public Long totalReports() {
+        return questionReportRepository.count();
+    }
+
     private void checkStaffPermission(User currentUser, QuestionReport questionReport) {
         // If the staff, they can only access the report assigned to them or the pending reports
         if (currentUser.getRole().getName().equals(ERole.STAFF)) {

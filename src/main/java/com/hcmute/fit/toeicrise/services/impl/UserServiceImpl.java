@@ -22,6 +22,7 @@ import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.UserSpecification;
+import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
+    private final IAuthenticationService authenticationService;
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -173,6 +175,11 @@ public class UserServiceImpl implements IUserService {
         }
         user.getAccount().setIsActive(!user.getAccount().getIsActive());
         userRepository.save(user);
+    }
+
+    @Override
+    public Long countAllUsers() {
+        return accountRepository.count();
     }
 
     private boolean isDuplicateEmail(String email) {

@@ -218,4 +218,10 @@ public class ChatMemoryRepository implements org.springframework.ai.chat.memory.
             return new ChatMessage(originalMessage, messageId, conversationId);
         }
     }
+
+    public Long countAllConversation() {
+        return jdbcTemplate.queryForObject("""
+                SELECT COUNT(DISTINCT conversation_id) FROM chat_memories 
+                """, Long.class);
+    }
 }
