@@ -11,11 +11,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateReques
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
@@ -337,14 +333,14 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 miniTestAnswerQuestionResponses.computeIfAbsent(question.getQuestionGroup(), _ -> new ArrayList<>()).add(miniTestAnswerQuestionResponse);
             }
         }
-        List<MiniTestQuestionGroupResponse> groupResponses = new ArrayList<>();
+        List<MiniTestQuestionGroupAnswerResponse> groupResponses = new ArrayList<>();
         for (Map.Entry<QuestionGroup, List<MiniTestAnswerQuestionResponse>>entry : miniTestAnswerQuestionResponses.entrySet()){
-            MiniTestQuestionGroupResponse miniTestQuestionGroupResponse = questionGroupMapper.toMiniTestQuestionGroupResponse(entry.getKey());
+            MiniTestQuestionGroupAnswerResponse miniTestQuestionGroupResponse = questionGroupMapper.toMiniTestQuestionGroupAnswerResponse(entry.getKey());
             miniTestQuestionGroupResponse.setIndex(groupPosition++);
             for (MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse : entry.getValue()){
                 miniTestAnswerQuestionResponse.setIndex(globalQuestionPosition++);
             }
-            miniTestQuestionGroupResponse.setQuestions(Collections.singletonList(entry.getValue()));
+            miniTestQuestionGroupResponse.setQuestions(entry.getValue());
             groupResponses.add(miniTestQuestionGroupResponse);
         }
         return MiniTestOverallResponse.builder()
@@ -371,7 +367,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 questionResponse.setIndex(globalQuestionPosition++);
                 questionResponses.add(questionResponse);
             }
-            groupResponse.setQuestions(Collections.singletonList(questionResponses));
+            groupResponse.setQuestions(questionResponses);
             miniTestQuestionGroupResponses.add(groupResponse);
         }
         return MiniTestResponse.builder()

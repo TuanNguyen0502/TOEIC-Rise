@@ -9,12 +9,13 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MiniTestQuestionGroupResponse {
+public class MiniTestQuestionGroupAnswerResponse {
     private Long id;
     private int index;
     private int position;
+    private String transcript;
     private String audioUrl;
     private String imageUrl;
     private String passage;
-    List<MiniTestQuestionResponse> questions;
+    List<MiniTestAnswerQuestionResponse> questions;
 }

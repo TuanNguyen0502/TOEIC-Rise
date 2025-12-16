@@ -13,5 +13,5 @@ import java.util.List;
 public class MiniTestOverallResponse {
     private int totalQuestions;
     private int correctAnswers;
-    private List<MiniTestQuestionGroupResponse> questionGroups;
+    private List<MiniTestQuestionGroupAnswerResponse> questionGroups;
 }

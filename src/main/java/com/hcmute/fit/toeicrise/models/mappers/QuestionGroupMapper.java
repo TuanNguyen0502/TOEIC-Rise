@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupAnswerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -19,6 +20,9 @@ public interface QuestionGroupMapper {
 
     @Mapping(target = "questions", ignore = true)
     MiniTestQuestionGroupResponse toMiniTestQuestionGroupResponse(QuestionGroup questionGroup);
+
+    @Mapping(target = "questions", ignore = true)
+    MiniTestQuestionGroupAnswerResponse toMiniTestQuestionGroupAnswerResponse(QuestionGroup questionGroup);
 
     default QuestionGroupResponse toResponse(QuestionGroup questionGroup, List<QuestionResponse> questions) {
         return QuestionGroupResponse.builder()
