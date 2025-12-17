@@ -33,4 +33,6 @@ public interface ITestSetService {
     void addTestSet(TestSetRequest testSetRequest);
 
     TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest);
+
+    Long totalTestSets();
 }

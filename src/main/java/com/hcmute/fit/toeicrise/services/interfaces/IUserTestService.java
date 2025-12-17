@@ -41,4 +41,6 @@ public interface IUserTestService {
     PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable);
 
     FullTestResultResponse getFullTestResult(String email, int size);
+
+    Long totalUserTest();
 }

@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.enums.ERole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,4 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @Query("SELECT u FROM User u JOIN FETCH u.account WHERE u.account.email = :email")
     Optional<User> findByAccount_Email(@Param("email") String email);
+
+    Long countByRole_Name(ERole role);
 }

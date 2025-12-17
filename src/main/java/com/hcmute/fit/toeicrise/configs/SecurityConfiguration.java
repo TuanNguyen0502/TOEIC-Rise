@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
                                 "/admin/question-groups/**", "/admin/question-reports/**", "/admin/tags/**").hasRole("ADMIN")
-                        .requestMatchers("/staff/tests/**", "/staff/question-reports/**").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers("/staff/tests/**", "/staff/question-reports/**", "/staff/stats/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",

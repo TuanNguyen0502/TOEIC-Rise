@@ -240,4 +240,9 @@ public class TestServiceImpl implements ITestService {
     public LearnerTestDetailResponse getLearnerTestDetailById(Long id) {
         return testMapper.toLearnerTestDetailResponse(testRepository.findListTagByIdOrderByPartName(id), partMapper);
     }
+
+    @Override
+    public Long totalTest() {
+        return testRepository.count();
+    }
 }

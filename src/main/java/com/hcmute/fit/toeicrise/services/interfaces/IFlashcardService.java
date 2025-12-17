@@ -21,4 +21,6 @@ public interface IFlashcardService {
 
     @Transactional
     FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardUpdateRequest flashcardUpdateRequest);
+
+    Long totalFlashcards();
 }

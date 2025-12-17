@@ -118,4 +118,9 @@ public class TestSetServiceImpl implements ITestSetService {
         testSetRepository.save(oldTestSet);
         return testSetMapper.toTestSetResponse(oldTestSet);
     }
+
+    @Override
+    public Long totalTestSets() {
+        return testSetRepository.count();
+    }
 }

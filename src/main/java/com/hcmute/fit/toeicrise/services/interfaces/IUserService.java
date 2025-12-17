@@ -25,4 +25,6 @@ public interface IUserService {
     void resetPassword(Long userId, UserResetPasswordRequest request);
 
     void changeAccountStatus(Long userId);
+
+    Long countAllUsers();
 }

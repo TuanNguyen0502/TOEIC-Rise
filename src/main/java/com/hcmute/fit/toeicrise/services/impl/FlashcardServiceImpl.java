@@ -179,4 +179,9 @@ public class FlashcardServiceImpl implements IFlashcardService {
         flashcardRepository.save(flashcard);
         return flashcardMapper.toFlashcardResponse(flashcard);
     }
+
+    @Override
+    public Long totalFlashcards() {
+        return flashcardRepository.count();
+    }
 }

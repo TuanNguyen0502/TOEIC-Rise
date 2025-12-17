@@ -375,4 +375,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         account.setPassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
         accountRepository.save(account);
     }
+
+    @Override
+    public Long countAllUsersWithRole(ERole role) {
+        return userRepository.countByRole_Name(role);
+    }
 }

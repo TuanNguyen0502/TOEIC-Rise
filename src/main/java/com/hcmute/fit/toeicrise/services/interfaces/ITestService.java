@@ -45,4 +45,6 @@ public interface ITestService {
     PageResponse searchTestsByName(PageRequest request);
 
     LearnerTestDetailResponse getLearnerTestDetailById(Long id);
+
+    Long totalTest();
 }

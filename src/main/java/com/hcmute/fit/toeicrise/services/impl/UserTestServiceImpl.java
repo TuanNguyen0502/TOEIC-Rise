@@ -28,6 +28,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -178,6 +179,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "systemOverview", key = "'global'")
     public TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request) {
         User user = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
@@ -656,6 +658,11 @@ public class UserTestServiceImpl implements IUserTestService {
                 .maxReadingScore(maxReadingScore)
                 .examTypeFullTestResponses(examTypeFullTestResponses)
                 .build();
+    }
+
+    @Override
+    public Long totalUserTest() {
+        return userTestRepository.count();
     }
 
     private int roundToNearest5(int number) {
