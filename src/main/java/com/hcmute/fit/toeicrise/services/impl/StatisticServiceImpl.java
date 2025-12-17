@@ -1,12 +1,19 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.responses.statistic.SystemOverviewResponse;
+import com.hcmute.fit.toeicrise.commons.utils.DateRangeUtil;
+import com.hcmute.fit.toeicrise.dtos.responses.DateRange;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.*;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +40,76 @@ public class StatisticServiceImpl implements IStatisticService {
                 .totalConversations(chatMemoryRepository.countAllConversation())
                 .totalReports(questionReportService.totalReports())
                 .build();
+    }
+
+    @Override
+    public AdminDashboardResponse getPerformanceAnalysis(LocalDate startDate, LocalDate endDate) {
+        validateLocalDate(startDate, endDate);
+        DateRange prevTime = DateRangeUtil.previousPeriod(startDate, endDate);
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+
+        KpiResponse newLearners = getNewLearners(start, end, prevTime);
+        KpiResponse activeUsers = getActiveLearners(start, end, prevTime);
+        KpiResponse totalTests = getTotalTest(start, end, prevTime);
+        KpiResponse aiConversations = getAiConversation(start, end, prevTime);
+
+        ActivityTrendResponse activityTrend = userTestService.getActivityTrend(start, end);
+        DeepInsightsResponse deepInsightsResponse = DeepInsightsResponse.builder()
+                .regSource(authenticationService.getRegSourceInsight(start, end))
+                .scoreDist(userTestService.getScoreInsight(start, end))
+                .testMode(userTestService.getTestModeInsight(start, end)).build();
+        return AdminDashboardResponse.builder()
+                .newLearners(newLearners)
+                .activeUsers(activeUsers)
+                .totalTests(totalTests)
+                .aiConversations(aiConversations)
+                .activityTrend(activityTrend)
+                .deepInsights(deepInsightsResponse)
+                .build();
+    }
+
+    void validateLocalDate(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) throw new AppException(ErrorCode.VALIDATION_ERROR);
+        if (startDate.isAfter(endDate)) throw new AppException(ErrorCode.VALIDATION_ERROR);
+        if (endDate.isAfter(LocalDate.now())) throw new AppException(ErrorCode.VALIDATION_ERROR);
+    }
+
+    private double calculatorGrowth(Long current, Long previous) {
+        if (previous == 0)
+            return current > 0 ? current*100 : 0.0;
+        return  ((double) (current - previous) / previous) * 100;
+    }
+
+    private KpiResponse getAiConversation(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
+        Long current = chatMemoryRepository.countTotalAiConversation(startDate, endDate);
+        Long prev = chatMemoryRepository.countTotalAiConversation(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+
+        return KpiResponse.builder().value(current)
+                .growthPercentage(calculatorGrowth(current, prev)).build();
+    }
+
+    private KpiResponse getTotalTest(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
+        Long current = testService.countTotalTests(startDate, endDate);
+        Long prev = testService.countTotalTests(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+
+        return KpiResponse.builder().value(current)
+                .growthPercentage(calculatorGrowth(current, prev)).build();
+    }
+
+    private KpiResponse getActiveLearners(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
+        Long current = authenticationService.countActiveUser(startDate, endDate);
+        Long prev = authenticationService.countActiveUser(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+
+        return KpiResponse.builder().value(current)
+                .growthPercentage(calculatorGrowth(current, prev)).build();
+    }
+
+    private KpiResponse getNewLearners(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
+        Long current = authenticationService.countUsersBetweenDays(startDate, endDate);
+        Long prev = authenticationService.countUsersBetweenDays(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+
+        return KpiResponse.builder().value(current)
+                .growthPercentage(calculatorGrowth(current, prev)).build();
     }
 }

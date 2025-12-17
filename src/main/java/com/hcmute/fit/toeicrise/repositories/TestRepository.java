@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,4 +34,7 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     Optional<Test> findByIdAndStatus(Long id, ETestStatus status);
 
     boolean existsByName(String name);
+
+    @Query("SELECT COUNT (t) FROM Test t WHERE t.createdAt >= :from AND t.createdAt < :to")
+    Long countByTestBetweenDays(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

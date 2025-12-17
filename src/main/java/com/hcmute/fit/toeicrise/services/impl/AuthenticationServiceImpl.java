@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.RegSourceInsightResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
@@ -379,5 +380,26 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public Long countAllUsersWithRole(ERole role) {
         return userRepository.countByRole_Name(role);
+    }
+
+    @Override
+    public Long countUsersBetweenDays(LocalDateTime from, LocalDateTime to) {
+        return userRepository.countByRole_NameBetweenDays(ERole.LEARNER, from, to);
+    }
+
+    @Override
+    public Long countActiveUser(LocalDateTime from, LocalDateTime to) {
+        return accountRepository.countByRole_NameBetweenDays(ERole.LEARNER, from, to);
+    }
+
+    @Override
+    public RegSourceInsightResponse getRegSourceInsight(LocalDateTime from, LocalDateTime to) {
+        RegSourceInsightResponse regSourceInsightResponse = accountRepository.countSourceInsight(from, to, ERole.LEARNER, EAuthProvider.LOCAL, EAuthProvider.GOOGLE);
+        double sum = regSourceInsightResponse.getGoogle() + regSourceInsightResponse.getEmail();
+        if (sum == 0)
+            return regSourceInsightResponse;
+        regSourceInsightResponse.setGoogle(Math.round(regSourceInsightResponse.getGoogle()/sum*100));
+        regSourceInsightResponse.setEmail(Math.round((regSourceInsightResponse.getEmail()/sum)*100));
+        return regSourceInsightResponse;
     }
 }
