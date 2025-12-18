@@ -25,7 +25,7 @@ public class StatisticServiceImpl implements IStatisticService {
         return SystemOverviewResponse.builder()
                 .totalAccounts(userService.countAllUsers())
                 .totalLearners(authenticationService.countAllUsersWithRole(ERole.LEARNER))
-                .totalStaffs(authenticationService.countAllUsersWithRole(ERole.STAFF))
+                .totalStaffs(authenticationService.countAllUsersWithRole(ERole.STAFF) + authenticationService.countAllUsersWithRole(ERole.ADMIN))
                 .totalTestSets(testSetService.totalTestSets())
                 .totalTests(testService.totalTest())
                 .totalFlashcards(flashcardService.totalFlashcards())
