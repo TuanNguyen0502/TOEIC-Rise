@@ -77,8 +77,8 @@ public class StatisticServiceImpl implements IStatisticService {
 
     private double calculatorGrowth(Long current, Long previous) {
         if (previous == 0)
-            return current > 0 ? current*100 : 0.0;
-        return  ((double) (current - previous) / previous) * 100;
+            return current > 0 ? 100 : 0.0;
+        return ((double) (current - previous) / previous) * 100;
     }
 
     private KpiResponse getAiConversation(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
