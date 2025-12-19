@@ -3,11 +3,15 @@ package com.hcmute.fit.toeicrise.dtos.requests.flashcard;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class FlashcardItemCreateRequest {
     @NotNull(message = MessageConstant.FLASHCARD_ITEM_VOCABULARY_NOT_NULL)
     @NotBlank(message = MessageConstant.FLASHCARD_ITEM_VOCABULARY_NOT_BLANK)
