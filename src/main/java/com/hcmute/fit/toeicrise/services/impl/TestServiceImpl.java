@@ -38,6 +38,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils.extractGroupNumber;
@@ -244,5 +245,10 @@ public class TestServiceImpl implements ITestService {
     @Override
     public Long totalTest() {
         return testRepository.count();
+    }
+
+    @Override
+    public Long countTotalTests(LocalDateTime start, LocalDateTime end) {
+        return testRepository.countByTestBetweenDays(start,end);
     }
 }

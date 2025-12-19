@@ -5,7 +5,10 @@ import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.CurrentUserResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.RegSourceInsightResponse;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
+
+import java.time.LocalDateTime;
 
 public interface IAuthenticationService {
     boolean register(RegisterRequest input);
@@ -37,4 +40,10 @@ public interface IAuthenticationService {
     void changePassword(UserChangePasswordRequest userChangePasswordRequest, String email);
 
     Long countAllUsersWithRole(ERole role);
+
+    Long countUsersBetweenDays(LocalDateTime from, LocalDateTime to);
+
+    Long countActiveUser(LocalDateTime from, LocalDateTime to);
+
+    RegSourceInsightResponse getRegSourceInsight(LocalDateTime from, LocalDateTime to);
 }

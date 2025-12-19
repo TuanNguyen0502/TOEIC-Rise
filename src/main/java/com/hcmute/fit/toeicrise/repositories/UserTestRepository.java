@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,4 +51,27 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
     Optional<UserTest> findFirstByOrderByCreatedAtDesc();
 
     List<UserTest> findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable);
+
+    @Query("SELECT FUNCTION('DATE', ut.createdAt), COUNT(ut) " +
+            "FROM UserTest ut " +
+            "WHERE ut.createdAt >= :start AND ut.createdAt < :end " +
+            "GROUP BY FUNCTION('DATE', ut.createdAt) " +
+            "ORDER BY FUNCTION('DATE', ut.createdAt)")
+    List<Object[]> getActivityTrend(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse(" +
+            "COALESCE(SUM(CASE WHEN ut.totalScore IS NOT NULL THEN 1 ELSE 0 END), 0), " +
+            "COALESCE(SUM(CASE WHEN ut.totalScore IS NULL THEN 1 ELSE 0 END), 0)) " +
+            "FROM UserTest ut " +
+            "WHERE ut.createdAt >= :start AND ut.createdAt < :end ")
+    TestModeInsightResponse countUserTestByMode(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightResponse(" +
+            "COALESCE(SUM(CASE WHEN ut.totalScore BETWEEN 0 AND 200 THEN 1 ELSE 0 END), 0), " +
+            "COALESCE(SUM(CASE WHEN ut.totalScore BETWEEN 201 AND 450 THEN 1 ELSE 0 END), 0), " +
+            "COALESCE(SUM(CASE WHEN ut.totalScore BETWEEN 451 AND 750 THEN 1 ELSE 0 END), 0), " +
+            "COALESCE(SUM(CASE WHEN ut.totalScore BETWEEN 751 AND 990 THEN 1 ELSE 0 END), 0)) " +
+            "FROM UserTest ut " +
+            "WHERE ut.createdAt >= :start AND ut.createdAt < :end")
+    ScoreDistInsightResponse countUserTestByScore(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

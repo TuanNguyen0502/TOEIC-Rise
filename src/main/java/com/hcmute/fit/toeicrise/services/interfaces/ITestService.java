@@ -14,6 +14,7 @@ import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.scheduling.annotation.Async;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ITestService {
@@ -47,4 +48,6 @@ public interface ITestService {
     LearnerTestDetailResponse getLearnerTestDetailById(Long id);
 
     Long totalTest();
+
+    Long countTotalTests(LocalDateTime start, LocalDateTime end);
 }

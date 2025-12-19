@@ -8,6 +8,10 @@ import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeFullTestResponse
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.FullTestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.ActivityPointResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.ActivityTrendResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
@@ -36,9 +40,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -63,13 +70,6 @@ public class UserTestServiceImpl implements IUserTestService {
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
         UserTest userTest = userTestRepository.findByIdWithAnswersAndQuestions(userTestId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "UserTest"));
-
-        // Get all tags involved in the user answers at once for better performance
-        int totalTags = userTest.getUserAnswers().stream()
-                .flatMap(ua -> ua.getQuestion().getTags().stream())
-                .map(Tag::getName)
-                .collect(Collectors.toSet())
-                .size();
 
         // Verify that the userTest belongs to the user with the given email
         if (!userTest.getUser().getAccount().getEmail().equals(email)) {
@@ -105,7 +105,7 @@ public class UserTestServiceImpl implements IUserTestService {
                             .map(tag -> Map.entry(tag.getName(), ua)))
                     .collect(Collectors.groupingBy(
                             Map.Entry::getKey,
-                            Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                            Collectors.mapping(Map.Entry::getValue, toList())
                     ));
 
             // Prepare grouped responses for the part
@@ -485,7 +485,7 @@ public class UserTestServiceImpl implements IUserTestService {
                                 .map(tag -> Map.entry(tag.getName(), ua)))
                         .collect(Collectors.groupingBy(
                                 Map.Entry::getKey,
-                                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                                Collectors.mapping(Map.Entry::getValue, toList())
                         ));
 
                 Map<String, TagStats> tagStatsMap = examTypeRawData.get(partName);
@@ -663,6 +663,52 @@ public class UserTestServiceImpl implements IUserTestService {
     @Override
     public Long totalUserTest() {
         return userTestRepository.count();
+    }
+
+    @Override
+    public ActivityTrendResponse getActivityTrend(LocalDateTime from, LocalDateTime to) {
+        List<ActivityPointResponse> activityPointResponses = userTestRepository.getActivityTrend(from, to).stream().map(item ->
+            new ActivityPointResponse(((java.sql.Date)item[0]).toLocalDate(), ((Number)item[1]).longValue())).toList();
+        Map<LocalDate, Long> submissionsByDate = activityPointResponses.stream().collect(
+                Collectors.toMap(ActivityPointResponse::getDate, ActivityPointResponse::getSubmissions));
+        List<ActivityPointResponse> responses = new ArrayList<>();
+        LocalDate current = from.toLocalDate();
+        LocalDate end = to.toLocalDate().minusDays(1);
+        long sum = 0L;
+
+        while (!current.isAfter(end)){
+            long count = submissionsByDate.getOrDefault(current, 0L);
+            sum += count;
+            responses.add(new ActivityPointResponse(current, count));
+            current = current.plusDays(1);
+        }
+
+        return ActivityTrendResponse.builder().totalSubmissions(sum)
+                .points(responses).build();
+    }
+
+    @Override
+    public TestModeInsightResponse getTestModeInsight(LocalDateTime start, LocalDateTime end) {
+        TestModeInsightResponse testMode = userTestRepository.countUserTestByMode(start, end);
+        double sum = testMode.getFullTest() + testMode.getPratice();
+        if(sum == 0)
+            return testMode;
+        testMode.setFullTest(Math.round((testMode.getFullTest()/sum)*100));
+        testMode.setPratice(Math.round((testMode.getPratice()/sum)*100));
+        return testMode;
+    }
+
+    @Override
+    public ScoreDistInsightResponse getScoreInsight(LocalDateTime start, LocalDateTime end) {
+        ScoreDistInsightResponse distInsightResponse = userTestRepository.countUserTestByScore(start, end);
+        double total = distInsightResponse.sum();
+        if(total == 0)
+            return distInsightResponse;
+        distInsightResponse.setBrand0_200(Math.round((distInsightResponse.getBrand0_200()/total)*100));
+        distInsightResponse.setBrand200_450(Math.round((distInsightResponse.getBrand200_450()/total)*100));
+        distInsightResponse.setBrand450_750(Math.round((distInsightResponse.getBrand450_750()/total)*100));
+        distInsightResponse.setBrand750_990(Math.round((distInsightResponse.getBrand750_990()/total)*100));
+        return distInsightResponse;
     }
 
     private int roundToNearest5(int number) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository
@@ -223,5 +224,10 @@ public class ChatMemoryRepository implements org.springframework.ai.chat.memory.
         return jdbcTemplate.queryForObject("""
                 SELECT COUNT(DISTINCT conversation_id) FROM chat_memories 
                 """, Long.class);
+    }
+
+    public Long countTotalAiConversation(LocalDateTime start, LocalDateTime end) {
+        return jdbcTemplate.queryForObject("""
+                SELECT COUNT(DISTINCT conversation_id) FROM chat_memories WHERE created_at >= ? AND created_at < ?""", Long.class, start, end);
     }
 }
