@@ -44,7 +44,7 @@ public class FlashcardController {
     }
 
     @GetMapping("/{flashcardId}")
-    public FlashcardDetailResponse getFlashcardDetail(@PathVariable("flashcardId") Long flashcardId) {
+    public FlashcardDetailResponse getFlashcardDetail(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         return flashcardService.getFlashcardDetailById(email, flashcardId);
     }
@@ -69,19 +69,19 @@ public class FlashcardController {
     }
 
     @PostMapping("/favourite/{flashcardId}")
-    public ResponseEntity<?> addFlashcardToFavourite(@PathVariable("flashcardId") Long flashcardId) {
+    public ResponseEntity<?> addFlashcardToFavourite(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         flashcardFavouriteService.addFavourite(email, flashcardId);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{flashcardId}")
-    public ResponseEntity<?> updateFlashcard(@PathVariable("flashcardId") Long flashcardId, @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
+    public ResponseEntity<?> updateFlashcard(@PathVariable Long flashcardId, @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
         return ResponseEntity.ok(flashcardService.updateFlashcard(SecurityUtils.getCurrentUser(), flashcardId, flashcardUpdateRequest));
     }
 
     @DeleteMapping("/{flashcardId}")
-    public ResponseEntity<?> deleteFlashcard(@PathVariable("flashcardId") Long flashcardId) {
+    public ResponseEntity<?> deleteFlashcard(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         flashcardService.deleteFlashcard(email, flashcardId);
         return ResponseEntity.ok().build();
