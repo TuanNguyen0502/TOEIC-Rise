@@ -29,6 +29,9 @@ public interface ITestService {
     @Async
     void deleteTestsByTestSetId(Long testSetId);
 
+    @Async
+    void changeTestsStatusToPendingByTestSetId(Long testSetId);
+
     TestDetailResponse getTestDetailById(Long id);
 
     void importTest(MultipartFile file, TestRequest testRequest);

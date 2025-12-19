@@ -114,7 +114,19 @@ public class TestSetServiceImpl implements ITestSetService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
         }
         oldTestSet.setName(updateTestSetRequest.getTestName());
-        oldTestSet.setStatus(updateTestSetRequest.getStatus());
+
+        if (updateTestSetRequest.getStatus() != null && !oldTestSet.getStatus().equals(updateTestSetRequest.getStatus())) {
+            // If status is changed to DELETED, also mark all tests in this test set as DELETED
+            if (updateTestSetRequest.getStatus() == ETestSetStatus.DELETED) {
+                testService.deleteTestsByTestSetId(oldTestSet.getId());
+            }
+            // If status is changed to IN_USE, also mark all PENDING tests in this test set as PENDING
+            if (updateTestSetRequest.getStatus() == ETestSetStatus.IN_USE) {
+                testService.changeTestsStatusToPendingByTestSetId(oldTestSet.getId());
+            }
+            oldTestSet.setStatus(updateTestSetRequest.getStatus());
+        }
+
         testSetRepository.save(oldTestSet);
         return testSetMapper.toTestSetResponse(oldTestSet);
     }
