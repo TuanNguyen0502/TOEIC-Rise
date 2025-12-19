@@ -249,7 +249,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             if (passage == null || passage.isBlank()) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
             }
-        } else {
+        } else if (passage != null && !passage.isBlank()) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
         }
     }
@@ -299,7 +299,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 .distinct().toList();
 
         List<Question> questions = questionService.getQuestionsWithGroupsByIds(questionIds);
-        questionService.validateQuestion(questionIds,questions);
+        questionService.validateQuestion(questionIds, questions);
         Map<Long, Question> questionMap = questions.stream()
                 .collect(Collectors.toMap(Question::getId, q -> q));
         MiniTestOverallResponse miniTestOverallResponse = calculatorAnswerMiniTest(request, questionMap);
@@ -314,13 +314,16 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         long globalQuestionPosition = 1;
 
         for (MiniQuestionGroupRequest questionGroupRequest : miniTestRequest.getQuestionGroups()) {
-            if(questionGroupRequest.getQuestionGroupId() == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+            if (questionGroupRequest.getQuestionGroupId() == null)
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
 
             for (UserAnswerMiniTestRequest userAnswerRequest : questionGroupRequest.getUserAnswerRequests()) {
-                if (userAnswerRequest.getQuestionId() == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+                if (userAnswerRequest.getQuestionId() == null)
+                    throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
                 Question question = questionMap.get(userAnswerRequest.getQuestionId());
                 if (question == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-                if (!question.getQuestionGroup().getId().equals(questionGroupRequest.getQuestionGroupId())) throw new AppException(ErrorCode.VALIDATION_ERROR);
+                if (!question.getQuestionGroup().getId().equals(questionGroupRequest.getQuestionGroupId()))
+                    throw new AppException(ErrorCode.VALIDATION_ERROR);
 
                 boolean isCorrect = userAnswerRequest.getAnswer() != null && question.getCorrectOption() != null
                         && question.getCorrectOption().equals(userAnswerRequest.getAnswer());
@@ -334,10 +337,10 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             }
         }
         List<MiniTestQuestionGroupAnswerResponse> groupResponses = new ArrayList<>();
-        for (Map.Entry<QuestionGroup, List<MiniTestAnswerQuestionResponse>>entry : miniTestAnswerQuestionResponses.entrySet()){
+        for (Map.Entry<QuestionGroup, List<MiniTestAnswerQuestionResponse>> entry : miniTestAnswerQuestionResponses.entrySet()) {
             MiniTestQuestionGroupAnswerResponse miniTestQuestionGroupResponse = questionGroupMapper.toMiniTestQuestionGroupAnswerResponse(entry.getKey());
             miniTestQuestionGroupResponse.setIndex(groupPosition++);
-            for (MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse : entry.getValue()){
+            for (MiniTestAnswerQuestionResponse miniTestAnswerQuestionResponse : entry.getValue()) {
                 miniTestAnswerQuestionResponse.setIndex(globalQuestionPosition++);
             }
             miniTestQuestionGroupResponse.setQuestions(entry.getValue());
@@ -358,7 +361,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         int groupPosition = 1;
         long globalQuestionPosition = 1;
 
-        for (Map.Entry<QuestionGroup, List<Question>> entry : groupEntities.entrySet()){
+        for (Map.Entry<QuestionGroup, List<Question>> entry : groupEntities.entrySet()) {
             MiniTestQuestionGroupResponse groupResponse = questionGroupMapper.toMiniTestQuestionGroupResponse(entry.getKey());
             groupResponse.setIndex(groupPosition++);
             List<MiniTestQuestionResponse> questionResponses = new ArrayList<>();
@@ -375,7 +378,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 .totalQuestions(globalQuestionPosition - 1).build();
     }
 
-    private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion){
+    private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion) {
         List<Question> allQuestions = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
         ShuffleUtil.shuffle(allQuestions);
         Map<Long, List<Question>> questionsByTag = new LinkedHashMap<>();
@@ -394,17 +397,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         while (selectedQuestions.size() < numberQuestion) {
             boolean addedInThisRound = false;
 
-            for (Long tagId : tagIds){
+            for (Long tagId : tagIds) {
                 if (selectedQuestions.size() >= numberQuestion)
                     break;
                 List<Question> tagQuestions = questionsByTag.get(tagId);
-                if (tagQuestions == null|| tagQuestions.isEmpty()) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
+                if (tagQuestions == null || tagQuestions.isEmpty())
+                    throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
                 Integer currentIndex = tagIndices.get(tagId);
 
-                while (currentIndex < tagQuestions.size()){
+                while (currentIndex < tagQuestions.size()) {
                     Question tagQuestion = tagQuestions.get(currentIndex);
                     currentIndex++;
-                    if (!usedQuestionIds.contains(tagQuestion.getId())){
+                    if (!usedQuestionIds.contains(tagQuestion.getId())) {
                         selectedQuestions.add(tagQuestion);
                         usedQuestionIds.add(tagQuestion.getId());
                         addedInThisRound = true;
