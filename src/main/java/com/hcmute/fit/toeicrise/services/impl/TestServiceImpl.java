@@ -134,9 +134,6 @@ public class TestServiceImpl implements ITestService {
         }
         if (status != null) {
             specification = specification.and(TestSpecification.statusEquals(status));
-        } else {
-            // If status is null, get all statuses except DELETED
-            specification = specification.and(TestSpecification.statusNotEquals(ETestStatus.DELETED));
         }
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
