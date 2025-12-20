@@ -14,4 +14,6 @@ public interface FlashcardFavouriteRepository extends JpaRepository<FlashcardFav
     boolean existsByFlashcardAndUser(Flashcard flashcard, User user);
 
     Optional<FlashcardFavourite> findByFlashcard_Id(Long flashcardId);
+
+    void deleteAllByFlashcard(Flashcard flashcard);
 }

@@ -99,4 +99,9 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
     public boolean isFlashcardFavouriteByUser(User user, Flashcard flashcard) {
         return flashcardFavouriteRepository.existsByFlashcardAndUser(flashcard, user);
     }
+
+    @Override
+    public void deleteByFlashcard(Flashcard flashcard) {
+        flashcardFavouriteRepository.deleteAllByFlashcard(flashcard);
+    }
 }

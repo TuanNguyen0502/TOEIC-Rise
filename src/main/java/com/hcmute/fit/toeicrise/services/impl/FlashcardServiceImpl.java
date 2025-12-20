@@ -159,6 +159,9 @@ public class FlashcardServiceImpl implements IFlashcardService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
         }
 
+        // Delete associated favourites
+        flashcardFavouriteService.deleteByFlashcard(flashcard);
+
         flashcardRepository.delete(flashcard);
     }
 

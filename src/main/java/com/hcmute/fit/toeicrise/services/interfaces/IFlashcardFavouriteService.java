@@ -14,4 +14,6 @@ public interface IFlashcardFavouriteService {
     void deleteFavourite(String email, Long flashcardId);
 
     boolean isFlashcardFavouriteByUser(User user, Flashcard flashcard);
+
+    void deleteByFlashcard(Flashcard flashcard);
 }
