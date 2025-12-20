@@ -71,6 +71,9 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Flashcard favourite");
         }
 
+        flashcard.setFavouriteCount(flashcard.getFavouriteCount() + 1);
+        flashcardRepository.save(flashcard);
+
         FlashcardFavourite flashcardFavourite = FlashcardFavourite.builder()
                 .user(user)
                 .flashcard(flashcard)
@@ -84,6 +87,11 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
         userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
         FlashcardFavourite flashcardFavourite = flashcardFavouriteRepository.findByFlashcard_Id(favouriteFlashcardId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Favourite flashcard"));
+
+        Flashcard flashcard = flashcardFavourite.getFlashcard();
+        flashcard.setFavouriteCount(Math.max(0, flashcard.getFavouriteCount() - 1));
+        flashcardRepository.save(flashcard);
+
         flashcardFavouriteRepository.delete(flashcardFavourite);
     }
 }
