@@ -44,9 +44,9 @@ public class FlashcardController {
     }
 
     @GetMapping("/{flashcardId}")
-    public FlashcardDetailResponse getFlashcardDetail(@PathVariable Long flashcardId) {
+    public ResponseEntity<FlashcardDetailResponse> getFlashcardDetail(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
-        return flashcardService.getFlashcardDetailById(email, flashcardId);
+        return ResponseEntity.ok(flashcardService.getFlashcardDetailById(email, flashcardId));
     }
 
     @GetMapping("/favourite")

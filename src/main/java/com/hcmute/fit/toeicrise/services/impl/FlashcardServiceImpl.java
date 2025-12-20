@@ -19,6 +19,7 @@ import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
+import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class FlashcardServiceImpl implements IFlashcardService {
     private final UserRepository userRepository;
     private final FlashcardRepository flashcardRepository;
     private final IFlashcardItemService flashcardItemService;
+    private final IFlashcardFavouriteService flashcardFavouriteService;
     private final FlashcardMapper flashcardMapper;
     private final FlashcardItemMapper flashcardItemMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -93,8 +95,13 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
     @Override
     public FlashcardDetailResponse getFlashcardDetailById(String email, Long flashcardId) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
         Flashcard flashcard = flashcardRepository.findById(flashcardId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+
+        boolean isOwner = flashcard.getUser().getId().equals(user.getId());
+        boolean isFavourite = flashcardFavouriteService.isFlashcardFavouriteByUser(user, flashcard);
 
         // Check access
         if (flashcard.getAccessType() == EFlashcardAccessType.PRIVATE &&
@@ -107,7 +114,7 @@ public class FlashcardServiceImpl implements IFlashcardService {
                 .map(flashcardItemMapper::toFlashcardItemDetailResponse)
                 .toList();
 
-        return flashcardMapper.toFlashcardDetailResponse(flashcard, items);
+        return flashcardMapper.toFlashcardDetailResponse(flashcard, isOwner, isFavourite, items);
     }
 
     @Override

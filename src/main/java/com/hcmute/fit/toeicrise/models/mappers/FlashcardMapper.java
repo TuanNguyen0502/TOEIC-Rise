@@ -52,7 +52,11 @@ public interface FlashcardMapper {
                 .build();
     }
 
-    default FlashcardDetailResponse toFlashcardDetailResponse(Flashcard flashcard, List<FlashcardItemDetailResponse> items) {
+    default FlashcardDetailResponse toFlashcardDetailResponse(
+            Flashcard flashcard,
+            Boolean isOwner,
+            Boolean isFavourite,
+            List<FlashcardItemDetailResponse> items) {
         return FlashcardDetailResponse.builder()
                 .id(flashcard.getId())
                 .authorFullName(flashcard.getUser().getFullName())
@@ -63,6 +67,8 @@ public interface FlashcardMapper {
                 .itemCount(items.size())
                 .updatedAt(flashcard.getUpdatedAt().toString())
                 .items(items)
+                .isOwner(isOwner)
+                .isFavourite(isFavourite)
                 .build();
     }
 }

@@ -18,4 +18,6 @@ public class FlashcardDetailResponse {
     private Integer itemCount;
     private String updatedAt;
     private List<FlashcardItemDetailResponse> items;
+    private Boolean isFavourite;
+    private Boolean isOwner;
 }
