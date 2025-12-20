@@ -10,9 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, JpaSpecificationExecutor<Flashcard> {
     @Query("SELECT f, " +
@@ -27,5 +24,17 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, Jpa
             @Param("name") String name,
             Pageable pageable
     );
-    List<Flashcard> findAllByUser_Account_Email(String userAccountEmail);
+
+    @Query("SELECT f, " +
+            "CASE WHEN fav.id IS NOT NULL THEN true ELSE false END as isFavourite " +
+            "FROM Flashcard f " +
+            "LEFT JOIN FlashcardFavourite fav ON f.id = fav.flashcard.id AND fav.user.id = :userId " +
+            "WHERE f.user.id = :userId AND f.accessType = :accessType " +
+            "AND (:name IS NULL OR LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+    Page<Object[]> findMyFlashcardsWithFavouriteStatus(
+            @Param("userId") Long userId,
+            @Param("accessType") EFlashcardAccessType accessType,
+            @Param("name") String name,
+            Pageable pageable
+    );
 }

@@ -19,7 +19,6 @@ import com.hcmute.fit.toeicrise.models.mappers.FlashcardMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
-import com.hcmute.fit.toeicrise.repositories.specifications.FlashcardSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,17 +45,25 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
     @Override
     public PageResponse getAllMyFlashcards(String email, String name, int page, int size, String sortBy, String direction) {
-        Specification<Flashcard> specification = (_, _, cb) -> cb.conjunction();
-        specification = specification.and(FlashcardSpecification.ownerEmailEquals(email));
-        if (name != null && !name.isBlank()) {
-            specification = specification.and(FlashcardSpecification.nameContains(name));
-        }
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<FlashcardResponse> flashcardPage = flashcardRepository.findAll(specification, pageable)
-                .map(flashcardMapper::toFlashcardResponse);
+        Page<Object[]> results = flashcardRepository.findMyFlashcardsWithFavouriteStatus(
+                user.getId(),
+                EFlashcardAccessType.PUBLIC,
+                name,
+                pageable
+        );
+
+        Page<FlashcardPublicResponse> flashcardPage = results.map(result -> {
+            Flashcard flashcard = (Flashcard) result[0];
+            boolean isFavourite = (boolean) result[1];
+            return flashcardMapper.toFlashcardPublicResponse(flashcard, isFavourite);
+        });
+
         return pageResponseMapper.toPageResponse(flashcardPage);
     }
 
@@ -166,8 +172,7 @@ public class FlashcardServiceImpl implements IFlashcardService {
                 FlashcardItem item = flashcardItemService.updateFlashcardItem(flashcardItem);
                 currentItems.add(item);
                 existingItems.remove(flashcardItem.getId());
-            }
-            else {
+            } else {
                 FlashcardItem newItem = flashcardItemService.createFlashcardItem(flashcardItem, flashcard);
                 currentItems.add(newItem);
             }
