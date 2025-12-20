@@ -91,9 +91,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
+    public ResponseEntity<?> resendVerificationCode(@RequestBody ResendOTPRequest request) {
         try {
-            authenticationServiceImpl.resendVerificationCode(email);
+            authenticationServiceImpl.resendVerificationCode(request);
             return ResponseEntity.ok("Verification code sent");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

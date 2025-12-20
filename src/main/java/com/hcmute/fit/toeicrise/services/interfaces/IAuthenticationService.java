@@ -11,7 +11,7 @@ import com.hcmute.fit.toeicrise.models.enums.ERole;
 import java.time.LocalDateTime;
 
 public interface IAuthenticationService {
-    boolean register(RegisterRequest input);
+    void register(RegisterRequest input);
 
     LoginResponse login(LoginRequest loginRequest);
 
@@ -19,7 +19,7 @@ public interface IAuthenticationService {
 
     void verifyUser(VerifyUserRequest input);
 
-    void resendVerificationCode(String email);
+    void resendVerificationCode(ResendOTPRequest request);
 
     void forgotPassword(ForgotPasswordRequest forgotPasswordRequest);
 

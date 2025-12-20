@@ -30,6 +30,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
+    private static final int MAX_VERIFY_OTP_TIMES = 15;
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -41,10 +42,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final UserMapper userMapper;
     @Value("${security.jwt.refresh-token.expiration}")
     private Long refreshTokenDurationMs;
-    private static final int MAX_VERIFY_OTP_TIMES = 15;
 
     @Override
-    public boolean register(RegisterRequest input) {
+    public void register(RegisterRequest input) {
         if (!input.getPassword().equals(input.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
@@ -67,7 +67,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 input.getEmail(), input.getFullName(), ECacheDuration.CACHE_FULLNAME_REGISTRATION.getDuration());
 
         emailService.sendVerificationEmail(account);
-        return true;
     }
 
     @Override
@@ -204,11 +203,11 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    public void resendVerificationCode(String email) {
-        Account account = accountRepository.findByEmail(email).orElse(null);
+    public void resendVerificationCode(ResendOTPRequest request) {
+        Account account = accountRepository.findByEmail(request.getEmail()).orElse(null);
         boolean isRegister = false;
         if (account == null) {
-            account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), email, Account.class);
+            account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), request.getEmail(), Account.class);
             isRegister = true;
         }
         if (account != null) {
@@ -275,7 +274,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account"));
         if (!account.getVerificationCode().equals(otp.getOtp())) {
             Integer times = redisService.get(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(), otp.getEmail(), Integer.class);
-            times = times == null ? 1 : times+1;
+            times = times == null ? 1 : times + 1;
             if (times > MAX_VERIFY_OTP_TIMES)
                 throw new AppException(ErrorCode.OTP_LIMIT_EXCEEDED, MAX_VERIFY_OTP_TIMES);
             redisService.put(ECacheDuration.CACHE_LIMIT_VERIFY_OTP.getCacheName(),
@@ -398,8 +397,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         double sum = regSourceInsightResponse.getGoogle() + regSourceInsightResponse.getEmail();
         if (sum == 0)
             return regSourceInsightResponse;
-        regSourceInsightResponse.setGoogle(Math.round(regSourceInsightResponse.getGoogle()/sum*100));
-        regSourceInsightResponse.setEmail(Math.round((regSourceInsightResponse.getEmail()/sum)*100));
+        regSourceInsightResponse.setGoogle(Math.round(regSourceInsightResponse.getGoogle() / sum * 100));
+        regSourceInsightResponse.setEmail(Math.round((regSourceInsightResponse.getEmail() / sum) * 100));
         return regSourceInsightResponse;
     }
 }
