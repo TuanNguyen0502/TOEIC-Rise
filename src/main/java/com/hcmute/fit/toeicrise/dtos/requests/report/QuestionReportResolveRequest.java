@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionReportResolveRequest {
+    @NotNull(message = MessageConstant.QUESTION_REPORT_STATUS_NOT_NULL)
+    @NotBlank(message = MessageConstant.QUESTION_REPORT_STATUS_NOT_BLANK)
     private EQuestionReportStatus status;
 
     @Valid

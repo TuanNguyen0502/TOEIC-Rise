@@ -72,6 +72,8 @@ public class MessageConstant {
     public static final String QUESTION_REPORT_REASONS_NOT_EMPTY = "Report reasons must not be empty.";
     public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_NULL = "Resolved note must not be null.";
     public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_BLANK = "Resolved note must not be blank.";
+    public static final String QUESTION_REPORT_STATUS_NOT_BLANK = "Report status must not be blank.";
+    public static final String QUESTION_REPORT_STATUS_NOT_NULL = "Report status must not be null.";
     // Flashcard related messages
     public static final String FLASHCARD_NAME_NOT_NULL = "Flashcard name must not be null.";
     public static final String FLASHCARD_NAME_NOT_BLANK = "Flashcard name must not be blank.";
