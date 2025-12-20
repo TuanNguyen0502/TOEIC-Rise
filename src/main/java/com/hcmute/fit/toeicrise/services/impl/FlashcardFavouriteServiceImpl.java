@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardFavourite;
@@ -47,8 +47,8 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<FlashcardResponse> flashcardPage = flashcardFavouriteRepository.findAll(specification, pageable)
-                .map(flashcardMapper::toFlashcardResponse);
+        Page<FlashcardPublicResponse> flashcardPage = flashcardFavouriteRepository.findAll(specification, pageable)
+                .map(flashcardMapper::toFlashcardPublicResponse);
         return pageResponseMapper.toPageResponse(flashcardPage);
     }
 

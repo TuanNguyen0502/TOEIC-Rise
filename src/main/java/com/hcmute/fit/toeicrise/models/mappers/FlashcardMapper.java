@@ -27,18 +27,6 @@ public interface FlashcardMapper {
                 .build();
     }
 
-    default FlashcardResponse toFlashcardResponse(FlashcardFavourite flashcardFavourite) {
-        Flashcard flashcard = flashcardFavourite.getFlashcard();
-        return FlashcardResponse.builder()
-                .id(flashcard.getId())
-                .authorFullName(flashcard.getUser().getFullName())
-                .name(flashcard.getName())
-                .accessType(flashcard.getAccessType())
-                .itemCount(flashcard.getFlashcardItems().size())
-                .favouriteCount(flashcard.getFavouriteCount())
-                .build();
-    }
-
     default FlashcardPublicResponse toFlashcardPublicResponse(Flashcard flashcard, boolean isFavourite) {
         return FlashcardPublicResponse.builder()
                 .id(flashcard.getId())
@@ -48,6 +36,19 @@ public interface FlashcardMapper {
                 .itemCount(flashcard.getFlashcardItems().size())
                 .favouriteCount(flashcard.getFavouriteCount())
                 .isFavourite(isFavourite)
+                .build();
+    }
+
+    default FlashcardPublicResponse toFlashcardPublicResponse(FlashcardFavourite flashcardFavourite) {
+        Flashcard flashcard = flashcardFavourite.getFlashcard();
+        return FlashcardPublicResponse.builder()
+                .id(flashcard.getId())
+                .authorFullName(flashcard.getUser().getFullName())
+                .name(flashcard.getName())
+                .accessType(flashcard.getAccessType())
+                .itemCount(flashcard.getFlashcardItems().size())
+                .favouriteCount(flashcard.getFavouriteCount())
+                .isFavourite(true)
                 .build();
     }
 
