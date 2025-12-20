@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.hcmute.fit.toeicrise.models.enums.EGender;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +24,7 @@ public class User extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", unique = true)
+    @JsonBackReference
     private Account account;
 
     @ManyToOne

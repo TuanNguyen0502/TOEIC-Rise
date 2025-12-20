@@ -1,5 +1,7 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,35 +59,42 @@ public class Account extends BaseEntity implements UserDetails {
     private Instant refreshTokenExpiryDate;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
+    @JsonManagedReference
     private User user;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
     @Override
+    @JsonIgnore
     public String getUsername() {
         return email;
     }
 
     //TODO: add proper boolean checks
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return accountLockedUntil == null || LocalDateTime.now().isAfter(accountLockedUntil);
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return isActive;
     }

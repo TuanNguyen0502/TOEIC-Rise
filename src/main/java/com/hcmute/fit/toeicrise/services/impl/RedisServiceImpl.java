@@ -24,8 +24,7 @@ public class RedisServiceImpl implements IRedisService {
         }
         try {
             return objectMapper.readValue(json, clazz);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new AppException(ErrorCode.CACHE_ERROR);
         }
     }
@@ -43,7 +42,12 @@ public class RedisServiceImpl implements IRedisService {
 
     @Override
     public boolean remove(String cacheName, Object key) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(buildKey(cacheName, key)));
+        try {
+            return Boolean.TRUE.equals(redisTemplate.delete(buildKey(cacheName, key)));
+        } catch (Exception e) {
+            System.err.println("Error removing cache key: " + buildKey(cacheName, key));
+            return false;
+        }
     }
 
     @Override
