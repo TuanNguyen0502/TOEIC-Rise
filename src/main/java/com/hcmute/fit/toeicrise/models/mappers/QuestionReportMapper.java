@@ -16,6 +16,7 @@ public interface QuestionReportMapper {
         return QuestionReportDetailResponse.builder()
                 .questionReportId(questionReport.getId())
                 .questionId(question.getId())
+                .questionPosition(question.getPosition())
                 .questionContent(question.getContent())
                 .questionOptions(question.getOptions())
                 .questionCorrectOption(question.getCorrectOption())

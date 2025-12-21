@@ -12,6 +12,7 @@ import java.util.List;
 public class QuestionReportDetailResponse {
     private Long questionReportId;
     private Long questionId;
+    private Integer questionPosition;
     private String questionContent;
     private List<String> questionOptions;
     private String questionCorrectOption;
