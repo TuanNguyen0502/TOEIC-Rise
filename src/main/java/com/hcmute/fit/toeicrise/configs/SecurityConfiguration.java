@@ -43,16 +43,13 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**", "/test-sets", "/tests/**")
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-reports/**", "/admin/tags/**")
-                        .hasRole("ADMIN")
+                                "/admin/question-reports/**", "/admin/tags/**").hasRole("ADMIN")
                         .requestMatchers("/staff/tests/**", "/staff/question-groups/**", "/staff/questions/**",
-                                "/staff/tags/**", "/staff/question-reports/**")
-                        .hasAnyRole("STAFF", "ADMIN")
+                                "/staff/tags/**", "/staff/question-reports/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
-                                "/learner/flashcards/**", "/learner/mini-tests/**")
-                        .hasRole("LEARNER")
+                                "/learner/flashcards/**", "/learner/mini-tests/**").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
