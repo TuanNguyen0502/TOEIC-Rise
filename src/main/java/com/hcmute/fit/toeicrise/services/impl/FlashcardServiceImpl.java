@@ -55,7 +55,6 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
         Page<Object[]> results = flashcardRepository.findMyFlashcardsWithFavouriteStatus(
                 user.getId(),
-                EFlashcardAccessType.PUBLIC,
                 name,
                 pageable
         );
