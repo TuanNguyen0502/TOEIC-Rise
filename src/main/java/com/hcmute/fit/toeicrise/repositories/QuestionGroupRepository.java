@@ -28,4 +28,10 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
 
     @Query("SELECT DISTINCT qg.id FROM QuestionGroup qg WHERE qg.id IN :ids")
     Set<Long> findExistingIdsByIds(List<Long> ids);
+
+    @Query("SELECT DISTINCT qg " +
+            "FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH qg.part p " +
+            "WHERE qg.id IN :ids")
+    List<QuestionGroup> findAllByIdWithGroups(@Param("ids") Set<Long> ids);
 }

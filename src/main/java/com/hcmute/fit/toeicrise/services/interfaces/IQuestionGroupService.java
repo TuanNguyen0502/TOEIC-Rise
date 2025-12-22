@@ -50,4 +50,6 @@ public interface IQuestionGroupService {
     MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request);
     
     MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
+
+    List<QuestionGroup> findAllByIdWithPart(Set<Long> questionIds);
 }

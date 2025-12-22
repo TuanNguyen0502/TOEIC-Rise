@@ -35,8 +35,11 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
 
     @Query("SELECT DISTINCT ut " +
             "FROM UserTest ut " +
+            "LEFT JOIN FETCH ut.test t " +
             "LEFT JOIN FETCH ut.userAnswers ua " +
             "LEFT JOIN FETCH ua.question q " +
+            "LEFT JOIN FETCH q.questionGroup qg " +
+            "LEFT JOIN FETCH qg.part p " +
             "WHERE ut.user.account.email = :email AND ut.createdAt >= :days")
     List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days);
 

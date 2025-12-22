@@ -146,6 +146,8 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     @Override
     public Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds) {
+        if (questionGroupIds.isEmpty())
+            return Collections.emptyMap();
         return questionGroupRepository.findAllById(questionGroupIds)
                 .stream()
                 .collect(Collectors.toMap(
@@ -376,6 +378,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return MiniTestResponse.builder()
                 .questionGroups(miniTestQuestionGroupResponses)
                 .totalQuestions(globalQuestionPosition - 1).build();
+    }
+
+    @Override
+    public List<QuestionGroup> findAllByIdWithPart(Set<Long> questionIds) {
+        return questionGroupRepository.findAllByIdWithGroups(questionIds);
     }
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion) {

@@ -24,4 +24,5 @@ public interface IQuestionService {
     List<Question> getAllQuestionsByPartAndTags(Set<Long> tagIds, Long partId);
     List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds);
     void validateQuestion(List<Long> questionIds, List<Question> questions);
+    List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds);
 }

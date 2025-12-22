@@ -112,6 +112,11 @@ public class QuestionServiceImpl implements IQuestionService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question without Question group");
     }
 
+    @Override
+    public List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds) {
+        return questionRepository.findAllByIdWithTags(questionIds);
+    }
+
     @Async
     public void changeTestStatus(Question question) {
         Test test = question.getQuestionGroup().getTest();

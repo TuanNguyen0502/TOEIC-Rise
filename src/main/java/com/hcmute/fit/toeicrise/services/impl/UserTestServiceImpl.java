@@ -24,7 +24,6 @@ import com.hcmute.fit.toeicrise.models.enums.EExamType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.*;
-import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
@@ -44,6 +43,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -52,7 +52,6 @@ import static java.util.stream.Collectors.toList;
 public class UserTestServiceImpl implements IUserTestService {
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
-    private final QuestionRepository questionRepository;
     private final TestRepository testRepository;
     private final UserRepository userRepository;
     private final UserTestRepository userTestRepository;
@@ -406,30 +405,37 @@ public class UserTestServiceImpl implements IUserTestService {
                 .count();
 
         Set<Long> questionIds = userTests.stream()
-                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
+                .filter(ut -> ut.getUserAnswers() != null &&!ut.getUserAnswers().isEmpty())
                 .flatMap(ut -> ut.getUserAnswers().stream())
                 .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        
+        Map<Long, Question> questionMapWithTags;
         if (!questionIds.isEmpty()) {
-            List<Question> questionsWithTags = questionRepository.findAllByIdWithTags(questionIds);
-            Map<Long, Question> questionMap = questionsWithTags.stream()
-                    .collect(Collectors.toMap(Question::getId, q -> q));
-            
-            userTests.forEach(ut -> {
-                if (ut.getUserAnswers() != null) {
-                    ut.getUserAnswers().forEach(ua -> {
-                        if (ua.getQuestion() != null) {
-                            Question questionWithTags = questionMap.get(ua.getQuestion().getId());
-                            if (questionWithTags != null && questionWithTags.getTags() != null) {
-                                ua.getQuestion().setTags(questionWithTags.getTags());
-                            }
-                        }
-                    });
-                }
-            });
+            List<Question> questionsWithTags = questionService.findAllQuestionByIdWithTags(questionIds);
+            questionMapWithTags = questionsWithTags.stream().collect(Collectors.toMap(Question::getId, q -> q));
+        } else {
+            questionMapWithTags = new HashMap<>();
         }
+        userTests.forEach(ut -> {
+            if (ut.getUserAnswers() != null) {
+                ut.getUserAnswers().forEach(userAnswer -> {
+                    if (userAnswer.getQuestion() != null) {
+                        Question questionWithTags = questionMapWithTags.get(userAnswer.getQuestion().getId());
+                        if (questionWithTags != null && questionWithTags.getTags() != null) {
+                            userAnswer.getQuestion().setTags(questionWithTags.getTags());
+                        }
+                    }
+                });
+            }
+        });
+        Set<Long> allQuestionGroupIds = userTests.stream()
+                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
+                .flatMap(ut -> ut.getUserAnswers().stream())
+                .map(UserAnswer::getQuestionGroupId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(allQuestionGroupIds);
 
         Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
         Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
@@ -455,12 +461,6 @@ public class UserTestServiceImpl implements IUserTestService {
             List<UserAnswer> userAnswers = ut.getUserAnswers();
             if (userAnswers == null || userAnswers.isEmpty()) continue;
 
-            Set<Long> questionGroupIds = userAnswers.stream()
-                    .map(UserAnswer::getQuestionGroupId)
-                    .collect(Collectors.toSet());
-
-            Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(questionGroupIds);
-
             Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
                     .collect(Collectors.groupingBy(ua ->
                             partNamesByGroupId.get(ua.getQuestionGroupId())
@@ -481,8 +481,13 @@ public class UserTestServiceImpl implements IUserTestService {
                 examTypePartStats.computeIfAbsent(partName,_ -> new PartStats());
 
                 Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
-                        .flatMap(ua -> ua.getQuestion().getTags().stream()
-                                .map(tag -> Map.entry(tag.getName(), ua)))
+                        .flatMap(ua -> {
+                            if (ua.getQuestion() != null && ua.getQuestion().getTags() != null) {
+                                return ua.getQuestion().getTags().stream()
+                                        .map(tag -> Map.entry(tag.getName(), ua));
+                            }
+                            return Stream.empty();
+                        })
                         .collect(Collectors.groupingBy(
                                 Map.Entry::getKey,
                                 Collectors.mapping(Map.Entry::getValue, toList())
