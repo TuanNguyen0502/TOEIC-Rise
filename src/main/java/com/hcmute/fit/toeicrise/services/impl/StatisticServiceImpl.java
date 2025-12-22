@@ -51,8 +51,8 @@ public class StatisticServiceImpl implements IStatisticService {
 
         KpiResponse newLearners = getNewLearners(start, end, prevTime);
         KpiResponse activeUsers = getActiveLearners(start, end, prevTime);
-        KpiResponse totalTests = getTotalTest(start, end, prevTime);
         KpiResponse aiConversations = getAiConversation(start, end, prevTime);
+        KpiResponse totalTests = getTotalTest(start, end, prevTime);
 
         ActivityTrendResponse activityTrend = userTestService.getActivityTrend(start, end);
         DeepInsightsResponse deepInsightsResponse = DeepInsightsResponse.builder()
@@ -90,8 +90,8 @@ public class StatisticServiceImpl implements IStatisticService {
     }
 
     private KpiResponse getTotalTest(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
-        Long current = testService.countTotalTests(startDate, endDate);
-        Long prev = testService.countTotalTests(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+        Long prev = userTestService.totalUserTest(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+        Long current = userTestService.totalUserTest(startDate, endDate);
 
         return KpiResponse.builder().value(current)
                 .growthPercentage(calculatorGrowth(current, prev)).build();

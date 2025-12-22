@@ -711,6 +711,12 @@ public class UserTestServiceImpl implements IUserTestService {
         return distInsightResponse;
     }
 
+    @Override
+    public Long totalUserTest(LocalDateTime from, LocalDateTime to) {
+        TestModeInsightResponse testMode = userTestRepository.countUserTestByMode(from, to);
+        return (long) (testMode.getFullTest() + testMode.getPratice());
+    }
+
     private int roundToNearest5(int number) {
         return (int) (Math.round(number / 5.0) * 5);
     }

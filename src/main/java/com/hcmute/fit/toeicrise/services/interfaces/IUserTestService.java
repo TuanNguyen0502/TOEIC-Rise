@@ -49,4 +49,6 @@ public interface IUserTestService {
     TestModeInsightResponse getTestModeInsight(LocalDateTime start, LocalDateTime end);
 
     ScoreDistInsightResponse getScoreInsight(LocalDateTime start, LocalDateTime end);
+
+    Long totalUserTest(LocalDateTime from, LocalDateTime to);
 }
