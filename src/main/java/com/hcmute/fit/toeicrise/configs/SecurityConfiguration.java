@@ -43,8 +43,8 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**", "/test-sets", "/tests/**")
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-groups/**", "/admin/questions/**", "/admin/question-reports/**", "/admin/tags/**", "/admin/stats/**").hasRole("ADMIN")
-                        .requestMatchers("/staff/tests/**", "/staff/question-reports/**", "/staff/stats/**").hasAnyRole("STAFF", "ADMIN")
+                                "/admin/question-groups/**", "/admin/questions/**", "/admin/question-reports/**", "/admin/tags/**").hasRole("ADMIN")
+                        .requestMatchers("/staff/tests/**", "/staff/question-reports/**", "/staff/stats/**", "/admin/stats/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
