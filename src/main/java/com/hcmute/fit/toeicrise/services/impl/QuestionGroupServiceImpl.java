@@ -140,7 +140,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     public String getPartNameByQuestionGroupId(Long questionGroupId) {
         QuestionGroup questionGroup = questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group with ID " + questionGroupId));
-        System.out.println(questionGroup.getPart().getName());
         return questionGroup.getPart().getName();
     }
 
