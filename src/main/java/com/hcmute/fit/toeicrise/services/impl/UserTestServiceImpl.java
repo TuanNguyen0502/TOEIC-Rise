@@ -398,7 +398,7 @@ public class UserTestServiceImpl implements IUserTestService {
         Optional<UserTest> userTest = userTestRepository.findFirstByOrderByCreatedAtDesc();
         LocalDateTime localDateTime = userTest.map(user -> user.getCreatedAt().minusDays(days.getDays()))
                 .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
-        List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime);
+        List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime, ETestStatus.APPROVED);
         int numberOfTests = (int)userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
                 .filter(Objects::nonNull)
                 .distinct()
@@ -626,7 +626,7 @@ public class UserTestServiceImpl implements IUserTestService {
         if (size > 10)
             size = 10;
         Pageable limit = PageRequest.of(0, size);
-        List<UserTest> userTests = userTestRepository.findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, limit);
+        List<UserTest> userTests = userTestRepository.findByUser_Account_EmailAndTest_StatusAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, limit, ETestStatus.APPROVED);
         List<ExamTypeFullTestResponse> examTypeFullTestResponses = new ArrayList<>();
 
         List<Integer> scores = new ArrayList<>();

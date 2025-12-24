@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryRespons
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -40,8 +41,8 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "LEFT JOIN FETCH ua.question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +
             "LEFT JOIN FETCH qg.part p " +
-            "WHERE ut.user.account.email = :email AND ut.createdAt >= :days")
-    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days);
+            "WHERE ut.user.account.email = :email AND ut.createdAt >= :days AND t.status = :status")
+    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days, @Param("status")ETestStatus status);
 
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
             "ut.id, t.name, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
@@ -53,7 +54,7 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
 
     Optional<UserTest> findFirstByOrderByCreatedAtDesc();
 
-    List<UserTest> findByUser_Account_EmailAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable);
+    List<UserTest> findByUser_Account_EmailAndTest_StatusAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable, ETestStatus status);
 
     @Query("SELECT FUNCTION('DATE', ut.createdAt), COUNT(ut) " +
             "FROM UserTest ut " +
