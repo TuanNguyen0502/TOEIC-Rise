@@ -5,6 +5,6 @@ RUN mvn clean install
 
 # Stage 2: Run the application
 FROM openjdk:17-jdk-slim
-COPY --from=build /target/toeic-rise-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /target/TOEIC-Rise-0.0.1-SNAPSHOT.jar-rise-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
