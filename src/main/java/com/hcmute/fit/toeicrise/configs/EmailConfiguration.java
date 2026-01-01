@@ -16,10 +16,13 @@ public class EmailConfiguration {
     @Value("${spring.mail.password}")
     private String emailPassword;
 
+    @Value("${SPRING_MAIL_HOST}")
+    private String emailHost;
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
+        mailSender.setHost(emailHost);
         mailSender.setPort(587);
         mailSender.setUsername(emailUsername);
         mailSender.setPassword(emailPassword);
@@ -29,7 +32,7 @@ public class EmailConfiguration {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        props.put("mail.smtp.ssl.trust", emailHost);
         props.put("mail.smtp.connectiontimeout", "5000");
         props.put("mail.smtp.timeout", "5000");
         props.put("mail.smtp.writetimeout", "5000");
