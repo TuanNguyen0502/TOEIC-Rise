@@ -11,13 +11,13 @@ import java.util.Properties;
 
 @Configuration
 public class EmailConfiguration {
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:apikey}")
     private String emailUsername;
 
-    @Value("${spring.mail.password}")
+    @Value("${spring.mail.password:}")
     private String emailPassword;
 
-    @Value("${spring.mail.host}")
+    @Value("${spring.mail.host:smtp.sendgrid.net}")
     private String emailHost;
 
     @Bean
