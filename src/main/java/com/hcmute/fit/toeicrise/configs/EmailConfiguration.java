@@ -16,7 +16,7 @@ public class EmailConfiguration {
     @Value("${spring.mail.password}")
     private String emailPassword;
 
-    @Value("${SPRING_MAIL_HOST}")
+    @Value("${spring.mail.host}")
     private String emailHost;
 
     @Bean
