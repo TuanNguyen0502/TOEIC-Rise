@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IRedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -15,6 +16,7 @@ import java.time.Duration;
 public class RedisServiceImpl implements IRedisService {
     private final RedisTemplate<Object, Object> redisTemplate;
     private final ObjectMapper objectMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public <T> T get(String cacheName, Object key, Class<T> clazz) {
@@ -33,7 +35,7 @@ public class RedisServiceImpl implements IRedisService {
     public boolean put(String cacheName, Object key, Object value, Duration cacheDuration) {
         try {
             String json = objectMapper.writeValueAsString(value);
-            redisTemplate.opsForValue().set(buildKey(cacheName, key), json, cacheDuration);
+            stringRedisTemplate.opsForValue().set(buildKey(cacheName, key), json, cacheDuration);
             return true;
         } catch (Exception e) {
             throw new AppException(ErrorCode.CACHE_ERROR);
