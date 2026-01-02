@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.dtos.responses.learner;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public class LearnerTestHistoryResponse {
     private Long id;
     private String name;
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     private List<String> parts;
     private Integer correctAnswers;
     private Integer totalQuestions;
@@ -21,7 +22,7 @@ public class LearnerTestHistoryResponse {
     public LearnerTestHistoryResponse(Long id, String name, LocalDateTime createdAt, List<String> parts, Integer correctAnswers, Integer totalQuestions, Integer totalScore, Integer timeSpent) {
         this.id = id;
         this.name = name;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt.toLocalDate();
         this.parts = parts;
         this.correctAnswers = correctAnswers;
         this.totalQuestions = totalQuestions;
