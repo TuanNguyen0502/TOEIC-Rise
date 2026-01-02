@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-@SpringBootApplication(exclude = {MailSenderAutoConfiguration.class})
+@SpringBootApplication
 @EnableAsync
 @EnableCaching
 public class ToeicRiseApplication {

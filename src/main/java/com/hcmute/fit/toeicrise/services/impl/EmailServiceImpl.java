@@ -1,22 +1,36 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IEmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements IEmailService {
-    private final JavaMailSender mailSender;
+    private final SendGrid sendGrid;
     private final TemplateEngine templateEngine;
+
+    @Value("${sendgrid.from.email:thihoangduyendo@gmail.com}")
+    private String fromEmail;
+
+    @Value("${sendgrid.from.name:TOEIC Rise}")
+    private String fromName;
 
     @Override
     @Async
@@ -29,25 +43,28 @@ public class EmailServiceImpl implements IEmailService {
 
         try {
             sendEmail(account.getEmail(), subject, "emailTemplate", context);
-        } catch (MessagingException e) {
+        } catch (IOException e) {
             // Handle email sending exception
             e.printStackTrace();
         }
     }
 
-    private void sendEmail(String to, String subject, String template, Context context) throws MessagingException {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-
+    private void sendEmail(String to, String subject, String template, Context context) throws IOException {
         // Process the template with the given context
         String htmlContent = templateEngine.process(template, context);
 
-        // Set email properties
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(htmlContent, true); // Set true for HTML content
+        Email from = new Email(fromEmail, fromName);
+        Email toEmail = new Email(to);
+        Content content = new Content("text/html", htmlContent);
+        Mail mail = new Mail(from, subject, toEmail, content);
 
-        // Send the email
-        mailSender.send(mimeMessage);
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody(mail.build());
+
+        Response response = sendGrid.api(request);
+        if (response.getStatusCode() <= 200 || response.getStatusCode() > 300)
+            throw new AppException(ErrorCode.MAIL_SEND_FAILED);
     }
 }
