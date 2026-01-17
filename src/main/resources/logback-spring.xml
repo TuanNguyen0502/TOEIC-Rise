@@ -78,8 +78,8 @@
     </logger>
 
     <!-- Root logger -->
-    <logger level="INFO">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="INFO_LOG"/>
-    </logger>
+    </root>
 </configuration>
