@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers;
 
+import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.authentication.*;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
@@ -7,6 +8,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenRespon
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
+import com.hcmute.fit.toeicrise.services.interfaces.IOTPService;
+import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,30 +24,23 @@ import java.io.IOException;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final IAuthenticationService authenticationServiceImpl;
+    private final IAuthenticationService authenticationService;
+    private final IRefreshTokenService refreshTokenService;
+    private final IOTPService otpService;
+    private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        authenticationServiceImpl.register(registerRequest);
-        return ResponseEntity.ok("Registration successful. Please check your email for the verification code.");
+        authenticationService.register(registerRequest);
+        return ResponseEntity.ok(MessageConstant.REGISTRATION_SUCCESS);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
-        // 1. Xác thực người dùng và tạo JWT token
-        LoginResponse loginResponse = authenticationServiceImpl.login(loginRequest);
-        // 2. Tạo refresh token
-        String refreshToken = authenticationServiceImpl.createRefreshTokenWithEmail(loginRequest.getEmail());
-        long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
-        // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
-        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
-                .httpOnly(true) // Không thể đọc bằng JavaScript → tăng bảo mật
-                .secure(true) // Chỉ sử dụng qua HTTPS
-                .path("/") // Cookie có hiệu lực toàn bộ hệ thống
-                .maxAge(refreshTokenExpirationTime) // Thời gian sống của cookie
-                .build();
-
-        // Trả về login response kèm cookie
+        LoginResponse loginResponse = authenticationService.login(loginRequest);
+        String refreshToken = refreshTokenService.createRefreshTokenWithEmail(loginRequest.getEmail());
+        Long refreshTokenExpirationTime = refreshTokenService.getRefreshTokenDurationMs();
+        ResponseCookie responseCookie = createRefreshTokenCookie(refreshToken, refreshTokenExpirationTime);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(loginResponse);
@@ -56,78 +52,60 @@ public class AuthenticationController {
     }
 
     @GetMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token") String refreshToken) {
-        try {
-            // 2. Tạo refresh token
-            RefreshTokenResponse refreshTokenResponse = authenticationServiceImpl.refreshToken(refreshToken);
-            // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
-            String newRefreshToken = authenticationServiceImpl.createRefreshTokenWithRefreshToken(refreshToken);
-            long refreshTokenExpirationTime = authenticationServiceImpl.getRefreshTokenDurationMs();
-            // Gửi refresh token về phía client thông qua HttpOnly Cookie (bảo mật hơn localStorage)
-            ResponseCookie responseCookie = ResponseCookie.from("refresh_token", newRefreshToken)
-                    .httpOnly(true) // Không thể đọc bằng JavaScript → tăng bảo mật
-                    .secure(true) // Chỉ sử dụng qua HTTPS
-                    .path("/") // Cookie có hiệu lực toàn bộ hệ thống
-                    .maxAge(refreshTokenExpirationTime) // Thời gian sống của cookie
-                    .build();
+    public ResponseEntity<?> refreshToken(@CookieValue(value =  REFRESH_TOKEN_COOKIE_NAME) String refreshToken) {
+        RefreshTokenResponse refreshTokenResponse = refreshTokenService.getRefreshToken(refreshToken);
+        String newRefreshToken = refreshTokenService.createRefreshTokenWithRefreshToken(refreshToken);
+        Long refreshTokenExpirationTime = refreshTokenService.getRefreshTokenDurationMs();
+        ResponseCookie responseCookie = createRefreshTokenCookie(newRefreshToken, refreshTokenExpirationTime);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(refreshTokenResponse);
+    }
 
-            // Trả về login response kèm cookie
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                    .body(refreshTokenResponse);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    private ResponseCookie createRefreshTokenCookie(String refreshToken, Long expirationTime) {
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
+                .httpOnly(true)
+//                .sameSite("Strict")
+                .secure(true)
+                .path("/")
+                .maxAge(expirationTime/1000)
+                .build();
     }
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyUserRequest verifyUserRequest) {
-        try {
-            authenticationServiceImpl.verifyUser(verifyUserRequest);
-            return ResponseEntity.ok("Account verified successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        authenticationService.verifyUser(verifyUserRequest);
+        return ResponseEntity.ok(MessageConstant.ACCOUNT_VERIFICATION_SUCCESS);
     }
 
     @PostMapping("/resend")
     public ResponseEntity<?> resendVerificationCode(@RequestBody ResendOTPRequest request) {
-        try {
-            authenticationServiceImpl.resendVerificationCode(request);
-            return ResponseEntity.ok("Verification code sent");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        otpService.resendVerificationCode(request);
+        return ResponseEntity.ok(MessageConstant.VERIFICATION_CODE_SUCCESS);
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        authenticationServiceImpl.forgotPassword(forgotPasswordRequest);
-        return ResponseEntity.ok("Verification code sent");
+        authenticationService.forgotPassword(forgotPasswordRequest);
+        return ResponseEntity.ok(MessageConstant.VERIFICATION_CODE_SUCCESS);
     }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpRequest otpRequest) {
-        return ResponseEntity.ok(authenticationServiceImpl.verifyOtp(otpRequest));
+        return ResponseEntity.ok(authenticationService.verifyOTP(otpRequest));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest, @RequestHeader(name = "Authorization") String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new AppException(ErrorCode.TOKEN_INVALID);
-        }
-        String token = authorization.substring(7);
-        authenticationServiceImpl.resetPassword(resetPasswordRequest, token);
-        return ResponseEntity.ok("Password reset successfully");
+        authenticationService.resetPassword(resetPasswordRequest, authorization);
+        return ResponseEntity.ok(MessageConstant.PASSWORD_RESET_SUCCESS);
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         String email = SecurityUtils.getCurrentUser();
-        if (email.isEmpty() || "anonymousUser".equals(email)) {
-            throw new AppException(ErrorCode.UNAUTHORIZED, "Invalid or anonymous user");
-        }
-
-        return ResponseEntity.ok(authenticationServiceImpl.getCurrentUser(email));
+        if (email.isEmpty() || "anonymousUser".equals(email))
+            throw new AppException(ErrorCode.UNAUTHORIZED, MessageConstant.INVALID_USER);
+        return ResponseEntity.ok(authenticationService.getCurrentUser(email));
     }
 }

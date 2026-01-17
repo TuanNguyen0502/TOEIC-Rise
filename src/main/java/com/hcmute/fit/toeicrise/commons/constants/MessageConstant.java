@@ -6,6 +6,7 @@ public class MessageConstant {
     public static final String INVALID_OTP = "Invalid OTP! OTP must be exactly 6 digits (0-9).";
     public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";
     // Profile messages
+    public static final String INVALID_USER = "Invalid or anonymous user";
     public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
     public static final String PROFILE_FULLNAME_NOT_BLANK = "Full name must not be blank.";
     public static final String PROFILE_FULLNAME_INVALID = "Full name can only contain letters and spaces.";
@@ -92,4 +93,9 @@ public class MessageConstant {
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
     public static final String TAG_NOT_EMPTY = "Tag must not be empty.";
+    // Success messages
+    public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
+    public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";
+    public static final String VERIFICATION_CODE_SUCCESS = "Verification code sent.";
+    public static final String PASSWORD_RESET_SUCCESS = "Password reset successfully.";
 }

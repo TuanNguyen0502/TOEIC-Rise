@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+    @Query("SELECT u FROM User u JOIN FETCH u.account JOIN FETCH u.role WHERE u.account.id = :accountId")
     Optional<User> findByAccount_Id(Long accountId);
 
-    @Query("SELECT u FROM User u JOIN FETCH u.account WHERE u.account.email = :email")
+    @Query("SELECT u FROM User u JOIN FETCH u.account JOIN FETCH u.role WHERE u.account.email = :email")
     Optional<User> findByAccount_Email(@Param("email") String email);
 
     Long countByRole_Name(ERole role);

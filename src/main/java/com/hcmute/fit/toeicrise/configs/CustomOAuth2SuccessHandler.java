@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.configs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.LoginResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
+import com.hcmute.fit.toeicrise.services.interfaces.IRefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.ObjectProvider;
@@ -22,14 +23,16 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final ObjectProvider<IAuthenticationService> authenticationServiceProvider;
+    private final IRefreshTokenService refreshTokenService;
     private final ObjectMapper objectMapper;
 
     @Value("${frontend.callback-url}")
     private String frontendCallbackUrl;
 
     public CustomOAuth2SuccessHandler(@Lazy ObjectProvider<IAuthenticationService> authenticationServiceProvider,
-                                      ObjectMapper objectMapper) {
+                                      @Lazy IRefreshTokenService refreshTokenService, ObjectMapper objectMapper) {
         this.authenticationServiceProvider = authenticationServiceProvider;
+        this.refreshTokenService = refreshTokenService;
         this.objectMapper = objectMapper;
     }
 
@@ -51,8 +54,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             LoginResponse loginResponse = authenticationService.loginWithGoogle(email, name, picture);
 
             // Create refresh token
-            String refreshToken = authenticationService.createRefreshTokenWithEmail(email);
-            long refreshTokenExpirationTime = authenticationService.getRefreshTokenDurationMs();
+            String refreshToken = refreshTokenService.createRefreshTokenWithEmail(email);
+            long refreshTokenExpirationTime = refreshTokenService.getRefreshTokenDurationMs();
 
             // Create an HttpOnly cookie with the refresh token
             ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)

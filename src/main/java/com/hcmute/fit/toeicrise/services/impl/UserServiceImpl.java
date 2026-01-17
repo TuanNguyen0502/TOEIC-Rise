@@ -14,6 +14,7 @@ import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EAuthProvider;
+import com.hcmute.fit.toeicrise.models.enums.EGender;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
@@ -22,7 +23,7 @@ import com.hcmute.fit.toeicrise.repositories.AccountRepository;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.UserSpecification;
-import com.hcmute.fit.toeicrise.services.interfaces.IAuthenticationService;
+import com.hcmute.fit.toeicrise.services.interfaces.IRoleService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,11 +34,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
-    private final IAuthenticationService authenticationService;
     private final AccountRepository accountRepository;
+    private final IRoleService roleService;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -180,6 +184,41 @@ public class UserServiceImpl implements IUserService {
     @Override
     public Long countAllUsers() {
         return accountRepository.count();
+    }
+
+    @Override
+    public User createUserWithGoogle(String avatar, String fullName, Account account) {
+        return User.builder()
+                .avatar(avatar)
+                .fullName(fullName)
+                .role(roleService.findByName(ERole.LEARNER))
+                .account(account)
+                .build();
+    }
+
+    @Override
+    public User createUser(Account account, String fullName) {
+        return User.builder()
+                .role(roleService.findByName(ERole.LEARNER))
+                .account(account)
+                .fullName(fullName)
+                .gender(EGender.OTHER)
+                .build();
+    }
+
+    @Override
+    public Optional<User> findAccountById(Long id) {
+        return userRepository.findByAccount_Id(id);
+    }
+
+    @Override
+    public Long countAllUsersWithRole(ERole role) {
+        return userRepository.countByRole_Name(role);
+    }
+
+    @Override
+    public Long countUsersBetweenDays(LocalDateTime from, LocalDateTime to) {
+        return userRepository.countByRole_NameBetweenDays(ERole.LEARNER, from, to);
     }
 
     private boolean isDuplicateEmail(String email) {

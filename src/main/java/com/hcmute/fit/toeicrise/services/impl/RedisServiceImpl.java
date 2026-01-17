@@ -5,10 +5,12 @@ import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IRedisService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +55,13 @@ public class RedisServiceImpl implements IRedisService {
     @Override
     public String buildKey(String cacheName, Object key) {
         return cacheName + "::" + key;
+    }
+
+    @Override
+    public void batch(Consumer<RedisTemplate<Object, Object>> action) {
+        redisTemplate.executePipelined((RedisCallback<?>) _ -> {
+            action.accept(redisTemplate);
+            return null;
+        });
     }
 }

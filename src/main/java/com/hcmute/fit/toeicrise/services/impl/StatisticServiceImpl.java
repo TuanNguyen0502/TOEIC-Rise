@@ -31,8 +31,8 @@ public class StatisticServiceImpl implements IStatisticService {
     public SystemOverviewResponse getSystemOverview() {
         return SystemOverviewResponse.builder()
                 .totalAccounts(userService.countAllUsers())
-                .totalLearners(authenticationService.countAllUsersWithRole(ERole.LEARNER))
-                .totalStaffs(authenticationService.countAllUsersWithRole(ERole.STAFF) + authenticationService.countAllUsersWithRole(ERole.ADMIN))
+                .totalLearners(userService.countAllUsersWithRole(ERole.LEARNER))
+                .totalStaffs(userService.countAllUsersWithRole(ERole.STAFF) + userService.countAllUsersWithRole(ERole.ADMIN))
                 .totalTestSets(testSetService.totalTestSets())
                 .totalTests(testService.totalTest())
                 .totalFlashcards(flashcardService.totalFlashcards())
@@ -106,8 +106,8 @@ public class StatisticServiceImpl implements IStatisticService {
     }
 
     private KpiResponse getNewLearners(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
-        Long current = authenticationService.countUsersBetweenDays(startDate, endDate);
-        Long prev = authenticationService.countUsersBetweenDays(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+        Long current = userService.countUsersBetweenDays(startDate, endDate);
+        Long prev = userService.countUsersBetweenDays(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
 
         return KpiResponse.builder().value(current)
                 .growthPercentage(calculatorGrowth(current, prev)).build();
