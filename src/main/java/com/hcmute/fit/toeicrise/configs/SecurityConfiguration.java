@@ -42,9 +42,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/**", "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/test-sets", "/tests/**")
                         .permitAll()
-                        .requestMatchers("/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-groups/**", "/admin/questions/**", "/admin/question-reports/**", "/admin/tags/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/test-sets/**", "/staff/tests/**", "/staff/question-reports/**", "/staff/stats/**", "/admin/stats/**").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
+                                "/admin/question-reports/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
+                                "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
+                                "/staff/stats/**", "/admin/stats/**")
+                        .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
