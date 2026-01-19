@@ -1,9 +1,8 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
-import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
-import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,18 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TestSetController {
     private final ITestSetService testSetService;
-
-    @GetMapping("")
-    public ResponseEntity<?> getAllTestSets(@RequestParam(required = false) String name,
-                                            @RequestParam(required = false) ETestSetStatus status,
-                                            @RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "10") int size,
-                                            @RequestParam(defaultValue = "updatedAt") String sortBy,
-                                            @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testSetService.getAllTestSets(
-                name, status, page, size, sortBy, direction
-        ));
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTestSetDetailById(@PathVariable Long id,

@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.controllers.admin;
+package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/question-groups")
+@RequestMapping("/staff/question-groups")
 @RequiredArgsConstructor
 public class QuestionGroupController {
     private final IQuestionGroupService questionGroupService;

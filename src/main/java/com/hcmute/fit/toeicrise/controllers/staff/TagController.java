@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.controllers.admin;
+package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin/tags")
+@RequestMapping("/staff/tags")
 @RequiredArgsConstructor
 public class TagController {
 
