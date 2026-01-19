@@ -1,7 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Role;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.repositories.RoleRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IRoleService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,6 @@ public class RoleServiceImpl implements IRoleService {
 
     @Override
     public Role findByName(ERole roleName) {
-        return roleRepository.findByName(roleName);
+        return roleRepository.findByName(roleName).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Role"));
     }
 }

@@ -44,7 +44,7 @@ public class FlashcardController {
     }
 
     @GetMapping("/{flashcardId}")
-    public ResponseEntity<FlashcardDetailResponse> getFlashcardDetail(@PathVariable Long flashcardId) {
+    public ResponseEntity<?> getFlashcardDetail(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(flashcardService.getFlashcardDetailById(email, flashcardId));
     }

@@ -17,4 +17,6 @@ public interface IAccountService {
     Account resetFailedLoginAttempts(Account account);
     Account createGoogleAccount(String email);
     void validateRefreshToken(Account account);
+    void validatePasswordMatch(String password, String confirmPassword);
+    Long countAllUsers();
 }

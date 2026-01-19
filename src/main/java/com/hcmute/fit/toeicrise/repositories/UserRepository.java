@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     @Query("SELECT u FROM User u JOIN FETCH u.account JOIN FETCH u.role WHERE u.account.id = :accountId")
-    Optional<User> findByAccount_Id(Long accountId);
+    Optional<User> findAccountById(Long accountId);
 
     @Query("SELECT u FROM User u JOIN FETCH u.account JOIN FETCH u.role WHERE u.account.email = :email")
     Optional<User> findByAccount_Email(@Param("email") String email);
@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @Query("SELECT COUNT (u) FROM User u WHERE u.role.name =:role AND u.createdAt >= :from AND u.createdAt < :to")
     Long countByRole_NameBetweenDays(@Param("role") ERole role, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT u FROM User u JOIN FETCH u.account JOIN FETCH u.role WHERE u.id = :id")
+    Optional<User> findByIdWithRelations(@Param("id") Long id);
 }

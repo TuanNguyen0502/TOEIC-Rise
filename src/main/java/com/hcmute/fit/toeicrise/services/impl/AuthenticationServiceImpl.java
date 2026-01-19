@@ -43,7 +43,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Transactional
     public void register(RegisterRequest input) {
         log.info("Register request for email: {}", input.getEmail());
-        validatePasswordMatch(input.getPassword(), input.getConfirmPassword());
+        accountService.validatePasswordMatch(input.getPassword(), input.getConfirmPassword());
         accountService.findByEmail(input.getEmail()).ifPresent(_ -> {
             throw new AppException(ErrorCode.DUPLICATE_EMAIL);
         });
@@ -91,6 +91,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
+    @Transactional
     public LoginResponse loginWithGoogle(String email, String fullName, String avatar) {
         Account authenticatedUser = loginAndRegisterWithGoogle(email, fullName, avatar);
         return getLoginResponse(authenticatedUser);
@@ -124,6 +125,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
+    @Transactional
     public void verifyUser(VerifyUserRequest input) {
         Account account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail(), Account.class);
         if (account == null){
@@ -133,7 +135,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String fullName = redisService.get(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName(), input.getEmail(), String.class);
         account = otpService.verifyOTP(account, input.getVerificationCode());
         account.setIsActive(true);
-        User user = userService.createUser(account, fullName);
+        User user = userService.createUser(account, fullName, ERole.LEARNER, EGender.OTHER);
         account.setUser(user);
         accountService.save(account);
 
@@ -160,7 +162,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (authorization == null || !authorization.startsWith(BEARER_PREFIX))
             throw new AppException(ErrorCode.TOKEN_INVALID);
         String token = authorization.substring(BEARER_PREFIX_LENGTH);
-        validatePasswordMatch(resetPasswordRequest.getPassword(), resetPasswordRequest.getConfirmPassword());
+        accountService.validatePasswordMatch(resetPasswordRequest.getPassword(), resetPasswordRequest.getConfirmPassword());
         if (!jwtService.isPasswordResetTokenValid(token))
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
 
@@ -174,7 +176,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    @Transactional
     @Cacheable(value = "user", key = "#email")
     public CurrentUserResponse getCurrentUser(String email) {
         Account account = accountService.findByEmail(email).orElseThrow(
@@ -193,13 +194,14 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         );
         if (!passwordEncoder.matches(userChangePasswordRequest.getOldPassword(), account.getPassword()))
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
-        validatePasswordMatch(userChangePasswordRequest.getNewPassword(), userChangePasswordRequest.getConfirmPassword());
+        accountService.validatePasswordMatch(userChangePasswordRequest.getNewPassword(), userChangePasswordRequest.getConfirmPassword());
 
         account.setPassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
         accountService.save(account);
     }
 
     @Override
+    @Transactional
     public String verifyOTP(OtpRequest otpRequest) {
         Account account = accountService.findByEmail(otpRequest.getEmail()).orElseThrow(() ->{
             log.error("Verify failed for email: {}", otpRequest.getEmail());
@@ -209,24 +211,21 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         return jwtService.generateTokenResetPassword(account);
     }
 
-    private void validatePasswordMatch(String password, String confirmPassword) {
-        if (!password.equals(confirmPassword))
-            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
-    }
-
     @Override
     public Long countActiveUser(LocalDateTime from, LocalDateTime to) {
         return accountService.countByRole_NameBetweenDays(from, to);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RegSourceInsightResponse getRegSourceInsight(LocalDateTime from, LocalDateTime to) {
         RegSourceInsightResponse regSourceInsightResponse = accountService.countSourceInsight(from, to);
         double sum = regSourceInsightResponse.getGoogle() + regSourceInsightResponse.getEmail();
         if (sum == 0)
             return regSourceInsightResponse;
-        regSourceInsightResponse.setGoogle(Math.round(regSourceInsightResponse.getGoogle() / sum * 100));
-        regSourceInsightResponse.setEmail(Math.round((regSourceInsightResponse.getEmail() / sum) * 100));
-        return regSourceInsightResponse;
+        return  RegSourceInsightResponse.builder()
+                .google(Math.round(regSourceInsightResponse.getGoogle() / sum * 100))
+                .email(Math.round((regSourceInsightResponse.getEmail() / sum) * 100))
+                .build();
     }
 }

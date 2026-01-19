@@ -6,6 +6,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.user.UserUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +23,10 @@ public class UserController {
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "isActive", required = false) Boolean isActive,
             @RequestParam(value = "role", required = false) ERole role,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "page", defaultValue = "0")
+            @Min(0) int page,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Min(1) @Max(100) int size,
             @RequestParam(value = "sortBy", defaultValue = "updatedAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction) {
         return ResponseEntity.ok(userService.getAllUsers(email, isActive, role, page, size, sortBy, direction));

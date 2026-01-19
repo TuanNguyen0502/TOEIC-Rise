@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 public class StatisticServiceImpl implements IStatisticService {
     private final IAuthenticationService authenticationService;
     private final IUserService userService;
+    private final IAccountService accountService;
     private final ITestSetService testSetService;
     private final ITestService testService;
     private final IFlashcardService flashcardService;
@@ -30,7 +31,7 @@ public class StatisticServiceImpl implements IStatisticService {
     @Cacheable(value = "systemOverview", key = "'global'")
     public SystemOverviewResponse getSystemOverview() {
         return SystemOverviewResponse.builder()
-                .totalAccounts(userService.countAllUsers())
+                .totalAccounts(accountService.countAllUsers())
                 .totalLearners(userService.countAllUsersWithRole(ERole.LEARNER))
                 .totalStaffs(userService.countAllUsersWithRole(ERole.STAFF) + userService.countAllUsersWithRole(ERole.ADMIN))
                 .totalTestSets(testSetService.totalTestSets())

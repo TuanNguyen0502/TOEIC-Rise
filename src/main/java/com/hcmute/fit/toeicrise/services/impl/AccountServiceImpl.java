@@ -97,4 +97,15 @@ public class AccountServiceImpl implements IAccountService {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
     }
+
+    @Override
+    public void validatePasswordMatch(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword))
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+    }
+
+    @Override
+    public Long countAllUsers() {
+        return accountRepository.count();
+    }
 }

@@ -9,6 +9,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.user.ProfileResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.user.UserDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.Account;
 import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.enums.EGender;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
 
 import java.time.LocalDateTime;
@@ -23,9 +24,8 @@ public interface IUserService {
     void updateUser(Long id, UserUpdateRequest request);
     void resetPassword(Long userId, UserResetPasswordRequest request);
     void changeAccountStatus(Long userId);
-    Long countAllUsers();
     User createUserWithGoogle(String avatar, String fullName, Account account);
-    User createUser(Account account, String fullName);
+    User createUser(Account account, String fullName, ERole roleName, EGender gender);
     Optional<User> findAccountById(Long id);
     Long countAllUsersWithRole(ERole role);
     Long countUsersBetweenDays(LocalDateTime from, LocalDateTime to);

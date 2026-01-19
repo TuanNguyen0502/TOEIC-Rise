@@ -36,7 +36,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse = authenticationService.login(loginRequest);
         String refreshToken = refreshTokenService.createRefreshTokenWithEmail(loginRequest.getEmail());
         Long refreshTokenExpirationTime = refreshTokenService.getRefreshTokenDurationMs();

@@ -98,4 +98,6 @@ public class MessageConstant {
     public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";
     public static final String VERIFICATION_CODE_SUCCESS = "Verification code sent.";
     public static final String PASSWORD_RESET_SUCCESS = "Password reset successfully.";
+    public static final String PASSWORD_UPDATE_SUCCESS = "Password updated successfully.";
+    public static final String PROFILE_UPDATE_SUCCESS = "Profile updated successfully.";
 }
