@@ -66,6 +66,7 @@ public class RedisConfiguration {
                 .serializeKeysWith(keyPair)
                 .serializeValuesWith(valuePair);
         return RedisCacheManager.builder(redisConnectionFactory)
+                .withCacheConfiguration("user", systemOverview)
                 .withCacheConfiguration("systemOverview", systemOverview)
                 .build();
     }
