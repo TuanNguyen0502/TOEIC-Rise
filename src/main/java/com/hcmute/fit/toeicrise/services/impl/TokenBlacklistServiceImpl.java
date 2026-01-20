@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TokenBlacklistServiceImpl implements ITokenBlacklistService {
     private static final Logger logger = LoggerFactory.getLogger(TokenBlacklistServiceImpl.class);
+    private static final String BLACKLIST_PREFIX = "blacklist:";
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtServiceImpl jwtService;
-    private static final String BLACKLIST_PREFIX = "blacklist:";
 
     public TokenBlacklistServiceImpl(@Qualifier("tokenBlacklistRedisTemplate") RedisTemplate<String, String> redisTemplate, JwtServiceImpl jwtService) {
         this.redisTemplate = redisTemplate;
@@ -39,10 +39,10 @@ public class TokenBlacklistServiceImpl implements ITokenBlacklistService {
             long ttl = expirationTime - currentTime;
 
             // Only blacklist if the token is not already expired
+            // Token is already expired, so it's effectively blacklisted
             if (ttl > 0) {
                 String key = BLACKLIST_PREFIX + token;
                 redisTemplate.opsForValue().set(key, "blacklisted", ttl, TimeUnit.MILLISECONDS);
-                logger.info("Token blacklisted successfully with TTL: {} ms", ttl);
 
                 // Verify the token was actually added to the blacklist
                 Boolean exists = redisTemplate.hasKey(key);
@@ -50,11 +50,8 @@ public class TokenBlacklistServiceImpl implements ITokenBlacklistService {
                     logger.error("Failed to verify token in blacklist after adding");
                     return false;
                 }
-                return true;
-            } else {
-                logger.info("Token already expired, no need to blacklist");
-                return true; // Token is already expired, so it's effectively blacklisted
             }
+            return true;
         } catch (RedisConnectionFailureException e) {
             logger.error("Redis connection failure while blacklisting token", e);
             return false;
