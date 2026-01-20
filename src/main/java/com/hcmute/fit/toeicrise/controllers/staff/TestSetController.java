@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController("staffTestSetController")
 @RequestMapping("/staff/test-sets")
 @RequiredArgsConstructor
 public class TestSetController {

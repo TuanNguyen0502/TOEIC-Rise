@@ -28,7 +28,7 @@ public class TestController {
                                          @RequestParam(required = false) ETestStatus status,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size,
-                                         @RequestParam(defaultValue = "updatedAt") String sortBy,
+                                         @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
                                          @RequestParam(defaultValue = "DESC") String direction) {
         return ResponseEntity.ok(testService.getAllTests(
                 name, status, page, size, sortBy, direction

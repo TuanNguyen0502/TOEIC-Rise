@@ -58,6 +58,7 @@ public interface TestMapper {
         }
     }
 
+    @Mapping(source = "numberOfLearnerTests", target = "numberOfLearnerTests")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     TestResponse toResponse(Test test);
