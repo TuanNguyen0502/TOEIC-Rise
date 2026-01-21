@@ -17,6 +17,7 @@ import com.hcmute.fit.toeicrise.repositories.specifications.TestSetSpecification
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TestSetServiceImpl implements ITestSetService {
     private final TestSetRepository testSetRepository;
     private final ITestService testService;
@@ -37,21 +39,17 @@ public class TestSetServiceImpl implements ITestSetService {
     private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public PageResponse getAllTestSets(String name,
-                                       ETestSetStatus status,
-                                       int page,
-                                       int size,
-                                       String sortBy,
-                                       String direction) {
+    @Transactional(readOnly = true)
+    public PageResponse getAllTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
-        if (name != null && !name.isEmpty()) {
+        if (name != null && !name.isEmpty())
             specification = specification.and(TestSetSpecification.nameContains(name));
-        }
-        specification = specification.and(TestSetSpecification.statusEquals(Objects.requireNonNullElse(status, ETestSetStatus.IN_USE)));
+        if (status == null)
+            status = ETestSetStatus.IN_USE;
+        specification = specification.and(TestSetSpecification.statusEquals(status));
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-
         Page<TestSetResponse> testSetResponses = testSetRepository.findAll(specification, pageable)
                 .map(testSetMapper::toTestSetResponse);
 
@@ -59,80 +57,81 @@ public class TestSetServiceImpl implements ITestSetService {
     }
 
     @Override
-    public List<TestSetResponse> getAllTestSet() {
-        return testSetRepository.getAllByStatus().stream().map(testSetMapper::toTestSetResponse).toList();
+    @Transactional(readOnly = true)
+    public List<TestSetResponse> getAllTestSets() {
+        return testSetRepository.getAllByStatus(ETestSetStatus.IN_USE).stream().map(testSetMapper::toTestSetResponse).toList();
     }
 
     @Override
-    public TestSetDetailResponse getTestSetDetailById(Long testSetId,
-                                                      String name,
-                                                      ETestStatus status,
-                                                      int page,
-                                                      int size,
-                                                      String sortBy,
-                                                      String direction) {
-        // Check if test set exists
-        TestSet testSet = testSetRepository.findById(testSetId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
-
-        // Get tests in the test set with filtering and pagination
+    @Transactional(readOnly = true)
+    public TestSetDetailResponse getTestSetDetailById(Long testSetId, String name, ETestStatus status, int page, int size,
+                                                      String sortBy, String direction) {
+        TestSet testSet = findTestSetById(testSetId);
         PageResponse testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
-        // Map to detail response
         return testSetMapper.toTestSetDetailResponse(testSet, testResponses);
     }
 
     @Override
+    @Transactional
     public void deleteTestSetById(Long id) {
-        TestSet testSet = testSetRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
+        TestSet testSet = findTestSetById(id);
         testSet.setStatus(ETestSetStatus.DELETED);
         testSetRepository.save(testSet);
-        // Also mark all tests in this test set as DELETED
+        log.info("Test set deleted successfully with id {}", id);
         testService.deleteTestsByTestSetId(id);
     }
 
     @Override
     @Transactional
     public void addTestSet(TestSetRequest testSetRequest) {
-        if (testSetRepository.existsByName(testSetRequest.getTestName())) {
+        if (testSetRepository.existsByName(testSetRequest.getTestName()))
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
-        }
         TestSet testSet = TestSet.builder()
                 .name(testSetRequest.getTestName())
                 .status(ETestSetStatus.IN_USE).build();
         testSetRepository.save(testSet);
+        log.info("Test set added successfully with name {}", testSetRequest.getTestName());
     }
 
     @Override
     @Transactional
     public TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
-        TestSet oldTestSet = testSetRepository.findById(updateTestSetRequest.getId()).orElse(null);
-        if (oldTestSet == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set");
-        }
-        TestSet testSet = testSetRepository.findByName(updateTestSetRequest.getTestName()).orElse(null);
-        if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())) {
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
-        }
+        TestSet oldTestSet = findTestSetById(updateTestSetRequest.getId());
+        testSetRepository.findByName(updateTestSetRequest.getTestName()).ifPresent(
+                existingTestSet -> {
+                    if (!existingTestSet.getId().equals(updateTestSetRequest.getId())){
+                        throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
+                    }
+                }
+        );
         oldTestSet.setName(updateTestSetRequest.getTestName());
 
         if (updateTestSetRequest.getStatus() != null && !oldTestSet.getStatus().equals(updateTestSetRequest.getStatus())) {
-            // If status is changed to DELETED, also mark all tests in this test set as DELETED
-            if (updateTestSetRequest.getStatus() == ETestSetStatus.DELETED) {
-                testService.deleteTestsByTestSetId(oldTestSet.getId());
-            }
-            // If status is changed to IN_USE, also mark all PENDING tests in this test set as PENDING
-            if (updateTestSetRequest.getStatus() == ETestSetStatus.IN_USE) {
-                testService.changeTestsStatusToPendingByTestSetId(oldTestSet.getId());
-            }
+            handleChangeTestSetStatus(updateTestSetRequest.getStatus(), updateTestSetRequest.getId());
             oldTestSet.setStatus(updateTestSetRequest.getStatus());
         }
 
         testSetRepository.save(oldTestSet);
+        log.info("Test set updated successfully with id {}", updateTestSetRequest.getId());
         return testSetMapper.toTestSetResponse(oldTestSet);
     }
 
     @Override
     public Long totalTestSets() {
         return testSetRepository.count();
+    }
+
+    @Override
+    public TestSet findTestSetById(Long testSetId) {
+        return testSetRepository.findById(testSetId).orElseThrow(
+                () -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set")
+        );
+    }
+
+    private void handleChangeTestSetStatus(ETestSetStatus status, Long testSetId) {
+        if (status == ETestSetStatus.DELETED)
+            testService.deleteTestsByTestSetId(testSetId);
+        if (status == ETestSetStatus.IN_USE)
+            testService.changeTestsStatusToPendingByTestSetId(testSetId);
     }
 }

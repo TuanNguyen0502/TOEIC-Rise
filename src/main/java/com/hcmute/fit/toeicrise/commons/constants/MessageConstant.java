@@ -100,4 +100,6 @@ public class MessageConstant {
     public static final String PASSWORD_RESET_SUCCESS = "Password reset successfully.";
     public static final String PASSWORD_UPDATE_SUCCESS = "Password updated successfully.";
     public static final String PROFILE_UPDATE_SUCCESS = "Profile updated successfully.";
+    public static final String TEST_SET_DELETED_SUCCESS = "Test Set deleted successfully.";
+    public static final String TEST_SET_CREATED_SUCCESS = "Test Set created successfully.";
 }

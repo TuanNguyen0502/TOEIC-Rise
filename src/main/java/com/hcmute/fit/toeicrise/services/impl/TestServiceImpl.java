@@ -16,7 +16,6 @@ import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.models.mappers.TestMapper;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
-import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 
@@ -48,7 +47,7 @@ import static com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils.extractG
 public class TestServiceImpl implements ITestService {
     private final TestRepository testRepository;
     private final IPartService partService;
-    private final TestSetRepository testSetRepository;
+    private final ITestSetService testSetService;
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
     private final ITagService tagService;
@@ -57,12 +56,14 @@ public class TestServiceImpl implements ITestService {
     private final PageResponseMapper pageResponseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
         return getTestResponses(name, status, page, size, sortBy, direction, specification);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(TestSpecification.testSetIdEquals(testSetId));
@@ -71,7 +72,6 @@ public class TestServiceImpl implements ITestService {
 
     @Override
     public TestResponse updateTest(Long id, TestUpdateRequest testUpdateRequest) {
-        // Validate test ID
         Test existingTest = testRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
 
@@ -148,7 +148,7 @@ public class TestServiceImpl implements ITestService {
     public void importTest(MultipartFile file, TestRequest request) {
         if (!isValidFile(file))
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
-        TestSet testSet = testSetRepository.findById(request.getTestSetId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Set"));
+        TestSet testSet = testSetService.findTestSetById(request.getTestSetId());
         if (testRepository.existsByName(request.getTestName()))
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
         Test test = createTest(request.getTestName(), testSet);
