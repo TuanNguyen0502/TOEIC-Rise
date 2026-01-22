@@ -26,7 +26,7 @@ public class TestSetController {
                                                 @Min(value = 0) int page,
                                             @RequestParam(defaultValue = "10")
                                                 @Min(value = 1) @Max(value = 100) int size,
-                                            @RequestParam(defaultValue = "updatedAt") String sortBy,
+                                            @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
                                             @RequestParam(defaultValue = "DESC") String direction) {
         return ResponseEntity.ok(testSetService.getAllTestSets(name, status, page, size, sortBy, direction));
     }
