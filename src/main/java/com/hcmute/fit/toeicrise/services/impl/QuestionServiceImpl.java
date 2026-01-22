@@ -20,10 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,6 +112,29 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds) {
         return questionRepository.findAllByIdWithTags(questionIds);
+    }
+
+    @Override
+    public void createQuestionBatch(List<QuestionExcelRequest> questionExcelRequests, QuestionGroup questionGroup) {
+        if (questionExcelRequests == null || questionExcelRequests.isEmpty())
+            return;
+
+        List<Question> questions = questionExcelRequests.stream().map(
+                request -> questionMapper.toEntity(request, questionGroup)).toList();
+        List<Question> savedQuestions = questionRepository.saveAll(questions);
+
+        Map<Question, List<Tag>> questionListMap = new HashMap<>();
+        for (int i = 0; i < savedQuestions.size(); i++) {
+            Question question = savedQuestions.get(i);
+            QuestionExcelRequest questionExcelRequest = questionExcelRequests.get(i);
+            if (questionExcelRequest != null && questionExcelRequest.getTags() != null && !questionExcelRequest.getTags().isEmpty()) {
+                List<Tag> tags = tagService.parseTagsAllowCreate(questionExcelRequest.getTags());
+                questionListMap.put(question, tags);
+            }
+        }
+        questionListMap.forEach(Question::setTags);
+        if (!questionListMap.isEmpty())
+            questionRepository.saveAll(questionListMap.keySet().stream().toList());
     }
 
     @Async

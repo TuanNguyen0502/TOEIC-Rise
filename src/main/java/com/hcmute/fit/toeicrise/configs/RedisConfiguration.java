@@ -61,13 +61,23 @@ public class RedisConfiguration {
     public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisSerializationContext.SerializationPair<String> keyPair = RedisSerializationContext.SerializationPair
                 .fromSerializer(new StringRedisSerializer());
-        RedisSerializationContext.SerializationPair<Object> valuePair = RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json());
+        // Save Object
+        RedisSerializationContext.SerializationPair<Object> jsonValuePair =
+                RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json());
+        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1))
+                .serializeKeysWith(keyPair)
+                .serializeValuesWith(jsonValuePair);
+        // Save List<object>
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
+        RedisSerializationContext.SerializationPair<Object> valuePair = RedisSerializationContext.SerializationPair.fromSerializer(serializer);
         RedisCacheConfiguration systemOverview = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1))
                 .serializeKeysWith(keyPair)
                 .serializeValuesWith(valuePair);
+
         return RedisCacheManager.builder(redisConnectionFactory)
-                .withCacheConfiguration("user", systemOverview)
-                .withCacheConfiguration("systemOverview", systemOverview)
+                .withCacheConfiguration("user", defaultCacheConfig)
+                .withCacheConfiguration("systemOverview", defaultCacheConfig)
+                .withCacheConfiguration("testSets", systemOverview)
                 .build();
     }
 }

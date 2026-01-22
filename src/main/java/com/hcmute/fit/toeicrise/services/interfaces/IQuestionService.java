@@ -25,4 +25,5 @@ public interface IQuestionService {
     List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds);
     void validateQuestion(List<Long> questionIds, List<Question> questions);
     List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds);
+    void createQuestionBatch(List<QuestionExcelRequest> questions, QuestionGroup questionGroup);
 }

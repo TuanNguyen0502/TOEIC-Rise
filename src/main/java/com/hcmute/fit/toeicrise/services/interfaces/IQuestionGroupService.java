@@ -19,37 +19,21 @@ import java.util.Set;
 
 public interface IQuestionGroupService {
     QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest request);
-
     @Transactional(readOnly = true)
     List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId);
-
     @Transactional
     void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request);
-
     void updateQuestionGroupWithEntity(QuestionGroup questionGroup, QuestionGroupUpdateRequest questionGroupUpdateRequest);
-
     QuestionGroup getQuestionGroup(Long questionGroupId);
-
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);
-
     QuestionGroup getQuestionGroupEntity(Long questionGroupId);
-
     String getPartNameByQuestionGroupId(Long questionGroupId);
-
     Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds);
-
     List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids);
-
     void checkQuestionGroupsExistByIds(List<Long> ids);
-
     boolean isListeningPart(Part part);
-
     @Transactional(readOnly = true)
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
-
     MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request);
-    
     MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
-
-    List<QuestionGroup> findAllByIdWithPart(Set<Long> questionIds);
 }

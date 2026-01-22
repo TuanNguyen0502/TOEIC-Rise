@@ -52,27 +52,22 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Override
     public List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId) {
         List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdOrderByPositionAsc(testId);
-
-        // Group question groups by part
         Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream()
                 .collect(Collectors.groupingBy(QuestionGroup::getPart));
 
-        // Convert the map to a list of PartResponse objects and sort by part name
         return groupedByPart.entrySet().stream()
                 .map(entry -> {
                     Part part = entry.getKey();
                     List<QuestionGroup> groups = entry.getValue();
-
-                    // Map each QuestionGroup to QuestionGroupResponse with questions
                     List<QuestionGroupResponse> questionGroupResponses = groups.stream()
                             .map(group -> {
-                                // Fetch questions for this question group
-                                List<QuestionResponse> questions = questionService.getQuestionsByQuestionGroupId(group.getId());
+                                List<QuestionResponse> questions = group.getQuestions().stream()
+                                        .sorted(Comparator.comparing(Question::getPosition))
+                                        .map(questionMapper::toQuestionResponse)
+                                        .toList();
                                 return questionGroupMapper.toResponse(group, questions);
                             })
                             .toList();
-
-                    // Create and return a PartResponse
                     return partMapper.toPartResponse(part, questionGroupResponses);
                 })
                 .sorted(Comparator.comparing(PartResponse::getName))
@@ -377,11 +372,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return MiniTestResponse.builder()
                 .questionGroups(miniTestQuestionGroupResponses)
                 .totalQuestions(globalQuestionPosition - 1).build();
-    }
-
-    @Override
-    public List<QuestionGroup> findAllByIdWithPart(Set<Long> questionIds) {
-        return questionGroupRepository.findAllByIdWithGroups(questionIds);
     }
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion) {

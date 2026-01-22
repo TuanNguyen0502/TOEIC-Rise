@@ -18,6 +18,8 @@ import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +59,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "testSets", key = "'IN_USE'", unless = "#result.isEmpty()")
     public List<TestSetResponse> getAllTestSets() {
         return testSetRepository.getAllByStatus(ETestSetStatus.IN_USE).stream().map(testSetMapper::toTestSetResponse).toList();
     }
@@ -95,6 +97,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "testSets", allEntries = true)
     public TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
         TestSet oldTestSet = findTestSetById(updateTestSetRequest.getId());
         testSetRepository.findByName(updateTestSetRequest.getTestName()).ifPresent(
