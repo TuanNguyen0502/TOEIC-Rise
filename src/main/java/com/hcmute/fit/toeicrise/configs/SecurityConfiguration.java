@@ -4,7 +4,6 @@ import com.hcmute.fit.toeicrise.exceptions.handlers.SecurityExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
-    private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
@@ -42,9 +40,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/**", "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/test-sets", "/tests/**")
                         .permitAll()
-                        .requestMatchers("/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-groups/**", "/admin/questions/**", "/admin/question-reports/**", "/admin/tags/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/test-sets/**", "/staff/tests/**", "/staff/question-reports/**", "/staff/stats/**", "/admin/stats/**").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
+                                "/admin/question-reports/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
+                                "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
+                                "/staff/stats/**", "/admin/stats/**")
+                        .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
@@ -66,7 +68,6 @@ public class SecurityConfiguration {
                         .permitAll()
                 )
                 .userDetailsService(userDetailsService)
-                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

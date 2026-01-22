@@ -10,6 +10,7 @@ public class TestResponse {
     private Long id;
     private String name;
     private ETestStatus status;
+    private Long numberOfLearnerTests;
     private String createdAt;
     private String updatedAt;
 }
