@@ -15,7 +15,10 @@ import java.util.Set;
 public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSpecificationExecutor<Question> {
     List<Question> findAllByQuestionGroup_Id(Long questionGroupId);
 
-    @Query("SELECT DISTINCT q FROM Question q LEFT JOIN FETCH q.tags WHERE q.id IN :ids")
+    @Query("SELECT q FROM Question q " +
+            "LEFT JOIN FETCH q.tags t " +
+            "WHERE q.questionGroup.id IN :ids " +
+            "ORDER BY q.questionGroup.position, q.position")
     List<Question> findAllByIdWithTags(@Param("ids") Set<Long> ids);
 
     @Query("SELECT DISTINCT q " +

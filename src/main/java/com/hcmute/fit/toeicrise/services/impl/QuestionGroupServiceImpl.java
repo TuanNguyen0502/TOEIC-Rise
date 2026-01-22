@@ -51,7 +51,15 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Transactional(readOnly = true)
     @Override
     public List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId) {
-        List<QuestionGroup> questionGroups = questionGroupRepository.findByTest_IdOrderByPositionAsc(testId);
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdWithPart(testId);
+        Set<Long> questionGroupIds = questionGroups.stream().map(QuestionGroup::getId).collect(Collectors.toSet());
+        List<Question> questions = questionService.findAllQuestionByIdWithTags(questionGroupIds);
+        Map<Long, List<Question>> questionsByGroupId = questions.stream().collect(
+                Collectors.groupingBy(q -> q.getQuestionGroup().getId()));
+        questionGroups.forEach(questionGroup -> {
+            List<Question> groupQuestions = questionsByGroupId.getOrDefault(questionGroup.getId(), Collections.emptyList());
+            questionGroup.setQuestions(groupQuestions);
+        });
         Map<Part, List<QuestionGroup>> groupedByPart = questionGroups.stream()
                 .collect(Collectors.groupingBy(QuestionGroup::getPart));
 
@@ -61,11 +69,11 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                     List<QuestionGroup> groups = entry.getValue();
                     List<QuestionGroupResponse> questionGroupResponses = groups.stream()
                             .map(group -> {
-                                List<QuestionResponse> questions = group.getQuestions().stream()
+                                List<QuestionResponse> questionsResponse = group.getQuestions().stream()
                                         .sorted(Comparator.comparing(Question::getPosition))
                                         .map(questionMapper::toQuestionResponse)
                                         .toList();
-                                return questionGroupMapper.toResponse(group, questions);
+                                return questionGroupMapper.toResponse(group, questionsResponse);
                             })
                             .toList();
                     return partMapper.toPartResponse(part, questionGroupResponses);

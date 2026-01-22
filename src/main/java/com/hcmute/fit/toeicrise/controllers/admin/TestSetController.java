@@ -19,18 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class TestSetController {
     private final ITestSetService testSetService;
 
-    @GetMapping("")
-    public ResponseEntity<?> getAllTestSets(@RequestParam(required = false) String name,
-                                            @RequestParam(required = false) ETestSetStatus status,
-                                            @RequestParam(defaultValue = "0")
-                                                @Min(value = 0) int page,
-                                            @RequestParam(defaultValue = "10")
-                                                @Min(value = 1) @Max(value = 100) int size,
-                                            @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
-                                            @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testSetService.getAllTestSets(name, status, page, size, sortBy, direction));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getTestSetDetailById(@PathVariable Long id,
                                                   @RequestParam(required = false) String name,
