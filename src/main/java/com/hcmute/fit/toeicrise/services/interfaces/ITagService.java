@@ -10,9 +10,16 @@ import java.util.function.Function;
 
 public interface ITagService {
     List<Tag> getTagsFromString(String tagsString, Function<String, Tag> resolver);
+
     PageResponse getAllTags(int page, int pageSize, String tagsName);
+
+    PageResponse getAllTagsForDashboard(int page, int pageSize, String sortBy, String direction, String tagsName);
+
     List<TagByPartResponse> getTagsByPartId(Long partId);
+
     List<Tag> parseTagsAllowCreate(String tagsString);
-    List<Tag> parseTagsOrThrow(String tagsString);
+    
     void checkExistsIds(Set<Long> tagIds);
+
+    void createTagIfNotExists(String tagName);
 }
