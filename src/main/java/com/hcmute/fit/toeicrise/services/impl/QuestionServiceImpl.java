@@ -66,11 +66,6 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public List<Question> getQuestionEntitiesByIds(List<Long> questionIds) {
-        return questionRepository.findAllById(questionIds);
-    }
-
-    @Override
     public Optional<Question> findById(Long aLong) {
         return questionRepository.findById(aLong);
     }
@@ -100,7 +95,7 @@ public class QuestionServiceImpl implements IQuestionService {
 
     @Override
     public void validateQuestion(List<Long> questionIds, List<Question> questions) {
-        if (questions.size() != questionIds.size()){
+        if (questions.size() != questionIds.size()) {
             Set<Long> foundIds = questions.stream().map(Question::getId)
                     .collect(Collectors.toSet());
             if (!foundIds.containsAll(questionIds))

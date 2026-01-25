@@ -38,18 +38,12 @@ public interface IQuestionGroupService {
 
     Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds);
 
-    List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids);
-
-    void checkQuestionGroupsExistByIds(List<Long> ids);
-
     boolean isListeningPart(Part part);
 
     @Transactional(readOnly = true)
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
 
     MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request);
-    
-    MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
 
-    List<QuestionGroup> findAllByIdWithPart(Set<Long> questionIds);
+    MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
 }

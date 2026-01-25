@@ -155,21 +155,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                 ));
     }
 
-    @Override
-    public List<QuestionGroup> findAllByIdsWithQuestions(Set<Long> ids) {
-        return questionGroupRepository.findAllByIdInFetchQuestions(ids);
-    }
-
-    @Override
-    public void checkQuestionGroupsExistByIds(List<Long> ids) {
-        Set<Long> existingIds = questionGroupRepository.findExistingIdsByIds(ids);
-        for (Long id : ids) {
-            if (!existingIds.contains(id)) {
-                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
-            }
-        }
-    }
-
     private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
         boolean hasFile = newFile != null && !newFile.isEmpty();
         boolean hasUrl = newUrl != null && !newUrl.isBlank();
@@ -377,11 +362,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         return MiniTestResponse.builder()
                 .questionGroups(miniTestQuestionGroupResponses)
                 .totalQuestions(globalQuestionPosition - 1).build();
-    }
-
-    @Override
-    public List<QuestionGroup> findAllByIdWithPart(Set<Long> questionIds) {
-        return questionGroupRepository.findAllByIdWithGroups(questionIds);
     }
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion) {
