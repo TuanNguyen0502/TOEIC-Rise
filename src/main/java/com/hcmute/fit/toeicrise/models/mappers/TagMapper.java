@@ -23,8 +23,8 @@ public interface TagMapper {
                 .id(tag.getId())
                 .name(tag.getName())
                 .questionCount(tag.getQuestions().stream().map(Question::getId).toList().size())
-                .userAnswerCount(0)
-                .correctRate(0.0f)
+                .userAnswerCount(tag.getNumberOfUserAnswers())
+                .correctRate(tag.getUserAnswersCorrectionRate())
                 .build();
     }
 }
