@@ -10,12 +10,10 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupR
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
-import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
-import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
@@ -35,7 +33,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class QuestionGroupServiceImpl implements IQuestionGroupService {
-    private final TestRepository testRepository;
     private final QuestionGroupRepository questionGroupRepository;
     private final IQuestionService questionService;
     private final CloudinaryUtil cloudinaryUtil;
@@ -81,7 +78,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
         questionGroupRepository.save(questionGroup);
         log.info("Update question group successfully with ID: {}", questionGroup.getId());
-        changeTestStatusToPending(questionGroup);
+        questionService.changeTestStatusToPending(questionGroup.getTest());
     }
 
     @Override
@@ -226,15 +223,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             }).toList();
             return partMapper.toPartResponse(part, groupResponses);
         }, Comparator.comparing(PartResponse::getName));
-    }
-
-    public void changeTestStatusToPending(QuestionGroup questionGroup) {
-        Test test = questionGroup.getTest();
-        if (test.getStatus() != ETestStatus.PENDING) {
-            test.setStatus(ETestStatus.PENDING);
-            testRepository.save(test);
-            log.info("Test updated status successfully with id: {}", test.getId());
-        }
     }
 
     public Map<Long, List<Question>> attachQuestionsToGroups(List<QuestionGroup> questionGroups){

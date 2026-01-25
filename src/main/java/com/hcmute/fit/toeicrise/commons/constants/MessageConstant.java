@@ -103,4 +103,5 @@ public class MessageConstant {
     public static final String TEST_SET_DELETED_SUCCESS = "Test Set deleted successfully.";
     public static final String TEST_SET_CREATED_SUCCESS = "Test Set created successfully.";
     public static final String TEST_IMPORT_SUCCESS = "Test imported successfully";
+    public static final String QUESTION_UPDATE_SUCCESS = "Update question updated successfully";
 }
