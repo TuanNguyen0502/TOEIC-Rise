@@ -33,4 +33,10 @@ public class TagController {
         tagService.createTagIfNotExists(tagName);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{tagId}")
+    public ResponseEntity<?> updateTag(@PathVariable Long tagId, @RequestParam String tagName) {
+        tagService.updateTag(tagId, tagName);
+        return ResponseEntity.ok().build();
+    }
 }

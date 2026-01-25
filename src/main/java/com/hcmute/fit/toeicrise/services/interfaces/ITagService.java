@@ -18,8 +18,10 @@ public interface ITagService {
     List<TagByPartResponse> getTagsByPartId(Long partId);
 
     List<Tag> parseTagsAllowCreate(String tagsString);
-    
+
     void checkExistsIds(Set<Long> tagIds);
 
     void createTagIfNotExists(String tagName);
+
+    void updateTag(Long tagId, String tagName);
 }

@@ -120,4 +120,18 @@ public class TagServiceImpl implements ITagService {
                 });
         throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagName);
     }
+
+    @Override
+    public void updateTag(Long tagId, String tagName) {
+        Tag existingTag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag ID: " + tagId));
+
+        Optional<Tag> tagWithName = tagRepository.findByName(tagName);
+        if (tagWithName.isPresent() && !tagWithName.get().getId().equals(tagId)) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagName);
+        }
+
+        existingTag.setName(tagName);
+        tagRepository.save(existingTag);
+    }
 }
