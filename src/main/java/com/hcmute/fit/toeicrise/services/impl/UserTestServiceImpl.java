@@ -187,9 +187,12 @@ public class UserTestServiceImpl implements IUserTestService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
         // Get all question groups in test
         List<QuestionGroup> questionGroups = test.getQuestionGroups();
-        // Create a map of all questions in the test for quick lookup
-        Map<Long, Question> allQuestionsInTest = questionGroups.stream()
+        // Get all questions in test
+        List<Question> questions = questionGroups.stream()
                 .flatMap(qg -> qg.getQuestions().stream())
+                .toList();
+        // Create a map of all questions in the test for quick lookup
+        Map<Long, Question> questionMap = questions.stream()
                 .collect(Collectors.toMap(Question::getId, q -> q));
         // Create a map to identify if a question belongs to a listening part
         Map<Long, Boolean> questionIdIsListeningMap = questionGroups.stream()
@@ -217,7 +220,7 @@ public class UserTestServiceImpl implements IUserTestService {
             if (!questionGroupIdsInTest.contains(answerRequest.getQuestionGroupId())) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Answer contains question group not in the test");
             }
-            if (!allQuestionsInTest.containsKey(answerRequest.getQuestionId())) {
+            if (!questionMap.containsKey(answerRequest.getQuestionId())) {
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Answer contains question not in the test");
             }
             if (!questionBelongToQuestionGroup.get(answerRequest.getQuestionId()).equals(answerRequest.getQuestionGroupId())) {
@@ -238,7 +241,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 .parts(request.getParts())
                 .build();
 
-        calculateScore(isFullTest, allQuestionsInTest, questionIdIsListeningMap, userTest, request.getAnswers());
+        calculateScore(isFullTest, questionMap, questionIdIsListeningMap, userTest, request.getAnswers());
 
         userTestRepository.save(userTest);
         return userTestMapper.toTestResultOverallResponse(userTest);
