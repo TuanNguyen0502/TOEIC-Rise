@@ -10,7 +10,7 @@ import lombok.*;
 public class TagDashboardResponse {
     private Long id;
     private String name;
-    private Integer questionCount;
-    private Integer userAnswerCount;
-    private Float correctRate;
+    private Long questionCount;
+    private Long userAnswerCount;
+    private Double correctRate;
 }

@@ -62,29 +62,11 @@ public class TagServiceImpl implements ITagService {
     }
 
     @Override
-    public PageResponse getAllTagsForDashboard(int page, int pageSize, String sortBy, String direction, String tagsName) {
-        Specification<Tag> specification = (_, _, cb) -> cb.conjunction();
-        if (StringUtils.hasText(tagsName)) {
-            specification = specification.and(TagSpecification.nameContains(tagsName));
-        }
-        Sort sort;
-        if (sortBy.equals("name")) {
-            sort = Sort.by(Sort.Direction.fromString(direction), "name");
-        } else {
-            sort = Sort.by(Sort.Direction.DESC, "id");
-        }
+    public PageResponse getAllTagsForDashboard(int page, int pageSize, String sortBy, String direction, String tagName) {
+        String searchName = (tagName == null || tagName.trim().isEmpty()) ? null : tagName;
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, pageSize, sort);
-
-        Page<TagDashboardResponse> tags = tagRepository.findAll(specification, pageable).map(tagMapper::mapToTagDashboardResponse);
-        if (sortBy.equals("questionCount")) {
-            List<TagDashboardResponse> sortedTags = new ArrayList<>(tags.getContent());
-            if (direction.equalsIgnoreCase("asc")) {
-                sortedTags.sort(Comparator.comparingInt(TagDashboardResponse::getQuestionCount));
-            } else {
-                sortedTags.sort(Comparator.comparingInt(TagDashboardResponse::getQuestionCount).reversed());
-            }
-            tags = new org.springframework.data.domain.PageImpl<>(sortedTags, pageable, tags.getTotalElements());
-        }
+        Page<TagDashboardResponse> tags = tagRepository.findAllTagStatistics(searchName, pageable).map(tagMapper::mapToTagDashboardResponse);
         return pageResponseMapper.toPageResponse(tags);
     }
 
