@@ -33,4 +33,8 @@ public enum EPart {
         }
         throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, name);
     }
+
+    public boolean allowImage() {
+        return !this.getName().contains("2") && !this.getName().contains("5");
+    }
 }

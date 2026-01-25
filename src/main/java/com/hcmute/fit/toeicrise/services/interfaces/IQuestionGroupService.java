@@ -22,9 +22,8 @@ public interface IQuestionGroupService {
     @Transactional(readOnly = true)
     List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId);
     @Transactional
-    void updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request);
+    QuestionGroupResponse updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request);
     void updateQuestionGroupWithEntity(QuestionGroup questionGroup, QuestionGroupUpdateRequest questionGroupUpdateRequest);
-    QuestionGroup getQuestionGroup(Long questionGroupId);
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);
     QuestionGroup getQuestionGroupEntity(Long questionGroupId);
     String getPartNameByQuestionGroupId(Long questionGroupId);
@@ -34,6 +33,4 @@ public interface IQuestionGroupService {
     boolean isListeningPart(Part part);
     @Transactional(readOnly = true)
     List<LearnerTestPartResponse> getQuestionGroupsByTestIdGroupByParts(Long testId, List<Long> partIds);
-    MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request);
-    MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
 }
