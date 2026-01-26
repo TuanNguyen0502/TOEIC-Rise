@@ -242,5 +242,5 @@ public class Constant {
     // Flashcard constants
     public static final String FLASHCARD_NAME_PATTERN = "^[\\p{L}0-9 ().,'-]{1,100}$";
     // Tag constants
-    public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 ().,'-]{1,50}$";
+    public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
 }

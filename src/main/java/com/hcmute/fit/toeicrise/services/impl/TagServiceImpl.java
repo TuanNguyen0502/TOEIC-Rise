@@ -96,12 +96,14 @@ public class TagServiceImpl implements ITagService {
 
     @Override
     public void createTagIfNotExists(TagRequest tagRequest) {
-        tagRepository.findByName(tagRequest.getName())
-                .orElseGet(() -> {
-                    Tag newTag = Tag.builder().name(tagRequest.getName()).build();
-                    return tagRepository.save(newTag);
-                });
-        throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagRequest.getName());
+        Optional<Tag> existingTag = tagRepository.findByName(tagRequest.getName());
+        if (existingTag.isPresent()) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagRequest.getName());
+        }
+        Tag newTag = Tag.builder()
+                .name(tagRequest.getName())
+                .build();
+        tagRepository.save(newTag);
     }
 
     @Override

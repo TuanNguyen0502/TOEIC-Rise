@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.dtos.requests.tag.TagRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +31,13 @@ public class TagController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createTag(@RequestBody TagRequest tagRequest) {
+    public ResponseEntity<?> createTag(@Valid @RequestBody TagRequest tagRequest) {
         tagService.createTagIfNotExists(tagRequest);
         return ResponseEntity.ok().build();
     }
-    
+
     @PutMapping("/{tagId}")
-    public ResponseEntity<?> updateTag(@PathVariable Long tagId, @RequestBody TagRequest tagRequest) {
+    public ResponseEntity<?> updateTag(@PathVariable Long tagId, @Valid @RequestBody TagRequest tagRequest) {
         tagService.updateTag(tagId, tagRequest);
         return ResponseEntity.ok().build();
     }

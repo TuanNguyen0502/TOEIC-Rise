@@ -92,5 +92,5 @@ public class MessageConstant {
     public static final String TAG_NOT_EMPTY = "Tag must not be empty.";
     public static final String TAG_NAME_NOT_NULL = "Tag name must not be null.";
     public static final String TAG_NAME_NOT_BLANK = "Tag name must not be blank.";
-    public static final String TAG_NAME_INVALID = "Tag name can only contain letters, digits, spaces, and special characters ().,'- and must be between 1 and 50 characters long.";
+    public static final String TAG_NAME_INVALID = "Tag name can only contain letters, digits, spaces, and special characters []():.,'- and must be between 1 and 50 characters long.";
 }
