@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.tag.TagRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.tag.TagDashboardResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.tag.TagResponse;
@@ -94,26 +95,26 @@ public class TagServiceImpl implements ITagService {
     }
 
     @Override
-    public void createTagIfNotExists(String tagName) {
-        tagRepository.findByName(tagName)
+    public void createTagIfNotExists(TagRequest tagRequest) {
+        tagRepository.findByName(tagRequest.getName())
                 .orElseGet(() -> {
-                    Tag newTag = Tag.builder().name(tagName).build();
+                    Tag newTag = Tag.builder().name(tagRequest.getName()).build();
                     return tagRepository.save(newTag);
                 });
-        throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagName);
+        throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagRequest.getName());
     }
 
     @Override
-    public void updateTag(Long tagId, String tagName) {
+    public void updateTag(Long tagId, TagRequest tagRequest) {
         Tag existingTag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag ID: " + tagId));
 
-        Optional<Tag> tagWithName = tagRepository.findByName(tagName);
+        Optional<Tag> tagWithName = tagRepository.findByName(tagRequest.getName());
         if (tagWithName.isPresent() && !tagWithName.get().getId().equals(tagId)) {
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagName);
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagRequest.getName());
         }
 
-        existingTag.setName(tagName);
+        existingTag.setName(tagRequest.getName());
         tagRepository.save(existingTag);
     }
 }

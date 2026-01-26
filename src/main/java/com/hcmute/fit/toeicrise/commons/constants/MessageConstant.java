@@ -71,8 +71,6 @@ public class MessageConstant {
     // Question Report related messages
     public static final String QUESTION_REPORT_REASONS_NOT_EMPTY = "Report reasons must not be empty.";
     public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_NULL = "Resolved note must not be null.";
-    public static final String QUESTION_REPORT_RESOLVED_NOTE_NOT_BLANK = "Resolved note must not be blank.";
-    public static final String QUESTION_REPORT_STATUS_NOT_BLANK = "Report status must not be blank.";
     public static final String QUESTION_REPORT_STATUS_NOT_NULL = "Report status must not be null.";
     // Flashcard related messages
     public static final String FLASHCARD_NAME_NOT_NULL = "Flashcard name must not be null.";
@@ -92,4 +90,7 @@ public class MessageConstant {
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
     public static final String TAG_NOT_EMPTY = "Tag must not be empty.";
+    public static final String TAG_NAME_NOT_NULL = "Tag name must not be null.";
+    public static final String TAG_NAME_NOT_BLANK = "Tag name must not be blank.";
+    public static final String TAG_NAME_INVALID = "Tag name can only contain letters, digits, spaces, and special characters ().,'- and must be between 1 and 50 characters long.";
 }

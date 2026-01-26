@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
+import com.hcmute.fit.toeicrise.dtos.requests.tag.TagRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +30,14 @@ public class TagController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createTag(@RequestParam String tagName) {
-        tagService.createTagIfNotExists(tagName);
+    public ResponseEntity<?> createTag(@RequestBody TagRequest tagRequest) {
+        tagService.createTagIfNotExists(tagRequest);
         return ResponseEntity.ok().build();
     }
-
+    
     @PutMapping("/{tagId}")
-    public ResponseEntity<?> updateTag(@PathVariable Long tagId, @RequestParam String tagName) {
-        tagService.updateTag(tagId, tagName);
+    public ResponseEntity<?> updateTag(@PathVariable Long tagId, @RequestBody TagRequest tagRequest) {
+        tagService.updateTag(tagId, tagRequest);
         return ResponseEntity.ok().build();
     }
 }
