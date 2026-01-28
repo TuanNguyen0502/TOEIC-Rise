@@ -4,6 +4,8 @@ import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "tests")
 @EqualsAndHashCode(callSuper = true)
@@ -25,4 +27,7 @@ public class Test extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "test_set_id")
     private TestSet testSet;
+
+    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionGroup> questionGroups;
 }

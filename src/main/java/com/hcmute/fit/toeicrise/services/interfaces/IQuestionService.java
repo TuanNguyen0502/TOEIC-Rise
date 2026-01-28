@@ -14,15 +14,23 @@ import java.util.Set;
 
 public interface IQuestionService {
     void createQuestion(QuestionExcelRequest request, QuestionGroup questionGroup, List<Tag> tags);
+
     List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId);
+
     @Transactional
     void updateQuestion(QuestionRequest questionRequest);
+
     QuestionResponse getQuestionById(Long questionId);
-    List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
+
     Optional<Question> findById(Long aLong);
+
     void updateQuestionWithEntity(Question question, QuestionRequest request);
+
     List<Question> getAllQuestionsByPartAndTags(Set<Long> tagIds, Long partId);
+
     List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds);
+
     void validateQuestion(List<Long> questionIds, List<Question> questions);
+
     List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds);
 }
