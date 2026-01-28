@@ -34,4 +34,7 @@ public interface ITestService {
     PageResponse searchTestsByName(PageRequest request);
     LearnerTestDetailResponse getLearnerTestDetailById(Long id);
     Long totalTest();
+    Test getTestById(Long testId);
+    void incrementNumberOfLearnersSubmit(Test test);
+    Test getTestByIdAndStatus(Long testId, ETestStatus status);
 }

@@ -267,8 +267,20 @@ public class TestServiceImpl implements ITestService {
         return testRepository.count();
     }
 
-    private Test getTestById(Long testId){
+    @Override
+    public Test getTestById(Long testId){
         return testRepository.findByIdWithTestSet(testId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+    }
+
+    @Override
+    public void incrementNumberOfLearnersSubmit(Test test) {
+        test.setNumberOfLearnerTests(test.getNumberOfLearnerTests() + 1);
+        testRepository.save(test);
+    }
+
+    @Override
+    public Test getTestByIdAndStatus(Long testId, ETestStatus status) {
+        return testRepository.findByIdAndStatus(testId, status).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
     }
 
     private Map<Integer, List<QuestionExcelRequest>> groupQuestionsByKey(List<QuestionExcelRequest> questionExcelRequests){

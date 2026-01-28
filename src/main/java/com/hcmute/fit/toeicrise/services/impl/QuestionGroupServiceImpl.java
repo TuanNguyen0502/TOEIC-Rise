@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
@@ -200,7 +201,14 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
         return HelperUtil.groupByPartAndMap(questionGroups, (part, groups) -> {
             List<LearnerTestQuestionGroupResponse> groupResponses = groups.stream().sorted(Comparator.comparing(QuestionGroup::getPosition))
-                    .map(questionGroupMapper::toLearnerTestQuestionGroupResponse)
+                    .map(group -> {
+                        List<LearnerTestQuestionResponse> questionResponses = group.getQuestions().stream().sorted(Comparator.comparing(Question::getPosition))
+                                .map(questionMapper::toLearnerTestQuestionResponse).toList();
+
+                        LearnerTestQuestionGroupResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(group);
+                        groupResponse.setQuestions(new ArrayList<>(questionResponses));
+                        return groupResponse;
+                    })
                     .toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
             partResponse.setQuestionGroups(groupResponses);

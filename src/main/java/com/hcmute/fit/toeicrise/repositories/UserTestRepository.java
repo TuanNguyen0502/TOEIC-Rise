@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,10 +19,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSpecificationExecutor<UserTest> {
-    @Query("SELECT ut FROM UserTest ut " +
-            "JOIN FETCH ut.userAnswers ua " +
-            "JOIN FETCH ua.question " +
-            "WHERE ut.id = :id")
+    @EntityGraph(attributePaths = {"userAnswers", "userAnswers.question", "userAnswers.question.tags"})
+    @Query("SELECT ut FROM UserTest ut WHERE ut.id = :id")
     Optional<UserTest> findByIdWithAnswersAndQuestions(@Param("id") Long id);
 
     @Query("SELECT ut " +
@@ -46,8 +45,8 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
 
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
             "ut.id, t.name, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
-            "FROM Test t " +
-            "INNER JOIN UserTest ut ON t.id = ut.test.id " +
+            "FROM UserTest ut " +
+            "JOIN ut.test t " +
             "WHERE t.id = :id AND ut.user.account.email = :email " +
             "ORDER BY ut.createdAt DESC ")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
