@@ -13,6 +13,7 @@ import lombok.*;
 public class UserAnswer extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_test_id")
+    @ToString.Exclude
     private UserTest userTest;
 
     @ManyToOne(optional = false)

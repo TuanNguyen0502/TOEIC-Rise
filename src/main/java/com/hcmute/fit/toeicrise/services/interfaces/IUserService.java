@@ -29,4 +29,5 @@ public interface IUserService {
     Optional<User> findAccountById(Long id);
     Long countAllUsersWithRole(ERole role);
     Long countUsersBetweenDays(LocalDateTime from, LocalDateTime to);
+    User getUserByEmail(String email);
 }

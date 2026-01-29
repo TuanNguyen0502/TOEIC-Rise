@@ -60,6 +60,7 @@ public class Account extends BaseEntity implements UserDetails {
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
     @JsonManagedReference
+    @ToString.Exclude
     private User user;
 
     @Override

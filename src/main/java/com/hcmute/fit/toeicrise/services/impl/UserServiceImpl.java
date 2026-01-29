@@ -206,6 +206,12 @@ public class UserServiceImpl implements IUserService {
         return userRepository.countByRole_NameBetweenDays(ERole.LEARNER, from, to);
     }
 
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+    }
+
     private User findUserById(Long id) {
         return userRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));

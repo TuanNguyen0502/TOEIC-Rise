@@ -62,7 +62,6 @@ public class ExamTypeStatsResponse {
                 groupedResponses.sort(Comparator.comparing(UserAnswerGroupedByTagResponse::getCorrectPercent));
                 groupedResponses.add(totalPartResponse);
                 userAnswersByPart.put(partName, groupedResponses);
-
             }
         }
 

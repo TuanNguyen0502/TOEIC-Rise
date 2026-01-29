@@ -25,12 +25,8 @@ import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.*;
 import com.hcmute.fit.toeicrise.models.mappers.*;
-import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
-import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
-import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
+import com.hcmute.fit.toeicrise.services.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -54,7 +50,7 @@ public class UserTestServiceImpl implements IUserTestService {
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
     private final ITestService testService;
-    private final UserRepository userRepository;
+    private final IUserService userService;
     private final UserTestRepository userTestRepository;
     private final UserTestMapper userTestMapper;
     private final TestMapper testMapper;
@@ -100,8 +96,7 @@ public class UserTestServiceImpl implements IUserTestService {
     @Override
     @CacheEvict(value = "systemOverview", key = "'global'")
     public TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request) {
-        User user = userRepository.findByAccount_Email(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
+        User user = userService.getUserByEmail(email);
         Test test = testService.getTestById(request.getTestId());
         testService.incrementNumberOfLearnersSubmit(test);
 
@@ -170,28 +165,36 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
-        Optional<UserTest> userTest = userTestRepository.findFirstByOrderByCreatedAtDesc();
-        LocalDateTime localDateTime = userTest.map(user -> user.getCreatedAt().minusDays(days.getDays()))
+        LocalDateTime localDateTime = userTestRepository.findLatestUserTestCreatedAt(email)
+                .map(user -> user.minusDays(days.getDays()))
                 .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
         List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime, ETestStatus.APPROVED);
+        ExamTypeStatsResponse listening = new ExamTypeStatsResponse();
+        ExamTypeStatsResponse reading = new ExamTypeStatsResponse();
+
+        if (userTests.isEmpty())
+            return AnalysisResultResponse.builder()
+                    .numberOfTests(0)
+                    .numberOfSubmissions(userTests.size())
+                    .totalTimes(0L)
+                    .examList(List.of(
+                            listening.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of()),
+                            reading.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of())))
+                    .build();
         int numberOfTests = (int)userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
 
         Set<Long> questionIds = userTests.stream()
-                .filter(ut -> ut.getUserAnswers() != null &&!ut.getUserAnswers().isEmpty())
+                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
                 .flatMap(ut -> ut.getUserAnswers().stream())
                 .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, Question> questionMapWithTags;
-        if (!questionIds.isEmpty()) {
-            List<Question> questionsWithTags = questionService.findAllQuestionByIdWithTags(questionIds);
-            questionMapWithTags = questionsWithTags.stream().collect(Collectors.toMap(Question::getId, q -> q));
-        } else {
-            questionMapWithTags = new HashMap<>();
-        }
+        Map<Long, Question> questionMapWithTags = questionIds.isEmpty() ? new HashMap<>() :
+                questionService.findAllQuestionByIdWithTags(questionIds).stream()
+                        .collect(Collectors.toMap(Question::getId, q -> q));
         userTests.forEach(ut -> {
             if (ut.getUserAnswers() != null) {
                 ut.getUserAnswers().forEach(userAnswer -> {
@@ -285,12 +288,10 @@ public class UserTestServiceImpl implements IUserTestService {
             }
         }
 
-        ExamTypeStatsResponse listening = new ExamTypeStatsResponse();
-        listening.buildExamTypeStatsResponse(totalQuestionsListening, correctAnswersListening,
+        listening = listening.buildExamTypeStatsResponse(totalQuestionsListening, correctAnswersListening,
                 rawDataByExamType.get(EExamType.LISTENING), rawPartStatsByExamType.get(EExamType.LISTENING));
 
-        ExamTypeStatsResponse reading = new ExamTypeStatsResponse();
-        reading.buildExamTypeStatsResponse(totalQuestionsReading, correctAnswersReading,
+        reading = reading.buildExamTypeStatsResponse(totalQuestionsReading, correctAnswersReading,
                 rawDataByExamType.get(EExamType.READING), rawPartStatsByExamType.get(EExamType.READING));
 
         return AnalysisResultResponse.builder()
