@@ -8,6 +8,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.minitest.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
+import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
@@ -15,6 +16,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.IMiniTestService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MiniTestServiceImpl implements IMiniTestService {
     private final IQuestionService questionService;
     private final QuestionMapper questionMapper;
@@ -30,16 +33,15 @@ public class MiniTestServiceImpl implements IMiniTestService {
 
     @Override
     public MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request) {
-        List<Long> questionIds = request.getQuestionGroups().stream()
-                .flatMap(group -> group.getUserAnswerRequests().stream())
-                .map(UserAnswerMiniTestRequest::getQuestionId)
-                .filter(Objects::nonNull)
-                .distinct().toList();
+        if (request == null || request.getQuestionGroups() == null || request.getQuestionGroups().isEmpty())
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Mini test request cannot be empty");
 
+        List<Long> questionIds = request.getQuestionGroups().stream().flatMap(group -> group.getUserAnswerRequests().stream())
+                .map(UserAnswerMiniTestRequest::getQuestionId).filter(Objects::nonNull).distinct().toList();
         List<Question> questions = questionService.getQuestionsWithGroupsByIds(questionIds);
         questionService.validateQuestion(questionIds, questions);
-        Map<Long, Question> questionMap = questions.stream()
-                .collect(Collectors.toMap(Question::getId, q -> q));
+        Map<Long, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, q -> q));
+
         MiniTestOverallResponse miniTestOverallResponse = calculatorAnswerMiniTest(request, questionMap);
         miniTestOverallResponse.setTotalQuestions(questions.size());
         return miniTestOverallResponse;
@@ -52,8 +54,7 @@ public class MiniTestServiceImpl implements IMiniTestService {
         long globalQuestionPosition = 1;
 
         for (MiniQuestionGroupRequest questionGroupRequest : miniTestRequest.getQuestionGroups()) {
-            if (questionGroupRequest.getQuestionGroupId() == null)
-                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+            validateQuestionGroup(questionGroupRequest);
 
             for (UserAnswerMiniTestRequest userAnswerRequest : questionGroupRequest.getUserAnswerRequests()) {
                 if (userAnswerRequest.getQuestionId() == null)
@@ -118,47 +119,50 @@ public class MiniTestServiceImpl implements IMiniTestService {
 
     private Map<QuestionGroup, List<Question>> getAllQuestionGroup(Long partId, Set<Long> tagIds, int numberQuestion) {
         List<Question> allQuestions = questionService.getAllQuestionsByPartAndTags(tagIds, partId);
-        ShuffleUtil.shuffle(allQuestions);
         Map<Long, List<Question>> questionsByTag = new LinkedHashMap<>();
-
-        for (Long tagId : tagIds) {
-            List<Question> tagQuestions = allQuestions.stream().filter(
-                    question -> question.getTags().stream().anyMatch(
-                            tag -> tag.getId().equals(tagId))).collect(Collectors.toList());
-            questionsByTag.put(tagId, tagQuestions);
+        Set<Long> tagIdSet = new HashSet<>(tagIds);
+        tagIds.forEach(tagId -> questionsByTag.put(tagId, new ArrayList<>()));
+        for (Question question : allQuestions) {
+            for (Tag t : question.getTags()) {
+                if (tagIdSet.contains(t.getId())) {
+                    questionsByTag.get(t.getId()).add(question);
+                }
+            }
         }
+        questionsByTag.values().forEach(ShuffleUtil::shuffle);
+
         List<Question> selectedQuestions = new ArrayList<>();
         Set<Long> usedQuestionIds = new HashSet<>();
-        Map<Long, Integer> tagIndices = new HashMap<>();
-        tagIds.forEach(tagId -> tagIndices.put(tagId, 0));
+        int[] indices = new int[tagIds.size()];
+        List<Long> tagIdList = new ArrayList<>(tagIds);
 
         while (selectedQuestions.size() < numberQuestion) {
             boolean addedInThisRound = false;
 
-            for (Long tagId : tagIds) {
-                if (selectedQuestions.size() >= numberQuestion)
-                    break;
-                List<Question> tagQuestions = questionsByTag.get(tagId);
-                if (tagQuestions == null || tagQuestions.isEmpty())
-                    throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-                Integer currentIndex = tagIndices.get(tagId);
+            for (int i = 0; i < tagIdList.size(); i++) {
+                if (selectedQuestions.size() >= numberQuestion) break;
+                List<Question> tagQuestions = questionsByTag.get(tagIdList.get(i));
+                int currentIndex = indices[i];
 
                 while (currentIndex < tagQuestions.size()) {
-                    Question tagQuestion = tagQuestions.get(currentIndex);
-                    currentIndex++;
-                    if (!usedQuestionIds.contains(tagQuestion.getId())) {
+                    Question tagQuestion = tagQuestions.get(currentIndex++);
+                    if (usedQuestionIds.add(tagQuestion.getId())) {
                         selectedQuestions.add(tagQuestion);
-                        usedQuestionIds.add(tagQuestion.getId());
                         addedInThisRound = true;
                         break;
                     }
                 }
-                tagIndices.put(tagId, currentIndex);
+                indices[i] = currentIndex;
             }
-            if (!addedInThisRound)
-                break;
+            if (!addedInThisRound) break;
         }
         return selectedQuestions.stream().collect(Collectors.groupingBy(Question::getQuestionGroup, LinkedHashMap::new, Collectors.toList()));
     }
 
+    private void validateQuestionGroup(MiniQuestionGroupRequest miniQuestionGroupRequest) {
+        if (miniQuestionGroupRequest.getQuestionGroupId() == null)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+        if (miniQuestionGroupRequest.getUserAnswerRequests() == null)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User answers");
+    }
 }

@@ -89,7 +89,7 @@ public class QuestionServiceImpl implements IQuestionService {
 
     @Override
     public List<Question> getAllQuestionsByPartAndTags(Set<Long> tagIds, Long partId) {
-        return questionRepository.findAllByPartIdAndTag(tagIds, partId, ETestStatus.APPROVED);
+        return questionRepository.findAllByPartIdAndTagIdsWithAssociations(partId, tagIds, ETestStatus.APPROVED);
     }
 
     @Override

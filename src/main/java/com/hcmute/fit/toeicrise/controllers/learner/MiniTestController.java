@@ -2,9 +2,9 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.dtos.requests.minitest.MiniTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.minitest.TagByPartResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IMiniTestService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController("learnerMiniTestController")
@@ -23,8 +22,8 @@ public class MiniTestController {
     private final IMiniTestService miniTestService;
 
     @GetMapping("/tags")
-    public List<TagByPartResponse> getTagsByPartId(@RequestParam Long partId) {
-        return tagService.getTagsByPartId(partId);
+    public ResponseEntity<?> getTagsByPartId(@RequestParam Long partId) {
+        return ResponseEntity.ok(tagService.getTagsByPartId(partId));
     }
 
     @GetMapping("")
@@ -43,7 +42,7 @@ public class MiniTestController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> submitTest(@RequestBody MiniTestRequest miniTestRequest){
+    public ResponseEntity<?> submitTest(@Valid @RequestBody MiniTestRequest miniTestRequest){
         return ResponseEntity.ok(miniTestService.getMiniTestOverallResponse(miniTestRequest));
     }
 }

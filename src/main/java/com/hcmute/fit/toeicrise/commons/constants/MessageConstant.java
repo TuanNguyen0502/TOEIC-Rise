@@ -87,8 +87,8 @@ public class MessageConstant {
     public static final String FLASHCARD_ITEM_DEFINITION_NOT_BLANK = "Flashcard item definition must not be blank.";
     public static final String FLASHCARD_ITEM_ID_NOT_NULL = "Flashcard item id must not be null.";
     // Part related messages
-    public static final String PART_ID_MIN = "Part ID must be greater than 0.";
-    public static final String PART_ID_MAX = "Part ID must be less than 10.";
+    public static final String PART_ID_MIN = "Part ID must be greater than 1.";
+    public static final String PART_ID_MAX = "Part ID must be less than 7.";
     // Tag related messages
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
