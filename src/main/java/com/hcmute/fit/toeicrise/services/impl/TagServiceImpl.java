@@ -1,7 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.tag.TagRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.TagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.tag.TagDashboardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.tag.TagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.TagByPartResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
@@ -61,6 +63,15 @@ public class TagServiceImpl implements ITagService {
     }
 
     @Override
+    public PageResponse getAllTagsForDashboard(int page, int pageSize, String sortBy, String direction, String tagName) {
+        String searchName = (tagName == null || tagName.trim().isEmpty()) ? null : tagName;
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        Page<TagDashboardResponse> tags = tagRepository.findAllTagStatistics(searchName, pageable).map(tagMapper::mapToTagDashboardResponse);
+        return pageResponseMapper.toPageResponse(tags);
+    }
+
+    @Override
     public List<TagByPartResponse> getTagsByPartId(Long partId) {
         if (!partRepository.existsById(partId)) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part");
@@ -77,17 +88,35 @@ public class TagServiceImpl implements ITagService {
         );
     }
 
-    public List<Tag> parseTagsOrThrow(String tagsString) {
-        return getTagsFromString(tagsString, name ->
-                tagRepository.findByName(name)
-                        .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND,
-                                "Tag name: "+ name))
-        );
+    @Override
+    public void checkExistsIds(Set<Long> tagIds) {
+        if (tagRepository.countByIdIn(tagIds) < tagIds.size())
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag");
     }
 
     @Override
-    public void checkExistsIds(Set<Long> tagIds){
-        if (tagRepository.countByIdIn(tagIds) < tagIds.size())
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag");
+    public void createTagIfNotExists(TagRequest tagRequest) {
+        Optional<Tag> existingTag = tagRepository.findByName(tagRequest.getName());
+        if (existingTag.isPresent()) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagRequest.getName());
+        }
+        Tag newTag = Tag.builder()
+                .name(tagRequest.getName())
+                .build();
+        tagRepository.save(newTag);
+    }
+
+    @Override
+    public void updateTag(Long tagId, TagRequest tagRequest) {
+        Tag existingTag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag ID: " + tagId));
+
+        Optional<Tag> tagWithName = tagRepository.findByName(tagRequest.getName());
+        if (tagWithName.isPresent() && !tagWithName.get().getId().equals(tagId)) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Tag name: " + tagRequest.getName());
+        }
+
+        existingTag.setName(tagRequest.getName());
+        tagRepository.save(existingTag);
     }
 }

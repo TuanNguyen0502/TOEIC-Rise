@@ -247,4 +247,6 @@ public class Constant {
     public static final int MAX_RESEND_OTP_ATTEMPTS = 5;
     public static final int OTP_EXPIRATION_MINUTES = 5;
     public static final int MAX_VERIFY_LOGIN_TIMES = 15;
+    // Tag constants
+    public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
 }

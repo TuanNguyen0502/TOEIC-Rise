@@ -255,8 +255,8 @@ public class UserTestServiceImpl implements IUserTestService {
                 Map<String, Map<String, TagStats>> examTypeRawData = rawDataByExamType.get(examType);
                 Map<String, PartStats> examTypePartStats = rawPartStatsByExamType.get(examType);
 
-                examTypeRawData.computeIfAbsent(partName,_ -> new HashMap<>());
-                examTypePartStats.computeIfAbsent(partName,_ -> new PartStats());
+                examTypeRawData.computeIfAbsent(partName, _ -> new HashMap<>());
+                examTypePartStats.computeIfAbsent(partName, _ -> new PartStats());
 
                 Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
                         .flatMap(ua -> {
@@ -276,7 +276,7 @@ public class UserTestServiceImpl implements IUserTestService {
                     int correct = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
                     int wrong = answersForTag.size() - correct;
 
-                    TagStats tagStats = tagStatsMap.computeIfAbsent(tagName,_ -> new TagStats());
+                    TagStats tagStats = tagStatsMap.computeIfAbsent(tagName, _ -> new TagStats());
                     tagStats.add(correct, wrong);
                 });
 
@@ -301,7 +301,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 .examList(List.of(listening, reading))
                 .build();
     }
-  
+
     @Override
     public PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable) {
         Page<LearnerTestHistoryResponse> learnerTestResponses = userTestRepository.findAll(userTestSpecification, pageable).map(userTestMapper::toLearnerTestHistoryResponse);
@@ -353,7 +353,7 @@ public class UserTestServiceImpl implements IUserTestService {
     @Override
     public ActivityTrendResponse getActivityTrend(LocalDateTime from, LocalDateTime to) {
         List<ActivityPointResponse> activityPointResponses = userTestRepository.getActivityTrend(from, to).stream().map(item ->
-            new ActivityPointResponse(((java.sql.Date)item[0]).toLocalDate(), ((Number)item[1]).longValue())).toList();
+                new ActivityPointResponse(((java.sql.Date) item[0]).toLocalDate(), ((Number) item[1]).longValue())).toList();
         Map<LocalDate, Long> submissionsByDate = activityPointResponses.stream().collect(
                 Collectors.toMap(ActivityPointResponse::getDate, ActivityPointResponse::getSubmissions));
         List<ActivityPointResponse> responses = new ArrayList<>();
@@ -361,7 +361,7 @@ public class UserTestServiceImpl implements IUserTestService {
         LocalDate end = to.toLocalDate().minusDays(1);
         long sum = 0L;
 
-        while (!current.isAfter(end)){
+        while (!current.isAfter(end)) {
             long count = submissionsByDate.getOrDefault(current, 0L);
             sum += count;
             responses.add(new ActivityPointResponse(current, count));
@@ -376,10 +376,10 @@ public class UserTestServiceImpl implements IUserTestService {
     public TestModeInsightResponse getTestModeInsight(LocalDateTime start, LocalDateTime end) {
         TestModeInsightResponse testMode = userTestRepository.countUserTestByMode(start, end);
         double sum = testMode.getFullTest() + testMode.getPratice();
-        if(sum == 0)
+        if (sum == 0)
             return testMode;
-        testMode.setFullTest(Math.round((testMode.getFullTest()/sum)*100));
-        testMode.setPratice(Math.round((testMode.getPratice()/sum)*100));
+        testMode.setFullTest(Math.round((testMode.getFullTest() / sum) * 100));
+        testMode.setPratice(Math.round((testMode.getPratice() / sum) * 100));
         return testMode;
     }
 
@@ -387,12 +387,12 @@ public class UserTestServiceImpl implements IUserTestService {
     public ScoreDistInsightResponse getScoreInsight(LocalDateTime start, LocalDateTime end) {
         ScoreDistInsightResponse distInsightResponse = userTestRepository.countUserTestByScore(start, end);
         double total = distInsightResponse.sum();
-        if(total == 0)
+        if (total == 0)
             return distInsightResponse;
-        distInsightResponse.setBrand0_200(Math.round((distInsightResponse.getBrand0_200()/total)*100));
-        distInsightResponse.setBrand200_450(Math.round((distInsightResponse.getBrand200_450()/total)*100));
-        distInsightResponse.setBrand450_750(Math.round((distInsightResponse.getBrand450_750()/total)*100));
-        distInsightResponse.setBrand750_990(Math.round((distInsightResponse.getBrand750_990()/total)*100));
+        distInsightResponse.setBrand0_200(Math.round((distInsightResponse.getBrand0_200() / total) * 100));
+        distInsightResponse.setBrand200_450(Math.round((distInsightResponse.getBrand200_450() / total) * 100));
+        distInsightResponse.setBrand450_750(Math.round((distInsightResponse.getBrand450_750() / total) * 100));
+        distInsightResponse.setBrand750_990(Math.round((distInsightResponse.getBrand750_990() / total) * 100));
         return distInsightResponse;
     }
 
