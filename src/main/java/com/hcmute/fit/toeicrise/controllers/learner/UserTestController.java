@@ -53,4 +53,9 @@ public class UserTestController {
     public ResponseEntity<?> getTestDetail(@PathVariable Long userTestId) {
         return ResponseEntity.ok(userTestService.getUserTestDetail(userTestId, SecurityUtils.getCurrentUser()));
     }
+
+    @GetMapping("/{userTestId}/wrong-answer")
+    public ResponseEntity<?> getWrongAnswer(@PathVariable Long userTestId) {
+        return ResponseEntity.ok(userTestService.getLearnerWrongAnswer(userTestId, SecurityUtils.getCurrentUser()));
+    }
 }

@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
@@ -200,18 +201,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, partIds);
 
         return HelperUtil.groupByPartAndMap(questionGroups, (part, groups) -> {
-            List<LearnerTestQuestionGroupResponse> groupResponses = groups.stream().sorted(Comparator.comparing(QuestionGroup::getPosition))
+            List<LearnerTestQuestionGroupWithoutTranscriptResponse> groupResponses = groups.stream().sorted(Comparator.comparing(QuestionGroup::getPosition))
                     .map(group -> {
                         List<LearnerTestQuestionResponse> questionResponses = group.getQuestions().stream().sorted(Comparator.comparing(Question::getPosition))
                                 .map(questionMapper::toLearnerTestQuestionResponse).toList();
 
-                        LearnerTestQuestionGroupResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(group);
+                        LearnerTestQuestionGroupWithoutTranscriptResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupWithoutTranscriptResponse(group);
                         groupResponse.setQuestions(new ArrayList<>(questionResponses));
                         return groupResponse;
                     })
                     .toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
-            partResponse.setQuestionGroups(groupResponses);
+            partResponse.setQuestionGroups(Collections.singletonList(groupResponses));
             return partResponse;
         }, Comparator.comparing(LearnerTestPartResponse::getPartName));
     }

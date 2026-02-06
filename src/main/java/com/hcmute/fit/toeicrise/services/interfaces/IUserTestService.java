@@ -49,4 +49,6 @@ public interface IUserTestService {
     ScoreDistInsightResponse getScoreInsight(LocalDateTime start, LocalDateTime end);
 
     Long totalUserTest(LocalDateTime from, LocalDateTime to);
+
+    LearnerTestPartsResponse getLearnerWrongAnswer(Long userTestId, String email);
 }
