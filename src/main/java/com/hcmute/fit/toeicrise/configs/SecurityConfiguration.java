@@ -45,7 +45,7 @@ public class SecurityConfiguration {
                         .hasRole("ADMIN")
                         .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
                                 "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
-                                "/staff/stats/**", "/admin/stats/**")
+                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",

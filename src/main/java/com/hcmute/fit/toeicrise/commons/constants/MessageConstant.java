@@ -57,7 +57,7 @@ public class MessageConstant {
     public static final String QUESTION_GROUP_ID_NOT_NULL = "Question group must not be null.";
     public static final String QUESTION_GROUP_ID_NOT_EMPTY = "Question group must not be empty";
     public static final String QUESTION_CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
-    public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
+    public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must not be blank.";
     public static final String QUESTION_EXPLANATION_NOT_BLANK = "Explain must not be blank.";
     public static final String QUESTION_EXPLANATION_NOT_NULL = "Explain must not be null.";
     public static final String QUESTION_MIN = "Question size must be greater than 5.";
