@@ -225,7 +225,7 @@ public class Constant {
     public static final String CHAT_TITLE_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{1,100}$";
     public static final String CHAT_CONVERSATION_ID_PATTERN = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
     // Cache constants
-    public static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
+    public static final String CHATBOT_SYSTEM_PROMPT_CACHE = "chatbotSystemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
     // Profile constants

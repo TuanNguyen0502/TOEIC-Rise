@@ -15,11 +15,11 @@ public interface ISystemPromptService {
 
     SystemPromptDetailResponse getSystemPromptById(Long id);
 
-    SystemPromptDetailResponse getActiveSystemPrompt();
+    SystemPromptDetailResponse getActiveChatbotSystemPrompt();
 
-    boolean updateSystemPrompt(Long id, SystemPromptUpdateRequest request);
+    void updateSystemPrompt(Long id, SystemPromptUpdateRequest request);
 
-    boolean createSystemPrompt(SystemPromptCreateRequest request);
+    void createSystemPrompt(SystemPromptCreateRequest request);
 
-    boolean changeActive(Long id);
+    void changeActive(Long id);
 }

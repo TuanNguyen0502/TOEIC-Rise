@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailRespons
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
+import com.hcmute.fit.toeicrise.models.enums.ESystemPromptFeatureType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.SystemPromptMapper;
@@ -23,7 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import static com.hcmute.fit.toeicrise.commons.constants.Constant.ACTIVE_PROMPT_KEY;
-import static com.hcmute.fit.toeicrise.commons.constants.Constant.SYSTEM_PROMPT_CACHE;
+import static com.hcmute.fit.toeicrise.commons.constants.Constant.CHATBOT_SYSTEM_PROMPT_CACHE;
 import static com.hcmute.fit.toeicrise.commons.constants.Constant.CACHE_DURATION;
 
 @Service
@@ -77,10 +78,10 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
     }
 
     @Override
-    public SystemPromptDetailResponse getActiveSystemPrompt() {
+    public SystemPromptDetailResponse getActiveChatbotSystemPrompt() {
         // Try to get from cache first
         SystemPromptDetailResponse cachedPrompt = redisService.get(
-                SYSTEM_PROMPT_CACHE,
+                CHATBOT_SYSTEM_PROMPT_CACHE,
                 ACTIVE_PROMPT_KEY,
                 SystemPromptDetailResponse.class);
 
@@ -89,25 +90,25 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         }
 
         // If not in cache, get from database and cache it
-        SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActive(true)
+        SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActiveAndFeatureType(true, ESystemPromptFeatureType.CHATBOT)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Active System Prompt"));
 
         SystemPromptDetailResponse response = systemPromptMapper.toDetailResponse(activePrompt);
 
         // Cache the result
-        redisService.put(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
+        redisService.put(CHATBOT_SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
 
         return response;
     }
 
     @Override
-    public boolean updateSystemPrompt(Long id, SystemPromptUpdateRequest request) {
+    public void updateSystemPrompt(Long id, SystemPromptUpdateRequest request) {
         SystemPrompt existingPrompt = systemPromptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
         // If the updated prompt is set to active, deactivate the current active prompt
         if (request.getIsActive()) {
-            deactivateSystemPrompt();
+            deactivateChatbotSystemPrompt();
         } else if (existingPrompt.getIsActive()) {
             // Prevent deactivating the only active prompt
             throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
@@ -128,16 +129,14 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
 
         // If the new system prompt is active, update cache
         if (request.getIsActive()) {
-            updateActivePromptCache(systemPrompt);
+            updateChatbotActivePromptCache(systemPrompt);
         }
-
-        return true;
     }
 
     @Override
-    public boolean createSystemPrompt(SystemPromptCreateRequest request) {
+    public void createSystemPrompt(SystemPromptCreateRequest request) {
         // Deactivate the current active prompt
-        deactivateSystemPrompt();
+        deactivateChatbotSystemPrompt();
         // Fetch the latest version to determine the new version number
         SystemPrompt latestVersion = systemPromptRepository.findLatestVersion().orElse(null);
 
@@ -150,46 +149,43 @@ public class SystemPromptServiceImpl implements ISystemPromptService {
         systemPromptRepository.save(newPrompt);
 
         // Update cache with the new active prompt
-        updateActivePromptCache(newPrompt);
-
-        return true;
+        updateChatbotActivePromptCache(newPrompt);
     }
 
     @Override
-    public boolean changeActive(Long id) {
+    public void changeActive(Long id) {
         SystemPrompt existingPrompt = systemPromptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
         // If the updated prompt is set to active, deactivate the current active prompt
         if (!existingPrompt.getIsActive()) {
-            deactivateSystemPrompt();
+            deactivateChatbotSystemPrompt();
             existingPrompt.setIsActive(true);
             systemPromptRepository.save(existingPrompt);
 
             // Update cache with the new active prompt
-            updateActivePromptCache(existingPrompt);
+            updateChatbotActivePromptCache(existingPrompt);
         } else {
             // Prevent deactivating the only active prompt
             throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
         }
-        return true;
     }
 
-    private void deactivateSystemPrompt() {
-        SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActive(true).orElse(null);
+    private void deactivateChatbotSystemPrompt() {
+        SystemPrompt activePrompt = systemPromptRepository.findFirstByIsActiveAndFeatureType(true, ESystemPromptFeatureType.CHATBOT).orElse(null);
         // Deactivate the current active prompt if it exists
         if (activePrompt != null) {
             activePrompt.setIsActive(false);
             systemPromptRepository.save(activePrompt);
 
             // Remove the active prompt from cache
-            redisService.remove(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY);
+            redisService.remove(CHATBOT_SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY);
         }
     }
 
-    private void updateActivePromptCache(SystemPrompt activePrompt) {
+    private void updateChatbotActivePromptCache(SystemPrompt activePrompt) {
         // Cache the new active prompt (put() will overwrite any existing entry)
         SystemPromptDetailResponse response = systemPromptMapper.toDetailResponse(activePrompt);
-        redisService.put(SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
+        redisService.put(CHATBOT_SYSTEM_PROMPT_CACHE, ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
     }
 }

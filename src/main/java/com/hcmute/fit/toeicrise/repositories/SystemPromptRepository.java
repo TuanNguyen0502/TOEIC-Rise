@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
+import com.hcmute.fit.toeicrise.models.enums.ESystemPromptFeatureType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,5 +14,5 @@ public interface SystemPromptRepository extends JpaRepository<SystemPrompt, Long
     @Query("SELECT sp FROM SystemPrompt sp WHERE sp.version = (SELECT MAX(s.version) FROM SystemPrompt s)")
     Optional<SystemPrompt> findLatestVersion();
 
-    Optional<SystemPrompt> findFirstByIsActive(Boolean isActive);
+    Optional<SystemPrompt> findFirstByIsActiveAndFeatureType(Boolean isActive, ESystemPromptFeatureType featureType);
 }

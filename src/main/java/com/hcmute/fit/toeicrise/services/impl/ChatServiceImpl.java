@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class ChatServiceImpl implements IChatService {
     private final ChatClient chatClient;
+    private final ChatClient.Builder chatClientBuilder;
     private final ChatModel chatModel;
     private final UserAnswerRepository userAnswerRepository;
     private final ChatMemoryRepository chatMemoryRepository;
@@ -71,7 +72,7 @@ public class ChatServiceImpl implements IChatService {
                     advisorSpec.param("messageId", messageId); // Pass messageId to advisor
                 })
                 .user(chatRequest.getMessage())
-                .system(getActiveSystemPrompt())
+                .system(getActiveChatbotSystemPrompt())
                 .stream()
                 .content();
 
@@ -95,7 +96,7 @@ public class ChatServiceImpl implements IChatService {
 
         Flux<String> content = ChatClient.create(chatModel)
                 .prompt()
-                .system(getActiveSystemPrompt())
+                .system(getActiveChatbotSystemPrompt())
                 .user(user -> user
                         .text(chatRequest.getMessage())
                         .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
@@ -237,57 +238,64 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public Flux<ChatbotResponse> generateExplanation(GenerateExplanationRequest request) {
-        Mono<String> promptMono;
-
-        String conversationId = UUID.randomUUID().toString();
-
-        promptMono = Mono.fromCallable(() -> {
+        return Flux.defer(() -> {
+            ChatClient cleanClient = chatClientBuilder.build();
+            // Toàn bộ logic tạo prompt nằm bên trong này để đảm bảo tính Lazy
+            String conversationId = UUID.randomUUID().toString();
+            String messageId = UUID.randomUUID().toString();
             String options = String.join(", ", request.getOptions());
-            return """
+
+            String systemPrompt = """
                     Nhiệm vụ của bạn là phân tích câu hỏi và đưa ra lời giải thích chuyên sâu, dễ hiểu.\s
+                    ### YÊU CẦU PHẢN HỒI: Vui lòng trình bày câu trả lời theo cấu trúc sau:\s
+                    #### 1. Dịch nghĩa & Bối cảnh\s
+                    - Dịch câu hỏi và các lựa chọn sang tiếng Việt.\s
+                    #### 2. Phân tích đáp án đúng\s
+                    - Chỉ rõ tại sao đáp án đó là chính xác.\s
+                    - Trích dẫn cụ thể từ khóa (keywords) hoặc câu văn trong Passage/Transcript làm bằng chứng (clue).\s
+                    - Nếu là câu hỏi ngữ pháp, hãy nêu rõ cấu trúc/ngữ pháp áp dụng.\s
+                    #### 3. Phân tích lựa chọn sai\s
+                    - Giải thích ngắn gọn tại sao các phương án còn lại không phù hợp (sai nghĩa, sai loại từ, hoặc thông tin gây nhiễu).\s
+                    ### LƯU Ý QUAN TRỌNG:\s
+                    - Ngôn ngữ phản hồi: Tiếng Việt.\s
+                    - Giọng văn: Chuyên nghiệp, khích lệ, dễ hiểu.\s
+                    - Trình bày rõ ràng, có cấu trúc dưới dạng text thuần túy (plain text) không sử dụng markdown, có thể sử dụng phối hợp các dấu đầu dòng như - +.\s
+                    - KHÔNG chào hỏi (ví dụ: "Chào bạn", "Tôi là...").\s
+                    - KHÔNG có câu kết hoặc lời chúc (ví dụ: "Hy vọng bài học này...", "Chúc bạn học tốt").\s
+                    - KHÔNG dẫn dắt rườm rà.\s
+                    - Tuyệt đối không tự suy diễn thông tin nằm ngoài dữ liệu được cung cấp.\s
+                    """;
+            String userPrompt = """
                     ### DỮ LIỆU ĐẦU VÀO:\s
                     1. Passage (Đoạn văn đọc hiểu): %s\s
                     2. Transcript: %s\s
                     3. Nội dung câu hỏi: %s\s
                     4. Các lựa chọn: %s\s
                     5. Đáp án đúng: %s\s
-                    ### YÊU CẦU PHẢN HỒI: Vui lòng trình bày câu trả lời theo cấu trúc sau:\s
-                    #### 1. Dịch nghĩa & Bối cảnh\s
-                    - Dịch câu hỏi và các lựa chọn sang tiếng Việt.\s
-                    #### 2. Phân tích đáp án đúng\s
-                    - Chỉ rõ tại sao đáp án [%s] là chính xác.\s
-                    - Trích dẫn cụ thể từ khóa (keywords) hoặc câu văn trong Passage/Transcript làm bằng chứng (clue).
-                    - Nếu là câu hỏi ngữ pháp, hãy nêu rõ cấu trúc/ngữ pháp áp dụng.
-                    #### 3. Phân tích lựa chọn sai
-                    - Giải thích ngắn gọn tại sao các phương án còn lại không phù hợp (sai nghĩa, sai loại từ, hoặc thông tin gây nhiễu).
-                    ### LƯU Ý QUAN TRỌNG:
-                    - Ngôn ngữ phản hồi: Tiếng Việt.
-                    - Giọng văn: Chuyên nghiệp, khích lệ, dễ hiểu.
-                    - Trình bày rõ ràng, có cấu trúc dưới dạng text thuần túy (plain text) không sử dụng markdown, có thể sử dụng phối hợp các dấu đầu dòng như - +.
-                    - KHÔNG chào hỏi (ví dụ: "Chào bạn", "Tôi là...").
-                    - KHÔNG có câu kết hoặc lời chúc (ví dụ: "Hy vọng bài học này...", "Chúc bạn học tốt").
-                    - KHÔNG dẫn dắt rườm rà.
-                    - Tuyệt đối không tự suy diễn thông tin nằm ngoài dữ liệu được cung cấp.
                     """.formatted(
                     request.getPassage(),
                     request.getTranscript(),
                     request.getContent(),
                     options,
-                    request.getCorrectOption(),
                     request.getCorrectOption()
             );
-        }).subscribeOn(Schedulers.boundedElastic());
 
-        return promptMono.flatMapMany(prompt ->
-                chat(ChatRequest.builder()
-                        .conversationId(conversationId)
-                        .message(prompt)
-                        .build())
-        );
+            return cleanClient.prompt()
+                    .user(userPrompt)
+                    .system(systemPrompt)
+                    .stream()
+                    .content()
+                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                            contentText,
+                            messageId,
+                            conversationId,
+                            MessageType.ASSISTANT.name()
+                    ));
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    private String getActiveSystemPrompt() {
-        SystemPromptDetailResponse response = systemPromptService.getActiveSystemPrompt();
+    private String getActiveChatbotSystemPrompt() {
+        SystemPromptDetailResponse response = systemPromptService.getActiveChatbotSystemPrompt();
         return response.getContent();
     }
 }
