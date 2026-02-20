@@ -1,9 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAboutQuestionRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAnalysisRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
@@ -169,7 +166,7 @@ public class ChatServiceImpl implements IChatService {
                         .reduce((a, b) -> a + ", " + b)
                         .orElse("N/A");
                 return """
-                         Bạn là trợ lý TOEIC Mentor. Nhiệm vụ của bạn là hỗ trợ người dùng giải thích, phân tích và trả lời câu hỏi TOEIC dựa trên dữ liệu cung cấp.\s
+                         Bạn là trợ lý TOEIC Rise. Nhiệm vụ của bạn là hỗ trợ người dùng giải thích, phân tích và trả lời câu hỏi TOEIC dựa trên dữ liệu cung cấp.\s
                          Hãy đọc kỹ toàn bộ thông tin và phản hồi một cách rõ ràng, chính xác và dễ hiểu.
                          Dưới đây là thông tin bạn cần xử lý:
                          1. Tin nhắn của người dùng:
@@ -233,9 +230,60 @@ public class ChatServiceImpl implements IChatService {
         String prompts = templateEngine.process("analysis-result", context);
 
         return chatClient.prompt(prompts)
-                        .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
-                                .call()
-                                        .entity(ChatbotAnalysisResponse.class);
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
+                .call()
+                .entity(ChatbotAnalysisResponse.class);
+    }
+
+    @Override
+    public Flux<ChatbotResponse> generateExplanation(GenerateExplanationRequest request) {
+        Mono<String> promptMono;
+
+        String conversationId = UUID.randomUUID().toString();
+
+        promptMono = Mono.fromCallable(() -> {
+            String options = String.join(", ", request.getOptions());
+            return """
+                    Nhiệm vụ của bạn là phân tích câu hỏi và đưa ra lời giải thích chuyên sâu, dễ hiểu.\s
+                    ### DỮ LIỆU ĐẦU VÀO:\s
+                    1. Passage (Đoạn văn đọc hiểu): %s\s
+                    2. Transcript: %s\s
+                    3. Nội dung câu hỏi: %s\s
+                    4. Các lựa chọn: %s\s
+                    5. Đáp án đúng: %s\s
+                    ### YÊU CẦU PHẢN HỒI: Vui lòng trình bày câu trả lời theo cấu trúc sau:\s
+                    #### 1. Dịch nghĩa & Bối cảnh\s
+                    - Dịch câu hỏi và các lựa chọn sang tiếng Việt.\s
+                    #### 2. Phân tích đáp án đúng\s
+                    - Chỉ rõ tại sao đáp án [%s] là chính xác.\s
+                    - Trích dẫn cụ thể từ khóa (keywords) hoặc câu văn trong Passage/Transcript làm bằng chứng (clue).
+                    - Nếu là câu hỏi ngữ pháp, hãy nêu rõ cấu trúc/ngữ pháp áp dụng.
+                    #### 3. Phân tích lựa chọn sai
+                    - Giải thích ngắn gọn tại sao các phương án còn lại không phù hợp (sai nghĩa, sai loại từ, hoặc thông tin gây nhiễu).
+                    ### LƯU Ý QUAN TRỌNG:
+                    - Ngôn ngữ phản hồi: Tiếng Việt.
+                    - Giọng văn: Chuyên nghiệp, khích lệ, dễ hiểu.
+                    - Trình bày rõ ràng, có cấu trúc dưới dạng text thuần túy (plain text) không sử dụng markdown, có thể sử dụng phối hợp các dấu đầu dòng như - +.
+                    - KHÔNG chào hỏi (ví dụ: "Chào bạn", "Tôi là...").
+                    - KHÔNG có câu kết hoặc lời chúc (ví dụ: "Hy vọng bài học này...", "Chúc bạn học tốt").
+                    - KHÔNG dẫn dắt rườm rà.
+                    - Tuyệt đối không tự suy diễn thông tin nằm ngoài dữ liệu được cung cấp.
+                    """.formatted(
+                    request.getPassage(),
+                    request.getTranscript(),
+                    request.getContent(),
+                    options,
+                    request.getCorrectOption(),
+                    request.getCorrectOption()
+            );
+        }).subscribeOn(Schedulers.boundedElastic());
+
+        return promptMono.flatMapMany(prompt ->
+                chat(ChatRequest.builder()
+                        .conversationId(conversationId)
+                        .message(prompt)
+                        .build())
+        );
     }
 
     private String getActiveSystemPrompt() {
