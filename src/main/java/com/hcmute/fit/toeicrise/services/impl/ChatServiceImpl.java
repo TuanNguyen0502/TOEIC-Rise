@@ -263,7 +263,7 @@ public class ChatServiceImpl implements IChatService {
                     ### LƯU Ý QUAN TRỌNG:
                     - Ngôn ngữ phản hồi: Tiếng Việt.
                     - Giọng văn: Chuyên nghiệp, khích lệ, dễ hiểu.
-                    - Trình bày rõ ràng, có cấu trúc.
+                    - Trình bày rõ ràng, có cấu trúc dưới dạng text thuần túy (plain text) không sử dụng markdown, có thể sử dụng phối hợp các dấu đầu dòng như - +.
                     - KHÔNG chào hỏi (ví dụ: "Chào bạn", "Tôi là...").
                     - KHÔNG có câu kết hoặc lời chúc (ví dụ: "Hy vọng bài học này...", "Chúc bạn học tốt").
                     - KHÔNG dẫn dắt rườm rà.
