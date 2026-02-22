@@ -84,6 +84,33 @@ public class ChatServiceImpl implements IChatService {
         ));
     }
 
+    public Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = chatClient.prompt()
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
+                .user(chatRequest.getMessage())
+                .system(systemPrompt)
+                .stream()
+                .content();
+
+        return content.map(contentText -> chatbotMapper.toChatbotResponse(
+                contentText,
+                messageId,
+                chatRequest.getConversationId(),
+                MessageType.ASSISTANT.name()
+        ));
+    }
+
     @Override
     public Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType) {
         // Ensure conversationId is set
@@ -167,39 +194,25 @@ public class ChatServiceImpl implements IChatService {
                         .reduce((a, b) -> a + ", " + b)
                         .orElse("N/A");
                 return """
-                         Bạn là trợ lý TOEIC Rise. Nhiệm vụ của bạn là hỗ trợ người dùng giải thích, phân tích và trả lời câu hỏi TOEIC dựa trên dữ liệu cung cấp.\s
-                         Hãy đọc kỹ toàn bộ thông tin và phản hồi một cách rõ ràng, chính xác và dễ hiểu.
-                         Dưới đây là thông tin bạn cần xử lý:
-                         1. Tin nhắn của người dùng:
-                         %s
-                         2. Passage (đoạn văn nếu có):
-                         %s
-                         3. Transcript (nghe hiểu nếu có):
-                         %s
-                         4. Nội dung câu hỏi:
-                         %s
-                         5. Các lựa chọn:
-                         %s
-                         6. Đáp án đúng:
-                         %s
-                         7. Giải thích đáp án đúng:
-                         %s
-                         8. Đáp án người dùng đã chọn (nếu có):
-                         %s
-                         9. Tags / Chủ điểm kiến thức:
-                         %s
-                         Yêu cầu phản hồi:
-                         - Trả lời đúng trọng tâm dựa trên tin nhắn người dùng. \s
-                         - Giải thích ngắn gọn câu hỏi đang kiểm tra kiến thức gì (ngữ pháp, từ vựng, suy luận, nội dung đoạn văn...). \s
-                         - Phân tích và chỉ ra cách tìm đáp án đúng dựa trên dữ liệu đã cung cấp. \s
-                         - Giải thích vì sao đáp án đúng là phù hợp. \s
-                         - Giải thích vì sao các lựa chọn sai không phù hợp (nếu có danh sách lựa chọn). \s
-                         - Nếu không có đáp án đúng (correctOption trống), hãy giúp người dùng suy luận và chọn đáp án hợp lý nhất. \s
-                         - Phản hồi theo phong cách thân thiện, rõ ràng, phù hợp với người đang luyện thi TOEIC. \s
-                         Lưu ý quan trọng:
-                         - Chỉ sử dụng thông tin được cung cấp. \s
-                         - Không tự tạo thêm dữ liệu không có trong đề bài. \s
-                         - Nếu thông tin không đủ, hãy nêu ra rõ ràng và đưa ra hướng dẫn phù hợp.
+                        ### DỮ LIỆU ĐẦU VÀO:\s
+                        1. Tin nhắn của người dùng:
+                        %s\s
+                        2. Passage (đoạn văn nếu có):
+                        %s\s
+                        3. Transcript (nghe hiểu nếu có):
+                        %s\s
+                        4. Nội dung câu hỏi:
+                        %s\s
+                        5. Các lựa chọn:
+                        %s\s
+                        6. Đáp án đúng:
+                        %s\s
+                        7. Giải thích đáp án đúng:
+                        %s\s
+                        8. Đáp án người dùng đã chọn (nếu có):
+                        %s\s
+                        9. Tags / Chủ điểm kiến thức:
+                        %s\s
                         """
                         .formatted(chatAboutQuestionRequest.getMessage(),
                                 questionGroup.getPassage(),
@@ -215,11 +228,28 @@ public class ChatServiceImpl implements IChatService {
             promptMono = Mono.just(chatAboutQuestionRequest.getMessage());
         }
 
+        String systemPrompt = """
+                Bạn là trợ lý TOEIC Rise. Nhiệm vụ của bạn là hỗ trợ người dùng giải thích, phân tích và trả lời câu hỏi TOEIC dựa trên dữ liệu cung cấp.\s
+                Hãy đọc kỹ toàn bộ thông tin và phản hồi một cách rõ ràng, chính xác và dễ hiểu.\s
+                Yêu cầu phản hồi:\s
+                - Trả lời đúng trọng tâm dựa trên tin nhắn người dùng. \s
+                - Giải thích ngắn gọn câu hỏi đang kiểm tra kiến thức gì (ngữ pháp, từ vựng, suy luận, nội dung đoạn văn...). \s
+                - Phân tích và chỉ ra cách tìm đáp án đúng dựa trên dữ liệu đã cung cấp. \s
+                - Giải thích vì sao đáp án đúng là phù hợp. \s
+                - Giải thích vì sao các lựa chọn sai không phù hợp (nếu có danh sách lựa chọn). \s
+                - Nếu không có đáp án đúng (correctOption trống), hãy giúp người dùng suy luận và chọn đáp án hợp lý nhất. \s
+                - Phản hồi theo phong cách thân thiện, rõ ràng, phù hợp với người đang luyện thi TOEIC. \s
+                Lưu ý quan trọng:
+                - Chỉ sử dụng thông tin được cung cấp. \s
+                - Không tự tạo thêm dữ liệu không có trong đề bài. \s
+                - Nếu thông tin không đủ, hãy nêu ra rõ ràng và đưa ra hướng dẫn phù hợp.
+                """;
+
         return promptMono.flatMapMany(prompt ->
                 chat(ChatRequest.builder()
                         .conversationId(chatAboutQuestionRequest.getConversationId())
                         .message(prompt)
-                        .build())
+                        .build(), systemPrompt)
         );
     }
 
