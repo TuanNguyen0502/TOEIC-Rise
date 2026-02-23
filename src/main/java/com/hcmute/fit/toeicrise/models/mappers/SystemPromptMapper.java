@@ -5,14 +5,25 @@ import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailRespons
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptResponse;
 import com.hcmute.fit.toeicrise.models.entities.SystemPrompt;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.time.format.DateTimeFormatter;
 
 @Mapper(componentModel = "spring")
 public interface SystemPromptMapper {
-    @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
-    SystemPromptResponse toResponse(SystemPrompt systemPrompt);
+    default SystemPromptResponse toResponse(SystemPrompt systemPrompt) {
+        if (systemPrompt == null) {
+            return null;
+        }
+
+        SystemPromptResponse response = new SystemPromptResponse();
+        response.setId(systemPrompt.getId());
+        response.setFeatureType(systemPrompt.getFeatureType());
+        response.setVersion(systemPrompt.getVersion());
+        response.setIsActive(systemPrompt.getIsActive());
+        response.setUpdatedAt(systemPrompt.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)));
+
+        return response;
+    }
 
     default SystemPromptDetailResponse toDetailResponse(SystemPrompt systemPrompt) {
         if (systemPrompt == null) {
@@ -27,7 +38,7 @@ public interface SystemPromptMapper {
         response.setIsActive(systemPrompt.getIsActive());
         response.setCreatedAt(systemPrompt.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)));
         response.setUpdatedAt(systemPrompt.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)));
-        
+
         return response;
     }
 }
