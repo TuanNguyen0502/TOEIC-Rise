@@ -14,7 +14,7 @@ public class QAndASystemPromptServiceImpl extends AbstractSystemPromptService {
     }
 
     @Override
-    protected ESystemPromptFeatureType getFeatureType() {
+    public ESystemPromptFeatureType getFeatureType() {
         return ESystemPromptFeatureType.Q_AND_A;
     }
 

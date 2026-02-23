@@ -14,7 +14,7 @@ public class ExplanationGenerationSystemPromptServiceImpl extends AbstractSystem
     }
 
     @Override
-    protected ESystemPromptFeatureType getFeatureType() {
+    public ESystemPromptFeatureType getFeatureType() {
         return ESystemPromptFeatureType.EXPLANATION_GENERATION;
     }
 

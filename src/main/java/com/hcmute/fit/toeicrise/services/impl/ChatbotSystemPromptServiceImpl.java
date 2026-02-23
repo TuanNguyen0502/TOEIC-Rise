@@ -16,7 +16,7 @@ public class ChatbotSystemPromptServiceImpl extends AbstractSystemPromptService 
     }
 
     @Override
-    protected ESystemPromptFeatureType getFeatureType() {
+    public ESystemPromptFeatureType getFeatureType() {
         return ESystemPromptFeatureType.CHATBOT;
     }
 

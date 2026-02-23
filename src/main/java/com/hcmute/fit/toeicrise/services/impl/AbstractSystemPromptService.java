@@ -191,7 +191,7 @@ public abstract class AbstractSystemPromptService {
         redisService.put(getCacheName(), ACTIVE_PROMPT_KEY, response, CACHE_DURATION);
     }
 
-    protected abstract ESystemPromptFeatureType getFeatureType();
+    public abstract ESystemPromptFeatureType getFeatureType();
 
     protected abstract String getCacheName();
 }
