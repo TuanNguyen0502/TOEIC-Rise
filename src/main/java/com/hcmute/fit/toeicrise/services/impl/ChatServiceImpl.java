@@ -251,7 +251,7 @@ public class ChatServiceImpl implements IChatService {
                                 .conversationId(chatAboutQuestionRequest.getConversationId())
                                 .message(prompt)
                                 .build(),
-                        systemPrompt)
+                        getActiveQAndASystemPrompt())
         );
     }
 
@@ -314,7 +314,7 @@ public class ChatServiceImpl implements IChatService {
 
             return cleanClient.prompt()
                     .user(userPrompt)
-                    .system(systemPrompt)
+                    .system(getActiveExplanationGenerationSystemPrompt())
                     .stream()
                     .content()
                     .map(contentText -> chatbotMapper.toChatbotResponse(
