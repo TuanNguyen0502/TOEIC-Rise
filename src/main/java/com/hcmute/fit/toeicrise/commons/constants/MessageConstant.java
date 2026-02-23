@@ -25,8 +25,7 @@ public class MessageConstant {
     public static final String QUESTION_GROUP_IMAGE_URL_FORMAT_INVALID = "Question group image URL format is invalid.";
     // System Prompt related messages
     public static final String SYSTEM_PROMPT_CONTENT_NOT_BLANK = "Content must not be blank";
-    public static final String SYSTEM_PROMPT_CONTENT_INVALID = "Content must be at least 20 characters and can only contain letters, digits, spaces, and punctuation (.,!?()'\"-)";
-    public static final String SYSTEM_PROMPT_CONTENT_NOT_NULL = "Content must not be null";
+    public static final String SYSTEM_PROMPT_CONTENT_INVALID = "Content must be at least 20 characters and can only contain letters, digits, spaces, and punctuation (.,!?()'\"-+)";
     public static final String SYSTEM_PROMPT_IS_ACTIVE_NOT_NULL = "isActive must not be null";
     // Chatbot messages
     public static final String CHAT_MESSAGE_NOT_BLANK = "Message must not be blank";

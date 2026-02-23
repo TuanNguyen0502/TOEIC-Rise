@@ -221,7 +221,7 @@ public class Constant {
     public static final String TEST_SET_NAME_PATTERN = "^[\\p{L}0-9 ()]+$";
     public static final String TEST_NAME_PATTERN = "^[\\p{L}0-9 ()]+$";
     // Chatbot patterns
-    public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{20,}$";
+    public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[\\p{L}0-9 .,!?()'\"-+]{20,}$";
     public static final String CHAT_TITLE_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{1,100}$";
     public static final String CHAT_CONVERSATION_ID_PATTERN = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
     // Cache constants
