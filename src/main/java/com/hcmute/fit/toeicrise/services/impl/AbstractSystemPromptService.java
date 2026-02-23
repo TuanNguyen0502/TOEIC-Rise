@@ -116,6 +116,11 @@ public abstract class AbstractSystemPromptService {
         SystemPrompt existingPrompt = systemPromptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
+        // Ensure the existing prompt belongs to the correct feature type
+        if (existingPrompt.getFeatureType() != getFeatureType()) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt");
+        }
+
         // If the updated prompt is set to active, deactivate the current active prompt
         if (request.getIsActive()) {
             deactivateSystemPrompt();
