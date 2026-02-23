@@ -16,7 +16,6 @@ import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +26,6 @@ public interface IUserTestService {
 
     Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId);
 
-    @Transactional
     TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request);
 
     List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email);

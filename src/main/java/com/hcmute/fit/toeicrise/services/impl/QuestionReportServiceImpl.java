@@ -44,9 +44,7 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
     public void createReport(String email, QuestionReportRequest questionReportRequest) {
         User reporter = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-        Question question = questionService.findById(questionReportRequest.getQuestionId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
-
+        Question question = questionService.findById(questionReportRequest.getQuestionId());
         QuestionReport questionReport = new QuestionReport();
         questionReport.setQuestion(question);
         questionReport.setReporter(reporter);

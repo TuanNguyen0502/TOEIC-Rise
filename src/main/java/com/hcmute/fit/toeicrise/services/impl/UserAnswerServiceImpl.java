@@ -12,6 +12,8 @@ import com.hcmute.fit.toeicrise.services.interfaces.IUserAnswerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserAnswerServiceImpl implements IUserAnswerService {
@@ -25,5 +27,10 @@ public class UserAnswerServiceImpl implements IUserAnswerService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Answer"));
         QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(userAnswer.getQuestionGroupId());
         return userAnswerMapper.toUserAnswerDetailResponse(userAnswer, questionGroup);
+    }
+
+    @Override
+    public List<UserAnswer> getUserTestIdInWithQuestion(List<Long> userTestIds) {
+        return userAnswerRepository.findByUserTestIdInWithQuestion(userTestIds);
     }
 }

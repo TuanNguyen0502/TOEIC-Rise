@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
+import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import jakarta.validation.Valid;
@@ -16,11 +17,11 @@ public class QuestionController {
     @PutMapping()
     public ResponseEntity<?> updateQuestion(@Valid @RequestBody QuestionRequest questionRequest) {
         questionService.updateQuestion(questionRequest);
-        return ResponseEntity.ok("Update question updated successfully");
+        return ResponseEntity.ok(MessageConstant.QUESTION_UPDATE_SUCCESS);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestionById(@PathVariable Long id) {
-        return ResponseEntity.ok(questionService.getQuestionById(id));
+        return ResponseEntity.ok(questionService.getQuestionResponseById(id));
     }
 }

@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateReques
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class QuestionGroupController {
     private final IQuestionGroupService questionGroupService;
 
-    @PutMapping("/{id}")
-    public void updateQuestionGroup(@PathVariable Long id, @Valid @ModelAttribute QuestionGroupUpdateRequest request) {
-        questionGroupService.updateQuestionGroup(id, request);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateQuestionGroup(@PathVariable Long id, @Valid @ModelAttribute QuestionGroupUpdateRequest request) {
+        return ResponseEntity.ok(questionGroupService.updateQuestionGroup(id, request));
     }
 
     @GetMapping("/{id}")

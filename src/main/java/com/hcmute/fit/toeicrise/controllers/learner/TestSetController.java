@@ -15,6 +15,6 @@ public class TestSetController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllTestSets() {
-        return ResponseEntity.ok(testSetService.getAllTestSet());
+        return ResponseEntity.ok(testSetService.getAllTestSets());
     }
 }

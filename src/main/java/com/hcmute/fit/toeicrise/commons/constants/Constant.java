@@ -241,6 +241,12 @@ public class Constant {
     public static final int AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
     // Flashcard constants
     public static final String FLASHCARD_NAME_PATTERN = "^[\\p{L}0-9 ().,'-]{1,100}$";
+    // Authentication constants
+    public static final int LOCK_DURATION_MINUTES = 30;
+    public static final int MAX_VERIFY_OTP_TIMES = 5;
+    public static final int MAX_RESEND_OTP_ATTEMPTS = 5;
+    public static final int OTP_EXPIRATION_MINUTES = 5;
+    public static final int MAX_VERIFY_LOGIN_TIMES = 15;
     // Tag constants
     public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
 }

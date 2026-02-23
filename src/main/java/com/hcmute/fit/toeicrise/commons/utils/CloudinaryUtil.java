@@ -72,6 +72,15 @@ public class CloudinaryUtil {
         }
     }
 
+    public void handleUploadFile(MultipartFile file, int maxSize) {
+        if (file != null && !file.isEmpty()) {
+            if (file.getSize() > maxSize) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
+            validateImageFile(file);
+        }
+    }
+
     private boolean isValidSuffixImage(String img) {
         return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
                 img.endsWith(".png") || img.endsWith(".gif") ||
