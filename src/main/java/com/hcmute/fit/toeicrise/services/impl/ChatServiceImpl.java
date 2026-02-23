@@ -46,6 +46,8 @@ public class ChatServiceImpl implements IChatService {
     private final UserAnswerRepository userAnswerRepository;
     private final ChatMemoryRepository chatMemoryRepository;
     private final ChatbotSystemPromptServiceImpl chatbotSystemPromptService;
+    private final QAndASystemPromptServiceImpl qAndASystemPromptService;
+    private final ExplanationGenerationSystemPromptServiceImpl explanationGenerationSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -246,9 +248,9 @@ public class ChatServiceImpl implements IChatService {
 
         return promptMono.flatMapMany(prompt ->
                 chat(ChatRequest.builder()
-                        .conversationId(chatAboutQuestionRequest.getConversationId())
-                        .message(prompt)
-                        .build(),
+                                .conversationId(chatAboutQuestionRequest.getConversationId())
+                                .message(prompt)
+                                .build(),
                         systemPrompt)
         );
     }
@@ -326,6 +328,16 @@ public class ChatServiceImpl implements IChatService {
 
     private String getActiveChatbotSystemPrompt() {
         SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveQAndASystemPrompt() {
+        SystemPromptDetailResponse response = qAndASystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveExplanationGenerationSystemPrompt() {
+        SystemPromptDetailResponse response = explanationGenerationSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 }
