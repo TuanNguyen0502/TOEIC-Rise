@@ -77,20 +77,9 @@ public abstract class AbstractSystemPromptService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<SystemPrompt> promptsPage = systemPromptRepository.findAll(specification, pageable);
-
-        // Map entities to responses and truncate content
-        Page<SystemPromptResponse> systemPrompts = promptsPage.map(prompt -> {
-            SystemPromptResponse response = systemPromptMapper.toResponse(prompt);
-            // Truncate content to a shorter version (e.g., first 100 characters + "...")
-            if (response.getContent() != null && response.getContent().length() > 100) {
-                response.setContent(response.getContent().substring(0, 100) + "...");
-            }
-            return response;
-        });
-
-        // Create PageResponse with meta information and result
-        return pageResponseMapper.toPageResponse(systemPrompts);
+        Page<SystemPromptResponse> promptsPage = systemPromptRepository.findAll(specification, pageable)
+                .map(systemPromptMapper::toResponse);
+        return pageResponseMapper.toPageResponse(promptsPage);
     }
 
     public final void createSystemPrompt(SystemPromptCreateRequest request) {

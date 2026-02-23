@@ -17,6 +17,11 @@ public interface SystemPromptMapper {
 
         SystemPromptResponse response = new SystemPromptResponse();
         response.setId(systemPrompt.getId());
+        if (systemPrompt.getContent() != null && systemPrompt.getContent().length() > 150) {
+            response.setContent(systemPrompt.getContent().substring(0, 150) + "...");
+        } else {
+            response.setContent(systemPrompt.getContent());
+        }
         response.setFeatureType(systemPrompt.getFeatureType());
         response.setVersion(systemPrompt.getVersion());
         response.setIsActive(systemPrompt.getIsActive());
