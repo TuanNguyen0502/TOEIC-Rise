@@ -16,7 +16,6 @@ import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
 import com.hcmute.fit.toeicrise.repositories.UserAnswerRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
-import com.hcmute.fit.toeicrise.services.interfaces.ISystemPromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -46,7 +45,7 @@ public class ChatServiceImpl implements IChatService {
     private final ChatModel chatModel;
     private final UserAnswerRepository userAnswerRepository;
     private final ChatMemoryRepository chatMemoryRepository;
-    private final ISystemPromptService systemPromptService;
+    private final ChatbotSystemPromptServiceImpl chatbotSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -249,7 +248,8 @@ public class ChatServiceImpl implements IChatService {
                 chat(ChatRequest.builder()
                         .conversationId(chatAboutQuestionRequest.getConversationId())
                         .message(prompt)
-                        .build(), systemPrompt)
+                        .build(),
+                        systemPrompt)
         );
     }
 
@@ -325,7 +325,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     private String getActiveChatbotSystemPrompt() {
-        SystemPromptDetailResponse response = systemPromptService.getActiveChatbotSystemPrompt();
+        SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 }
