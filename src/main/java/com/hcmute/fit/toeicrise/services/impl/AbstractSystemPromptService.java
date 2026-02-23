@@ -117,9 +117,7 @@ public abstract class AbstractSystemPromptService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
         // Ensure the existing prompt belongs to the correct feature type
-        if (existingPrompt.getFeatureType() != getFeatureType()) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt");
-        }
+        checkFeatureType(existingPrompt);
 
         // If the updated prompt is set to active, deactivate the current active prompt
         if (request.getIsActive()) {
@@ -152,6 +150,9 @@ public abstract class AbstractSystemPromptService {
         SystemPrompt existingPrompt = systemPromptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt"));
 
+        // Ensure the existing prompt belongs to the correct feature type
+        checkFeatureType(existingPrompt);
+
         // If the updated prompt is set to active, deactivate the current active prompt
         if (!existingPrompt.getIsActive()) {
             deactivateSystemPrompt();
@@ -163,6 +164,12 @@ public abstract class AbstractSystemPromptService {
         } else {
             // Prevent deactivating the only active prompt
             throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
+        }
+    }
+
+    private void checkFeatureType(SystemPrompt systemPrompt) {
+        if (systemPrompt.getFeatureType() != getFeatureType()) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "System Prompt");
         }
     }
 
