@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ESystemPromptFeatureType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;

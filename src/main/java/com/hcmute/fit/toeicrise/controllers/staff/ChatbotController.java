@@ -50,4 +50,19 @@ public class ChatbotController {
     public Flux<ChatbotResponse> generateExplanation(@Valid @ModelAttribute GenerateExplanationRequest request) {
         return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
     }
+
+    @PostMapping(path = "/testing-system-prompt-chatbot", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> testingChatbotSystemPrompt(@Valid @ModelAttribute TestingSystemPromptChatbotRequest request) {
+        return chatService.chat(request).delayElements(Duration.ofMillis(50));
+    }
+
+    @PostMapping(path = "/testing-system-prompt-q-and-a", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> chatAboutQuestion(@Valid @ModelAttribute TestingSystemPromptQAndAnswerRequest request) {
+        return chatService.chatAboutQuestion(request).delayElements(Duration.ofMillis(50));
+    }
+
+    @PostMapping(path = "/testing-system-prompt-explanation-generation", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> testingExplanationGenerationSystemPrompt(@Valid @ModelAttribute TestingSystemPromptExplanationGenerationRequest request) {
+        return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
+    }
 }
