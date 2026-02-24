@@ -13,13 +13,15 @@ public interface IChatService {
 
     Flux<ChatbotResponse> chat(ChatRequest chatRequest);
 
-    Flux<ChatbotResponse> chat(ChatForTestingSystemPromptRequest request);
+    Flux<ChatbotResponse> chat(TestingChatbotSystemPromptRequest request);
 
     Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType);
 
     String generateConversationTitle(String email, TitleRequest titleRequest);
 
     Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest);
+
+    Flux<ChatbotResponse> chatAboutQuestion(TestingQAndAnswerSystemPromptRequest request);
 
     ChatbotAnalysisResponse chatAnalysisData(ChatAnalysisRequest chatRequest);
 

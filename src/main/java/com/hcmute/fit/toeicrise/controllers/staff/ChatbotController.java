@@ -52,7 +52,12 @@ public class ChatbotController {
     }
 
     @PostMapping(path = "/testing-chatbot-system-prompt", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChatbotResponse> testingChatbotSystemPrompt(@Valid @ModelAttribute ChatForTestingSystemPromptRequest request) {
+    public Flux<ChatbotResponse> testingChatbotSystemPrompt(@Valid @ModelAttribute TestingChatbotSystemPromptRequest request) {
         return chatService.chat(request).delayElements(Duration.ofMillis(50));
+    }
+
+    @PostMapping(path = "/testing-q-and-a-system-prompt", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> chatAboutQuestion(@Valid @ModelAttribute TestingQAndAnswerSystemPromptRequest request) {
+        return chatService.chatAboutQuestion(request).delayElements(Duration.ofMillis(50));
     }
 }

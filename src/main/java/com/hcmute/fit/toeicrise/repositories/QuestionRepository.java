@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -36,4 +37,14 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             "LEFT JOIN FETCH q.tags tags " +
             "WHERE q.id IN :questionIds")
     List<Question> findAllByIdWithGroups(@Param("questionIds") List<Long> questionIds);
+
+    @Query(value = """
+                SELECT q.* FROM questions q
+                JOIN question_groups qg ON q.question_group_id = qg.id
+                JOIN parts p ON qg.part_id = p.id
+                WHERE p.name LIKE CONCAT('%', :partName, '%')
+                ORDER BY RAND()
+                LIMIT 1
+            """, nativeQuery = true)
+    Optional<Question> findRandomQuestionByPartName(@Param("partName") String partName);
 }

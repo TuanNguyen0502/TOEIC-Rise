@@ -85,6 +85,7 @@ public class MessageConstant {
     // Part related messages
     public static final String PART_ID_MIN = "Part ID must be greater than 0.";
     public static final String PART_ID_MAX = "Part ID must be less than 10.";
+    public static final String PART_NAME_NOT_BLANK = "Part name must not be blank.";
     // Tag related messages
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
