@@ -2,7 +2,6 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
@@ -21,7 +20,7 @@ public class UserTestController {
     private final IUserTestService userTestService;
 
     @GetMapping("/{userTestId}")
-    public ResponseEntity<TestResultResponse> getUserTestResultById(@PathVariable Long userTestId) {
+    public ResponseEntity<?> getUserTestResultById(@PathVariable Long userTestId) {
         String email = SecurityUtils.getCurrentUser();
         TestResultResponse result = userTestService.getUserTestResultById(email, userTestId);
         return ResponseEntity.ok(result);
@@ -34,11 +33,10 @@ public class UserTestController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("")
-    public ResponseEntity<TestResultOverallResponse> submitTest(@Valid @RequestBody UserTestRequest request) {
+    @PostMapping()
+    public ResponseEntity<?> submitTest(@Valid @RequestBody UserTestRequest request) {
         String email = SecurityUtils.getCurrentUser();
-        TestResultOverallResponse result = userTestService.calculateAndSaveUserTestResult(email, request);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(userTestService.calculateAndSaveUserTestResult(email, request));
     }
 
     @GetMapping("/view-histories/{id}")
@@ -46,7 +44,7 @@ public class UserTestController {
         return ResponseEntity.ok(userTestService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
     }
 
-    @GetMapping(value = "/exam/{id}")
+    @GetMapping( "/exam/{id}")
     public ResponseEntity<?> getTestByParts(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
         return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, parts));
     }

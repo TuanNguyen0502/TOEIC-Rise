@@ -6,6 +6,7 @@ public class MessageConstant {
     public static final String INVALID_OTP = "Invalid OTP! OTP must be exactly 6 digits (0-9).";
     public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";
     // Profile messages
+    public static final String INVALID_USER = "Invalid or anonymous user";
     public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
     public static final String PROFILE_FULLNAME_NOT_BLANK = "Full name must not be blank.";
     public static final String PROFILE_FULLNAME_INVALID = "Full name can only contain letters and spaces.";
@@ -83,8 +84,8 @@ public class MessageConstant {
     public static final String FLASHCARD_ITEM_DEFINITION_NOT_BLANK = "Flashcard item definition must not be blank.";
     public static final String FLASHCARD_ITEM_ID_NOT_NULL = "Flashcard item id must not be null.";
     // Part related messages
-    public static final String PART_ID_MIN = "Part ID must be greater than 0.";
-    public static final String PART_ID_MAX = "Part ID must be less than 10.";
+    public static final String PART_ID_MIN = "Part ID must be greater than 1.";
+    public static final String PART_ID_MAX = "Part ID must be less than 7.";
     public static final String PART_NAME_NOT_BLANK = "Part name must not be blank.";
     // Tag related messages
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
@@ -93,4 +94,15 @@ public class MessageConstant {
     public static final String TAG_NAME_NOT_NULL = "Tag name must not be null.";
     public static final String TAG_NAME_NOT_BLANK = "Tag name must not be blank.";
     public static final String TAG_NAME_INVALID = "Tag name can only contain letters, digits, spaces, and special characters []():.,'- and must be between 1 and 50 characters long.";
+    // Success messages
+    public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
+    public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";
+    public static final String VERIFICATION_CODE_SUCCESS = "Verification code sent.";
+    public static final String PASSWORD_RESET_SUCCESS = "Password reset successfully.";
+    public static final String PASSWORD_UPDATE_SUCCESS = "Password updated successfully.";
+    public static final String PROFILE_UPDATE_SUCCESS = "Profile updated successfully.";
+    public static final String TEST_SET_DELETED_SUCCESS = "Test Set deleted successfully.";
+    public static final String TEST_SET_CREATED_SUCCESS = "Test Set created successfully.";
+    public static final String TEST_IMPORT_SUCCESS = "Test imported successfully";
+    public static final String QUESTION_UPDATE_SUCCESS = "Update question updated successfully";
 }

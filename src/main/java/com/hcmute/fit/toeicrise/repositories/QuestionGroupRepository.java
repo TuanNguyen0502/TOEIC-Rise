@@ -3,13 +3,19 @@ package com.hcmute.fit.toeicrise.repositories;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Long> {
-    List<QuestionGroup> findByTest_IdOrderByPositionAsc(Long id);
+    @Query("SELECT qg FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH qg.part p " +
+            "WHERE qg.test.id = :testId " +
+            "ORDER BY p.id, qg.position")
+    List<QuestionGroup> findByTestIdWithPart(@Param("testId") Long id);
 
     @Query("SELECT DISTINCT qg " +
             "FROM QuestionGroup qg " +
@@ -17,5 +23,18 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
             "LEFT JOIN FETCH qg.part p " +
             "WHERE qg.test.id = :testId AND p.id IN :partIds " +
             "ORDER BY p.id, qg.position, q.position")
-    List<QuestionGroup> findByTest_IdAndPart_IdOrderByPositionAsc(Long testId, List<Long> partIds);
+    List<QuestionGroup> findByTestIdAndPartIdsWithQuestionsAndPart(Long testId, List<Long> partIds);
+
+    @Query("SELECT DISTINCT qg FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH qg.questions " +
+            "WHERE qg.id IN :ids")
+    List<QuestionGroup> findAllByIdInFetchQuestions(@Param("ids") Set<Long> ids);
+
+    @Query("SELECT DISTINCT qg.id FROM QuestionGroup qg WHERE qg.id IN :ids")
+    Set<Long> findExistingIdsByIds(List<Long> ids);
+
+    @Query("SELECT qg FROM QuestionGroup qg " +
+            "LEFT JOIN FETCH qg.part " +
+            "WHERE qg.id IN :ids")
+    List<QuestionGroup> findAllByIdWithPart(@Param("ids") Set<Long> ids);
 }

@@ -25,6 +25,7 @@ public class User extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", unique = true)
     @JsonBackReference
+    @ToString.Exclude
     private Account account;
 
     @ManyToOne
