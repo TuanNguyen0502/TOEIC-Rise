@@ -1,14 +1,24 @@
-package com.hcmute.fit.toeicrise.dtos.requests.chatbot;
+package com.hcmute.fit.toeicrise.dtos.requests.systemprompt;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class SystemPromptCreateRequest {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SystemPromptUpdateRequest {
     @NotBlank(message = MessageConstant.SYSTEM_PROMPT_CONTENT_NOT_BLANK)
     @Pattern(regexp = Constant.SYSTEM_PROMPT_CONTENT_PATTERN, message = MessageConstant.SYSTEM_PROMPT_CONTENT_INVALID)
     private String content;
+
+    @NotNull(message = MessageConstant.SYSTEM_PROMPT_IS_ACTIVE_NOT_NULL)
+    private Boolean isActive;
 }

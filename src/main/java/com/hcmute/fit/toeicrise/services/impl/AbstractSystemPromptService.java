@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.chatbot.SystemPromptUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptResponse;
