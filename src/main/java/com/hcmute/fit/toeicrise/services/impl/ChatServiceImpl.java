@@ -115,7 +115,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> chat(TestingChatbotSystemPromptRequest request) {
+    public Flux<ChatbotResponse> chat(TestingSystemPromptChatbotRequest request) {
         return Flux.defer(() -> {
             if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
                 request.setConversationId(UUID.randomUUID().toString());
@@ -283,7 +283,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> chatAboutQuestion(TestingQAndAnswerSystemPromptRequest request) {
+    public Flux<ChatbotResponse> chatAboutQuestion(TestingSystemPromptQAndAnswerRequest request) {
         Mono<String> promptMono;
 
         if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
@@ -410,6 +410,51 @@ public class ChatServiceImpl implements IChatService {
                             MessageType.ASSISTANT.name()
                     ));
         }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Flux<ChatbotResponse> generateExplanation(TestingSystemPromptExplanationGenerationRequest request) {
+        return Flux.defer(() -> {
+            ChatClient cleanClient = chatClientBuilder.build();
+            String conversationId = UUID.randomUUID().toString();
+            String messageId = UUID.randomUUID().toString();
+
+            return Mono.fromCallable(() -> {
+                        Question question = questionRepository.findRandomQuestionByPartName(request.getPartName())
+                                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST, "No question found for part: " + request.getPartName()));
+                        QuestionGroup questionGroup = question.getQuestionGroup();
+                        String options = String.join(", ", question.getOptions());
+
+                        return """
+                                ### DỮ LIỆU ĐẦU VÀO:\s
+                                1. Passage (Đoạn văn đọc hiểu): %s\s
+                                2. Transcript: %s\s
+                                3. Nội dung câu hỏi: %s\s
+                                4. Các lựa chọn: %s\s
+                                5. Đáp án đúng: %s\s
+                                """.formatted(
+                                questionGroup.getPassage(),
+                                questionGroup.getTranscript(),
+                                question.getContent(),
+                                options,
+                                question.getCorrectOption()
+                        );
+                    })
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .flatMapMany(userPrompt ->
+                            cleanClient.prompt()
+                                    .user(userPrompt)
+                                    .system(getActiveExplanationGenerationSystemPrompt())
+                                    .stream()
+                                    .content()
+                                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                                            contentText,
+                                            messageId,
+                                            conversationId,
+                                            MessageType.ASSISTANT.name()
+                                    ))
+                    );
+        });
     }
 
     private String getActiveChatbotSystemPrompt() {

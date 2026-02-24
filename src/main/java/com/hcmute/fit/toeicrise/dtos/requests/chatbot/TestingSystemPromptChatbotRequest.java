@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TestingChatbotSystemPromptRequest {
+public class TestingSystemPromptChatbotRequest {
     @Pattern(regexp = Constant.CHAT_CONVERSATION_ID_PATTERN, message = MessageConstant.CHAT_CONVERSATION_ID_INVALID)
     private String conversationId;
 
