@@ -113,6 +113,31 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
+    public Flux<ChatbotResponse> chat(ChatForTestingSystemPromptRequest request) {
+        return Flux.defer(() -> {
+            if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
+                request.setConversationId(UUID.randomUUID().toString());
+            }
+            String messageId = UUID.randomUUID().toString();
+            return chatClient.prompt()
+                    .advisors(advisorSpec -> {
+                        advisorSpec.param(ChatMemory.CONVERSATION_ID, request.getConversationId());
+                        advisorSpec.param("messageId", messageId);
+                    })
+                    .user(request.getMessage())
+                    .system(request.getSystemPromptContent())
+                    .stream()
+                    .content()
+                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                            contentText,
+                            messageId,
+                            request.getConversationId(),
+                            MessageType.ASSISTANT.name()
+                    ));
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
     public Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType) {
         // Ensure conversationId is set
         if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
