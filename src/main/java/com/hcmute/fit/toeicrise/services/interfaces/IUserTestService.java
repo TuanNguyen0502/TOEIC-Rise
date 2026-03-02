@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.analysis.FullTestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.ActivityTrendResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.RetestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
@@ -51,4 +52,6 @@ public interface IUserTestService {
     Long totalUserTest(LocalDateTime from, LocalDateTime to);
 
     LearnerTestPartsResponse getLearnerWrongAnswer(Long userTestId, String email);
+
+    RetestResultOverallResponse getResultAfterSubmitWrongAnswer(Long userTestId, String email, UserTestRequest request);
 }

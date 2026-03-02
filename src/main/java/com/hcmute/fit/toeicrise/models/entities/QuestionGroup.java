@@ -41,5 +41,6 @@ public class QuestionGroup extends BaseEntity {
 
     @OneToMany(mappedBy = "questionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @ToString.Exclude
     private List<Question> questions = new ArrayList<>();
 }

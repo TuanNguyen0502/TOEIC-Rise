@@ -58,4 +58,9 @@ public class UserTestController {
     public ResponseEntity<?> getWrongAnswer(@PathVariable Long userTestId) {
         return ResponseEntity.ok(userTestService.getLearnerWrongAnswer(userTestId, SecurityUtils.getCurrentUser()));
     }
+
+    @PostMapping("/{userTestId}/wrong-answer")
+    public ResponseEntity<?> submitWrongAnswer(@PathVariable Long userTestId, @Valid @RequestBody UserTestRequest request) {
+        return ResponseEntity.ok(userTestService.getResultAfterSubmitWrongAnswer(userTestId, SecurityUtils.getCurrentUser(), request));
+    }
 }
