@@ -494,11 +494,12 @@ public class UserTestServiceImpl implements IUserTestService {
                         .map(group -> {
                             QuestionGroup questionGroup = group.getKey();
                             List<UserAnswer> userAnswerList = group.getValue();
-                            List<LearnerTestQuestionResponse> questionResponses = userAnswerList.stream().sorted(Comparator.comparing(question -> question.getQuestion().getPosition()))
-                                    .map(question -> questionMapper.toLearnerTestQuestionResponse(question.getQuestion())).toList();
+                            List<LearnerAnswerResponse> answerResponses = userAnswerList.stream().sorted(Comparator.comparing(userAnswer -> userAnswer.getQuestion().getPosition()))
+                                    .map(userAnswerMapper::toLearnerAnswerResponse).toList();
 
+                            List<Object> questionsAsObject = new ArrayList<>(answerResponses);
                             LearnerTestQuestionGroupResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(questionGroup);
-                            groupResponse.setQuestions(new ArrayList<>(questionResponses));
+                            groupResponse.setQuestions(new ArrayList<>(questionsAsObject));
                             return groupResponse;
                         })
                         .toList();
