@@ -4,10 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
@@ -88,6 +85,20 @@ public class FlashcardServiceImpl implements IFlashcardService {
             boolean isFavourite = (boolean) result[1];
             return flashcardMapper.toFlashcardPublicResponse(flashcard, isFavourite);
         });
+
+        return pageResponseMapper.toPageResponse(flashcardPage);
+    }
+
+    @Override
+    public PageResponse getFlashcardsForPopup(String email, int page, int size, String sortBy, String direction) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<FlashcardForPopupResponse> flashcardPage = flashcardRepository.findByUser(user, pageable)
+                .map(flashcardMapper::toFlashcardForPopupResponse);
 
         return pageResponseMapper.toPageResponse(flashcardPage);
     }

@@ -12,6 +12,8 @@ public interface IFlashcardService {
 
     PageResponse getAllPublicFlashcards(String email, String name, int page, int size, String sortBy, String direction);
 
+    PageResponse getFlashcardsForPopup(String email, int page, int size, String sortBy, String direction);
+
     FlashcardDetailResponse getFlashcardDetailById(String email, Long flashcardId);
 
     void createFlashcard(String email, FlashcardCreateRequest flashcardCreateRequest);
