@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -208,5 +209,24 @@ public class FlashcardServiceImpl implements IFlashcardService {
     @Override
     public Long totalFlashcards() {
         return flashcardRepository.count();
+    }
+
+    @Transactional
+    @Override
+    public void addFlashcardItemToFlashcard(String email, FlashcardItemAddingRequest request) {
+        Flashcard flashcard = flashcardRepository.findById(Long.valueOf(request.getFlashcardId())).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+        if (!flashcard.getUser().getAccount().getEmail().equals(email))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+
+        FlashcardItem newItem = new FlashcardItem();
+        newItem.setFlashcard(flashcard);
+        newItem.setVocabulary(request.getVocabulary());
+        newItem.setDefinition(request.getDefinition());
+        newItem.setAudioUrl(request.getAudioUrl());
+        newItem.setPronunciation(request.getPronunciation());
+
+        flashcard.getFlashcardItems().add(newItem);
+
+        flashcardRepository.save(flashcard);
     }
 }

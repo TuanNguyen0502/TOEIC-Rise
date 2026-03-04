@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
@@ -82,6 +83,13 @@ public class FlashcardController {
     public ResponseEntity<?> addFlashcardToFavourite(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         flashcardFavouriteService.addFavourite(email, flashcardId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/popup")
+    public ResponseEntity<?> addFlashcardToPopup(@Valid @RequestBody FlashcardItemAddingRequest flashcardItemAddingRequest) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardService.addFlashcardItemToFlashcard(email, flashcardItemAddingRequest);
         return ResponseEntity.ok().build();
     }
 
