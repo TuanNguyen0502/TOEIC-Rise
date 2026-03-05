@@ -105,4 +105,7 @@ public class MessageConstant {
     public static final String TEST_SET_CREATED_SUCCESS = "Test Set created successfully.";
     public static final String TEST_IMPORT_SUCCESS = "Test imported successfully";
     public static final String QUESTION_UPDATE_SUCCESS = "Update question updated successfully";
+    //Common messages
+    public static final String COMMENT_NOT_BLANK = "Comment content must not be blank.";
+    public static final String COMMENT_TOO_LONG = "Comment content must not exceed 2000 characters.";
 }

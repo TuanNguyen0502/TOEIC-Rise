@@ -251,4 +251,6 @@ public class Constant {
     public static final int MAX_VERIFY_LOGIN_TIMES = 15;
     // Tag constants
     public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
+    // Common constants
+    public static final int MAX_COMMENT_LENGTH = 2000;
 }
