@@ -54,4 +54,6 @@ public interface IUserTestService {
     LearnerTestPartsResponse getLearnerWrongAnswer(Long userTestId, String email);
 
     RetestResultOverallResponse getResultAfterSubmitWrongAnswer(Long userTestId, String email, UserTestRequest request);
+
+    LearnerTestPartsResponse getQuestionsAndCorrectAnswersWrongAnswer(Long userTestId, String email);
 }

@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.RedoWrongQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
@@ -29,6 +30,8 @@ public interface QuestionMapper {
     MiniTestAnswerQuestionResponse toMiniTestAnswerQuestionResponse(Question question);
 
     LearnerTestQuestionResponse toLearnerTestQuestionResponse(Question question);
+
+    RedoWrongQuestionResponse toRedoWrongQuestionResponse(Question question);
 
     default Question toEntity(QuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
         List<String> options = Arrays.asList(

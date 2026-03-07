@@ -63,4 +63,9 @@ public class UserTestController {
     public ResponseEntity<?> submitWrongAnswer(@PathVariable Long userTestId, @Valid @RequestBody UserTestRequest request) {
         return ResponseEntity.ok(userTestService.getResultAfterSubmitWrongAnswer(userTestId, SecurityUtils.getCurrentUser(), request));
     }
+
+    @GetMapping("{userTestId}/do-wrong-answer")
+    public ResponseEntity<?> getDoWrongAnswer(@PathVariable Long userTestId) {
+        return ResponseEntity.ok(userTestService.getQuestionsAndCorrectAnswersWrongAnswer(userTestId, SecurityUtils.getCurrentUser()));
+    }
 }

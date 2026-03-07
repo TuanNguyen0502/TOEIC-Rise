@@ -145,15 +145,12 @@ public class UserTestServiceImpl implements IUserTestService {
                     List<LearnerTestQuestionGroupResponse> questionGroupResponses = answerByQuestionGroups.entrySet().stream()
                             .sorted(Comparator.comparing(e -> e.getKey().getPosition()))
                             .map(groupEntry -> {
-                                QuestionGroup questionGroup = groupEntry.getKey();
-                                List<UserAnswer> userAnswers = groupEntry.getValue();
-
-                                List<LearnerAnswerResponse> questionAndAnswers = userAnswers.stream()
+                                List<LearnerAnswerResponse> questionAndAnswers = groupEntry.getValue().stream()
                                         .sorted(Comparator.comparing(ua -> ua.getQuestion().getPosition()))
                                         .map(userAnswerMapper::toLearnerAnswerResponse)
                                         .toList();
                                 List<Object> questionsAsObject = new ArrayList<>(questionAndAnswers);
-                                LearnerTestQuestionGroupResponse questionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(questionGroup);
+                                LearnerTestQuestionGroupResponse questionGroupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(groupEntry.getKey());
                                 questionGroupResponse.setQuestions(questionsAsObject);
                                 return questionGroupResponse;
 
@@ -436,7 +433,7 @@ public class UserTestServiceImpl implements IUserTestService {
                         })
                         .toList();
                 LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
-                partResponse.setQuestionGroups(Collections.singletonList(groupResponses));
+                partResponse.setQuestionGroups(new ArrayList<>(groupResponses));
                 return partResponse;
             }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
 
@@ -504,7 +501,7 @@ public class UserTestServiceImpl implements IUserTestService {
                         })
                         .toList();
                 LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
-                partResponse.setQuestionGroups(Collections.singletonList(groupResponses));
+                partResponse.setQuestionGroups(new ArrayList<>(groupResponses));
                 return partResponse;
             }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
 
@@ -516,6 +513,45 @@ public class UserTestServiceImpl implements IUserTestService {
                 .totalQuestions(totalQuestions)
                 .correctAnswers(correctAnswers)
                 .timeSpent(timeSpent).build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LearnerTestPartsResponse getQuestionsAndCorrectAnswersWrongAnswer(Long userTestId, String email) {
+        UserTest userTest = userTestRepository.findUserTestByIdWithWrongAnswer(userTestId, email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
+        LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(userTest.getTest());
+
+        if (userTest.getUserAnswers() == null|| userTest.getUserAnswers().isEmpty())
+            learnerTestPartsResponse.setPartResponses(Collections.emptyList());
+        else {
+            Map<Part, List<UserAnswer>> answersByPart = groupWrongAnswersByPart(userTest.getUserAnswers());
+            List<LearnerTestPartResponse> partResponses = answersByPart.entrySet().stream().map(entry -> {
+                Part part = entry.getKey();
+                List<UserAnswer> userAnswers = entry.getValue();
+                Map<QuestionGroup, List<UserAnswer>> answersByQuestionGroup = userAnswers.stream().collect(
+                        Collectors.groupingBy(userAnswer -> userAnswer.getQuestion().getQuestionGroup(),
+                                LinkedHashMap::new, Collectors.toList()));
+                List<LearnerTestQuestionGroupResponse> groupResponses = answersByQuestionGroup.entrySet().stream().sorted(
+                                Comparator.comparing(questionGroupListEntry -> questionGroupListEntry.getKey().getPosition()))
+                        .map(group -> {
+                            QuestionGroup questionGroup = group.getKey();
+                            List<UserAnswer> userAnswerList = group.getValue();
+                            List<RedoWrongQuestionResponse> questionResponses = userAnswerList.stream().sorted(Comparator.comparing(question -> question.getQuestion().getPosition()))
+                                    .map(question -> questionMapper.toRedoWrongQuestionResponse(question.getQuestion())).toList();
+
+                            LearnerTestQuestionGroupResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupResponse(questionGroup);
+                            groupResponse.setQuestions(new ArrayList<>(questionResponses));
+                            return groupResponse;
+                        })
+                        .toList();
+                LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
+                partResponse.setQuestionGroups(new ArrayList<>(groupResponses));
+                return partResponse;
+            }).sorted(Comparator.comparing(LearnerTestPartResponse::getPartName)).toList();
+
+            learnerTestPartsResponse.setPartResponses(partResponses);
+        }
+        return learnerTestPartsResponse;
     }
 
     private int roundToNearest5(int number) {

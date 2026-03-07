@@ -212,7 +212,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
                     })
                     .toList();
             LearnerTestPartResponse partResponse = partMapper.toLearnerTestPartResponse(part);
-            partResponse.setQuestionGroups(Collections.singletonList(groupResponses));
+            partResponse.setQuestionGroups(new ArrayList<>(groupResponses));
             return partResponse;
         }, Comparator.comparing(LearnerTestPartResponse::getPartName));
     }
