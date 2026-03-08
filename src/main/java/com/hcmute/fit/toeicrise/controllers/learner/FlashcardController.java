@@ -4,7 +4,6 @@ import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import jakarta.validation.Valid;
@@ -92,5 +91,17 @@ public class FlashcardController {
         String email = SecurityUtils.getCurrentUser();
         flashcardFavouriteService.deleteFavourite(email, favouriteFlashcardId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{flashcardId}/review")
+    public ResponseEntity<?> getReview(@PathVariable Long flashcardId) {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(flashcardService.getFlashcardItemDetailToReview(email, flashcardId));
+    }
+
+    @GetMapping("/due-items")
+    public ResponseEntity<?> getDueItems() {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(flashcardService.getFlashcardItemDueToReview(email));
     }
 }
