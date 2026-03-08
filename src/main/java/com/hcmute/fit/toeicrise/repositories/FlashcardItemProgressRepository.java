@@ -7,12 +7,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Repository
 public interface FlashcardItemProgressRepository extends JpaRepository<FlashcardItemProgress, Long> {
-    @Query("SELECT fi " +
+    @Query("SELECT fp " +
             "FROM FlashcardItemProgress fp " +
             "LEFT JOIN FETCH fp.flashcardItem fi " +
             "WHERE fi.flashcard.user.account.email = :email AND fp.nextReviewAt <= :nextReviewAt " +
