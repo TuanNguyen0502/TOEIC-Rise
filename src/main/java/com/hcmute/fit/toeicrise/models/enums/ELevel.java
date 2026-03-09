@@ -17,8 +17,14 @@ public enum ELevel {
     private final String name;
     private final Duration duration;
 
-    private ELevel(String name, Duration duration) {
+    ELevel(String name, Duration duration) {
         this.name = name;
         this.duration = duration;
+    }
+
+    public ELevel next(boolean isCorrect) {
+        int index = this.ordinal() + (isCorrect ? 1 : -1);
+        index = Math.max(0, Math.min(index, ELevel.values().length - 1));
+        return ELevel.values()[index];
     }
 }

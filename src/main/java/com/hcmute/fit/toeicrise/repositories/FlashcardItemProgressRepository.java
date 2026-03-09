@@ -17,4 +17,10 @@ public interface FlashcardItemProgressRepository extends JpaRepository<Flashcard
             "WHERE fi.flashcard.user.account.email = :email AND fp.nextReviewAt <= :nextReviewAt " +
             "ORDER BY fp.nextReviewAt ASC ")
     List<FlashcardItemProgress> getAllFlashcardItemProgressByNextReviewAt(@Param("email") String email, @Param("nextReviewAt") LocalDate nextReviewAt);
+
+    @Query("SELECT fp " +
+            "FROM FlashcardItemProgress fp "+
+            "LEFT JOIN FETCH fp.flashcardItem fi " +
+            "WHERE fp.user.id = :userId AND fi.id IN :ids")
+    List<FlashcardItemProgress> getAllFlashcardItemProgressByUserIdAndIds(@Param("userId") Long userId, @Param("ids") List<Long> ids);
 }

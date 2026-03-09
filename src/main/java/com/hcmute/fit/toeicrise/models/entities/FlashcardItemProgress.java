@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "flashcard_item_progress", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "flashcard_item_id"})
+        @UniqueConstraint(name = "uc_user_flashcard_item", columnNames = {"user_id", "flashcard_item_id"})
 })
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -17,11 +17,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class FlashcardItemProgress extends BaseEntity{
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "flashcard_item_id")
+    @JoinColumn(name = "flashcard_item_id", nullable = false)
     private FlashcardItem flashcardItem;
 
     @Enumerated(EnumType.STRING)

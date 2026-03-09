@@ -207,8 +207,6 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
     @Override
     public List<FlashcardItemDetailResponse> getFlashcardItemDetailToReview(String email, Long flashcardId) {
-        User user = userRepository.findByAccount_Email(email)
-                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
         Flashcard flashcard = flashcardRepository.findById(flashcardId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
         if (flashcard.getAccessType() == EFlashcardAccessType.PRIVATE &&
@@ -227,8 +225,6 @@ public class FlashcardServiceImpl implements IFlashcardService {
 
     @Override
     public List<FlashcardItemDetailResponse> getFlashcardItemDueToReview(String email) {
-        User user = userRepository.findByAccount_Email(email)
-                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
         List<FlashcardItem> flashcardItems = flashcardItemProgressService.getFlashcardItemProgress(email)
                 .stream()
                 .limit(NUMBER_OF_FLASHCARD_ITEMS)

@@ -2,14 +2,19 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemProgressRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
+import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemProgressService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController("learnerFlashcardController")
 @RequestMapping("/learner/flashcards")
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class FlashcardController {
     private final IFlashcardService flashcardService;
     private final IFlashcardFavouriteService flashcardFavouriteService;
+    private final IFlashcardItemProgressService flashcardItemProgressService;
 
     @GetMapping("/my")
     public PageResponse getMyFlashcards(
@@ -75,7 +81,7 @@ public class FlashcardController {
     }
 
     @PutMapping("/{flashcardId}")
-    public ResponseEntity<?> updateFlashcard(@PathVariable Long flashcardId, @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
+    public ResponseEntity<?> updateFlashcard(@PathVariable Long flashcardId,@Valid @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
         return ResponseEntity.ok(flashcardService.updateFlashcard(SecurityUtils.getCurrentUser(), flashcardId, flashcardUpdateRequest));
     }
 
@@ -103,5 +109,12 @@ public class FlashcardController {
     public ResponseEntity<?> getDueItems() {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(flashcardService.getFlashcardItemDueToReview(email));
+    }
+
+    @PostMapping("/submit-review")
+    public ResponseEntity<?> submitReview(@Valid @RequestBody FlashcardItemListRequest flashcardItemProgressRequestList) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardItemProgressService.saveFlashcardItemProgress(email, flashcardItemProgressRequestList);
+        return ResponseEntity.ok().build();
     }
 }
