@@ -5,10 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
@@ -47,7 +44,6 @@ public class FlashcardServiceImpl implements IFlashcardService {
     private final FlashcardMapper flashcardMapper;
     private final FlashcardItemMapper flashcardItemMapper;
     private final PageResponseMapper pageResponseMapper;
-    private final IFlashcardItemProgressService flashcardItemProgressService;
 
     private static final int NUMBER_OF_FLASHCARD_ITEMS = 30;
 
@@ -221,14 +217,5 @@ public class FlashcardServiceImpl implements IFlashcardService {
         return flashcardItems.stream()
                 .map(flashcardItemMapper::toFlashcardItemDetailResponse)
                 .toList();
-    }
-
-    @Override
-    public List<FlashcardItemDetailResponse> getFlashcardItemDueToReview(String email) {
-        List<FlashcardItem> flashcardItems = flashcardItemProgressService.getFlashcardItemProgress(email)
-                .stream()
-                .limit(NUMBER_OF_FLASHCARD_ITEMS)
-                .map(FlashcardItemProgress::getFlashcardItem).toList();
-        return flashcardItems.stream().map(flashcardItemMapper::toFlashcardItemDetailResponse).toList();
     }
 }

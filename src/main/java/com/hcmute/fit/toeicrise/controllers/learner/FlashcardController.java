@@ -3,7 +3,6 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemProgressRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
@@ -13,8 +12,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController("learnerFlashcardController")
 @RequestMapping("/learner/flashcards")
@@ -108,7 +105,7 @@ public class FlashcardController {
     @GetMapping("/due-items")
     public ResponseEntity<?> getDueItems() {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(flashcardService.getFlashcardItemDueToReview(email));
+        return ResponseEntity.ok(flashcardItemProgressService.getFlashcardItemDueToReview(email));
     }
 
     @PostMapping("/submit-review")
@@ -116,5 +113,11 @@ public class FlashcardController {
         String email = SecurityUtils.getCurrentUser();
         flashcardItemProgressService.saveFlashcardItemProgress(email, flashcardItemProgressRequestList);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/overall")
+    public ResponseEntity<?> reviewWords(){
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(flashcardItemProgressService.getFlashcardReviewOverall(email));
     }
 }

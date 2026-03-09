@@ -2,6 +2,8 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemProgressRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardReviewOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
@@ -10,6 +12,7 @@ import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import com.hcmute.fit.toeicrise.models.enums.ELevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
+import com.hcmute.fit.toeicrise.models.mappers.FlashcardItemMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardItemProgressRepository;
 import com.hcmute.fit.toeicrise.repositories.FlashcardItemRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemProgressService;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,11 +33,9 @@ public class FlashcardItemProgressServiceImpl implements IFlashcardItemProgressS
     private final FlashcardItemProgressRepository flashcardItemProgressRepository;
     private final FlashcardItemRepository flashcardItemRepository;
     private final IUserService userService;
+    private final FlashcardItemMapper flashcardItemMapper;
 
-    @Override
-    public List<FlashcardItemProgress> getFlashcardItemProgress(String email) {
-        return flashcardItemProgressRepository.getAllFlashcardItemProgressByNextReviewAt(email, LocalDate.now());
-    }
+    private static final int NUMBER_OF_FLASHCARD_ITEMS = 30;
 
     @Override
     public void saveFlashcardItemProgress(String email, FlashcardItemListRequest flashcardItemProgress) {
@@ -85,5 +87,30 @@ public class FlashcardItemProgressServiceImpl implements IFlashcardItemProgressS
 
         if (isPrivate && !isOwner)
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard Item");
+    }
+
+    @Override
+    public FlashcardReviewOverallResponse getFlashcardReviewOverall(String email) {
+        User user = userService.getUserByEmail(email);
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        Long totalLearnedWords = flashcardItemProgressRepository.countByUserIdAndUpdatedAtBetween(user.getId(), startOfDay, endOfDay);
+        Long totalNewWords = flashcardItemProgressRepository.countByUserIdAndCreatedAtBetween(user.getId(), startOfDay, endOfDay);
+        Long totalDueWords = flashcardItemProgressRepository.countByUserIdAndNextReviewAtBefore(user.getId(), endOfDay);
+        return FlashcardReviewOverallResponse.builder()
+                .totalLearnedWords(totalLearnedWords)
+                .totalNewWords(totalNewWords)
+                .totalDueWords(totalDueWords)
+                .build();
+    }
+
+    @Override
+    public List<FlashcardItemDetailResponse> getFlashcardItemDueToReview(String email) {
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        List<FlashcardItem> flashcardItems = flashcardItemProgressRepository.getAllFlashcardItemProgressByNextReviewAt(email, endOfDay)
+                .stream()
+                .limit(NUMBER_OF_FLASHCARD_ITEMS)
+                .map(FlashcardItemProgress::getFlashcardItem).toList();
+        return flashcardItems.stream().map(flashcardItemMapper::toFlashcardItemDetailResponse).toList();
     }
 }

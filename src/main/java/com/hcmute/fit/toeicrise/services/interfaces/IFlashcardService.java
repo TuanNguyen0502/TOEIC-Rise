@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardReviewOverallResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,6 +29,4 @@ public interface IFlashcardService {
     Long totalFlashcards();
 
     List<FlashcardItemDetailResponse> getFlashcardItemDetailToReview(String email, Long flashcardId);
-
-    List<FlashcardItemDetailResponse> getFlashcardItemDueToReview(String email);
 }
