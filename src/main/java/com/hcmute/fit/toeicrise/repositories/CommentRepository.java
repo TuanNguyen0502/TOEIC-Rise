@@ -27,4 +27,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("SELECT c.parent.id, COUNT(c) FROM Comment c WHERE c.parent.id IN :parentIds GROUP BY c.parent.id")
     List<Object[]> countRepliesByParentIds(@Param("parentIds") List<Long> parentIds);
+
+    @EntityGraph(attributePaths = {"user", "user.account", "taggedQuestion"})
+    Page<Comment> findByParentId(Long parentId, Pageable pageable);
 }

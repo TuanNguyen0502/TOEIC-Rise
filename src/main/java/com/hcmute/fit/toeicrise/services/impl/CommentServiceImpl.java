@@ -111,6 +111,23 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
+    public PageResponse getMoreCommentsByCommentId(Long commentId, int page, int size) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Comment"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        Page<Comment> replyPage = commentRepository.findByParentId(commentId, pageable);
+
+        String currentEmail = SecurityUtils.getCurrentUser();
+        List<CommentResponse> dtoList = replyPage.stream()
+                .map(c -> enrichCommentDto(c, currentEmail))
+                .toList();
+
+        return pageResponseMapper.toPageResponse(replyPage, dtoList);
+
+    }
+
+    @Override
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Comment"));

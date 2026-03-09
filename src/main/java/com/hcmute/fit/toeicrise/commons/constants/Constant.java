@@ -252,5 +252,5 @@ public class Constant {
     // Tag constants
     public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
     // Common constants
-    public static final int MAX_COMMENT_LENGTH = 2000;
+    public static final int MAX_COMMENT_LENGTH = 500;
 }

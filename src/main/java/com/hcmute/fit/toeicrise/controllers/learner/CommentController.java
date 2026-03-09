@@ -41,6 +41,18 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{commentId}/replies")
+    public ResponseEntity<PageResponse> getMoreReply(
+            @PathVariable Long commentId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        PageResponse response = commentService.getMoreCommentsByCommentId(commentId, page, size);
+        return ResponseEntity.ok(response);
+    }
+
+
+
     @DeleteMapping("{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
