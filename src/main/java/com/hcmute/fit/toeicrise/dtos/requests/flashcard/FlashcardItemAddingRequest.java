@@ -19,9 +19,7 @@ public class FlashcardItemAddingRequest {
     @NotBlank(message = MessageConstant.FLASHCARD_ITEM_VOCABULARY_NOT_BLANK)
     private String vocabulary;
 
-    @NotBlank(message = MessageConstant.FLASHCARD_ITEM_DEFINITION_NOT_BLANK)
     private String definition;
-
     private String audioUrl;
     private String pronunciation;
 }
