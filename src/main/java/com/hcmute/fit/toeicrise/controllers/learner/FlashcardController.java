@@ -4,14 +4,18 @@ import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemProgressService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 @RestController("learnerFlashcardController")
 @RequestMapping("/learner/flashcards")
@@ -20,6 +24,7 @@ public class FlashcardController {
     private final IFlashcardService flashcardService;
     private final IFlashcardFavouriteService flashcardFavouriteService;
     private final IFlashcardItemProgressService flashcardItemProgressService;
+    private final IChatService chatService;
 
     @GetMapping("/my")
     public PageResponse getMyFlashcards(
@@ -119,5 +124,10 @@ public class FlashcardController {
     public ResponseEntity<?> reviewWords(){
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(flashcardItemProgressService.getFlashcardReviewOverall(email));
+    }
+
+    @GetMapping(value = "/sentence", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getSentenceStream(@Valid @RequestBody SentenceCreateRequest sentenceCreateRequest) {
+        return chatService.chatAboutSentenceStream(sentenceCreateRequest);
     }
 }

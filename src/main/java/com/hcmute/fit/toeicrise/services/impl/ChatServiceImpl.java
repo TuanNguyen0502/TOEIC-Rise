@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAboutQuestionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatAnalysisRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.ChatRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.TitleRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
@@ -236,6 +237,17 @@ public class ChatServiceImpl implements IChatService {
                         .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
                                 .call()
                                         .entity(ChatbotAnalysisResponse.class);
+    }
+
+    @Override
+    public Flux<String> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest) {
+        Context context = new Context();
+        context.setVariable("sentenceData", sentenceCreateRequest);
+        String prompts = templateEngine.process("sentence-result", context);
+
+        return chatClient.prompt(prompts)
+                .stream()
+                .content();
     }
 
     private String getActiveSystemPrompt() {
