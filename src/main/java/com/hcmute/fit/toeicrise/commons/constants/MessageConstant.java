@@ -26,8 +26,7 @@ public class MessageConstant {
     public static final String QUESTION_GROUP_IMAGE_URL_FORMAT_INVALID = "Question group image URL format is invalid.";
     // System Prompt related messages
     public static final String SYSTEM_PROMPT_CONTENT_NOT_BLANK = "Content must not be blank";
-    public static final String SYSTEM_PROMPT_CONTENT_INVALID = "Content must be at least 20 characters and can only contain letters, digits, spaces, and punctuation (.,!?()'\"-)";
-    public static final String SYSTEM_PROMPT_CONTENT_NOT_NULL = "Content must not be null";
+    public static final String SYSTEM_PROMPT_CONTENT_INVALID = "Content must be at least 20 characters and can only contain letters, digits, spaces, and allowed punctuation (!#%&*()[]_+;:'\",.<>?/{}-\\n\\r–).";
     public static final String SYSTEM_PROMPT_IS_ACTIVE_NOT_NULL = "isActive must not be null";
     // Chatbot messages
     public static final String CHAT_MESSAGE_NOT_BLANK = "Message must not be blank";
@@ -58,7 +57,7 @@ public class MessageConstant {
     public static final String QUESTION_GROUP_ID_NOT_NULL = "Question group must not be null.";
     public static final String QUESTION_GROUP_ID_NOT_EMPTY = "Question group must not be empty";
     public static final String QUESTION_CORRECT_OPTION_NOT_NULL = "Correct option must not be null.";
-    public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must be blank.";
+    public static final String QUESTION_CORRECT_OPTION_NOT_BLANK = "Correct option must not be blank.";
     public static final String QUESTION_EXPLANATION_NOT_BLANK = "Explain must not be blank.";
     public static final String QUESTION_EXPLANATION_NOT_NULL = "Explain must not be null.";
     public static final String QUESTION_MIN = "Question size must be greater than 5.";
@@ -87,6 +86,7 @@ public class MessageConstant {
     // Part related messages
     public static final String PART_ID_MIN = "Part ID must be greater than 1.";
     public static final String PART_ID_MAX = "Part ID must be less than 7.";
+    public static final String PART_NAME_NOT_BLANK = "Part name must not be blank.";
     // Tag related messages
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
