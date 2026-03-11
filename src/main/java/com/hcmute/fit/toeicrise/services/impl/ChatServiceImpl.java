@@ -51,6 +51,7 @@ public class ChatServiceImpl implements IChatService {
     private final ChatbotSystemPromptServiceImpl chatbotSystemPromptService;
     private final QAndASystemPromptServiceImpl qAndASystemPromptService;
     private final ExplanationGenerationSystemPromptServiceImpl explanationGenerationSystemPromptService;
+    private final ReviewSentenceSystemPromptServiceImpl reviewSentenceSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -473,15 +474,48 @@ public class ChatServiceImpl implements IChatService {
         return response.getContent();
     }
 
-    @Override
-    public Flux<String> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest) {
-        Context context = new Context();
-        context.setVariable("sentenceData", sentenceCreateRequest);
-        String prompts = templateEngine.process("sentence-result", context);
+    private String getReviewSentenceSystemPrompt() {
+        SystemPromptDetailResponse response = reviewSentenceSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
 
-        return chatClient.prompt(prompts)
-                .stream()
-                .content();
+    @Override
+    public Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest) {
+//        Context context = new Context();
+//        context.setVariable("sentenceData", sentenceCreateRequest);
+//        String prompts = templateEngine.process("sentence-result", context);
+//
+//        return chatClient.prompt(prompts)
+//                .stream()
+//                .content();
+        return Flux.defer(() -> {
+            ChatClient cleanClient = chatClientBuilder.build();
+            String conversationId = UUID.randomUUID().toString();
+            String messageId = UUID.randomUUID().toString();
+
+            return Mono.fromCallable(() -> """
+                    ### DỮ LIỆU ĐẦU VÀO:\s
+                    1. Sentence: %s\s
+                    2. Keyword: %s\s
+                    """.formatted(
+                    sentenceCreateRequest.getSentence(),
+                    sentenceCreateRequest.getKeyword()
+            ))
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .flatMapMany(userPrompt ->
+                            cleanClient.prompt()
+                                    .user(userPrompt)
+                                    .system(getReviewSentenceSystemPrompt())
+                                    .stream()
+                                    .content()
+                                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                                            contentText,
+                                            messageId,
+                                            conversationId,
+                                            MessageType.ASSISTANT.name()
+                                    ))
+                    );
+        });
     }
 
 }

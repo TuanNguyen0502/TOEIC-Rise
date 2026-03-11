@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemProgressService;
@@ -126,8 +127,8 @@ public class FlashcardController {
         return ResponseEntity.ok(flashcardItemProgressService.getFlashcardReviewOverall(email));
     }
 
-    @GetMapping(value = "/sentence", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> getSentenceStream(@Valid @RequestBody SentenceCreateRequest sentenceCreateRequest) {
+    @PostMapping(value = "/sentence", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> getSentenceStream(@Valid @RequestBody SentenceCreateRequest sentenceCreateRequest) {
         return chatService.chatAboutSentenceStream(sentenceCreateRequest);
     }
 }
