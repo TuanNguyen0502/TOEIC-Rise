@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.comment.CommentRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.comment.EditCommentRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.ICommentService;
+import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CommentController {
     private final ICommentService commentService;
+    private final IQuestionService questionService;
 
     @PostMapping("")
     public ResponseEntity<?> createComment(@Valid @RequestBody CommentRequest commentRequest) {
@@ -51,6 +53,12 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{testId}/questions")
+    public ResponseEntity<?> getQuestionMap(
+            @PathVariable Long testId
+    ) {
+        return ResponseEntity.ok(questionService.getQuestionByTestId(testId));
+    }
 
 
     @DeleteMapping("{commentId}")

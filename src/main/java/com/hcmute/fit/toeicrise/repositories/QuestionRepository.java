@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.repositories;
 
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -51,4 +52,15 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
                 LIMIT 1
             """, nativeQuery = true)
     Optional<Question> findRandomQuestionByPartName(@Param("partName") String partName);
+
+    @Query("""
+            SELECT new com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse(
+                q.id, q.position
+            )
+            FROM Question q
+            JOIN q.questionGroup qg
+            WHERE qg.test.id = :testId
+            ORDER BY q.position
+        """)
+    List<QuestionMapResponse> getQuestionByTestId(@Param("testId") Long testId);
 }

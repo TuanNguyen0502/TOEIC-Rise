@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -157,5 +158,10 @@ public class QuestionServiceImpl implements IQuestionService {
             testRepository.save(test);
             log.info("Test updated status successfully with id: {}", test.getId());
         }
+    }
+
+    @Override
+    public List<QuestionMapResponse> getQuestionByTestId(Long testId) {
+        return questionRepository.getQuestionByTestId(testId);
     }
 }
