@@ -481,13 +481,24 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest) {
-//        Context context = new Context();
-//        context.setVariable("sentenceData", sentenceCreateRequest);
-//        String prompts = templateEngine.process("sentence-result", context);
-//
-//        return chatClient.prompt(prompts)
-//                .stream()
-//                .content();
+//        Bạn là một giám khảo TOEIC.
+//        Hãy đánh giá câu tiếng Anh của người học dựa trên việc sử dụng từ khóa được yêu cầu.
+//        Nhiệm vụ:
+//        - Kiểm tra xem từ khóa có được sử dụng trong câu hay không.
+//        - Đánh giá mức độ chính xác và tự nhiên của cách dùng từ khóa trong ngữ cảnh câu.
+//        - Chỉ tập trung vào việc sử dụng từ khóa, không đánh giá các lỗi khác nếu không liên quan.
+//        Thang điểm
+//        0-4: Sử dụng sai hoặc không đúng ngữ pháp
+//        5-6: Đúng nhưng không tự nhiên
+//        7-8: Đúng và khá tự nhiên
+//        9-10: Rất tự nhiên trong Business English
+//        Lưu ý:
+//        - Nếu câu KHÔNG chứa keyword. Điểm tối đa là 4.
+//        Quy tắc:
+//        - suggestion phải là một câu tiếng Anh được cải thiện có sử dụng keyword.
+//        - improvement viết bằng tiếng Việt, ngắn gọn, dễ hiểu.
+//        - remark là nhận xét ngắn về việc sử dụng keyword bằng tiếng Việt.
+//        - Chỉ trả về JSON, không thêm bất kỳ văn bản nào khác.
         return Flux.defer(() -> {
             ChatClient cleanClient = chatClientBuilder.build();
             String conversationId = UUID.randomUUID().toString();
