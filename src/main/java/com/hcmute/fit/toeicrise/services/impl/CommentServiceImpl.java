@@ -145,7 +145,16 @@ public class CommentServiceImpl implements ICommentService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Comment");
         }
 
+        if (commentRequest.questionId() != null) {
+            Question question = questionRepository.findById(commentRequest.questionId())
+                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+            comment.setTaggedQuestion(question);
+        } else {
+            comment.setTaggedQuestion(null);
+        }
+
         comment.setContent(commentRequest.content());
+
         commentRepository.save(comment);
     }
 

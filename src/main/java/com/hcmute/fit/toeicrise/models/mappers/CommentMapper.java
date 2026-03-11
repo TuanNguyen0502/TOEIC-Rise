@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface CommentMapper {
     @Mapping(target = "userFullName", source = "user.fullName")
     @Mapping(target = "userAvatar", source = "user.avatar")
+    @Mapping(target = "taggedQuestionId", source = "taggedQuestion.id")
     @Mapping(target = "taggedQuestionPosition", source = "taggedQuestion.position")
     @Mapping(target = "isEdited", ignore = true)
     @Mapping(target = "isOwner", ignore = true)

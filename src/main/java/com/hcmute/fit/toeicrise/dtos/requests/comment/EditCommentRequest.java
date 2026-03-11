@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 public record EditCommentRequest(
         @NotBlank(message = MessageConstant.COMMENT_NOT_BLANK)
         @Size(max = Constant.MAX_COMMENT_LENGTH, message = MessageConstant.COMMENT_TOO_LONG)
-        String content
+        String content,
+        Long questionId
 ) {
 }

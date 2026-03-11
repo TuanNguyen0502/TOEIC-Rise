@@ -15,6 +15,7 @@ public class CommentResponse {
     String content;
     String userFullName;
     String userAvatar;
+    Long taggedQuestionId;
     Integer taggedQuestionPosition;
     LocalDate createdAt;
     boolean isEdited;
