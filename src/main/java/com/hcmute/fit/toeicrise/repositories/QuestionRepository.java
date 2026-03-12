@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.repositories;
 import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -63,4 +64,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             ORDER BY q.position
         """)
     List<QuestionMapResponse> getQuestionByTestId(@Param("testId") Long testId);
+
+    @EntityGraph(attributePaths = {"questionGroup", "tags"})
+    Optional<Question> getQuestionById(Long id);
 }

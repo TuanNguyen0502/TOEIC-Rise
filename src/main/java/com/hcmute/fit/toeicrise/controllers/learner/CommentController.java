@@ -60,6 +60,13 @@ public class CommentController {
         return ResponseEntity.ok(questionService.getQuestionByTestId(testId));
     }
 
+    @GetMapping("/questions/{questionId}")
+    public ResponseEntity<?> getTaggedQuestionDetail(
+            @PathVariable Long questionId
+    ) {
+        return ResponseEntity.ok(questionService.getTaggedQuestionDetail(questionId));
+    }
+
 
     @DeleteMapping("{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {

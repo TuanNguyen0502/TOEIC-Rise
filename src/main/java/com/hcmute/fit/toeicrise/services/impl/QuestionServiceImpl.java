@@ -2,7 +2,10 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.comment.QuestionGroupSupportResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.comment.TaggedQuestionDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.tag.TagResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -12,6 +15,7 @@ import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
+import com.hcmute.fit.toeicrise.models.mappers.TagMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
@@ -32,6 +36,7 @@ public class QuestionServiceImpl implements IQuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
     private final ITagService tagService;
+    private final TagMapper tagMapper;
 
     @Override
     public List<QuestionResponse> getQuestionsByQuestionGroupId(Long questionGroupId) {
@@ -163,5 +168,37 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public List<QuestionMapResponse> getQuestionByTestId(Long testId) {
         return questionRepository.getQuestionByTestId(testId);
+    }
+
+    @Override
+    public TaggedQuestionDetailResponse getTaggedQuestionDetail(Long questionId) {
+        Question question = questionRepository.getQuestionById(questionId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+
+        QuestionGroup group = question.getQuestionGroup();
+
+        QuestionGroupSupportResponse groupDTO = new QuestionGroupSupportResponse(
+                group.getId(),
+                group.getAudioUrl(),
+                group.getImageUrl(),
+                group.getPassage(),
+                group.getTranscript(),
+                group.getPart().getName()
+        );
+
+        List<TagResponse> tagResponses = question.getTags().stream()
+                .map(tagMapper::toTagResponse)
+                .toList();
+
+        return new TaggedQuestionDetailResponse(
+                question.getId(),
+                question.getPosition(),
+                question.getContent(),
+                question.getOptions(),
+                question.getCorrectOption(),
+                question.getExplanation(),
+                tagResponses,
+                groupDTO
+        );
     }
 }
