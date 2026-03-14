@@ -2,20 +2,22 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.RedoWrongQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
+import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
 import org.mapstruct.*;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {QuestionGroupMapper.class})
 public interface QuestionMapper {
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
     QuestionResponse toQuestionResponse(Question question);
@@ -28,6 +30,8 @@ public interface QuestionMapper {
     MiniTestAnswerQuestionResponse toMiniTestAnswerQuestionResponse(Question question);
 
     LearnerTestQuestionResponse toLearnerTestQuestionResponse(Question question);
+
+    RedoWrongQuestionResponse toRedoWrongQuestionResponse(Question question);
 
     default Question toEntity(QuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
         List<String> options = Arrays.asList(
@@ -54,5 +58,16 @@ public interface QuestionMapper {
     default List<String> mapTagsToNames(List<Tag> tags) {
         if (tags == null) return null;
         return tags.stream().map(Tag::getName).collect(Collectors.toList());
+    }
+
+    default LearnerTestQuestionGroupWithoutTranscriptResponse convertToGroupResponse(Map.Entry<QuestionGroup, List<UserAnswer>> entry, QuestionGroupMapper questionGroupMapper) {
+        QuestionGroup questionGroup = entry.getKey();
+        List<LearnerTestQuestionResponse> questionResponses = entry.getValue().stream()
+                .sorted(Comparator.comparing(question -> question.getQuestion().getPosition()))
+                .map(question -> toLearnerTestQuestionResponse(question.getQuestion())).toList();
+
+        LearnerTestQuestionGroupWithoutTranscriptResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupWithoutTranscriptResponse(questionGroup);
+        groupResponse.setQuestions(new ArrayList<>(questionResponses));
+        return groupResponse;
     }
 }
