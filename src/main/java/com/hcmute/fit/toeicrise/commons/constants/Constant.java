@@ -228,6 +228,7 @@ public class Constant {
     public static final String CHATBOT_SYSTEM_PROMPT_CACHE = "chatbotSystemPrompt";
     public static final String Q_AND_A_SYSTEM_PROMPT_CACHE = "qAndASystemPrompt";
     public static final String EXPLANATION_GENERATION_SYSTEM_PROMPT_CACHE = "explanationGenerationSystemPrompt";
+    public static final String SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE = "sentenceAssessmentSystemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
     // Profile constants

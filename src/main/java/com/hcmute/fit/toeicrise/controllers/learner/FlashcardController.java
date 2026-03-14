@@ -2,15 +2,21 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
+import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
+import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemProgressService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 @RestController("learnerFlashcardController")
 @RequestMapping("/learner/flashcards")
@@ -18,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 public class FlashcardController {
     private final IFlashcardService flashcardService;
     private final IFlashcardFavouriteService flashcardFavouriteService;
+    private final IFlashcardItemProgressService flashcardItemProgressService;
+    private final IChatService chatService;
 
     @GetMapping("/my")
     public PageResponse getMyFlashcards(
@@ -76,7 +84,7 @@ public class FlashcardController {
     }
 
     @PutMapping("/{flashcardId}")
-    public ResponseEntity<?> updateFlashcard(@PathVariable Long flashcardId, @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
+    public ResponseEntity<?> updateFlashcard(@PathVariable Long flashcardId,@Valid @RequestBody FlashcardUpdateRequest flashcardUpdateRequest) {
         return ResponseEntity.ok(flashcardService.updateFlashcard(SecurityUtils.getCurrentUser(), flashcardId, flashcardUpdateRequest));
     }
 
@@ -92,5 +100,35 @@ public class FlashcardController {
         String email = SecurityUtils.getCurrentUser();
         flashcardFavouriteService.deleteFavourite(email, favouriteFlashcardId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{flashcardId}/review")
+    public ResponseEntity<?> getReview(@PathVariable Long flashcardId) {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(flashcardService.getFlashcardItemDetailToReview(email, flashcardId));
+    }
+
+    @GetMapping("/due-items")
+    public ResponseEntity<?> getDueItems() {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(flashcardItemProgressService.getFlashcardItemDueToReview(email));
+    }
+
+    @PostMapping("/submit-review")
+    public ResponseEntity<?> submitReview(@Valid @RequestBody FlashcardItemListRequest flashcardItemProgressRequestList) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardItemProgressService.saveFlashcardItemProgress(email, flashcardItemProgressRequestList);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/overall")
+    public ResponseEntity<?> reviewWords(){
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(flashcardItemProgressService.getFlashcardReviewOverall(email));
+    }
+
+    @PostMapping(value = "/sentence", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> getSentenceStream(@Valid @RequestBody SentenceCreateRequest sentenceCreateRequest) {
+        return chatService.chatAboutSentenceStream(sentenceCreateRequest);
     }
 }

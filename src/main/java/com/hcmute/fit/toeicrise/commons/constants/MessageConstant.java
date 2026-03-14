@@ -94,6 +94,12 @@ public class MessageConstant {
     public static final String TAG_NAME_NOT_NULL = "Tag name must not be null.";
     public static final String TAG_NAME_NOT_BLANK = "Tag name must not be blank.";
     public static final String TAG_NAME_INVALID = "Tag name can only contain letters, digits, spaces, and special characters []():.,'- and must be between 1 and 50 characters long.";
+    // FlashcardItemProgress related messages
+    public static final String FLASHCARD_ITEM_PROGRESS_NOT_EMPTY = "Flashcard item progress must not be empty.";
+    public static final String SENTENCE_NOT_EMPTY = "Sentence must not be empty";
+    public static final String SENTENCE_NOT_BLANK = "Sentence must not be blank";
+    public static final String KEYWORD_NOT_EMPTY = "Keyword must not be empty.";
+    public static final String KEYWORD_NOT_BLANK = "Keyword must not be blank.";
     // Success messages
     public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
     public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";

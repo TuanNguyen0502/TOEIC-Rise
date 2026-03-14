@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import reactor.core.publisher.Flux;
@@ -28,4 +29,7 @@ public interface IChatService {
     Flux<ChatbotResponse> generateExplanation(GenerateExplanationRequest request);
 
     Flux<ChatbotResponse> generateExplanation(TestingSystemPromptExplanationGenerationRequest request);
+
+    Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
+
 }
