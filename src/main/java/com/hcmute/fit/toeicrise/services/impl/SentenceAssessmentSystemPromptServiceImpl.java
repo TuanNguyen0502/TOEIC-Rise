@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import static com.hcmute.fit.toeicrise.commons.constants.Constant.SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE;
 
 @Service
-public class ReviewSentenceSystemPromptServiceImpl extends AbstractSystemPromptService {
-    public ReviewSentenceSystemPromptServiceImpl(IRedisService redisService, SystemPromptRepository systemPromptRepository, SystemPromptMapper systemPromptMapper, PageResponseMapper pageResponseMapper) {
+public class SentenceAssessmentSystemPromptServiceImpl extends AbstractSystemPromptService {
+    public SentenceAssessmentSystemPromptServiceImpl(IRedisService redisService, SystemPromptRepository systemPromptRepository, SystemPromptMapper systemPromptMapper, PageResponseMapper pageResponseMapper) {
         super(redisService, systemPromptRepository, systemPromptMapper, pageResponseMapper);
     }
 

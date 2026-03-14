@@ -51,7 +51,7 @@ public class ChatServiceImpl implements IChatService {
     private final ChatbotSystemPromptServiceImpl chatbotSystemPromptService;
     private final QAndASystemPromptServiceImpl qAndASystemPromptService;
     private final ExplanationGenerationSystemPromptServiceImpl explanationGenerationSystemPromptService;
-    private final ReviewSentenceSystemPromptServiceImpl reviewSentenceSystemPromptService;
+    private final SentenceAssessmentSystemPromptServiceImpl sentenceAssessmentSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -437,8 +437,8 @@ public class ChatServiceImpl implements IChatService {
         return response.getContent();
     }
 
-    private String getReviewSentenceSystemPrompt() {
-        SystemPromptDetailResponse response = reviewSentenceSystemPromptService.getActiveSystemPrompt();
+    private String getSentenceAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = sentenceAssessmentSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 
@@ -461,7 +461,7 @@ public class ChatServiceImpl implements IChatService {
                     .flatMapMany(userPrompt ->
                             cleanClient.prompt()
                                     .user(userPrompt)
-                                    .system(getReviewSentenceSystemPrompt())
+                                    .system(getSentenceAssessmentSystemPrompt())
                                     .stream()
                                     .content()
                                     .map(contentText -> chatbotMapper.toChatbotResponse(
