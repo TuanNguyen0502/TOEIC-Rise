@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.controllers.staff;
+package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptUpdateRequest;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/staff/system-prompts")
+@RequestMapping("/admin/system-prompts")
 @RequiredArgsConstructor
 public class SystemPromptController {
     private final List<AbstractSystemPromptService> systemPromptServices;

@@ -41,11 +41,11 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**", "/test-sets", "/tests/**")
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-reports/**")
+                                "/admin/question-reports/**", "/admin/system-prompts/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
                                 "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
-                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**", "/staff/system-prompts/**")
+                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
