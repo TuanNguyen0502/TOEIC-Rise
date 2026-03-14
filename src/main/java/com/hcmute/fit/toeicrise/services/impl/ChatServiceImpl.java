@@ -258,23 +258,6 @@ public class ChatServiceImpl implements IChatService {
             promptMono = Mono.just(chatAboutQuestionRequest.getMessage());
         }
 
-//        String systemPrompt = """
-//                Bạn là trợ lý TOEIC Rise. Nhiệm vụ của bạn là hỗ trợ người dùng giải thích, phân tích và trả lời câu hỏi TOEIC dựa trên dữ liệu cung cấp.\s
-//                Hãy đọc kỹ toàn bộ thông tin và phản hồi một cách rõ ràng, chính xác và dễ hiểu.\s
-//                Yêu cầu phản hồi:\s
-//                - Trả lời đúng trọng tâm dựa trên tin nhắn người dùng. \s
-//                - Giải thích ngắn gọn câu hỏi đang kiểm tra kiến thức gì (ngữ pháp, từ vựng, suy luận, nội dung đoạn văn...). \s
-//                - Phân tích và chỉ ra cách tìm đáp án đúng dựa trên dữ liệu đã cung cấp. \s
-//                - Giải thích vì sao đáp án đúng là phù hợp. \s
-//                - Giải thích vì sao các lựa chọn sai không phù hợp (nếu có danh sách lựa chọn). \s
-//                - Nếu không có đáp án đúng (correctOption trống), hãy giúp người dùng suy luận và chọn đáp án hợp lý nhất. \s
-//                - Phản hồi theo phong cách thân thiện, rõ ràng, phù hợp với người đang luyện thi TOEIC. \s
-//                Lưu ý quan trọng:
-//                - Chỉ sử dụng thông tin được cung cấp. \s
-//                - Không tự tạo thêm dữ liệu không có trong đề bài. \s
-//                - Nếu thông tin không đủ, hãy nêu ra rõ ràng và đưa ra hướng dẫn phù hợp.
-//                """;
-
         return promptMono.flatMapMany(prompt ->
                 chat(ChatRequest.builder()
                                 .conversationId(chatAboutQuestionRequest.getConversationId())
@@ -365,26 +348,6 @@ public class ChatServiceImpl implements IChatService {
             String messageId = UUID.randomUUID().toString();
             String options = String.join(", ", request.getOptions());
 
-//            String systemPrompt = """
-//                    Nhiệm vụ của bạn là phân tích câu hỏi và đưa ra lời giải thích chuyên sâu, dễ hiểu.\s
-//                    ### YÊU CẦU PHẢN HỒI: Vui lòng trình bày câu trả lời theo cấu trúc sau:\s
-//                    #### 1. Dịch nghĩa & Bối cảnh\s
-//                    - Dịch câu hỏi và các lựa chọn sang tiếng Việt.\s
-//                    #### 2. Phân tích đáp án đúng\s
-//                    - Chỉ rõ tại sao đáp án đó là chính xác.\s
-//                    - Trích dẫn cụ thể từ khóa (keywords) hoặc câu văn trong Passage/Transcript làm bằng chứng (clue).\s
-//                    - Nếu là câu hỏi ngữ pháp, hãy nêu rõ cấu trúc/ngữ pháp áp dụng.\s
-//                    #### 3. Phân tích lựa chọn sai\s
-//                    - Giải thích ngắn gọn tại sao các phương án còn lại không phù hợp (sai nghĩa, sai loại từ, hoặc thông tin gây nhiễu).\s
-//                    ### LƯU Ý QUAN TRỌNG:\s
-//                    - Ngôn ngữ phản hồi: Tiếng Việt.\s
-//                    - Giọng văn: Chuyên nghiệp, khích lệ, dễ hiểu.\s
-//                    - Trình bày rõ ràng, có cấu trúc dưới dạng text thuần túy (plain text) không sử dụng markdown, có thể sử dụng phối hợp các dấu đầu dòng như - +.\s
-//                    - KHÔNG chào hỏi (ví dụ: "Chào bạn", "Tôi là...").\s
-//                    - KHÔNG có câu kết hoặc lời chúc (ví dụ: "Hy vọng bài học này...", "Chúc bạn học tốt").\s
-//                    - KHÔNG dẫn dắt rườm rà.\s
-//                    - Tuyệt đối không tự suy diễn thông tin nằm ngoài dữ liệu được cung cấp.\s
-//                    """;
             String userPrompt = """
                     ### DỮ LIỆU ĐẦU VÀO:\s
                     1. Passage (Đoạn văn đọc hiểu): %s\s
@@ -481,37 +444,19 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest) {
-//        Bạn là một giám khảo TOEIC.
-//        Hãy đánh giá câu tiếng Anh của người học dựa trên việc sử dụng từ khóa được yêu cầu.
-//        Nhiệm vụ:
-//        - Kiểm tra xem từ khóa có được sử dụng trong câu hay không.
-//        - Đánh giá mức độ chính xác và tự nhiên của cách dùng từ khóa trong ngữ cảnh câu.
-//        - Chỉ tập trung vào việc sử dụng từ khóa, không đánh giá các lỗi khác nếu không liên quan.
-//        Thang điểm
-//        0-4: Sử dụng sai hoặc không đúng ngữ pháp
-//        5-6: Đúng nhưng không tự nhiên
-//        7-8: Đúng và khá tự nhiên
-//        9-10: Rất tự nhiên trong Business English
-//        Lưu ý:
-//        - Nếu câu KHÔNG chứa keyword. Điểm tối đa là 4.
-//        Quy tắc:
-//        - suggestion phải là một câu tiếng Anh được cải thiện có sử dụng keyword.
-//        - improvement viết bằng tiếng Việt, ngắn gọn, dễ hiểu.
-//        - remark là nhận xét ngắn về việc sử dụng keyword bằng tiếng Việt.
-//        - Chỉ trả về JSON, không thêm bất kỳ văn bản nào khác.
         return Flux.defer(() -> {
             ChatClient cleanClient = chatClientBuilder.build();
             String conversationId = UUID.randomUUID().toString();
             String messageId = UUID.randomUUID().toString();
 
             return Mono.fromCallable(() -> """
-                    ### DỮ LIỆU ĐẦU VÀO:\s
-                    1. Sentence: %s\s
-                    2. Keyword: %s\s
-                    """.formatted(
-                    sentenceCreateRequest.getSentence(),
-                    sentenceCreateRequest.getKeyword()
-            ))
+                            ### DỮ LIỆU ĐẦU VÀO:\s
+                            1. Sentence: %s\s
+                            2. Keyword: %s\s
+                            """.formatted(
+                            sentenceCreateRequest.getSentence(),
+                            sentenceCreateRequest.getKeyword()
+                    ))
                     .subscribeOn(Schedulers.boundedElastic())
                     .flatMapMany(userPrompt ->
                             cleanClient.prompt()
