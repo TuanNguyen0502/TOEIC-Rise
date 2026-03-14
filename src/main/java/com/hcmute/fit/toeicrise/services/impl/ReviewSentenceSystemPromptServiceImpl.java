@@ -7,22 +7,22 @@ import com.hcmute.fit.toeicrise.repositories.SystemPromptRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IRedisService;
 import org.springframework.stereotype.Service;
 
-import static com.hcmute.fit.toeicrise.commons.constants.Constant.CHATBOT_SYSTEM_PROMPT_CACHE;
+import static com.hcmute.fit.toeicrise.commons.constants.Constant.SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE;
 
 @Service
-public class ReviewSentenceSystemPromptServiceImpl extends AbstractSystemPromptService{
+public class ReviewSentenceSystemPromptServiceImpl extends AbstractSystemPromptService {
     public ReviewSentenceSystemPromptServiceImpl(IRedisService redisService, SystemPromptRepository systemPromptRepository, SystemPromptMapper systemPromptMapper, PageResponseMapper pageResponseMapper) {
         super(redisService, systemPromptRepository, systemPromptMapper, pageResponseMapper);
     }
 
     @Override
     public ESystemPromptFeatureType getFeatureType() {
-        return ESystemPromptFeatureType.CHATBOT;
+        return ESystemPromptFeatureType.SENTENCE_ASSESSMENT;
     }
 
     @Override
     protected String getCacheName() {
-        return CHATBOT_SYSTEM_PROMPT_CACHE;
+        return SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE;
     }
 
 }
