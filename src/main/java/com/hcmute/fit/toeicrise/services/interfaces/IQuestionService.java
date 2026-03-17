@@ -2,6 +2,8 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.comment.TaggedQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
@@ -23,4 +25,6 @@ public interface IQuestionService {
     List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds);
     void createQuestionBatch(List<QuestionExcelRequest> questions, QuestionGroup questionGroup);
     void changeTestStatusToPending(Test test);
+    List<QuestionMapResponse> getQuestionByTestId(Long testId);
+    TaggedQuestionDetailResponse getTaggedQuestionDetail(Long questionId);
 }
