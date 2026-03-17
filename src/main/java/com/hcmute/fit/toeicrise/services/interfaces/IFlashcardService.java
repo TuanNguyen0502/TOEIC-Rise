@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
@@ -16,6 +17,8 @@ public interface IFlashcardService {
 
     PageResponse getAllPublicFlashcards(String email, String name, int page, int size, String sortBy, String direction);
 
+    PageResponse getFlashcardsForPopup(String email, int page, int size, String sortBy, String direction);
+
     FlashcardDetailResponse getFlashcardDetailById(String email, Long flashcardId);
 
     void createFlashcard(String email, FlashcardCreateRequest flashcardCreateRequest);
@@ -28,5 +31,8 @@ public interface IFlashcardService {
 
     Long totalFlashcards();
 
+    @Transactional
+    void addFlashcardItemToFlashcard(String email, FlashcardItemAddingRequest request);
+  
     List<FlashcardItemDetailResponse> getFlashcardItemDetailToReview(String email, Long flashcardId);
 }

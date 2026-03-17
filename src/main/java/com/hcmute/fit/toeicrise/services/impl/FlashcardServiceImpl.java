@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.ShuffleUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -90,6 +91,20 @@ public class FlashcardServiceImpl implements IFlashcardService {
             boolean isFavourite = (boolean) result[1];
             return flashcardMapper.toFlashcardPublicResponse(flashcard, isFavourite);
         });
+
+        return pageResponseMapper.toPageResponse(flashcardPage);
+    }
+
+    @Override
+    public PageResponse getFlashcardsForPopup(String email, int page, int size, String sortBy, String direction) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<FlashcardForPopupResponse> flashcardPage = flashcardRepository.findByUser(user, pageable)
+                .map(flashcardMapper::toFlashcardForPopupResponse);
 
         return pageResponseMapper.toPageResponse(flashcardPage);
     }
@@ -201,6 +216,25 @@ public class FlashcardServiceImpl implements IFlashcardService {
         return flashcardRepository.count();
     }
 
+    @Transactional
+    @Override
+    public void addFlashcardItemToFlashcard(String email, FlashcardItemAddingRequest request) {
+        Flashcard flashcard = flashcardRepository.findById(Long.valueOf(request.getFlashcardId())).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+        if (!flashcard.getUser().getAccount().getEmail().equals(email))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+
+        FlashcardItem newItem = new FlashcardItem();
+        newItem.setFlashcard(flashcard);
+        newItem.setVocabulary(request.getVocabulary());
+        newItem.setDefinition(request.getDefinition());
+        newItem.setAudioUrl(request.getAudioUrl());
+        newItem.setPronunciation(request.getPronunciation());
+
+        flashcard.getFlashcardItems().add(newItem);
+
+        flashcardRepository.save(flashcard);
+    }
+  
     @Override
     public List<FlashcardItemDetailResponse> getFlashcardItemDetailToReview(String email, Long flashcardId) {
         Flashcard flashcard = flashcardRepository.findById(flashcardId)

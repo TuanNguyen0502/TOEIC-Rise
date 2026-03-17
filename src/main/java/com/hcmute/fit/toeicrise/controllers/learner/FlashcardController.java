@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemListRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
@@ -51,6 +52,17 @@ public class FlashcardController {
         return flashcardService.getAllPublicFlashcards(email, name, page, size, sortBy, direction);
     }
 
+    @GetMapping("/popup")
+    public PageResponse getMyFlashcardsForPopup(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") String direction
+    ) {
+        String email = SecurityUtils.getCurrentUser();
+        return flashcardService.getFlashcardsForPopup(email, page, size, sortBy, direction);
+    }
+
     @GetMapping("/{flashcardId}")
     public ResponseEntity<?> getFlashcardDetail(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
@@ -80,6 +92,13 @@ public class FlashcardController {
     public ResponseEntity<?> addFlashcardToFavourite(@PathVariable Long flashcardId) {
         String email = SecurityUtils.getCurrentUser();
         flashcardFavouriteService.addFavourite(email, flashcardId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/popup")
+    public ResponseEntity<?> addFlashcardToPopup(@Valid @RequestBody FlashcardItemAddingRequest flashcardItemAddingRequest) {
+        String email = SecurityUtils.getCurrentUser();
+        flashcardService.addFlashcardItemToFlashcard(email, flashcardItemAddingRequest);
         return ResponseEntity.ok().build();
     }
 

@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
+import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,4 +37,6 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long>, Jpa
             @Param("name") String name,
             Pageable pageable
     );
+
+    Page<Flashcard> findByUser(User user, Pageable pageable);
 }
