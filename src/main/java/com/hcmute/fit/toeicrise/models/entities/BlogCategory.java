@@ -1,9 +1,9 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "blog_categories")
@@ -18,4 +18,7 @@ public class BlogCategory extends BaseEntity {
 
     @Column(name = "slug", nullable = false, unique = true)
     private String slug;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BlogPost> posts;
 }
