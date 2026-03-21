@@ -1,13 +1,11 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController("staffBlogCategoryController")
 @RequestMapping("/staff/blog-categories")
@@ -24,5 +22,10 @@ public class BlogCategoryController {
                                                           @RequestParam(defaultValue = "updatedAt") String sortBy,
                                                           @RequestParam(defaultValue = "DESC") String direction) {
         return ResponseEntity.ok(blogCategoryService.getAllBlogCategoriesForStaff(name, slug, isActive, page, size, sortBy, direction));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BlogCategoryDetailResponse> getBlogCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(blogCategoryService.getBlogCategoryDetailById(id));
     }
 }
