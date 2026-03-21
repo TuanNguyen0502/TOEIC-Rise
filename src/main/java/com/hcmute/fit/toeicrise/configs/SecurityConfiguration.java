@@ -45,12 +45,14 @@ public class SecurityConfiguration {
                         .hasRole("ADMIN")
                         .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
                                 "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
-                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**")
+                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
+                                "/staff/blog-categories/**", "/staff/blog-posts/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
-                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**").hasRole("LEARNER")
+                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**")
+                        .hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
