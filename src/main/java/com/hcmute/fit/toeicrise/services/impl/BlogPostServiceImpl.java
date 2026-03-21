@@ -1,7 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogPostResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostResponse;
 import com.hcmute.fit.toeicrise.models.entities.BlogPost;
 import com.hcmute.fit.toeicrise.models.mappers.BlogPostMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;

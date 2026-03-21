@@ -1,9 +1,9 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryCreateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryResponse;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;

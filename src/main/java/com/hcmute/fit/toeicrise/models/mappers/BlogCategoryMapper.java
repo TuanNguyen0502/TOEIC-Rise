@@ -1,8 +1,8 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
-import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryResponse;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
 import org.mapstruct.Mapper;
 

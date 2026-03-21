@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.responses.blog;
+package com.hcmute.fit.toeicrise.dtos.responses.blog.category;
 
 import lombok.Builder;
 import lombok.Data;
