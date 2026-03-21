@@ -13,6 +13,7 @@ import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.BlogCategoryRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.BlogCategorySpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
+import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BlogCategoryServiceImpl implements IBlogCategoryService {
+    private final IBlogPostService blogPostService;
     private final BlogCategoryRepository blogCategoryRepository;
     private final BlogCategoryMapper blogCategoryMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -124,5 +126,6 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
         blogCategory.setIsActive(false);
         blogCategoryRepository.save(blogCategory);
+        blogPostService.achievedBlogPostsByCategory(id);
     }
 }

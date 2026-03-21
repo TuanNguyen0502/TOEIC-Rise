@@ -15,7 +15,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,5 +46,15 @@ public class BlogPostServiceImpl implements IBlogPostService {
         Page<BlogPostResponse> blogPostResponses = blogPostRepository.findAll(spec, pageable)
                 .map(blogPostMapper::blogPostToBlogPostResponse);
         return pageResponseMapper.toPageResponse(blogPostResponses);
+    }
+
+    @Async
+    @Override
+    public void achievedBlogPostsByCategory(Long categoryId) {
+        List<BlogPost> blogPosts = blogPostRepository.findAllByCategory_Id(categoryId);
+        for (BlogPost blogPost : blogPosts) {
+            blogPost.setStatus(EBlogPostStatus.ACHIEVED);
+        }
+        blogPostRepository.saveAll(blogPosts);
     }
 }
