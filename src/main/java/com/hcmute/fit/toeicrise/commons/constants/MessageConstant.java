@@ -118,4 +118,5 @@ public class MessageConstant {
     public static final String BLOG_CATEGORY_NAME_INVALID = "Blog category name can only contain letters, digits, spaces, and punctuation (.,&()-), and must be between 2 and 50 characters long.";
     public static final String BLOG_CATEGORY_SLUG_NOT_BLANK = "Blog category slug must not be blank.";
     public static final String BLOG_CATEGORY_SLUG_INVALID = "Blog category slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 100 characters long.";
+    public static final String BLOG_CATEGORY_ACTIVE_NOT_NULL = "Blog category active must not be null.";
 }

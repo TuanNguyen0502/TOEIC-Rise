@@ -3,6 +3,7 @@ CREATE TABLE blog_categories
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     name       VARCHAR(255) NOT NULL UNIQUE,
     slug       VARCHAR(255) NOT NULL UNIQUE,
+    is_active  BOOLEAN DEFAULT TRUE,
     created_at DATETIME,
     updated_at DATETIME
 );

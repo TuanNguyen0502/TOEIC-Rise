@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
@@ -45,7 +46,7 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
 
     @Transactional
     @Override
-    public void createBlogCategory(BlogCategoryRequest request) {
+    public void createBlogCategory(BlogCategoryCreateRequest request) {
         BlogCategory blogCategory = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
         if (blogCategory != null) {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + request.getSlug() + "'");
@@ -54,11 +55,13 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
         BlogCategory newBlogCategory = new BlogCategory();
         newBlogCategory.setName(request.getName());
         newBlogCategory.setSlug(request.getSlug());
+        newBlogCategory.setIsActive(true);
         blogCategoryRepository.save(newBlogCategory);
     }
 
     @Transactional
-    public void updateBlogCategory(Long id, BlogCategoryRequest request) {
+    @Override
+    public void updateBlogCategory(Long id, BlogCategoryUpdateRequest request) {
         BlogCategory blogCategory = blogCategoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
 
@@ -72,6 +75,16 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
 
         blogCategory.setName(request.getName());
         blogCategory.setSlug(request.getSlug());
+        blogCategory.setIsActive(request.getActive());
+        blogCategoryRepository.save(blogCategory);
+    }
+
+    @Transactional
+    @Override
+    public void inactiveBlogCategory(Long id) {
+        BlogCategory blogCategory = blogCategoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
+        blogCategory.setIsActive(false);
         blogCategoryRepository.save(blogCategory);
     }
 }

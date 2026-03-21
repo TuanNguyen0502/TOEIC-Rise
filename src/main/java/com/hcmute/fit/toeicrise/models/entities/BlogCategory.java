@@ -19,6 +19,9 @@ public class BlogCategory extends BaseEntity {
     @Column(name = "slug", nullable = false, unique = true)
     private String slug;
 
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BlogPost> posts;
 }

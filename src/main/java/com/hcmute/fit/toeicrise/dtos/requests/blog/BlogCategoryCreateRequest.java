@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class BlogCategoryRequest {
+public class BlogCategoryCreateRequest {
     @NotBlank(message = MessageConstant.BLOG_CATEGORY_NAME_NOT_BLANK)
     @Pattern(regexp = Constant.BLOG_NAME_PATTERN, message = MessageConstant.BLOG_CATEGORY_NAME_INVALID)
     private String name;
