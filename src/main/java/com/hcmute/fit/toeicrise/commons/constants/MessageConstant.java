@@ -113,4 +113,9 @@ public class MessageConstant {
     //Common messages
     public static final String COMMENT_NOT_BLANK = "Comment content must not be blank.";
     public static final String COMMENT_TOO_LONG = "Comment content must not exceed 500 characters.";
+    // Blog
+    public static final String BLOG_CATEGORY_NAME_NOT_BLANK = "Blog category name must not be blank.";
+    public static final String BLOG_CATEGORY_NAME_INVALID = "Blog category name can only contain letters, digits, spaces, and punctuation (.,&()-), and must be between 2 and 50 characters long.";
+    public static final String BLOG_CATEGORY_SLUG_NOT_BLANK = "Blog category slug must not be blank.";
+    public static final String BLOG_CATEGORY_SLUG_INVALID = "Blog category slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 100 characters long.";
 }

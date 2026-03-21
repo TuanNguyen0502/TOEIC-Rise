@@ -1,12 +1,16 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.BlogCategoryMapper;
 import com.hcmute.fit.toeicrise.repositories.BlogCategoryRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,5 +41,23 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
             }
         }
         return blogCategoryResponseList;
+    }
+
+    @Transactional
+    @Override
+    public void createBlogCategory(BlogCategoryRequest request) {
+        checkBlogCategoryExistsBySlug(request.getSlug());
+
+        BlogCategory blogCategory = new BlogCategory();
+        blogCategory.setName(request.getName());
+        blogCategory.setSlug(request.getSlug());
+        blogCategoryRepository.save(blogCategory);
+    }
+
+    public void checkBlogCategoryExistsBySlug(String slug) {
+        BlogCategory blogCategory = blogCategoryRepository.findBySlug(slug).orElse(null);
+        if (blogCategory != null) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + slug + "'");
+        }
     }
 }
