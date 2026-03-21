@@ -2,15 +2,23 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.BlogCategoryMapper;
+import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.BlogCategoryRepository;
+import com.hcmute.fit.toeicrise.repositories.specifications.BlogCategorySpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +30,28 @@ import java.util.List;
 public class BlogCategoryServiceImpl implements IBlogCategoryService {
     private final BlogCategoryRepository blogCategoryRepository;
     private final BlogCategoryMapper blogCategoryMapper;
+    private final PageResponseMapper pageResponseMapper;
+
+    @Override
+    public PageResponse getAllBlogCategoriesForStaff(String name, String slug, Boolean isActive, int page, int size, String sortBy, String direction) {
+        Specification<BlogCategory> spec = (_, _, cb) -> cb.conjunction();
+        if (name != null && !name.isBlank()) {
+            spec = spec.and(BlogCategorySpecification.nameContains(name));
+        }
+        if (slug != null && !slug.isBlank()) {
+            spec = spec.and(BlogCategorySpecification.slugContains(slug));
+        }
+        if (isActive != null) {
+            spec = spec.and(BlogCategorySpecification.isActive(isActive));
+        }
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<BlogCategoryResponse> blogCategoryResponses = blogCategoryRepository.findAll(spec, pageable)
+                .map(blogCategoryMapper::toBlogCategoryResponse);
+        return pageResponseMapper.toPageResponse(blogCategoryResponses);
+    }
 
     @Override
     public List<BlogCategoryResponse> getAllBlogCategories() {

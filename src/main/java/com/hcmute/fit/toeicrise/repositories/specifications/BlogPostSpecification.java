@@ -12,12 +12,12 @@ public class BlogPostSpecification {
 
     public static Specification<BlogPost> titleContains(String title) {
         return (root, _, criteriaBuilder) ->
-                criteriaBuilder.like(root.get("title"), "%" + title + "%");
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%");
     }
 
     public static Specification<BlogPost> slugContains(String slug) {
         return (root, _, criteriaBuilder) ->
-                criteriaBuilder.like(root.get("slug"), "%" + slug + "%");
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("slug")), "%" + slug.toLowerCase() + "%");
     }
 
     public static Specification<BlogPost> isActive(EBlogPostStatus status) {

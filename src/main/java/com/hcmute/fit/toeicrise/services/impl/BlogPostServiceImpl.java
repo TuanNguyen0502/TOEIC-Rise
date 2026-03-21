@@ -28,10 +28,10 @@ public class BlogPostServiceImpl implements IBlogPostService {
     public PageResponse getBlogPostsByCategoryForStaff(String categorySlug, String title, String slug, EBlogPostStatus status, int page, int size) {
         Specification<BlogPost> spec = (_, _, cb) -> cb.conjunction();
         spec = spec.and(BlogPostSpecification.byCategorySlug(categorySlug));
-        if (title != null) {
+        if (title != null && !title.isBlank()) {
             spec = spec.and(BlogPostSpecification.titleContains(title));
         }
-        if (slug != null) {
+        if (slug != null && !slug.isBlank()) {
             spec = spec.and(BlogPostSpecification.slugContains(slug));
         }
         if (status != null) {
