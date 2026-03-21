@@ -1,5 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
+import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
@@ -27,5 +29,23 @@ public class BlogCategoryController {
     @GetMapping("/{id}")
     public ResponseEntity<BlogCategoryDetailResponse> getBlogCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(blogCategoryService.getBlogCategoryDetailById(id));
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> createBlogCategory(@RequestBody BlogCategoryCreateRequest request) {
+        blogCategoryService.createBlogCategory(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBlogCategory(@PathVariable Long id, @RequestBody BlogCategoryUpdateRequest request) {
+        blogCategoryService.updateBlogCategory(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> inactiveBlogCategory(@PathVariable Long id) {
+        blogCategoryService.inactiveBlogCategory(id);
+        return ResponseEntity.ok().build();
     }
 }
