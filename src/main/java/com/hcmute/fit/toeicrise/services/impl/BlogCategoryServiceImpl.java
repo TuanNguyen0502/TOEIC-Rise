@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
@@ -42,6 +43,13 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
             }
         }
         return blogCategoryResponseList;
+    }
+
+    @Override
+    public BlogCategoryDetailResponse getBlogCategoryDetailById(Long id) {
+        BlogCategory blogCategory = blogCategoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
+        return blogCategoryMapper.toBlogCategoryDetailResponse(blogCategory);
     }
 
     @Transactional

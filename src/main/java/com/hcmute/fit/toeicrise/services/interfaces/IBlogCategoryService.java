@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.BlogCategoryUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.BlogCategoryResponse;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,8 @@ public interface IBlogCategoryService {
     List<BlogCategoryResponse> getAllBlogCategories();
 
     List<BlogCategoryResponse> getBlogCategoriesForStaffDropdown(String keyword);
+
+    BlogCategoryDetailResponse getBlogCategoryDetailById(Long id);
 
     @Transactional
     void createBlogCategory(BlogCategoryCreateRequest request);
