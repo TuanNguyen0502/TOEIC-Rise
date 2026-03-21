@@ -52,6 +52,9 @@ public class BlogPostServiceImpl implements IBlogPostService {
     @Override
     public void achievedBlogPostsByCategory(Long categoryId) {
         List<BlogPost> blogPosts = blogPostRepository.findAllByCategory_Id(categoryId);
+        if (blogPosts.isEmpty()) {
+            return;
+        }
         for (BlogPost blogPost : blogPosts) {
             blogPost.setStatus(EBlogPostStatus.ACHIEVED);
         }
