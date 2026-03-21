@@ -46,18 +46,32 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
     @Transactional
     @Override
     public void createBlogCategory(BlogCategoryRequest request) {
-        checkBlogCategoryExistsBySlug(request.getSlug());
+        BlogCategory blogCategory = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
+        if (blogCategory != null) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + request.getSlug() + "'");
+        }
 
-        BlogCategory blogCategory = new BlogCategory();
+        BlogCategory newBlogCategory = new BlogCategory();
+        newBlogCategory.setName(request.getName());
+        newBlogCategory.setSlug(request.getSlug());
+        blogCategoryRepository.save(newBlogCategory);
+    }
+
+    @Transactional
+    public void updateBlogCategory(Long id, BlogCategoryRequest request) {
+        BlogCategory blogCategory = blogCategoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
+
+        // Check if the slug is being updated and if the new slug already exists
+        if (!blogCategory.getSlug().equals(request.getSlug())) {
+            BlogCategory bc = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
+            if (bc != null) {
+                throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + request.getSlug() + "'");
+            }
+        }
+
         blogCategory.setName(request.getName());
         blogCategory.setSlug(request.getSlug());
         blogCategoryRepository.save(blogCategory);
-    }
-
-    public void checkBlogCategoryExistsBySlug(String slug) {
-        BlogCategory blogCategory = blogCategoryRepository.findBySlug(slug).orElse(null);
-        if (blogCategory != null) {
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + slug + "'");
-        }
     }
 }
