@@ -20,6 +20,6 @@ public class BlogPostController {
                                                                        @RequestParam(required = false) EBlogPostStatus status,
                                                                        @RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(blogPostService.getBlogPostsByCategoryForStaff(categorySlug, title, slug, status, page, size));
+        return ResponseEntity.ok(blogPostService.getBlogPostsByCategory(categorySlug, title, slug, status, page, size));
     }
 }

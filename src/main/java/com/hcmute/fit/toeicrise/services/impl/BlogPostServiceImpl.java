@@ -28,7 +28,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
     private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public PageResponse getBlogPostsByCategoryForStaff(String categorySlug, String title, String slug, EBlogPostStatus status, int page, int size) {
+    public PageResponse getBlogPostsByCategory(String categorySlug, String title, String slug, EBlogPostStatus status, int page, int size) {
         Specification<BlogPost> spec = (_, _, cb) -> cb.conjunction();
         spec = spec.and(BlogPostSpecification.byCategorySlug(categorySlug));
         if (title != null && !title.isBlank()) {

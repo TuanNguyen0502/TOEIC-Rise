@@ -5,7 +5,7 @@ import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import org.springframework.scheduling.annotation.Async;
 
 public interface IBlogPostService {
-    PageResponse getBlogPostsByCategoryForStaff(String category, String title, String slug, EBlogPostStatus status, int page, int size);
+    PageResponse getBlogPostsByCategory(String category, String title, String slug, EBlogPostStatus status, int page, int size);
 
     @Async
     void achievedBlogPostsByCategory(Long categoryId);
