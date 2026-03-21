@@ -65,19 +65,6 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
     }
 
     @Override
-    public List<BlogCategoryResponse> getBlogCategoriesForStaffDropdown(String keyword) {
-        List<BlogCategoryResponse> blogCategoryResponseList = new ArrayList<>();
-        if (keyword != null) {
-            for (BlogCategory blogCategory : blogCategoryRepository.findAll()) {
-                if (blogCategory.getName().contains(keyword)) {
-                    blogCategoryResponseList.add(blogCategoryMapper.toBlogCategoryResponse(blogCategory));
-                }
-            }
-        }
-        return blogCategoryResponseList;
-    }
-
-    @Override
     public BlogCategoryDetailResponse getBlogCategoryDetailById(Long id) {
         BlogCategory blogCategory = blogCategoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));

@@ -14,8 +14,6 @@ public interface IBlogCategoryService {
 
     List<BlogCategoryResponse> getAllBlogCategories();
 
-    List<BlogCategoryResponse> getBlogCategoriesForStaffDropdown(String keyword);
-
     BlogCategoryDetailResponse getBlogCategoryDetailById(Long id);
 
     @Transactional
