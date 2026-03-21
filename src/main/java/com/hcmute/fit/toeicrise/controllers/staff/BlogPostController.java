@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,10 @@ public class BlogPostController {
                                                                        @RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(blogPostService.getBlogPostsByCategory(categorySlug, title, slug, status, page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BlogPostDetailForStaffResponse> getBlogPostDetailForStaff(@PathVariable Long id) {
+        return ResponseEntity.ok(blogPostService.getBlogPostDetailForStaff(id));
     }
 }

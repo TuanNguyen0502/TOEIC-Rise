@@ -1,9 +1,13 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogPost;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.BlogPostMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.BlogPostRepository;
@@ -46,6 +50,23 @@ public class BlogPostServiceImpl implements IBlogPostService {
         Page<BlogPostResponse> blogPostResponses = blogPostRepository.findAll(spec, pageable)
                 .map(blogPostMapper::blogPostToBlogPostResponse);
         return pageResponseMapper.toPageResponse(blogPostResponses);
+    }
+
+    @Override
+    public BlogPostDetailForStaffResponse getBlogPostDetailForStaff(Long blogPostId) {
+        BlogPost blogPost = blogPostRepository.findById(blogPostId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post"));
+        return blogPostMapper.toBlogPostDetailForStaffResponse(blogPost);
+    }
+
+    @Override
+    public BlogPostDetailForLearnerResponse getBlogPostDetailForLearner(Long blogPostId) {
+        BlogPost blogPost = blogPostRepository.findById(blogPostId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post"));
+        if (blogPost.getStatus() != EBlogPostStatus.PUBLISHED) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post");
+        }
+        return blogPostMapper.toBlogPostDetailForLearnerResponse(blogPost);
     }
 
     @Async
