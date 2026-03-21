@@ -1,16 +1,22 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
 import com.hcmute.fit.toeicrise.models.entities.BlogPost;
+import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.BlogPostMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
+import com.hcmute.fit.toeicrise.repositories.BlogCategoryRepository;
 import com.hcmute.fit.toeicrise.repositories.BlogPostRepository;
+import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.BlogPostSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +27,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BlogPostServiceImpl implements IBlogPostService {
+    private final CloudinaryUtil cloudinaryUtil;
+    private final BlogCategoryRepository blogCategoryRepository;
     private final BlogPostRepository blogPostRepository;
+    private final UserRepository userRepository;
     private final BlogPostMapper blogPostMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -80,5 +90,32 @@ public class BlogPostServiceImpl implements IBlogPostService {
             blogPost.setStatus(EBlogPostStatus.ACHIEVED);
         }
         blogPostRepository.saveAll(blogPosts);
+    }
+
+    @Transactional
+    @Override
+    public void createBlogPost(String email, String categorySlug, BlogPostCreateRequest request) {
+        BlogPost bp = blogPostRepository.findBySlug(request.getSlug()).orElse(null);
+        if (bp != null) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog post with slug '" + request.getSlug() + "'");
+        }
+
+        User author = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Staff"));
+        BlogCategory blogCategory = blogCategoryRepository.findBySlug(categorySlug)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category"));
+        String thumbnailUrl = cloudinaryUtil.uploadFile(request.getThumbnail());
+
+        BlogPost blogPost = new BlogPost();
+        blogPost.setTitle(request.getTitle());
+        blogPost.setSlug(request.getSlug());
+        blogPost.setSummary(request.getSummary());
+        blogPost.setContent(request.getContent());
+        blogPost.setThumbnailUrl(thumbnailUrl);
+        blogPost.setAuthor(author);
+        blogPost.setCategory(blogCategory);
+        blogPost.setStatus(request.getStatus());
+        blogPost.setViews(0);
+        blogPostRepository.save(blogPost);
     }
 }

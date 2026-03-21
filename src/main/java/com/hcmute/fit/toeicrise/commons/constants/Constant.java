@@ -254,7 +254,12 @@ public class Constant {
     public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
     // Common constants
     public static final int MAX_COMMENT_LENGTH = 500;
-    // Blog
-    public static final String BLOG_NAME_PATTERN = "^[\\p{L}0-9\\s.,&()\\-]{2,50}$";
-    public static final String BLOG_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    // Blog category
+    public static final String BLOG_CATEGORY_NAME_PATTERN = "^[\\p{L}0-9\\s.,&()\\-]{2,50}$";
+    public static final String BLOG_CATEGORY_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    // Blog post
+    public static final String BLOG_POST_TITLE_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{5,150}$";
+    public static final String BLOG_POST_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    public static final String BLOG_POST_SUMMARY_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{10,500}$";
+    public static final String BLOG_POST_CONTENT_PATTERN = "^[\\s\\S]{50,}$";
 }

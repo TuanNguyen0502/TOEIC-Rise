@@ -1,9 +1,12 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
+import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,5 +30,12 @@ public class BlogPostController {
     @GetMapping("/{id}")
     public ResponseEntity<BlogPostDetailForStaffResponse> getBlogPostDetailForStaff(@PathVariable Long id) {
         return ResponseEntity.ok(blogPostService.getBlogPostDetailForStaff(id));
+    }
+
+    @PostMapping("/{category-slug}")
+    public ResponseEntity<?> createBlogPost(@PathVariable("category-slug") String categorySlug, @Valid @RequestBody BlogPostCreateRequest request) {
+        String email = SecurityUtils.getCurrentUser();
+        blogPostService.createBlogPost(email, categorySlug, request);
+        return ResponseEntity.ok().build();
     }
 }

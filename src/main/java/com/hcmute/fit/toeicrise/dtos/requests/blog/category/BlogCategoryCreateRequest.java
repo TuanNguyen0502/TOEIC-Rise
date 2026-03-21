@@ -11,10 +11,10 @@ import lombok.Data;
 @Builder
 public class BlogCategoryCreateRequest {
     @NotBlank(message = MessageConstant.BLOG_CATEGORY_NAME_NOT_BLANK)
-    @Pattern(regexp = Constant.BLOG_NAME_PATTERN, message = MessageConstant.BLOG_CATEGORY_NAME_INVALID)
+    @Pattern(regexp = Constant.BLOG_CATEGORY_NAME_PATTERN, message = MessageConstant.BLOG_CATEGORY_NAME_INVALID)
     private String name;
 
     @NotBlank(message = MessageConstant.BLOG_CATEGORY_SLUG_NOT_BLANK)
-    @Pattern(regexp = Constant.BLOG_SLUG_PATTERN, message = MessageConstant.BLOG_CATEGORY_SLUG_INVALID)
+    @Pattern(regexp = Constant.BLOG_CATEGORY_SLUG_PATTERN, message = MessageConstant.BLOG_CATEGORY_SLUG_INVALID)
     private String slug;
 }
