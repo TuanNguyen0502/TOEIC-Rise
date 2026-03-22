@@ -37,7 +37,7 @@ public class BlogPostController {
     }
 
     @PostMapping("/{category-slug}")
-    public ResponseEntity<?> createBlogPost(@PathVariable("category-slug") String categorySlug, @Valid @RequestBody BlogPostCreateRequest request) {
+    public ResponseEntity<?> createBlogPost(@PathVariable("category-slug") String categorySlug, @Valid @ModelAttribute BlogPostCreateRequest request) {
         String email = SecurityUtils.getCurrentUser();
         blogPostService.createBlogPost(email, categorySlug, request);
         return ResponseEntity.ok().build();
