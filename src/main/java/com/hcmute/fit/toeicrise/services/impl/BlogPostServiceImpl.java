@@ -120,7 +120,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
             return;
         }
         for (BlogPost blogPost : blogPosts) {
-            blogPost.setStatus(EBlogPostStatus.ACHIEVED);
+            blogPost.setStatus(EBlogPostStatus.ARCHIVED);
         }
         blogPostRepository.saveAll(blogPosts);
     }
