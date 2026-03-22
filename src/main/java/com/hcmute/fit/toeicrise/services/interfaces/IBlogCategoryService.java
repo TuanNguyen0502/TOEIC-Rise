@@ -12,7 +12,7 @@ import java.util.List;
 public interface IBlogCategoryService {
     PageResponse getAllBlogCategoriesForStaff(String name, String slug, Boolean isActive, int page, int size, String sortBy, String direction);
 
-    List<BlogCategoryResponse> getAllBlogCategories();
+    List<BlogCategoryResponse> getAllBlogCategoriesForLearner();
 
     BlogCategoryDetailResponse getBlogCategoryDetailById(Long id);
 

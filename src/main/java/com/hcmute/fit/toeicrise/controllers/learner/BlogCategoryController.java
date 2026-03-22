@@ -18,6 +18,6 @@ public class BlogCategoryController {
 
     @GetMapping("")
     public ResponseEntity<List<BlogCategoryResponse>> getAllBlogCategories() {
-        return ResponseEntity.ok(blogCategoryService.getAllBlogCategories());
+        return ResponseEntity.ok(blogCategoryService.getAllBlogCategoriesForLearner());
     }
 }

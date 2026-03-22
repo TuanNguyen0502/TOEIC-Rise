@@ -56,10 +56,12 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
     }
 
     @Override
-    public List<BlogCategoryResponse> getAllBlogCategories() {
+    public List<BlogCategoryResponse> getAllBlogCategoriesForLearner() {
         List<BlogCategoryResponse> blogCategoryResponseList = new ArrayList<>();
         for (BlogCategory blogCategory : blogCategoryRepository.findAll()) {
-            blogCategoryResponseList.add(blogCategoryMapper.toBlogCategoryResponse(blogCategory));
+            if (blogCategory.getIsActive() == true) {
+                blogCategoryResponseList.add(blogCategoryMapper.toBlogCategoryResponse(blogCategory));
+            }
         }
         return blogCategoryResponseList;
     }
