@@ -87,8 +87,8 @@ public class BlogPostServiceImpl implements IBlogPostService {
     }
 
     @Override
-    public BlogPostDetailForLearnerResponse getBlogPostDetailForLearner(Long blogPostId) {
-        BlogPost blogPost = blogPostRepository.findById(blogPostId)
+    public BlogPostDetailForLearnerResponse getBlogPostDetailForLearner(String slug) {
+        BlogPost blogPost = blogPostRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post"));
         if (blogPost.getStatus() != EBlogPostStatus.PUBLISHED) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post");

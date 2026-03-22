@@ -17,7 +17,7 @@ public interface IBlogPostService {
 
     BlogPostDetailForStaffResponse getBlogPostDetailForStaff(Long blogPostId);
 
-    BlogPostDetailForLearnerResponse getBlogPostDetailForLearner(Long blogPostId);
+    BlogPostDetailForLearnerResponse getBlogPostDetailForLearner(String slug);
 
     @Async
     void achievedBlogPostsByCategory(Long categoryId);
