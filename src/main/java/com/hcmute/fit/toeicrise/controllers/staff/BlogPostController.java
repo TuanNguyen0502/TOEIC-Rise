@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController("staffBlogPostController")
 @RequestMapping("/staff/blog-posts")
@@ -38,6 +40,11 @@ public class BlogPostController {
         String email = SecurityUtils.getCurrentUser();
         blogPostService.createBlogPost(email, categorySlug, request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/upload-image")
+    public ResponseEntity<String> uploadImage(@Valid @RequestBody BlogPostImageRequest request) {
+        return ResponseEntity.ok(blogPostService.uploadImage(request));
     }
 
     @PutMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
@@ -27,4 +28,6 @@ public interface IBlogPostService {
 
     @Transactional
     void changeStatus(String email, Long blogPostId, EBlogPostStatus status);
+
+    String uploadImage(BlogPostImageRequest request);
 }

@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
@@ -176,5 +177,15 @@ public class BlogPostServiceImpl implements IBlogPostService {
         }
         blogPost.setStatus(status);
         blogPostRepository.save(blogPost);
+    }
+
+    @Override
+    public String uploadImage(BlogPostImageRequest request) {
+        if (request.getOldThumbnailUrl() != null && !request.getOldThumbnailUrl().isBlank()) {
+            cloudinaryUtil.validateImageURL(request.getOldThumbnailUrl());
+            cloudinaryUtil.deleteFile(request.getOldThumbnailUrl());
+        }
+        cloudinaryUtil.validateImageFile(request.getThumbnail());
+        return cloudinaryUtil.uploadFile(request.getThumbnail());
     }
 }
