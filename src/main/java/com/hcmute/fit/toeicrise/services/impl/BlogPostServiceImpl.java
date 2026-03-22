@@ -105,6 +105,8 @@ public class BlogPostServiceImpl implements IBlogPostService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Staff"));
         BlogCategory blogCategory = blogCategoryRepository.findBySlug(categorySlug)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category"));
+
+        cloudinaryUtil.validateImageFile(request.getThumbnail());
         String thumbnailUrl = cloudinaryUtil.uploadFile(request.getThumbnail());
 
         BlogPost blogPost = new BlogPost();
@@ -145,6 +147,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
         blogPost.setContent(request.getContent());
         blogPost.setStatus(request.getStatus());
         if (request.getThumbnail() != null) {
+            cloudinaryUtil.validateImageFile(request.getThumbnail());
             String thumbnailUrl = cloudinaryUtil.updateFile(request.getThumbnail(), blogPost.getThumbnailUrl());
             blogPost.setThumbnailUrl(thumbnailUrl);
         }
