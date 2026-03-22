@@ -93,6 +93,8 @@ public class BlogPostServiceImpl implements IBlogPostService {
         if (blogPost.getStatus() != EBlogPostStatus.PUBLISHED) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post");
         }
+        blogPost.setViews(blogPost.getViews() + 1);
+        blogPostRepository.save(blogPost);
         return blogPostMapper.toBlogPostDetailForLearnerResponse(blogPost);
     }
 
