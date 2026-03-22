@@ -10,7 +10,14 @@ import java.time.format.DateTimeFormatter;
 
 @Mapper(componentModel = "spring")
 public interface BlogCategoryMapper {
-    BlogCategoryResponse toBlogCategoryResponse(BlogCategory blogCategory);
+    default BlogCategoryResponse toBlogCategoryResponse(BlogCategory blogCategory) {
+        return BlogCategoryResponse.builder()
+                .id(blogCategory.getId())
+                .name(blogCategory.getName())
+                .slug(blogCategory.getSlug())
+                .isActive(blogCategory.getIsActive())
+                .build();
+    }
 
     default BlogCategoryDetailResponse toBlogCategoryDetailResponse(BlogCategory blogCategory) {
         return BlogCategoryDetailResponse.builder()
