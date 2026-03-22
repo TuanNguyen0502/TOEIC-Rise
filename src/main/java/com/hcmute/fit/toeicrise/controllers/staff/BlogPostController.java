@@ -25,8 +25,10 @@ public class BlogPostController {
                                                                        @RequestParam(required = false) String slug,
                                                                        @RequestParam(required = false) EBlogPostStatus status,
                                                                        @RequestParam(defaultValue = "0") int page,
-                                                                       @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(blogPostService.getBlogPostsByCategory(categorySlug, title, slug, status, page, size));
+                                                                       @RequestParam(defaultValue = "10") int size,
+                                                                       @RequestParam(defaultValue = "updatedAt") String sortBy,
+                                                                       @RequestParam(defaultValue = "DESC") String direction) {
+        return ResponseEntity.ok(blogPostService.getBlogPostsByCategory(categorySlug, title, slug, status, page, size, sortBy, direction));
     }
 
     @GetMapping("/{id}")

@@ -44,7 +44,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
     private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public PageResponse getBlogPostsByCategory(String categorySlug, String title, String slug, EBlogPostStatus status, int page, int size) {
+    public PageResponse getBlogPostsByCategory(String categorySlug, String title, String slug, EBlogPostStatus status, int page, int size, String sortBy, String direction) {
         Specification<BlogPost> spec = (_, _, cb) -> cb.conjunction();
         spec = spec.and(BlogPostSpecification.byCategorySlug(categorySlug));
         if (title != null && !title.isBlank()) {
@@ -55,6 +55,21 @@ public class BlogPostServiceImpl implements IBlogPostService {
         }
         if (status != null) {
             spec = spec.and(BlogPostSpecification.isActive(status));
+        }
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<BlogPostResponse> blogPostResponses = blogPostRepository.findAll(spec, pageable)
+                .map(blogPostMapper::blogPostToBlogPostResponse);
+        return pageResponseMapper.toPageResponse(blogPostResponses);
+    }
+
+    @Override
+    public PageResponse getBlogPostsByCategory(String categorySlug, String title, int page, int size) {
+        Specification<BlogPost> spec = (_, _, cb) -> cb.conjunction();
+        spec = spec.and(BlogPostSpecification.byCategorySlug(categorySlug));
+        if (title != null && !title.isBlank()) {
+            spec = spec.and(BlogPostSpecification.titleContains(title));
         }
 
         Sort sort = Sort.by(Sort.Direction.fromString("DESC"), "updatedAt");
