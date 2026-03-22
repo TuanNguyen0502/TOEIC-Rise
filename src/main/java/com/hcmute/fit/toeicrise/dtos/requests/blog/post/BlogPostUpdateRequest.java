@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +31,7 @@ public class BlogPostUpdateRequest {
     private String summary;
 
     @NotBlank(message = MessageConstant.BLOG_POST_CONTENT_NOT_BLANK)
-    @Pattern(regexp = Constant.BLOG_POST_CONTENT_PATTERN, message = MessageConstant.BLOG_POST_CONTENT_INVALID)
+    @Size(min = 50, message = MessageConstant.BLOG_POST_CONTENT_INVALID)
     private String content;
 
     @NotNull(message = MessageConstant.BLOG_POST_STATUS_NOT_NULL)
