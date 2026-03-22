@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryUpdateRe
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,13 @@ public class BlogCategoryController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createBlogCategory(@RequestBody BlogCategoryCreateRequest request) {
+    public ResponseEntity<?> createBlogCategory(@Valid @RequestBody BlogCategoryCreateRequest request) {
         blogCategoryService.createBlogCategory(request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBlogCategory(@PathVariable Long id, @RequestBody BlogCategoryUpdateRequest request) {
+    public ResponseEntity<?> updateBlogCategory(@PathVariable Long id, @Valid @RequestBody BlogCategoryUpdateRequest request) {
         blogCategoryService.updateBlogCategory(id, request);
         return ResponseEntity.ok().build();
     }
