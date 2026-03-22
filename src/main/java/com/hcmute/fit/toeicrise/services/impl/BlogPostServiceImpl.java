@@ -155,4 +155,23 @@ public class BlogPostServiceImpl implements IBlogPostService {
         }
         blogPostRepository.save(blogPost);
     }
+
+    @Transactional
+    @Override
+    public void changeStatus(String email, Long blogPostId, EBlogPostStatus status) {
+        BlogPost blogPost = blogPostRepository.findById(blogPostId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post"));
+        User author = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Staff"));
+        BlogCategory blogCategory = blogPost.getCategory();
+
+        if (!blogPost.getAuthor().getId().equals(author.getId())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "You are not the author of this blog post");
+        }
+        if (status.equals(EBlogPostStatus.PUBLISHED) && blogCategory.getIsActive() == false) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Cannot publish blog post because the category '" + blogCategory.getName() + "' is not active");
+        }
+        blogPost.setStatus(status);
+        blogPostRepository.save(blogPost);
+    }
 }

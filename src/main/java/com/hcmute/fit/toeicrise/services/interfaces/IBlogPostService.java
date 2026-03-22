@@ -24,4 +24,7 @@ public interface IBlogPostService {
 
     @Transactional
     void updateBlogPost(String email, Long blogPostId, BlogPostUpdateRequest request);
+
+    @Transactional
+    void changeStatus(String email, Long blogPostId, EBlogPostStatus status);
 }

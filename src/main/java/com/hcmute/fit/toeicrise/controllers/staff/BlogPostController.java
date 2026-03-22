@@ -46,4 +46,11 @@ public class BlogPostController {
         blogPostService.updateBlogPost(email, id, request);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> changeBlogPostStatus(@PathVariable Long id, @RequestParam EBlogPostStatus status) {
+        String email = SecurityUtils.getCurrentUser();
+        blogPostService.changeStatus(email, id, status);
+        return ResponseEntity.ok().build();
+    }
 }
