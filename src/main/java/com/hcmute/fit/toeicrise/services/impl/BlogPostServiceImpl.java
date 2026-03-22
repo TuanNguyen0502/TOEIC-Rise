@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
@@ -116,6 +117,42 @@ public class BlogPostServiceImpl implements IBlogPostService {
         blogPost.setCategory(blogCategory);
         blogPost.setStatus(request.getStatus());
         blogPost.setViews(0);
+        blogPostRepository.save(blogPost);
+    }
+
+    @Transactional
+    @Override
+    public void updateBlogPost(String email, Long blogPostId, BlogPostUpdateRequest request) {
+        BlogPost blogPost = blogPostRepository.findById(blogPostId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post"));
+        User author = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Staff"));
+
+        // Only the author of the blog post can update it
+        if (!blogPost.getAuthor().getId().equals(author.getId())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "You are not the author of this blog post");
+        }
+        if (!blogPost.getSlug().equals(request.getSlug())) {
+            BlogPost bp = blogPostRepository.findBySlug(request.getSlug()).orElse(null);
+            if (bp != null) {
+                throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog post with slug '" + request.getSlug() + "'");
+            }
+        }
+
+        blogPost.setTitle(request.getTitle());
+        blogPost.setSlug(request.getSlug());
+        blogPost.setSummary(request.getSummary());
+        blogPost.setContent(request.getContent());
+        blogPost.setStatus(request.getStatus());
+        if (request.getThumbnail() != null) {
+            String thumbnailUrl = cloudinaryUtil.updateFile(request.getThumbnail(), blogPost.getThumbnailUrl());
+            blogPost.setThumbnailUrl(thumbnailUrl);
+        }
+        if (request.getCategoryId() != null && !blogPost.getCategory().getId().equals(request.getCategoryId())) {
+            BlogCategory blogCategory = blogCategoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category"));
+            blogPost.setCategory(blogCategory);
+        }
         blogPostRepository.save(blogPost);
     }
 }

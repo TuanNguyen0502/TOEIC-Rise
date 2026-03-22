@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
@@ -20,4 +21,7 @@ public interface IBlogPostService {
 
     @Transactional
     void createBlogPost(String email, String categorySlug, BlogPostCreateRequest request);
+
+    @Transactional
+    void updateBlogPost(String email, Long blogPostId, BlogPostUpdateRequest request);
 }

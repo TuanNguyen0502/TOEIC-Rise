@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
@@ -36,6 +37,13 @@ public class BlogPostController {
     public ResponseEntity<?> createBlogPost(@PathVariable("category-slug") String categorySlug, @Valid @RequestBody BlogPostCreateRequest request) {
         String email = SecurityUtils.getCurrentUser();
         blogPostService.createBlogPost(email, categorySlug, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBlogPost(@PathVariable Long id, @Valid @RequestBody BlogPostUpdateRequest request) {
+        String email = SecurityUtils.getCurrentUser();
+        blogPostService.updateBlogPost(email, id, request);
         return ResponseEntity.ok().build();
     }
 }
