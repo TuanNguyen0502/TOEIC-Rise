@@ -19,6 +19,8 @@ public interface BlogPostMapper {
                 .summary(blogPost.getSummary())
                 .thumbnailUrl(blogPost.getThumbnailUrl())
                 .authorName(blogPost.getAuthor().getFullName())
+                .categoryName(blogPost.getCategory().getName())
+                .categorySlug(blogPost.getCategory().getSlug())
                 .views(blogPost.getViews())
                 .updatedAt(blogPost.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                 .build();

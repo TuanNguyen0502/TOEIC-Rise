@@ -12,6 +12,8 @@ public class BlogPostResponse {
     private String summary;
     private String thumbnailUrl;
     private String authorName;
+    private String categoryName;
+    private String categorySlug;
     private Integer views;
     private String updatedAt;
 }

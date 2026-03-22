@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface IBlogPostService {
+    PageResponse getNewestBlogPosts(String title, int page, int size);
+
     PageResponse getBlogPostsByCategory(String category, String title, String slug, EBlogPostStatus status, int page, int size, String sortBy, String direction);
 
     PageResponse getBlogPostsByCategory(String categorySlug, String title, int page, int size);
