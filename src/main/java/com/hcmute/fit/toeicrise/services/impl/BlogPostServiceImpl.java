@@ -115,7 +115,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
         blogPost.setThumbnailUrl(thumbnailUrl);
         blogPost.setAuthor(author);
         blogPost.setCategory(blogCategory);
-        blogPost.setStatus(request.getStatus());
+        blogPost.setStatus(EBlogPostStatus.DRAFT);
         blogPost.setViews(0);
         blogPostRepository.save(blogPost);
     }

@@ -2,7 +2,6 @@ package com.hcmute.fit.toeicrise.dtos.requests.blog.post;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
-import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import com.hcmute.fit.toeicrise.validators.annotations.ValidImage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +32,4 @@ public class BlogPostCreateRequest {
     @NotNull(message = MessageConstant.BLOG_POST_THUMBNAIL_NOT_NULL)
     @ValidImage
     private MultipartFile thumbnail;
-
-    @NotNull(message = MessageConstant.BLOG_POST_STATUS_NOT_NULL)
-    private EBlogPostStatus status;
 }
