@@ -24,7 +24,7 @@ public class BlogPost extends BaseEntity {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "author")
+    @Column(name = "thumbnail_url")
     private String thumbnailUrl;
 
     @ManyToOne(optional = false)

@@ -10,6 +10,7 @@ import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class BlogPostController {
     private final IBlogPostService blogPostService;
 
-    @GetMapping("/{category-slug}")
+    @GetMapping("/categories/{category-slug}")
     public ResponseEntity<PageResponse> getBlogPostsByCategoryForStaff(@PathVariable("category-slug") String categorySlug,
                                                                        @RequestParam(required = false) String title,
                                                                        @RequestParam(required = false) String slug,
@@ -36,7 +37,7 @@ public class BlogPostController {
         return ResponseEntity.ok(blogPostService.getBlogPostDetailForStaff(id));
     }
 
-    @PostMapping("/{category-slug}")
+    @PostMapping(value = "/{category-slug}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createBlogPost(@PathVariable("category-slug") String categorySlug, @Valid @ModelAttribute BlogPostCreateRequest request) {
         String email = SecurityUtils.getCurrentUser();
         blogPostService.createBlogPost(email, categorySlug, request);
