@@ -9,5 +9,6 @@ public class BlogCategoryResponse {
     private Long id;
     private String name;
     private String slug;
+    private Integer numberOfPosts;
     private Boolean isActive;
 }

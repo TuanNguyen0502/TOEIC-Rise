@@ -51,7 +51,7 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<BlogCategoryResponse> blogCategoryResponses = blogCategoryRepository.findAll(spec, pageable)
-                .map(blogCategoryMapper::toBlogCategoryResponse);
+                .map(blogCategoryMapper::toBlogCategoryResponseForStaff);
         return pageResponseMapper.toPageResponse(blogCategoryResponses);
     }
 
@@ -60,7 +60,7 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
         List<BlogCategoryResponse> blogCategoryResponseList = new ArrayList<>();
         for (BlogCategory blogCategory : blogCategoryRepository.findAll()) {
             if (blogCategory.getIsActive() == true) {
-                blogCategoryResponseList.add(blogCategoryMapper.toBlogCategoryResponse(blogCategory));
+                blogCategoryResponseList.add(blogCategoryMapper.toBlogCategoryResponseForLearner(blogCategory));
             }
         }
         return blogCategoryResponseList;
