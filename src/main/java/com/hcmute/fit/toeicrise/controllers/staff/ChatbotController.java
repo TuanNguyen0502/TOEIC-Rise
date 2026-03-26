@@ -70,4 +70,9 @@ public class ChatbotController {
     public Flux<ChatbotResponse> testingExplanationGenerationSystemPrompt(@Valid @ModelAttribute TestingSystemPromptExplanationGenerationRequest request) {
         return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
     }
+
+    @PostMapping(path = "/testing-system-prompt-blog-summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> testingBlogSummarizationSystemPrompt(@Valid @ModelAttribute BlogPostSummaryRequest request) {
+        return chatService.generateBlogPostSummary(request).delayElements(Duration.ofMillis(50));
+    }
 }
