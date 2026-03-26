@@ -212,11 +212,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 
     @Override
     public String uploadImage(BlogPostImageRequest request) {
-        if (request.getOldThumbnailUrl() != null && !request.getOldThumbnailUrl().isBlank()) {
-            cloudinaryUtil.validateImageURL(request.getOldThumbnailUrl());
-            cloudinaryUtil.deleteFile(request.getOldThumbnailUrl());
-        }
-        cloudinaryUtil.validateImageFile(request.getThumbnail());
-        return cloudinaryUtil.uploadFile(request.getThumbnail());
+        cloudinaryUtil.validateImageFile(request.getImage());
+        return cloudinaryUtil.uploadFile(request.getImage());
     }
 }

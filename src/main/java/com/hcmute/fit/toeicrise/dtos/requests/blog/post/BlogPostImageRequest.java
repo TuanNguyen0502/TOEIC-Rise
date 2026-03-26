@@ -14,9 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BlogPostImageRequest {
-    private String oldThumbnailUrl;
-
     @NotNull(message = MessageConstant.BLOG_POST_THUMBNAIL_NOT_NULL)
     @ValidImage
-    private MultipartFile thumbnail;
+    private MultipartFile image;
 }

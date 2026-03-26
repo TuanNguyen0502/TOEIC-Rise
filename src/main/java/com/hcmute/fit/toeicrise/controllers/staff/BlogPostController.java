@@ -44,8 +44,8 @@ public class BlogPostController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/upload-image")
-    public ResponseEntity<String> uploadImage(@Valid @RequestBody BlogPostImageRequest request) {
+    @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadImage(@Valid @ModelAttribute BlogPostImageRequest request) {
         return ResponseEntity.ok(blogPostService.uploadImage(request));
     }
 
