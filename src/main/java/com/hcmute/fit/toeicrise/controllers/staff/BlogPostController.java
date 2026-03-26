@@ -50,8 +50,8 @@ public class BlogPostController {
         return ResponseEntity.ok(blogPostService.uploadImage(request));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateBlogPost(@PathVariable Long id, @Valid @RequestBody BlogPostUpdateRequest request) {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateBlogPost(@PathVariable Long id, @Valid @ModelAttribute BlogPostUpdateRequest request) {
         String email = SecurityUtils.getCurrentUser();
         blogPostService.updateBlogPost(email, id, request);
         return ResponseEntity.ok().build();
