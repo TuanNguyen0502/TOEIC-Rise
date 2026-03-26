@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageDeleteRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -214,5 +215,14 @@ public class BlogPostServiceImpl implements IBlogPostService {
     public String uploadImage(BlogPostImageRequest request) {
         cloudinaryUtil.validateImageFile(request.getImage());
         return cloudinaryUtil.uploadFile(request.getImage());
+    }
+
+    @Override
+    public void deleteImage(BlogPostImageDeleteRequest request) {
+        if (!cloudinaryUtil.isCloudinaryUrl(request.getImageUrl())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image URL");
+        }
+        cloudinaryUtil.validateImageURL(request.getImageUrl());
+        cloudinaryUtil.deleteFile(request.getImageUrl());
     }
 }

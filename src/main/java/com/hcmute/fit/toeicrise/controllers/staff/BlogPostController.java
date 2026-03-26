@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageDeleteRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -60,6 +61,12 @@ public class BlogPostController {
     public ResponseEntity<?> changeBlogPostStatus(@PathVariable Long id, @RequestParam EBlogPostStatus status) {
         String email = SecurityUtils.getCurrentUser();
         blogPostService.changeStatus(email, id, status);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/delete-image")
+    public ResponseEntity<?> deleteImage(@Valid @RequestBody BlogPostImageDeleteRequest request) {
+        blogPostService.deleteImage(request);
         return ResponseEntity.ok().build();
     }
 }

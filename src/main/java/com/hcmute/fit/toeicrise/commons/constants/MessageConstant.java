@@ -130,4 +130,5 @@ public class MessageConstant {
     public static final String BLOG_POST_CONTENT_INVALID = "Blog post content must be at least 50 characters long.";
     public static final String BLOG_POST_THUMBNAIL_NOT_NULL = "Blog post thumbnail must not be null.";
     public static final String BLOG_POST_STATUS_NOT_NULL = "Blog post status must not be null.";
+    public static final String BLOG_POST_IMAGE_NOT_BLANK = "Blog post image must not be blank.";
 }
