@@ -30,6 +30,8 @@ public interface IChatService {
 
     Flux<ChatbotResponse> generateExplanation(TestingSystemPromptExplanationGenerationRequest request);
 
+    Flux<ChatbotResponse> generateBlogPostSummary(BlogPostSummaryRequest request);
+
     Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
 
 }
