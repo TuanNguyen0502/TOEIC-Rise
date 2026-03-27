@@ -47,6 +47,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
     @Override
     public PageResponse getNewestBlogPosts(String title, int page, int size) {
         Specification<BlogPost> spec = (_, _, cb) -> cb.conjunction();
+        spec = spec.and(BlogPostSpecification.isPublished());
         if (title != null && !title.isBlank()) {
             spec = spec.and(BlogPostSpecification.titleContains(title));
         }
@@ -69,7 +70,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
             spec = spec.and(BlogPostSpecification.slugContains(slug));
         }
         if (status != null) {
-            spec = spec.and(BlogPostSpecification.isActive(status));
+            spec = spec.and(BlogPostSpecification.statusEqual(status));
         }
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
@@ -83,6 +84,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
     public PageResponse getBlogPostsByCategory(String categorySlug, String title, int page, int size) {
         Specification<BlogPost> spec = (_, _, cb) -> cb.conjunction();
         spec = spec.and(BlogPostSpecification.byCategorySlug(categorySlug));
+        spec = spec.and(BlogPostSpecification.isPublished());
         if (title != null && !title.isBlank()) {
             spec = spec.and(BlogPostSpecification.titleContains(title));
         }

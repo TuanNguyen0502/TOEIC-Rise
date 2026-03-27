@@ -20,8 +20,13 @@ public class BlogPostSpecification {
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("slug")), "%" + slug.toLowerCase() + "%");
     }
 
-    public static Specification<BlogPost> isActive(EBlogPostStatus status) {
+    public static Specification<BlogPost> statusEqual(EBlogPostStatus status) {
         return (root, _, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), status);
+    }
+
+    public static Specification<BlogPost> isPublished() {
+        return (root, _, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("status"), EBlogPostStatus.PUBLISHED);
     }
 }
