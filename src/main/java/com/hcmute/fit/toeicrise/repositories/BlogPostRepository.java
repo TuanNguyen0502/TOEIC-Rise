@@ -13,4 +13,6 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long>, JpaSp
     List<BlogPost> findAllByCategory_Id(Long categoryId);
 
     Optional<BlogPost> findBySlug(String slug);
+
+    Boolean existsBySlug(String slug);
 }

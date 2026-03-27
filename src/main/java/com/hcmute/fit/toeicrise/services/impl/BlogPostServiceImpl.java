@@ -129,8 +129,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
     @Transactional
     @Override
     public void createBlogPost(String email, String categorySlug, BlogPostCreateRequest request) {
-        BlogPost bp = blogPostRepository.findBySlug(request.getSlug()).orElse(null);
-        if (bp != null) {
+        if (blogPostRepository.existsBySlug(request.getSlug())) {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog post with slug '" + request.getSlug() + "'");
         }
 
@@ -168,8 +167,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
             throw new AppException(ErrorCode.INVALID_REQUEST, "You are not the author of this blog post");
         }
         if (!blogPost.getSlug().equals(request.getSlug())) {
-            BlogPost bp = blogPostRepository.findBySlug(request.getSlug()).orElse(null);
-            if (bp != null) {
+            if (blogPostRepository.existsBySlug(request.getSlug())) {
                 throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog post with slug '" + request.getSlug() + "'");
             }
         }
