@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ImageFileValidator implements ConstraintValidator<ValidImage, MultipartFile> {
     private static final List<String> CONTENT_TYPES = Arrays.asList("image/png", "image/jpg", "image/jpeg", "image/webp");
-    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final long MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 
     @Override
     public boolean isValid(MultipartFile file, ConstraintValidatorContext context) {
