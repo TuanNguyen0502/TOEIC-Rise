@@ -20,8 +20,8 @@ public class BlogPostController {
         return ResponseEntity.ok(blogPostService.getNewestBlogPosts(title, page, size));
     }
 
-    @GetMapping("/{category-slug}")
-    public ResponseEntity<PageResponse> getBlogPostsByCategory(@PathVariable("category-slug") String categorySlug,
+    @GetMapping("/categories/{category}")
+    public ResponseEntity<PageResponse> getBlogPostsByCategory(@PathVariable("category") String categorySlug,
                                                                @RequestParam(required = false) String title,
                                                                @RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
