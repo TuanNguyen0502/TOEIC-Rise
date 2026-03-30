@@ -22,8 +22,12 @@ public class BlogSearchServiceImpl implements IBlogSearchService {
                 .summary(blogPost.getSummary())
                 .content(blogPost.getContent())
                 .slug(blogPost.getSlug())
+                .thumbnailUrl(blogPost.getThumbnailUrl())
+                .authorName(blogPost.getAuthor().getFullName())
                 .categoryName(blogPost.getCategory().getName())
-                .categoryId(blogPost.getCategory().getId())
+                .categorySlug(blogPost.getCategory().getSlug())
+                .views(blogPost.getViews())
+                .createdAt(blogPost.getCreatedAt())
                 .build();
         blogSearchRepository.save(doc);
     }
@@ -37,8 +41,11 @@ public class BlogSearchServiceImpl implements IBlogSearchService {
         blogDocument.setSummary(blogPost.getSummary());
         blogDocument.setContent(blogPost.getContent());
         blogDocument.setSlug(blogPost.getSlug());
+        blogDocument.setThumbnailUrl(blogPost.getThumbnailUrl());
         blogDocument.setCategoryName(blogPost.getCategory().getName());
-        blogDocument.setCategoryId(blogPost.getCategory().getId());
+        blogDocument.setCategorySlug(blogPost.getCategory().getSlug());
+        blogDocument.setViews(blogPost.getViews());
+        blogDocument.setCreatedAt(blogPost.getCreatedAt());
         blogSearchRepository.save(blogDocument);
     }
 
