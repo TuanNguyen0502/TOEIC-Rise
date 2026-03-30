@@ -7,8 +7,6 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.time.LocalDateTime;
-
 @Document(indexName = "blog_posts")
 @Data
 @Builder
@@ -31,5 +29,5 @@ public class BlogDocument {
     private String categoryName;
     private String categorySlug;
     private Integer views;
-    private LocalDateTime createdAt;
+    private String updatedAt;
 }

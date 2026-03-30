@@ -4,7 +4,9 @@ import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostResponse;
+import com.hcmute.fit.toeicrise.models.entities.BlogDocument;
 import com.hcmute.fit.toeicrise.models.entities.BlogPost;
+import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import org.mapstruct.Mapper;
 
 import java.time.format.DateTimeFormatter;
@@ -62,6 +64,22 @@ public interface BlogPostMapper {
                 .categoryName(blogPost.getCategory().getName())
                 .categorySlug(blogPost.getCategory().getSlug())
                 .categoryIsActive(blogPost.getCategory().getIsActive())
+                .build();
+    }
+
+    default BlogPostResponse toBlogPostResponse(BlogDocument blogDocument) {
+        return BlogPostResponse.builder()
+                .id(blogDocument.getId())
+                .title(blogDocument.getTitle())
+                .slug(blogDocument.getSlug())
+                .summary(blogDocument.getSummary())
+                .thumbnailUrl(blogDocument.getThumbnailUrl())
+                .authorName(blogDocument.getAuthorName())
+                .categoryName(blogDocument.getCategoryName())
+                .categorySlug(blogDocument.getCategorySlug())
+                .status(EBlogPostStatus.PUBLISHED)
+                .views(blogDocument.getViews())
+                .updatedAt(blogDocument.getUpdatedAt())
                 .build();
     }
 }
