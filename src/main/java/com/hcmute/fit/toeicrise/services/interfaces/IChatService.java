@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
 import reactor.core.publisher.Flux;
 
 import java.io.InputStream;
@@ -32,4 +33,5 @@ public interface IChatService {
 
     Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
 
+    List<DictationGenerationResponse> generateDictation(Long testId, Long partId);
 }

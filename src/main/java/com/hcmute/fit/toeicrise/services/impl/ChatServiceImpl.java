@@ -1,11 +1,13 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
+import com.hcmute.fit.toeicrise.dtos.requests.dictation.AiDictationRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -14,6 +16,7 @@ import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
 import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
+import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.UserAnswerRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
@@ -25,6 +28,7 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
@@ -46,6 +50,7 @@ public class ChatServiceImpl implements IChatService {
     private final ChatClient.Builder chatClientBuilder;
     private final ChatModel chatModel;
     private final QuestionRepository questionRepository;
+    private final QuestionGroupRepository questionGroupRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final ChatMemoryRepository chatMemoryRepository;
     private final ChatbotSystemPromptServiceImpl chatbotSystemPromptService;
@@ -472,6 +477,47 @@ public class ChatServiceImpl implements IChatService {
                                     ))
                     );
         });
+    }
+
+    @Override
+    public List<DictationGenerationResponse> generateDictation(Long testId, Long partId) {
+        List<QuestionGroup> groups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, List.of(partId));
+
+        List<AiDictationRequest> aiRequests = groups.stream()
+                .map(g -> AiDictationRequest.builder()
+                        .questionGroupId(g.getId())
+                        .partName(g.getPart().getName())
+                        .transcript(g.getTranscript())
+                        .build())
+                .toList();
+
+        String userMessage = "Process these question groups for TOEIC Dictation: " + aiRequests.toString();
+        return chatClient.prompt()
+                .system(getDictationGenerationSystemPrompt())
+                .user(userMessage)
+                .call()
+                .entity(new ParameterizedTypeReference<List<DictationGenerationResponse>>() {});
+    }
+
+    private String getDictationGenerationSystemPrompt() {
+        return """
+        You are a TOEIC data processing expert. Your task is to extract clean English text from raw TOEIC transcripts (HTML format) for dictation exercises.
+        
+        ### PROCESSING RULES:
+        1. STRIP all HTML tags.
+        2. REMOVE Vietnamese translations entirely.
+        3. REMOVE question numbers (e.g., "32", "33", "34").
+        4. REMOVE speaker labels (e.g., "M-Cn:", "W-Am:", "W:", "M:").
+        
+        ### PART-SPECIFIC LOGIC:
+        - Part 1 & 2: Identify answer choices (A), (B), (C), (D). Extract ONLY the text of these choices into the 'answers' list. 
+        - Part 2 ONLY: Extract the main question text into 'questionText'.
+        - Part 3 & 4: Extract the English dialogue lines. Separate turns with a newline (\\n) and put it into 'passageText'.
+        
+        ### OUTPUT FORMAT:
+        - Return a JSON array of objects matching the provided structure.
+        - Ensure 'questionGroupId' is preserved from the input.
+        """;
     }
 
 }

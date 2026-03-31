@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -10,11 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.List;
 
 @RestController("StaffChatbotController")
 @RequestMapping("/staff/chatbot")
@@ -64,5 +67,15 @@ public class ChatbotController {
     @PostMapping(path = "/testing-system-prompt-explanation-generation", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> testingExplanationGenerationSystemPrompt(@Valid @ModelAttribute TestingSystemPromptExplanationGenerationRequest request) {
         return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
+    }
+
+    @GetMapping("/generate-preview")
+    public ResponseEntity<List<DictationGenerationResponse>> generateDictationPreview(
+            @RequestParam Long testId,
+            @RequestParam Long partId) {
+
+        List<DictationGenerationResponse> result = chatService.generateDictation(testId, partId);
+
+        return ResponseEntity.ok(result);
     }
 }
