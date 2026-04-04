@@ -7,13 +7,19 @@ import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
-import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface ITestSetService {
-    PageResponse getAllTestSets(String name, ETestSetStatus status, ETestSetType type, int page, int size, String sortBy, String direction);
+    PageResponse getAllListeningReadingTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction);
+
+    @Transactional(readOnly = true)
+    PageResponse getAllSpeakingTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction);
+
+    @Transactional(readOnly = true)
+    PageResponse getAllWritingTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction);
 
     List<TestSetResponse> getAllTestSets();
 
