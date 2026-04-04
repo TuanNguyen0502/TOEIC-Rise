@@ -4,5 +4,6 @@ public enum ESystemPromptFeatureType {
     CHATBOT,
     Q_AND_A,
     EXPLANATION_GENERATION,
-    SENTENCE_ASSESSMENT
+    SENTENCE_ASSESSMENT,
+    BLOG_SUMMARIZATION
 }
