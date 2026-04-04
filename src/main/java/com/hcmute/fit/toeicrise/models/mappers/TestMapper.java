@@ -2,6 +2,8 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
@@ -116,6 +118,37 @@ public interface TestMapper {
         request.setTags(getCellValueAsString(row.getCell(12)));
         request.setExplanation(getCellValueAsString(row.getCell(13)));
         request.setTranscript(getCellValueAsString(row.getCell(14)));
+
+        return request;
+    }
+
+    default SpeakingQuestionExcelRequest mapRowToSpeakingDTO(Row row) {
+        SpeakingQuestionExcelRequest request = new SpeakingQuestionExcelRequest();
+
+        // Các field số
+        request.setPartNumber(getCellValueAsInteger(row.getCell(0)));
+        request.setQuestionGroupId(getCellValueAsString(row.getCell(1)));
+        request.setNumberOfQuestions(getCellValueAsInteger(row.getCell(2)));
+
+        // Các field text
+        request.setPassageText(getCellValueAsString(row.getCell(3)));
+        request.setQuestion(getCellValueAsString(row.getCell(4)));
+        request.setImageUrl(getCellValueAsString(row.getCell(11)));
+
+        return request;
+    }
+
+    default WritingQuestionExcelRequest mapRowToWritingDTO(Row row) {
+        WritingQuestionExcelRequest request = new WritingQuestionExcelRequest();
+
+        // Các field số
+        request.setPartNumber(getCellValueAsInteger(row.getCell(0)));
+        request.setQuestionGroupId(getCellValueAsString(row.getCell(1)));
+        request.setNumberOfQuestions(getCellValueAsInteger(row.getCell(2)));
+
+        // Các field text
+        request.setPassageText(getCellValueAsString(row.getCell(3)));
+        request.setImageUrl(getCellValueAsString(row.getCell(11)));
 
         return request;
     }

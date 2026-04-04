@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupAnswerResponse;
@@ -48,6 +50,26 @@ public interface QuestionGroupMapper {
         questionGroup.setPosition(excelRequest.getNumberOfQuestions());
         questionGroup.setPassage(excelRequest.getPassageText());
         questionGroup.setTranscript(excelRequest.getTranscript());
+        return questionGroup;
+    }
+
+    default QuestionGroup toQuestionGroup(Test test, Part part, SpeakingQuestionExcelRequest excelRequest) {
+        QuestionGroup questionGroup = new QuestionGroup();
+        questionGroup.setTest(test);
+        questionGroup.setPart(part);
+        questionGroup.setImageUrl(excelRequest.getImageUrl());
+        questionGroup.setPosition(excelRequest.getNumberOfQuestions());
+        questionGroup.setPassage(excelRequest.getPassageText());
+        return questionGroup;
+    }
+
+    default QuestionGroup toQuestionGroup(Test test, Part part, WritingQuestionExcelRequest excelRequest) {
+        QuestionGroup questionGroup = new QuestionGroup();
+        questionGroup.setTest(test);
+        questionGroup.setPart(part);
+        questionGroup.setImageUrl(excelRequest.getImageUrl());
+        questionGroup.setPosition(excelRequest.getNumberOfQuestions());
+        questionGroup.setPassage(excelRequest.getPassageText());
         return questionGroup;
     }
 }

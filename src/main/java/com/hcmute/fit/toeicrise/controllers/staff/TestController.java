@@ -26,13 +26,27 @@ public class TestController {
         return ResponseEntity.ok(MessageConstant.TEST_IMPORT_SUCCESS);
     }
 
+    @PostMapping("/speaking/import")
+    public ResponseEntity<?> importSpeakingTests(@RequestPart MultipartFile file,
+                                                 @Valid @RequestPart TestRequest testRequest) {
+        testService.importSpeakingTest(file, testRequest);
+        return ResponseEntity.ok(MessageConstant.TEST_IMPORT_SUCCESS);
+    }
+
+    @PostMapping("/writing/import")
+    public ResponseEntity<?> importWritingTests(@RequestPart MultipartFile file,
+                                                @Valid @RequestPart TestRequest testRequest) {
+        testService.importWritingTest(file, testRequest);
+        return ResponseEntity.ok(MessageConstant.TEST_IMPORT_SUCCESS);
+    }
+
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@RequestParam(required = false) String name,
                                          @RequestParam(required = false) ETestStatus status,
                                          @RequestParam(defaultValue = "0")
-                                             @Min(0) int page,
+                                         @Min(0) int page,
                                          @RequestParam(defaultValue = "10")
-                                             @Min(1) @Max(100) int size,
+                                         @Min(1) @Max(100) int size,
                                          @RequestParam(defaultValue = "updatedAt") String sortBy,
                                          @RequestParam(defaultValue = "DESC") String direction) {
         return ResponseEntity.ok(testService.getAllTests(name, status, page, size, sortBy, direction));

@@ -2,6 +2,8 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
@@ -19,6 +21,12 @@ public interface IQuestionGroupService {
     List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId);
 
     @Transactional
+    QuestionGroup createQuestionGroup(Test test, Part part, SpeakingQuestionExcelRequest questionExcelRequest);
+
+    @Transactional
+    QuestionGroup createQuestionGroup(Test test, Part part, WritingQuestionExcelRequest questionExcelRequest);
+
+    @Transactional
     QuestionGroupResponse updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request);
 
     @Transactional(readOnly = true)
@@ -31,8 +39,6 @@ public interface IQuestionGroupService {
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);
 
     QuestionGroup getQuestionGroupEntity(Long questionGroupId);
-
-    String getPartNameByQuestionGroupId(Long questionGroupId);
 
     Map<Long, String> getPartNamesByQuestionGroupIds(Set<Long> questionGroupIds);
 

@@ -2,6 +2,8 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.RedoWrongQuestionResponse;
@@ -47,6 +49,21 @@ public interface QuestionMapper {
                 .options(options)
                 .correctOption(excelRequest.getCorrectAnswer())
                 .explanation(excelRequest.getExplanation())
+                .build();
+    }
+
+    default Question toEntity(SpeakingQuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
+        return Question.builder()
+                .questionGroup(questionGroup)
+                .position(excelRequest.getNumberOfQuestions())
+                .content(excelRequest.getQuestion())
+                .build();
+    }
+
+    default Question toEntity(WritingQuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
+        return Question.builder()
+                .questionGroup(questionGroup)
+                .position(excelRequest.getNumberOfQuestions())
                 .build();
     }
 

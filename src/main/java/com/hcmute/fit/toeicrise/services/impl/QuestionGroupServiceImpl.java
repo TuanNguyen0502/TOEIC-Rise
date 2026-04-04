@@ -5,8 +5,9 @@ import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.HelperUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -45,6 +46,24 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Override
     @Transactional
     public QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest questionExcelRequest) {
+        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+        log.info("Created question group: {}", questionGroup.getId());
+        return questionGroup;
+    }
+
+    @Transactional
+    @Override
+    public QuestionGroup createQuestionGroup(Test test, Part part, SpeakingQuestionExcelRequest questionExcelRequest) {
+        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+        log.info("Created question group: {}", questionGroup.getId());
+        return questionGroup;
+    }
+
+    @Transactional
+    @Override
+    public QuestionGroup createQuestionGroup(Test test, Part part, WritingQuestionExcelRequest questionExcelRequest) {
         QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
         questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
         log.info("Created question group: {}", questionGroup.getId());
@@ -93,12 +112,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     public QuestionGroup getQuestionGroupEntity(Long questionGroupId) {
         return questionGroupRepository.findById(questionGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group"));
-    }
-
-    @Override
-    public String getPartNameByQuestionGroupId(Long questionGroupId) {
-        QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
-        return questionGroup.getPart().getName();
     }
 
     @Override
@@ -184,8 +197,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         if (ePart.isRequiredPassage()) {
             if (passage == null || passage.isBlank())
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
-        }
-        else if (passage != null && !passage.isBlank())
+        } else if (passage != null && !passage.isBlank())
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
     }
 
@@ -234,7 +246,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }, Comparator.comparing(PartResponse::getName));
     }
 
-    public Map<Long, List<Question>> attachQuestionsToGroups(List<QuestionGroup> questionGroups){
+    public Map<Long, List<Question>> attachQuestionsToGroups(List<QuestionGroup> questionGroups) {
         Set<Long> groupIds = questionGroups.stream().map(QuestionGroup::getId).collect(Collectors.toSet());
         if (groupIds.isEmpty())
             return Collections.emptyMap();

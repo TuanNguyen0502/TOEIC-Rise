@@ -2,6 +2,8 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.QuestionGroupSupportResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.TaggedQuestionDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
@@ -51,7 +53,7 @@ public class QuestionServiceImpl implements IQuestionService {
     @Transactional
     @Override
     public void updateQuestion(QuestionRequest questionRequest) {
-        if (questionRequest == null|| questionRequest.getId() == null)
+        if (questionRequest == null || questionRequest.getId() == null)
             throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
 
         Question question = findById(questionRequest.getId());
@@ -67,7 +69,7 @@ public class QuestionServiceImpl implements IQuestionService {
 
     @Override
     public List<Question> getQuestionEntitiesByIds(List<Long> questionIds) {
-        if (questionIds == null||questionIds.isEmpty())
+        if (questionIds == null || questionIds.isEmpty())
             throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
         return questionRepository.findAllById(questionIds);
     }
@@ -81,7 +83,7 @@ public class QuestionServiceImpl implements IQuestionService {
 
     @Override
     public void updateQuestionWithEntity(Question question, QuestionRequest request) {
-        if (request == null|| question == null||request.getId() == null || question.getId() == null)
+        if (request == null || question == null || request.getId() == null || question.getId() == null)
             throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
 
         List<Tag> tags = tagService.parseTagsAllowCreate(request.getTags());
@@ -111,7 +113,7 @@ public class QuestionServiceImpl implements IQuestionService {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
         if (questions == null || questions.isEmpty())
             throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
-        if (questions.size() != questionIds.size()){
+        if (questions.size() != questionIds.size()) {
             Set<Long> foundIds = questions.stream().map(Question::getId)
                     .collect(Collectors.toSet());
             if (!foundIds.containsAll(questionIds))
@@ -152,6 +154,32 @@ public class QuestionServiceImpl implements IQuestionService {
         questionListMap.forEach(Question::setTags);
         if (!questionListMap.isEmpty())
             questionRepository.saveAll(questionListMap.keySet().stream().toList());
+    }
+
+    @Override
+    public void createSpeakingQuestionBatch(List<SpeakingQuestionExcelRequest> questionExcelRequests, QuestionGroup questionGroup) {
+        if (questionExcelRequests == null || questionExcelRequests.isEmpty())
+            return;
+        if (questionGroup == null)
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Question group");
+
+        List<Question> questions = questionExcelRequests.stream().map(
+                request -> questionMapper.toEntity(request, questionGroup)).toList();
+        List<Question> savedQuestions = questionRepository.saveAll(questions);
+        log.info("Saved questions: {}", savedQuestions);
+    }
+
+    @Override
+    public void createWritingQuestionBatch(List<WritingQuestionExcelRequest> questionExcelRequests, QuestionGroup questionGroup) {
+        if (questionExcelRequests == null || questionExcelRequests.isEmpty())
+            return;
+        if (questionGroup == null)
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Question group");
+
+        List<Question> questions = questionExcelRequests.stream().map(
+                request -> questionMapper.toEntity(request, questionGroup)).toList();
+        List<Question> savedQuestions = questionRepository.saveAll(questions);
+        log.info("Saved questions: {}", savedQuestions);
     }
 
     @Override
