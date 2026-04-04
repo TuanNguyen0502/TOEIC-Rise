@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -17,12 +18,13 @@ public class TestSetController {
     @GetMapping("")
     public ResponseEntity<?> getAllTestSets(@RequestParam(required = false) String name,
                                             @RequestParam(required = false) ETestSetStatus status,
+                                            @RequestParam(required = false) ETestSetType type,
                                             @RequestParam(defaultValue = "0")
                                             @Min(value = 0) int page,
                                             @RequestParam(defaultValue = "10")
                                             @Min(value = 1) @Max(value = 100) int size,
                                             @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
                                             @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testSetService.getAllTestSets(name, status, page, size, sortBy, direction));
+        return ResponseEntity.ok(testSetService.getAllTestSets(name, status, type, page, size, sortBy, direction));
     }
 }

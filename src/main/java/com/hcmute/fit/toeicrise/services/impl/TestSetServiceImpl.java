@@ -8,6 +8,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
@@ -41,13 +42,16 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse getAllTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
+    public PageResponse getAllTestSets(String name, ETestSetStatus status, ETestSetType type, int page, int size, String sortBy, String direction) {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
         if (name != null && !name.isEmpty())
             specification = specification.and(TestSetSpecification.nameContains(name));
         if (status == null)
             status = ETestSetStatus.IN_USE;
         specification = specification.and(TestSetSpecification.statusEquals(status));
+        if (type != null) {
+            specification = specification.and(TestSetSpecification.typeEquals(type));
+        }
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -102,7 +106,7 @@ public class TestSetServiceImpl implements ITestSetService {
         TestSet oldTestSet = findTestSetById(updateTestSetRequest.getId());
         testSetRepository.findByName(updateTestSetRequest.getTestName()).ifPresent(
                 existingTestSet -> {
-                    if (!existingTestSet.getId().equals(updateTestSetRequest.getId())){
+                    if (!existingTestSet.getId().equals(updateTestSetRequest.getId())) {
                         throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
                     }
                 }

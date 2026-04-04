@@ -7,18 +7,26 @@ import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 
 import java.util.List;
 
 public interface ITestSetService {
-    PageResponse getAllTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction);
+    PageResponse getAllTestSets(String name, ETestSetStatus status, ETestSetType type, int page, int size, String sortBy, String direction);
+
     List<TestSetResponse> getAllTestSets();
+
     TestSetDetailResponse getTestSetDetailById(Long testSetId, String name, ETestStatus status, int page, int size,
                                                String sortBy, String direction);
+
     void deleteTestSetById(Long id);
+
     void addTestSet(TestSetRequest testSetRequest);
+
     TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest);
+
     Long totalTestSets();
+
     TestSet findTestSetById(Long testSetId);
 }
