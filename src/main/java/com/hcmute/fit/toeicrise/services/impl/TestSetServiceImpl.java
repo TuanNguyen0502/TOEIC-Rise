@@ -42,47 +42,15 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse getAllListeningReadingTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
+    public PageResponse getAllTestSetsByType(ETestSetType type, String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
         if (name != null && !name.isEmpty())
             specification = specification.and(TestSetSpecification.nameContains(name));
         if (status == null)
             status = ETestSetStatus.IN_USE;
         specification = specification.and(TestSetSpecification.statusEquals(status));
-        specification = specification.and(TestSetSpecification.typeEquals(ETestSetType.LISTENING_AND_READING));
+        specification = specification.and(TestSetSpecification.typeEquals(type));
 
-        return getPageResponse(page, size, sortBy, direction, specification);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public PageResponse getAllSpeakingTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
-        Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
-        if (name != null && !name.isEmpty())
-            specification = specification.and(TestSetSpecification.nameContains(name));
-        if (status == null)
-            status = ETestSetStatus.IN_USE;
-        specification = specification.and(TestSetSpecification.statusEquals(status));
-        specification = specification.and(TestSetSpecification.typeEquals(ETestSetType.SPEAKING));
-
-        return getPageResponse(page, size, sortBy, direction, specification);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public PageResponse getAllWritingTestSets(String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
-        Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
-        if (name != null && !name.isEmpty())
-            specification = specification.and(TestSetSpecification.nameContains(name));
-        if (status == null)
-            status = ETestSetStatus.IN_USE;
-        specification = specification.and(TestSetSpecification.statusEquals(status));
-        specification = specification.and(TestSetSpecification.typeEquals(ETestSetType.WRITING));
-
-        return getPageResponse(page, size, sortBy, direction, specification);
-    }
-
-    private PageResponse getPageResponse(int page, int size, String sortBy, String direction, Specification<TestSet> specification) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<TestSetResponse> testSetResponses = testSetRepository.findAll(specification, pageable)

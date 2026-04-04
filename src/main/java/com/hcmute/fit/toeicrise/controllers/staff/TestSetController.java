@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -23,7 +24,7 @@ public class TestSetController {
                                                             @Min(value = 1) @Max(value = 100) int size,
                                                             @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
                                                             @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testSetService.getAllListeningReadingTestSets(name, status, page, size, sortBy, direction));
+        return ResponseEntity.ok(testSetService.getAllTestSetsByType(ETestSetType.LISTENING_AND_READING, name, status, page, size, sortBy, direction));
     }
 
     @GetMapping("/speaking")
@@ -35,7 +36,7 @@ public class TestSetController {
                                                     @Min(value = 1) @Max(value = 100) int size,
                                                     @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
                                                     @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testSetService.getAllSpeakingTestSets(name, status, page, size, sortBy, direction));
+        return ResponseEntity.ok(testSetService.getAllTestSetsByType(ETestSetType.SPEAKING, name, status, page, size, sortBy, direction));
     }
 
     @GetMapping("/writing")
@@ -47,6 +48,6 @@ public class TestSetController {
                                                    @Min(value = 1) @Max(value = 100) int size,
                                                    @RequestParam(defaultValue = "numberOfLearnerTests") String sortBy,
                                                    @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testSetService.getAllWritingTestSets(name, status, page, size, sortBy, direction));
+        return ResponseEntity.ok(testSetService.getAllTestSetsByType(ETestSetType.WRITING, name, status, page, size, sortBy, direction));
     }
 }
