@@ -14,16 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController("staffTestController")
-@RequestMapping("/staff/tests")
+@RestController("staffWritingTestController")
+@RequestMapping("/staff/writing-tests")
 @RequiredArgsConstructor
-public class TestController {
+public class WritingTestController {
     private final ITestService testService;
 
     @PostMapping("/import")
     public ResponseEntity<?> importTests(@RequestPart MultipartFile file,
                                          @Valid @RequestPart TestRequest testRequest) {
-        testService.importTest(file, testRequest);
+        testService.importWritingTest(file, testRequest);
         return ResponseEntity.ok(MessageConstant.TEST_IMPORT_SUCCESS);
     }
 
@@ -36,12 +36,12 @@ public class TestController {
                                          @Min(1) @Max(100) int size,
                                          @RequestParam(defaultValue = "updatedAt") String sortBy,
                                          @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testService.getAllTestsByType(ETestType.LISTENING_AND_READING, name, status, page, size, sortBy, direction));
+        return ResponseEntity.ok(testService.getAllTestsByType(ETestType.WRITING, name, status, page, size, sortBy, direction));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTestById(@PathVariable Long id) {
-        return ResponseEntity.ok(testService.getTestDetailById(id));
+        return ResponseEntity.ok(testService.getWritingTestDetailById(id));
     }
 
     @PutMapping("/{id}")

@@ -8,15 +8,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("LearnerTestController")
-@RequestMapping("/tests")
+@RestController("LearnerWritingTestController")
+@RequestMapping("/writing-tests")
 @RequiredArgsConstructor
-public class TestController {
+public class WritingTestController {
     private final ITestService testService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@Valid @ModelAttribute PageRequest pageRequest) {
-        return ResponseEntity.ok(testService.searchTestsByTypeAndName(ETestType.LISTENING_AND_READING, pageRequest));
+        return ResponseEntity.ok(testService.searchTestsByTypeAndName(ETestType.WRITING, pageRequest));
     }
 
     @GetMapping("/{id}")

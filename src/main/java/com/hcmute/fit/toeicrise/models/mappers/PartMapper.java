@@ -4,6 +4,10 @@ import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import org.mapstruct.*;
 
@@ -37,6 +41,22 @@ public interface PartMapper {
                 .partId(((Number) objects[4]).longValue())
                 .partName((String) objects[3])
                 .tagNames(tagNames)
+                .build();
+    }
+
+    default SpeakingPartResponse toSpeakingPartResponse(Part part, List<SpeakingQuestionGroupResponse> questionGroupResponses) {
+        return SpeakingPartResponse.builder()
+                .id(part.getId())
+                .name(part.getName())
+                .questionGroups(questionGroupResponses)
+                .build();
+    }
+
+    default WritingPartResponse toWritingPartResponse(Part part, List<WritingQuestionGroupResponse> questionGroupResponses) {
+        return WritingPartResponse.builder()
+                .id(part.getId())
+                .name(part.getName())
+                .questionGroups(questionGroupResponses)
                 .build();
     }
 }
