@@ -19,4 +19,10 @@ public class PartServiceImpl implements IPartService {
                 () -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part")
         );
     }
+
+    @Override
+    public Part getPartByName(String partName) {
+        return partRepository.findByName(partName)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part with name: " + partName));
+    }
 }

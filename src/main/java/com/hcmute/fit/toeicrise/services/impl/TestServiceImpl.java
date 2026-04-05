@@ -384,7 +384,8 @@ public class TestServiceImpl implements ITestService {
     private void processSpeakingQuestionGroup(Test test, List<SpeakingQuestionExcelRequest> groupQuestions) {
         try {
             SpeakingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
-            Part part = partService.getPartById(firstQuestion.getPartNumber());
+            String partName = EPart.getSpeakingPart(firstQuestion.getPartNumber());
+            Part part = partService.getPartByName(partName);
             QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
 
             questionService.createSpeakingQuestionBatch(groupQuestions, questionGroup);
@@ -400,7 +401,8 @@ public class TestServiceImpl implements ITestService {
     private void processWritingQuestionGroup(Test test, List<WritingQuestionExcelRequest> groupQuestions) {
         try {
             WritingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
-            Part part = partService.getPartById(firstQuestion.getPartNumber());
+            String partName = EPart.getWritingPart(firstQuestion.getPartNumber());
+            Part part = partService.getPartByName(partName);
             QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
 
             questionService.createWritingQuestionBatch(groupQuestions, questionGroup);
