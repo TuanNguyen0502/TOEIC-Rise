@@ -6,6 +6,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequ
 import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -47,4 +49,10 @@ public interface IQuestionGroupService {
     void checkQuestionGroupsExistByIds(List<Long> ids);
 
     boolean isListeningPart(Part part);
+
+    @Transactional(readOnly = true)
+    List<SpeakingPartResponse> getSpeakingQuestionGroupsByTestIdGroupByPart(Long testId);
+
+    @Transactional(readOnly = true)
+    List<WritingPartResponse> getWritingQuestionGroupsByTestIdGroupByPart(Long testId);
 }

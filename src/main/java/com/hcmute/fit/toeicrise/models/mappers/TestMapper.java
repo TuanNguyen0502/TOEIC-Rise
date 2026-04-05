@@ -10,12 +10,17 @@ import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import org.mapstruct.*;
 import org.apache.poi.ss.usermodel.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Mapper(componentModel = "spring", uses = {PartMapper.class})
@@ -133,7 +138,7 @@ public interface TestMapper {
         // Các field text
         request.setPassageText(getCellValueAsString(row.getCell(3)));
         request.setQuestion(getCellValueAsString(row.getCell(4)));
-        request.setImageUrl(getCellValueAsString(row.getCell(11)));
+        request.setImageUrl(getCellValueAsString(row.getCell(5)));
 
         return request;
     }
@@ -148,8 +153,30 @@ public interface TestMapper {
 
         // Các field text
         request.setPassageText(getCellValueAsString(row.getCell(3)));
-        request.setImageUrl(getCellValueAsString(row.getCell(11)));
+        request.setImageUrl(getCellValueAsString(row.getCell(4)));
 
         return request;
+    }
+
+    default SpeakingTestDetailResponse toSpeakingTestDetailResponse(Test test, List<SpeakingPartResponse> partResponses) {
+        return SpeakingTestDetailResponse.builder()
+                .id(test.getId())
+                .name(test.getName())
+                .status(test.getStatus())
+                .createdAt(test.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .updatedAt(test.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .partResponses(partResponses)
+                .build();
+    }
+
+    default WritingTestDetailResponse toWritingTestDetailResponse(Test test, List<WritingPartResponse> partResponses) {
+        return WritingTestDetailResponse.builder()
+                .id(test.getId())
+                .name(test.getName())
+                .status(test.getStatus())
+                .createdAt(test.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .updatedAt(test.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .partResponses(partResponses)
+                .build();
     }
 }

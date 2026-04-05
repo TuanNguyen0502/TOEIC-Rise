@@ -6,11 +6,13 @@ import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.models.entities.Test;
-import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +21,7 @@ import org.springframework.scheduling.annotation.Async;
 import java.util.List;
 
 public interface ITestService {
-    PageResponse getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction);
+    PageResponse getAllTestsByType(ETestType type, String name, ETestStatus status, int page, int size, String sortBy, String direction);
 
     PageResponse getTestsByTestSetId(Long testSetId, String name, ETestStatus status, int page, int size, String sortBy, String direction);
 
@@ -35,6 +37,12 @@ public interface ITestService {
 
     TestDetailResponse getTestDetailById(Long id);
 
+    @Transactional(readOnly = true)
+    SpeakingTestDetailResponse getSpeakingTestDetailById(Long id);
+
+    @Transactional(readOnly = true)
+    WritingTestDetailResponse getWritingTestDetailById(Long id);
+
     void importTest(MultipartFile file, TestRequest testRequest);
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -42,8 +50,6 @@ public interface ITestService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     void importWritingTest(MultipartFile file, TestRequest request);
-
-    Test createTest(String testName, TestSet testSet);
 
     List<QuestionExcelRequest> readFile(MultipartFile file);
 

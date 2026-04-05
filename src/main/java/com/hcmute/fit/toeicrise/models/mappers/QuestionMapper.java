@@ -9,6 +9,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionRespon
 import com.hcmute.fit.toeicrise.dtos.responses.learner.RedoWrongQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
@@ -23,6 +25,21 @@ import java.util.stream.Collectors;
 public interface QuestionMapper {
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
     QuestionResponse toQuestionResponse(Question question);
+
+    default SpeakingQuestionResponse toSpeakingQuestionResponse(Question question) {
+        return SpeakingQuestionResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .content(question.getContent())
+                .build();
+    }
+
+    default WritingQuestionResponse toWritingQuestionResponse(Question question) {
+        return WritingQuestionResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .build();
+    }
 
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
     @Mapping(source = "options", target = "options")

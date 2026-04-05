@@ -10,6 +10,13 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelReque
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.*;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
@@ -18,9 +25,6 @@ import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
@@ -244,6 +248,40 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             }).toList();
             return partMapper.toPartResponse(part, groupResponses);
         }, Comparator.comparing(PartResponse::getName));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<SpeakingPartResponse> getSpeakingQuestionGroupsByTestIdGroupByPart(Long testId) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdWithPart(testId);
+        Map<Long, List<Question>> questionsByGroupId = attachQuestionsToGroups(questionGroups);
+
+        return HelperUtil.groupByPartAndMap(questionGroups, (part, groups) -> {
+            List<SpeakingQuestionGroupResponse> groupResponses = groups.stream().map(group -> {
+                List<Question> groupQuestions = questionsByGroupId.getOrDefault(group.getId(), Collections.emptyList());
+                List<SpeakingQuestionResponse> questionResponses = groupQuestions.stream().sorted(Comparator.comparing(Question::getPosition))
+                        .map(questionMapper::toSpeakingQuestionResponse).toList();
+                return questionGroupMapper.toSpeakingQuestionGroupResponse(group, questionResponses);
+            }).toList();
+            return partMapper.toSpeakingPartResponse(part, groupResponses);
+        }, Comparator.comparing(SpeakingPartResponse::getName));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<WritingPartResponse> getWritingQuestionGroupsByTestIdGroupByPart(Long testId) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdWithPart(testId);
+        Map<Long, List<Question>> questionsByGroupId = attachQuestionsToGroups(questionGroups);
+
+        return HelperUtil.groupByPartAndMap(questionGroups, (part, groups) -> {
+            List<WritingQuestionGroupResponse> groupResponses = groups.stream().map(group -> {
+                List<Question> groupQuestions = questionsByGroupId.getOrDefault(group.getId(), Collections.emptyList());
+                List<WritingQuestionResponse> questionResponses = groupQuestions.stream().sorted(Comparator.comparing(Question::getPosition))
+                        .map(questionMapper::toWritingQuestionResponse).toList();
+                return questionGroupMapper.toWritingQuestionGroupResponse(group, questionResponses);
+            }).toList();
+            return partMapper.toWritingPartResponse(part, groupResponses);
+        }, Comparator.comparing(WritingPartResponse::getName));
     }
 
     public Map<Long, List<Question>> attachQuestionsToGroups(List<QuestionGroup> questionGroups) {

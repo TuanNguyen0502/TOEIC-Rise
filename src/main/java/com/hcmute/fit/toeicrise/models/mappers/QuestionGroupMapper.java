@@ -7,6 +7,10 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupR
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupAnswerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -36,6 +40,26 @@ public interface QuestionGroupMapper {
                 .imageUrl(questionGroup.getImageUrl())
                 .passage(questionGroup.getPassage())
                 .transcript(questionGroup.getTranscript())
+                .position(questionGroup.getPosition())
+                .questions(questions)
+                .build();
+    }
+
+    default SpeakingQuestionGroupResponse toSpeakingQuestionGroupResponse(QuestionGroup questionGroup, List<SpeakingQuestionResponse> questions) {
+        return SpeakingQuestionGroupResponse.builder()
+                .id(questionGroup.getId())
+                .imageUrl(questionGroup.getImageUrl())
+                .passage(questionGroup.getPassage())
+                .position(questionGroup.getPosition())
+                .questions(questions)
+                .build();
+    }
+
+    default WritingQuestionGroupResponse toWritingQuestionGroupResponse(QuestionGroup questionGroup, List<WritingQuestionResponse> questions) {
+        return WritingQuestionGroupResponse.builder()
+                .id(questionGroup.getId())
+                .imageUrl(questionGroup.getImageUrl())
+                .passage(questionGroup.getPassage())
                 .position(questionGroup.getPosition())
                 .questions(questions)
                 .build();

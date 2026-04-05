@@ -11,6 +11,10 @@ import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
@@ -61,8 +65,9 @@ public class TestServiceImpl implements ITestService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
+    public PageResponse getAllTestsByType(ETestType type, String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
+        specification = specification.and(TestSpecification.typeEquals(type));
         return getTestResponses(name, status, page, size, sortBy, direction, specification);
     }
 
@@ -131,6 +136,22 @@ public class TestServiceImpl implements ITestService {
         return testMapper.toDetailResponse(test, partResponses);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public SpeakingTestDetailResponse getSpeakingTestDetailById(Long id) {
+        Test test = getTestById(id);
+        List<SpeakingPartResponse> partResponses = questionGroupService.getSpeakingQuestionGroupsByTestIdGroupByPart(id);
+        return testMapper.toSpeakingTestDetailResponse(test, partResponses);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public WritingTestDetailResponse getWritingTestDetailById(Long id) {
+        Test test = getTestById(id);
+        List<WritingPartResponse> partResponses = questionGroupService.getWritingQuestionGroupsByTestIdGroupByPart(id);
+        return testMapper.toWritingTestDetailResponse(test, partResponses);
+    }
+
     private PageResponse getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
         if (name != null && !name.trim().isEmpty())
             specification = specification.and(TestSpecification.nameContains(name));
@@ -155,7 +176,7 @@ public class TestServiceImpl implements ITestService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
 
         List<QuestionExcelRequest> questionExcelRequests = readFile(file);
-        Test test = createTest(request.getTestName(), testSet);
+        Test test = createTest(request.getTestName(), ETestType.LISTENING_AND_READING, testSet);
         processQuestions(test, questionExcelRequests);
         log.info("Test imported successfully with {} questions", questionExcelRequests.size());
     }
@@ -171,7 +192,7 @@ public class TestServiceImpl implements ITestService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
 
         List<SpeakingQuestionExcelRequest> questionExcelRequests = readSpeakingFile(file);
-        Test test = createTest(request.getTestName(), testSet);
+        Test test = createTest(request.getTestName(), ETestType.SPEAKING, testSet);
         processSpeakingQuestions(test, questionExcelRequests);
         log.info("Test imported successfully with {} questions", questionExcelRequests.size());
     }
@@ -187,16 +208,16 @@ public class TestServiceImpl implements ITestService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
 
         List<WritingQuestionExcelRequest> questionExcelRequests = readWritingFile(file);
-        Test test = createTest(request.getTestName(), testSet);
+        Test test = createTest(request.getTestName(), ETestType.WRITING, testSet);
         processWritingQuestions(test, questionExcelRequests);
         log.info("Test imported successfully with {} questions", questionExcelRequests.size());
     }
 
-    @Override
-    public Test createTest(String testName, TestSet testSet) {
+    private Test createTest(String testName, ETestType type, TestSet testSet) {
         Test test = Test.builder()
                 .name(testName)
                 .status(ETestStatus.PENDING)
+                .type(type)
                 .testSet(testSet)
                 .numberOfLearnerTests(0L).build();
         log.info("Test created successfully");
