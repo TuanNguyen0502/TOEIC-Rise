@@ -46,9 +46,9 @@ public class TestSetServiceImpl implements ITestSetService {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
         if (name != null && !name.isEmpty())
             specification = specification.and(TestSetSpecification.nameContains(name));
-        if (status == null)
-            status = ETestSetStatus.IN_USE;
-        specification = specification.and(TestSetSpecification.statusEquals(status));
+        if (status != null) {
+            specification = specification.and(TestSetSpecification.statusEquals(status));
+        }
         specification = specification.and(TestSetSpecification.typeEquals(type));
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
@@ -92,7 +92,9 @@ public class TestSetServiceImpl implements ITestSetService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
         TestSet testSet = TestSet.builder()
                 .name(testSetRequest.getTestName())
-                .status(ETestSetStatus.IN_USE).build();
+                .status(ETestSetStatus.IN_USE)
+                .type(testSetRequest.getTestSetType())
+                .build();
         testSetRepository.save(testSet);
         log.info("Test set added successfully with name {}", testSetRequest.getTestName());
     }
