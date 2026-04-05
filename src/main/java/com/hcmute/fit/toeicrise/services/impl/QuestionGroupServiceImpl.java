@@ -3,10 +3,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.HelperUtil;
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
@@ -86,6 +83,50 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
+    public SpeakingQuestionGroupResponse updateSpeakingQuestionGroup(Long questionGroupId, SWQuestionGroupUpdateRequest request) {
+        QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
+        Part part = questionGroup.getPart();
+
+        validateImageForPart(part, request.getImage(), request.getImageUrl());
+        validatePassageForPart(part, request.getPassage());
+
+        questionGroup.setImageUrl(processMediaFile(
+                request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
+        questionGroup.setPassage(request.getPassage());
+
+        questionGroupRepository.save(questionGroup);
+        log.info("Update question group successfully with ID: {}", questionGroup.getId());
+        questionService.changeTestStatusToPending(questionGroup.getTest());
+        log.info("Updated question group: {}", questionGroup.getId());
+
+        List<SpeakingQuestionResponse> questionResponses = questionGroup.getQuestions().stream()
+                .map(questionMapper::toSpeakingQuestionResponse).toList();
+        return questionGroupMapper.toSpeakingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questionResponses);
+    }
+
+    @Override
+    public WritingQuestionGroupResponse updateWritingQuestionGroup(Long questionGroupId, SWQuestionGroupUpdateRequest request) {
+        QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
+        Part part = questionGroup.getPart();
+
+        validateImageForPart(part, request.getImage(), request.getImageUrl());
+        validatePassageForPart(part, request.getPassage());
+
+        questionGroup.setImageUrl(processMediaFile(
+                request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
+        questionGroup.setPassage(request.getPassage());
+
+        questionGroupRepository.save(questionGroup);
+        log.info("Update question group successfully with ID: {}", questionGroup.getId());
+        questionService.changeTestStatusToPending(questionGroup.getTest());
+        log.info("Updated question group: {}", questionGroup.getId());
+
+        List<WritingQuestionResponse> questionResponses = questionGroup.getQuestions().stream()
+                .map(questionMapper::toWritingQuestionResponse).toList();
+        return questionGroupMapper.toWritingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questionResponses);
+    }
+
+    @Override
     @Transactional
     public void updateQuestionGroupWithEntity(QuestionGroup questionGroup, QuestionGroupUpdateRequest request) {
         Part part = questionGroup.getPart();
@@ -110,6 +151,18 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     public QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId) {
         List<QuestionResponse> questions = questionService.getQuestionsByQuestionGroupId(questionGroupId);
         return questionGroupMapper.toResponse(getQuestionGroupEntity(questionGroupId), questions);
+    }
+
+    @Override
+    public SpeakingQuestionGroupResponse getSpeakingQuestionGroupResponse(Long questionGroupId) {
+        List<SpeakingQuestionResponse> questions = questionService.getSpeakingQuestionsByQuestionGroupId(questionGroupId);
+        return questionGroupMapper.toSpeakingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questions);
+    }
+
+    @Override
+    public WritingQuestionGroupResponse getWritingQuestionGroupResponse(Long questionGroupId) {
+        List<WritingQuestionResponse> questions = questionService.getWritingQuestionsByQuestionGroupId(questionGroupId);
+        return questionGroupMapper.toWritingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questions);
     }
 
     @Override

@@ -24,6 +24,7 @@ public class MessageConstant {
     public static final String QUESTION_GROUP_IMAGE_URL_INVALID = "Question group image URL is invalid.";
     public static final String QUESTION_GROUP_AUDIO_URL_FORMAT_INVALID = "Question group audio URL format is invalid.";
     public static final String QUESTION_GROUP_IMAGE_URL_FORMAT_INVALID = "Question group image URL format is invalid.";
+    public static final String QUESTION_GROUP_PASSAGE_NOT_BLANK = "Question group passage must not be blank.";
     // System Prompt related messages
     public static final String SYSTEM_PROMPT_CONTENT_NOT_BLANK = "Content must not be blank";
     public static final String SYSTEM_PROMPT_CONTENT_INVALID = "Content must be at least 20 characters and can only contain letters, digits, spaces, and allowed punctuation (!#%&*()[]_+;:'\",.<>?/{}-\\n\\r–).";

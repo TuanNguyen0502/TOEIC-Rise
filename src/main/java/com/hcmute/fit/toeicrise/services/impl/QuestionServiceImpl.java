@@ -1,13 +1,12 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.QuestionGroupSupportResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.TaggedQuestionDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.tag.TagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -50,6 +49,26 @@ public class QuestionServiceImpl implements IQuestionService {
                 .toList();
     }
 
+    @Override
+    public List<SpeakingQuestionResponse> getSpeakingQuestionsByQuestionGroupId(Long questionGroupId) {
+        if (questionGroupId == null)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+        return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
+                .stream()
+                .map(questionMapper::toSpeakingQuestionResponse)
+                .toList();
+    }
+
+    @Override
+    public List<WritingQuestionResponse> getWritingQuestionsByQuestionGroupId(Long questionGroupId) {
+        if (questionGroupId == null)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
+        return questionRepository.findAllByQuestionGroup_Id(questionGroupId)
+                .stream()
+                .map(questionMapper::toWritingQuestionResponse)
+                .toList();
+    }
+
     @Transactional
     @Override
     public void updateQuestion(QuestionRequest questionRequest) {
@@ -60,11 +79,30 @@ public class QuestionServiceImpl implements IQuestionService {
         updateQuestionWithEntity(question, questionRequest);
     }
 
+    @Transactional
+    @Override
+    public void updateSpeakingQuestion(SpeakingQuestionUpdateRequest request) {
+        Question question = questionRepository.findById(request.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+        question.setContent(request.getContent());
+        questionRepository.save(question);
+        log.info("Question updated successfully with id: {}", question.getId());
+
+        changeTestStatusToPending(question.getQuestionGroup().getTest());
+    }
+
     @Override
     public QuestionResponse getQuestionResponseById(Long questionId) {
         if (questionId == null)
             throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
         return questionMapper.toQuestionResponse(findById(questionId));
+    }
+
+    @Override
+    public SpeakingQuestionResponse getSpeakingQuestionResponseById(Long questionId) {
+        if (questionId == null)
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Question");
+        return questionMapper.toSpeakingQuestionResponse(findById(questionId));
     }
 
     @Override

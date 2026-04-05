@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("learnerTestSetController")
-@RequestMapping("/test-sets")
+@RestController("learnerWritingTestSetController")
+@RequestMapping("/writing-test-sets")
 @RequiredArgsConstructor
-public class TestSetController {
+public class WritingTestSetController {
     private final ITestSetService testSetService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllTestSets() {
-        return ResponseEntity.ok(testSetService.getAllTestSetsByType(ETestSetType.LISTENING_AND_READING));
+        return ResponseEntity.ok(testSetService.getAllTestSetsByType(ETestSetType.WRITING));
     }
 }

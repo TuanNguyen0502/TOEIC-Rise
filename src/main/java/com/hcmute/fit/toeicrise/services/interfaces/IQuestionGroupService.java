@@ -1,13 +1,12 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -36,9 +35,17 @@ public interface IQuestionGroupService {
 
     QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest request);
 
+    SpeakingQuestionGroupResponse updateSpeakingQuestionGroup(Long questionGroupId, SWQuestionGroupUpdateRequest request);
+
+    WritingQuestionGroupResponse updateWritingQuestionGroup(Long questionGroupId, SWQuestionGroupUpdateRequest request);
+
     void updateQuestionGroupWithEntity(QuestionGroup questionGroup, QuestionGroupUpdateRequest questionGroupUpdateRequest);
 
     QuestionGroupResponse getQuestionGroupResponse(Long questionGroupId);
+
+    SpeakingQuestionGroupResponse getSpeakingQuestionGroupResponse(Long questionGroupId);
+
+    WritingQuestionGroupResponse getWritingQuestionGroupResponse(Long questionGroupId);
 
     QuestionGroup getQuestionGroupEntity(Long questionGroupId);
 

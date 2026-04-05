@@ -62,8 +62,8 @@ public class TestSetServiceImpl implements ITestSetService {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "testSets", key = "'IN_USE'", unless = "#result.isEmpty()")
-    public List<TestSetResponse> getAllTestSets() {
-        return testSetRepository.getAllByStatus(ETestSetStatus.IN_USE).stream().map(testSetMapper::toTestSetResponse).toList();
+    public List<TestSetResponse> getAllTestSetsByType(ETestSetType type) {
+        return testSetRepository.getAllByStatus(ETestSetStatus.IN_USE, type).stream().map(testSetMapper::toTestSetResponse).toList();
     }
 
     @Override

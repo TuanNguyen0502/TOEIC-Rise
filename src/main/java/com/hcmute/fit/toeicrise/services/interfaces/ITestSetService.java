@@ -15,7 +15,7 @@ import java.util.List;
 public interface ITestSetService {
     PageResponse getAllTestSetsByType(ETestSetType type, String name, ETestSetStatus status, int page, int size, String sortBy, String direction);
 
-    List<TestSetResponse> getAllTestSets();
+    List<TestSetResponse> getAllTestSetsByType(ETestSetType type);
 
     TestSetDetailResponse getTestSetDetailById(Long testSetId, String name, ETestStatus status, int page, int size,
                                                String sortBy, String direction);

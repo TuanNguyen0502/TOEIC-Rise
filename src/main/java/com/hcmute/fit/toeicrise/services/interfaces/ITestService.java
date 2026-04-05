@@ -57,7 +57,7 @@ public interface ITestService {
 
     void processQuestionGroup(Test test, List<QuestionExcelRequest> groupQuestions);
 
-    PageResponse searchTestsByName(PageRequest request);
+    PageResponse searchTestsByTypeAndName(ETestType type, PageRequest request);
 
     LearnerTestDetailResponse getLearnerTestDetailById(Long id);
 

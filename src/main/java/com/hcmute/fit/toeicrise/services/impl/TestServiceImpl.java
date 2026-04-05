@@ -437,9 +437,10 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public PageResponse searchTestsByName(com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest request) {
+    public PageResponse searchTestsByTypeAndName(ETestType type, com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest request) {
         Specification<Test> testSpecification = (_, _, cb) -> cb.conjunction();
         testSpecification = testSpecification.and(TestSpecification.testSetIdsIn(request.getSort()));
+        testSpecification = testSpecification.and(TestSpecification.typeEquals(type));
 
         if (request.getName() != null && !request.getName().isEmpty())
             testSpecification = testSpecification.and(TestSpecification.nameContains(request.getName()));
