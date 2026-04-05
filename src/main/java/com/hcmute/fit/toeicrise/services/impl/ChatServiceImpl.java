@@ -52,6 +52,7 @@ public class ChatServiceImpl implements IChatService {
     private final QAndASystemPromptServiceImpl qAndASystemPromptService;
     private final ExplanationGenerationSystemPromptServiceImpl explanationGenerationSystemPromptService;
     private final SentenceAssessmentSystemPromptServiceImpl sentenceAssessmentSystemPromptService;
+    private final BlogSummarizationSystemPromptServiceImpl blogSummarizationSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -422,6 +423,37 @@ public class ChatServiceImpl implements IChatService {
         });
     }
 
+    @Override
+    public Flux<ChatbotResponse> generateBlogPostSummary(BlogPostSummaryRequest request) {
+        return Flux.defer(() -> {
+            ChatClient cleanClient = chatClientBuilder.build();
+            // Toàn bộ logic tạo prompt nằm bên trong này để đảm bảo tính Lazy
+            String conversationId = UUID.randomUUID().toString();
+            String messageId = UUID.randomUUID().toString();
+
+            String userPrompt = """
+                    ### DỮ LIỆU ĐẦU VÀO:\s
+                    1. Title: %s\s
+                    2. Content: %s\s
+                    """.formatted(
+                    request.getTitle(),
+                    request.getContent()
+            );
+
+            return cleanClient.prompt()
+                    .user(userPrompt)
+                    .system(getBlogSummarizationSystemPrompt())
+                    .stream()
+                    .content()
+                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                            contentText,
+                            messageId,
+                            conversationId,
+                            MessageType.ASSISTANT.name()
+                    ));
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
     private String getActiveChatbotSystemPrompt() {
         SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
@@ -439,6 +471,11 @@ public class ChatServiceImpl implements IChatService {
 
     private String getSentenceAssessmentSystemPrompt() {
         SystemPromptDetailResponse response = sentenceAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getBlogSummarizationSystemPrompt() {
+        SystemPromptDetailResponse response = blogSummarizationSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 

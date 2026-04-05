@@ -1,0 +1,72 @@
+package com.hcmute.fit.toeicrise.controllers.staff;
+
+import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageDeleteRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostImageRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
+import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
+import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController("staffBlogPostController")
+@RequestMapping("/staff/blog-posts")
+@RequiredArgsConstructor
+public class BlogPostController {
+    private final IBlogPostService blogPostService;
+
+    @GetMapping("/categories/{category-slug}")
+    public ResponseEntity<PageResponse> getBlogPostsByCategoryForStaff(@PathVariable("category-slug") String categorySlug,
+                                                                       @RequestParam(required = false) String title,
+                                                                       @RequestParam(required = false) String slug,
+                                                                       @RequestParam(required = false) EBlogPostStatus status,
+                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "10") int size,
+                                                                       @RequestParam(defaultValue = "updatedAt") String sortBy,
+                                                                       @RequestParam(defaultValue = "DESC") String direction) {
+        return ResponseEntity.ok(blogPostService.getBlogPostsByCategory(categorySlug, title, slug, status, page, size, sortBy, direction));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BlogPostDetailForStaffResponse> getBlogPostDetailForStaff(@PathVariable Long id) {
+        return ResponseEntity.ok(blogPostService.getBlogPostDetailForStaff(id));
+    }
+
+    @PostMapping(value = "/{category-slug}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createBlogPost(@PathVariable("category-slug") String categorySlug, @Valid @ModelAttribute BlogPostCreateRequest request) {
+        String email = SecurityUtils.getCurrentUser();
+        blogPostService.createBlogPost(email, categorySlug, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadImage(@Valid @ModelAttribute BlogPostImageRequest request) {
+        return ResponseEntity.ok(blogPostService.uploadImage(request));
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateBlogPost(@PathVariable Long id, @Valid @ModelAttribute BlogPostUpdateRequest request) {
+        String email = SecurityUtils.getCurrentUser();
+        blogPostService.updateBlogPost(email, id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> changeBlogPostStatus(@PathVariable Long id, @RequestParam EBlogPostStatus status) {
+        String email = SecurityUtils.getCurrentUser();
+        blogPostService.changeStatus(email, id, status);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/delete-image")
+    public ResponseEntity<?> deleteImage(@Valid @RequestBody BlogPostImageDeleteRequest request) {
+        blogPostService.deleteImage(request);
+        return ResponseEntity.ok().build();
+    }
+}
