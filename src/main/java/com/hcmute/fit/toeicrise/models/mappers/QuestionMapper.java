@@ -7,6 +7,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelReque
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.RedoWrongQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
@@ -103,5 +105,20 @@ public interface QuestionMapper {
         LearnerTestQuestionGroupWithoutTranscriptResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupWithoutTranscriptResponse(questionGroup);
         groupResponse.setQuestions(new ArrayList<>(questionResponses));
         return groupResponse;
+    }
+
+    default LearnerSpeakingQuestionDetailResponse toLearnerSpeakingQuestionDetailResponse(Question question) {
+        return LearnerSpeakingQuestionDetailResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .content(question.getContent())
+                .build();
+    }
+
+    default LearnerWritingQuestionDetailResponse toLearnerWritingQuestionDetailResponse(Question question) {
+        return LearnerWritingQuestionDetailResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .build();
     }
 }

@@ -4,6 +4,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingTestDetailResponse;
@@ -68,4 +70,8 @@ public interface ITestService {
     void incrementNumberOfLearnersSubmit(Test test);
 
     Test getTestByIdAndStatus(Long testId, ETestStatus status);
+
+    LearnerSpeakingTestDetailResponse getSpeakingTestDetailResponseForExam(Long testId, List<Long> parts);
+
+    LearnerWritingTestDetailResponse getWritingTestDetailResponseForExam(Long testId, List<Long> parts);
 }

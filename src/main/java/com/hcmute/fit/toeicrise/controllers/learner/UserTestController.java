@@ -2,8 +2,11 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import java.util.Map;
 @RequestMapping("/learner/user-tests")
 @RequiredArgsConstructor
 public class UserTestController {
+    private final ITestService testService;
     private final IUserTestService userTestService;
 
     @GetMapping("/{userTestId}")
@@ -44,9 +48,19 @@ public class UserTestController {
         return ResponseEntity.ok(userTestService.allLearnerTestHistories(id, SecurityUtils.getCurrentUser()));
     }
 
-    @GetMapping( "/exam/{id}")
+    @GetMapping("/exam/{id}")
     public ResponseEntity<?> getTestByParts(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
         return ResponseEntity.ok(userTestService.getTestByIdAndParts(id, parts));
+    }
+
+    @GetMapping("/speaking-exam/{id}")
+    public ResponseEntity<LearnerSpeakingTestDetailResponse> getSpeakingExamTestById(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
+        return ResponseEntity.ok(testService.getSpeakingTestDetailResponseForExam(id, parts));
+    }
+
+    @GetMapping("/writing-exam/{id}")
+    public ResponseEntity<LearnerWritingTestDetailResponse> getWritingExamTestById(@PathVariable Long id, @RequestParam("parts") List<Long> parts) {
+        return ResponseEntity.ok(testService.getWritingTestDetailResponseForExam(id, parts));
     }
 
     @GetMapping("/detail/{userTestId}")

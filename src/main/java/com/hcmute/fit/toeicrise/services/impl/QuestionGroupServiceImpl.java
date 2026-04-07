@@ -7,6 +7,12 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionGroupDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionGroupDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.*;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
@@ -284,6 +290,56 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
             partResponse.setQuestionGroups(new ArrayList<>(groupResponses));
             return partResponse;
         }, Comparator.comparing(LearnerTestPartResponse::getPartName));
+    }
+
+    @Override
+    public List<LearnerSpeakingPartDetailResponse> getLearnerSpeakingPartsByTestIdGroupByParts(Long testId, List<Long> partIds) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, partIds);
+        return questionGroups.stream()
+                .collect(Collectors.groupingBy(QuestionGroup::getPart))
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(e -> EPart.getEPart(e.getKey().getName())))
+                .map(entry -> {
+                    Part part = entry.getKey();
+                    List<LearnerSpeakingQuestionGroupDetailResponse> groupDetails = entry.getValue().stream()
+                            .sorted(Comparator.comparing(QuestionGroup::getPosition))
+                            .map(group -> {
+                                List<LearnerSpeakingQuestionDetailResponse> questionDetails = group.getQuestions().stream()
+                                        .sorted(Comparator.comparing(Question::getPosition))
+                                        .map(questionMapper::toLearnerSpeakingQuestionDetailResponse)
+                                        .toList();
+                                return questionGroupMapper.toLearnerSpeakingQuestionGroupDetailResponse(group, questionDetails);
+                            })
+                            .toList();
+                    return partMapper.toLearnerSpeakingPartDetailResponse(part, groupDetails);
+                })
+                .toList();
+    }
+
+    @Override
+    public List<LearnerWritingPartDetailResponse> getLearnerWritingPartsByTestIdGroupByParts(Long testId, List<Long> partIds) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, partIds);
+        return questionGroups.stream()
+                .collect(Collectors.groupingBy(QuestionGroup::getPart))
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(e -> EPart.getEPart(e.getKey().getName())))
+                .map(entry -> {
+                    Part part = entry.getKey();
+                    List<LearnerWritingQuestionGroupDetailResponse> groupDetails = entry.getValue().stream()
+                            .sorted(Comparator.comparing(QuestionGroup::getPosition))
+                            .map(group -> {
+                                List<LearnerWritingQuestionDetailResponse> questionDetails = group.getQuestions().stream()
+                                        .sorted(Comparator.comparing(Question::getPosition))
+                                        .map(questionMapper::toLearnerWritingQuestionDetailResponse)
+                                        .toList();
+                                return questionGroupMapper.toLearnerWritingQuestionGroupDetailResponse(group, questionDetails);
+                            })
+                            .toList();
+                    return partMapper.toLearnerWritingPartDetailResponse(part, groupDetails);
+                })
+                .toList();
     }
 
     @Transactional(readOnly = true)

@@ -6,6 +6,10 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequ
 import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
@@ -176,6 +180,22 @@ public interface TestMapper {
                 .status(test.getStatus())
                 .createdAt(test.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
                 .updatedAt(test.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .partResponses(partResponses)
+                .build();
+    }
+
+    default LearnerSpeakingTestDetailResponse toLearnerSpeakingTestDetailResponse(Test test, List<LearnerSpeakingPartDetailResponse> partResponses) {
+        return LearnerSpeakingTestDetailResponse.builder()
+                .id(test.getId())
+                .testName(test.getName())
+                .partResponses(partResponses)
+                .build();
+    }
+
+    default LearnerWritingTestDetailResponse toLearnerWritingTestDetailResponse(Test test, List<LearnerWritingPartDetailResponse> partResponses) {
+        return LearnerWritingTestDetailResponse.builder()
+                .id(test.getId())
+                .testName(test.getName())
                 .partResponses(partResponses)
                 .build();
     }

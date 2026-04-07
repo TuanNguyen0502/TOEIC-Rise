@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.*;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
@@ -18,6 +20,10 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IQuestionGroupService {
+    List<LearnerSpeakingPartDetailResponse> getLearnerSpeakingPartsByTestIdGroupByParts(Long testId, List<Long> partIds);
+
+    List<LearnerWritingPartDetailResponse> getLearnerWritingPartsByTestIdGroupByParts(Long testId, List<Long> partIds);
+
     @Transactional(readOnly = true)
     List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId);
 

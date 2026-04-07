@@ -1,5 +1,9 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionGroupDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionGroupDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerPartResponse;
@@ -58,5 +62,23 @@ public interface PartMapper {
                 .name(part.getName())
                 .questionGroups(questionGroupResponses)
                 .build();
+    }
+
+    default LearnerSpeakingPartDetailResponse toLearnerSpeakingPartDetailResponse(Part part, List<LearnerSpeakingQuestionGroupDetailResponse> questionGroupResponses) {
+        return LearnerSpeakingPartDetailResponse.builder()
+                .id(part.getId())
+                .partName(part.getName())
+                .questionGroupResponses(questionGroupResponses)
+                .build();
+
+    }
+
+    default LearnerWritingPartDetailResponse toLearnerWritingPartDetailResponse(Part part, List<LearnerWritingQuestionGroupDetailResponse> questionGroupResponses) {
+        return LearnerWritingPartDetailResponse.builder()
+                .id(part.getId())
+                .partName(part.getName())
+                .questionGroupResponses(questionGroupResponses)
+                .build();
+
     }
 }

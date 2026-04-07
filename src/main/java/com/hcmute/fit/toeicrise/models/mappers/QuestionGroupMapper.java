@@ -5,6 +5,10 @@ import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequ
 import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionGroupDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionGroupDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupAnswerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
@@ -95,5 +99,25 @@ public interface QuestionGroupMapper {
         questionGroup.setPosition(excelRequest.getNumberOfQuestions());
         questionGroup.setPassage(excelRequest.getPassageText());
         return questionGroup;
+    }
+
+    default LearnerSpeakingQuestionGroupDetailResponse toLearnerSpeakingQuestionGroupDetailResponse(QuestionGroup questionGroup, List<LearnerSpeakingQuestionDetailResponse> questions) {
+        return LearnerSpeakingQuestionGroupDetailResponse.builder()
+                .id(questionGroup.getId())
+                .passage(questionGroup.getPassage())
+                .imageUrl(questionGroup.getImageUrl())
+                .position(questionGroup.getPosition())
+                .questionDetailResponses(questions)
+                .build();
+    }
+
+    default LearnerWritingQuestionGroupDetailResponse toLearnerWritingQuestionGroupDetailResponse(QuestionGroup questionGroup, List<LearnerWritingQuestionDetailResponse> questions) {
+        return LearnerWritingQuestionGroupDetailResponse.builder()
+                .id(questionGroup.getId())
+                .passage(questionGroup.getPassage())
+                .imageUrl(questionGroup.getImageUrl())
+                .position(questionGroup.getPosition())
+                .questionDetailResponses(questions)
+                .build();
     }
 }
