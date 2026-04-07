@@ -75,7 +75,6 @@ public class ChatbotController {
             @RequestParam Long partId) {
 
         List<DictationGenerationResponse> result = chatService.generateDictation(testId, partId);
-
         return ResponseEntity.ok(result);
     }
 }

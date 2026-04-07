@@ -38,5 +38,13 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
             "WHERE qg.id IN :ids")
     List<QuestionGroup> findAllByIdWithPart(@Param("ids") Set<Long> ids);
 
-    int countByIdIn(List<Long> questionGroupIds);
+    @Query("SELECT DISTINCT qg " +
+            "FROM QuestionGroup qg " +
+            "INNER JOIN FETCH qg.part p " +
+            "LEFT JOIN FETCH qg.questions q " +
+            "LEFT JOIN FETCH qg.dictationTranscript dt " +
+            "WHERE qg.test.id = :testId AND p.id = :partId " +
+            "ORDER BY qg.position ASC, q.position ASC")
+    List<QuestionGroup> findListeningDictationData(@Param("testId") Long testId, @Param("partId") Long partId);
+
 }

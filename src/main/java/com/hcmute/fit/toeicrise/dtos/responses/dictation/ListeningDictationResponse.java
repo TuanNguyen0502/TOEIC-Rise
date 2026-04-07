@@ -1,10 +1,10 @@
 package com.hcmute.fit.toeicrise.dtos.responses.dictation;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
@@ -12,10 +12,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictationGenerationResponse {
-    private Long questionGroupId;
-    private String transcript;
-    private String questionText;
-    private List<String> options;
-    private String passageText;
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+public class ListeningDictationResponse {
+     String partName;
+     List<QuestionGroupDictationResponse> questionGroups;
 }

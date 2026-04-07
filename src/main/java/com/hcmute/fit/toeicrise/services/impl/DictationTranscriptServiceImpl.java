@@ -1,11 +1,14 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.ListeningDictationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.QuestionGroupDictationResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.DictationTranscript;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.DictationTranscriptMapper;
+import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.DictationTranscriptRepository;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IDictationTranscriptService;
@@ -26,6 +29,7 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
     DictationTranscriptRepository dictationTranscriptRepository;
     DictationTranscriptMapper dictationTranscriptMapper;
     QuestionGroupRepository questionGroupRepository;
+    QuestionMapper questionMapper;
 
     @Override
     @Transactional
@@ -63,5 +67,44 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
                 .toList();
 
         dictationTranscriptRepository.saveAll(newTranscripts);
+    }
+
+    @Override
+    public ListeningDictationResponse getListeningDictationByTestIdAndPartId(Long testId, Long partId) {
+        List <QuestionGroup> groups = questionGroupRepository.findListeningDictationData(testId, partId);
+
+        if(groups.isEmpty()) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Listening dictation data");
+        }
+
+        String partName = groups.getFirst().getPart().getName();
+        List<QuestionGroupDictationResponse> groupResponses = groups.stream()
+                .filter(g -> g.getDictationTranscript() != null)
+                .map(g -> {
+                    DictationTranscript dt = g.getDictationTranscript();
+
+                    return QuestionGroupDictationResponse.builder()
+                            .id(g.getId())
+                            .audioUrl(g.getAudioUrl())
+                            .imageUrl(g.getImageUrl())
+                            .passage(g.getPassage())
+                            .transcript(g.getTranscript())
+                            .position(g.getPosition())
+
+                            .questionText(dt.getQuestionText())
+                            .options(dt.getOptions())
+                            .passageText(dt.getPassageText())
+
+                            .questions(g.getQuestions().stream()
+                                    .map(questionMapper::toQuestionResponse)
+                                    .toList())
+                            .build();
+                })
+                .toList();
+
+        return ListeningDictationResponse.builder()
+                .partName(partName)
+                .questionGroups(groupResponses)
+                .build();
     }
 }
