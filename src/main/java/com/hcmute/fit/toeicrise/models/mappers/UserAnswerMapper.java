@@ -22,6 +22,7 @@ public interface UserAnswerMapper {
                 .position(question.getPosition())
                 .correctAnswer(question.getCorrectOption())
                 .userAnswer(userAnswer.getAnswer())
+                .userAnswerText(userAnswer.getAnswerText())
                 .build();
     }
 
@@ -49,6 +50,8 @@ public interface UserAnswerMapper {
                 .userAnswerId(userAnswer.getId())
                 .questionId(question.getId())
                 .userAnswer(userAnswer.getAnswer())
+                .userAnswerText(userAnswer.getAnswerText())
+                .feedback(userAnswer.getFeedback())
                 .position(question.getPosition())
                 .tags(question.getTags().stream().map(Tag::getName).toList())
                 .audioUrl(questionGroup.getAudioUrl())
@@ -72,6 +75,8 @@ public interface UserAnswerMapper {
                 .correctOption(userAnswer.getQuestion().getCorrectOption())
                 .explanation(userAnswer.getQuestion().getExplanation())
                 .userAnswer(userAnswer.getAnswer())
+                .userAnswerText(userAnswer.getAnswerText())
+                .feedback(userAnswer.getFeedback())
                 .correctOption(userAnswer.getQuestion().getCorrectOption())
                 .isCorrect(userAnswer.getIsCorrect())
                 .build();

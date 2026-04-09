@@ -10,4 +10,5 @@ public class UserAnswerOverallResponse {
     private int position;
     private String correctAnswer;
     private String userAnswer;
+    private String userAnswerText;
 }
