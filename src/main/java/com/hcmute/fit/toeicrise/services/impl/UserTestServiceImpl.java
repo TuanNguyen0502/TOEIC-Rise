@@ -50,6 +50,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 @Slf4j
 public class UserTestServiceImpl implements IUserTestService {
+    private static final int MAX_FULL_TEST_RESULT_SIZE = 10;
     private final IQuestionService questionService;
     private final IQuestionGroupService questionGroupService;
     private final ITestService testService;
@@ -62,10 +63,8 @@ public class UserTestServiceImpl implements IUserTestService {
     private final QuestionGroupMapper questionGroupMapper;
     private final PageResponseMapper pageResponseMapper;
     private final QuestionMapper questionMapper;
-
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
     private final Map<Integer, Integer> estimatedListeningScoreMap = Constant.estimatedListeningScoreMap;
-    private static final int MAX_FULL_TEST_RESULT_SIZE = 10;
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
@@ -182,7 +181,7 @@ public class UserTestServiceImpl implements IUserTestService {
                             listening.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of()),
                             reading.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of())))
                     .build();
-        int numberOfTests = (int)userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
+        int numberOfTests = (int) userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
@@ -195,7 +194,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 .collect(Collectors.toSet());
         Map<Long, Question> questionMapWithTags = questionIds.isEmpty() ? new HashMap<>() :
                 questionService.findAllQuestionByIdWithTags(questionIds).stream()
-                        .collect(Collectors.toMap(Question::getId, q -> q));
+                .collect(Collectors.toMap(Question::getId, q -> q));
         userTests.forEach(ut -> {
             if (ut.getUserAnswers() != null) {
                 ut.getUserAnswers().forEach(userAnswer -> {
@@ -236,7 +235,7 @@ public class UserTestServiceImpl implements IUserTestService {
             correctAnswersListening += ut.getListeningCorrectAnswers() != null ? ut.getListeningCorrectAnswers() : 0;
             totalQuestionsReading += ut.getTotalReadingQuestions() != null ? ut.getTotalReadingQuestions() : 0;
             correctAnswersReading += ut.getReadingCorrectAnswers() != null ? ut.getReadingCorrectAnswers() : 0;
-            
+
             List<UserAnswer> userAnswers = ut.getUserAnswers();
             if (userAnswers == null || userAnswers.isEmpty()) continue;
 
@@ -311,7 +310,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public FullTestResultResponse getFullTestResult(String email, int size) {
-        int limit = Math.min(Math.max(size, 1), MAX_FULL_TEST_RESULT_SIZE);
+        int limit = Math.clamp(size, 1, MAX_FULL_TEST_RESULT_SIZE);
         Pageable pageable = PageRequest.of(0, limit);
         List<UserTest> userTests = userTestRepository.findByUser_Account_EmailAndTest_StatusAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, pageable, ETestStatus.APPROVED);
         List<ExamTypeFullTestResponse> examTypeFullTestResponses = new ArrayList<>();
@@ -409,7 +408,7 @@ public class UserTestServiceImpl implements IUserTestService {
         UserTest userTest = userTestRepository.findUserTestByIdWithWrongAnswer(userTestId, email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
         LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(userTest.getTest());
 
-        if (userTest.getUserAnswers() == null|| userTest.getUserAnswers().isEmpty())
+        if (userTest.getUserAnswers() == null || userTest.getUserAnswers().isEmpty())
             learnerTestPartsResponse.setPartResponses(Collections.emptyList());
         else {
             Map<Part, List<UserAnswer>> answersByPart = groupWrongAnswersByPart(userTest.getUserAnswers());
@@ -446,7 +445,7 @@ public class UserTestServiceImpl implements IUserTestService {
     public RetestResultOverallResponse getResultAfterSubmitWrongAnswer(Long userTestId, String email, UserTestRequest request) {
         UserTest userTest = userTestRepository.findUserTestByIdWithWrongAnswer(userTestId, email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
 
-        if (request == null||request.getAnswers() == null)
+        if (request == null || request.getAnswers() == null)
             throw new AppException(ErrorCode.INVALID_REQUEST);
         List<UserAnswerRequest> answers = request.getAnswers();
         Set<Long> questionIds = answers.stream().map(UserAnswerRequest::getQuestionId).collect(Collectors.toSet());
@@ -521,7 +520,7 @@ public class UserTestServiceImpl implements IUserTestService {
         UserTest userTest = userTestRepository.findUserTestByIdWithWrongAnswer(userTestId, email).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User test"));
         LearnerTestPartsResponse learnerTestPartsResponse = testMapper.toLearnerTestPartsResponse(userTest.getTest());
 
-        if (userTest.getUserAnswers() == null|| userTest.getUserAnswers().isEmpty())
+        if (userTest.getUserAnswers() == null || userTest.getUserAnswers().isEmpty())
             learnerTestPartsResponse.setPartResponses(Collections.emptyList());
         else {
             Map<Part, List<UserAnswer>> answersByPart = groupWrongAnswersByPart(userTest.getUserAnswers());
@@ -577,7 +576,7 @@ public class UserTestServiceImpl implements IUserTestService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test Result");
     }
 
-    private Map<String, List<UserAnswerGroupedByTagResponse>> groupUserAnswersByPartAndTag(UserTest userTest){
+    private Map<String, List<UserAnswerGroupedByTagResponse>> groupUserAnswersByPartAndTag(UserTest userTest) {
         List<UserAnswer> userAnswers = userTest.getUserAnswers();
         if (userAnswers == null || userAnswers.isEmpty())
             return Collections.emptyMap();
@@ -591,15 +590,15 @@ public class UserTestServiceImpl implements IUserTestService {
             if (partName == null)
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Part name invalid");
             return partName;
-            }, Collectors.collectingAndThen(Collectors.toList(), this::groupByTag))));
+        }, Collectors.collectingAndThen(Collectors.toList(), this::groupByTag))));
     }
 
-    private List<UserAnswerGroupedByTagResponse> groupByTag(List<UserAnswer> answersInPart){
+    private List<UserAnswerGroupedByTagResponse> groupByTag(List<UserAnswer> answersInPart) {
         if (answersInPart == null || answersInPart.isEmpty())
             return List.of();
 
         Map<String, List<UserAnswer>> answersByTag = answersInPart.stream().flatMap(ua -> {
-            if (ua.getQuestion() == null||ua.getQuestion().getTags() == null)
+            if (ua.getQuestion() == null || ua.getQuestion().getTags() == null)
                 return Stream.empty();
             return ua.getQuestion().getTags().stream().map(tag -> Map.entry(tag.getName(), ua));
         }).collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, toList())));
@@ -630,7 +629,7 @@ public class UserTestServiceImpl implements IUserTestService {
         return groupedByTag;
     }
 
-    private void calculate(UserTest userTest, List<UserAnswerRequest> answerRequests){
+    private void calculate(UserTest userTest, List<UserAnswerRequest> answerRequests) {
         boolean isExamMode = userTest.getParts() == null || userTest.getParts().isEmpty();
         ScoreAccumulator accumulator = new ScoreAccumulator();
 
@@ -641,7 +640,7 @@ public class UserTestServiceImpl implements IUserTestService {
             Map<Long, QuestionGroup> groupMap = questionGroupService.findAllByIdsWithQuestions(questionGroupIds).stream()
                     .collect(Collectors.toMap(QuestionGroup::getId, g -> g));
 
-            for (Map.Entry<Long, List<UserAnswerRequest>> e : groupedByGroupId.entrySet()){
+            for (Map.Entry<Long, List<UserAnswerRequest>> e : groupedByGroupId.entrySet()) {
                 QuestionGroup questionGroup = groupMap.get(e.getKey());
                 if (questionGroup == null)
                     throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
@@ -652,7 +651,7 @@ public class UserTestServiceImpl implements IUserTestService {
                     Question question = questionMap.get(userAnswerRequest.getQuestionId());
                     if (question == null)
                         throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-                    calculatorScore(userAnswerRequest,question, accumulator, isListening, userTest);
+                    calculatorScore(userAnswerRequest, question, accumulator, isListening, userTest);
                 }
             }
             int listenScore = estimatedListeningScoreMap.getOrDefault(accumulator.getListeningCorrectAnswers(), 0);
@@ -660,8 +659,7 @@ public class UserTestServiceImpl implements IUserTestService {
             userTest.setListeningScore(listenScore);
             userTest.setReadingScore(readingScore);
             userTest.setTotalScore(listenScore + readingScore);
-        }
-        else {
+        } else {
             List<Long> questionIds = answerRequests.stream().map(UserAnswerRequest::getQuestionId).distinct().toList();
             Map<Long, Question> questionMap = questionService.getQuestionEntitiesByIds(questionIds).stream()
                     .collect(Collectors.toMap(Question::getId, q -> q));
@@ -683,9 +681,9 @@ public class UserTestServiceImpl implements IUserTestService {
     }
 
     private void calculatorScore(UserAnswerRequest userAnswerRequest, Question question, ScoreAccumulator accumulator,
-                                 boolean isListening, UserTest userTest){
+                                 boolean isListening, UserTest userTest) {
         boolean correct = userAnswerRequest.getAnswer() != null && userAnswerRequest.getAnswer().equals(question.getCorrectOption());
-        if (correct){
+        if (correct) {
             accumulator.setCorrectAnswers(accumulator.getCorrectAnswers() + 1);
             if (isListening)
                 accumulator.setListeningCorrectAnswers(accumulator.getListeningCorrectAnswers() + 1);
@@ -707,10 +705,10 @@ public class UserTestServiceImpl implements IUserTestService {
                 .build());
     }
 
-    private Map<Part, List<UserAnswer>> groupWrongAnswersByPart(List<UserAnswer> userAnswers){
+    private Map<Part, List<UserAnswer>> groupWrongAnswersByPart(List<UserAnswer> userAnswers) {
         return userAnswers.stream()
                 .filter(userAnswer -> userAnswer.getQuestion() != null && userAnswer.getQuestion().getQuestionGroup() != null
-                && userAnswer.getQuestion().getQuestionGroup().getPart() != null)
+                        && userAnswer.getQuestion().getQuestionGroup().getPart() != null)
                 .collect(Collectors.groupingBy(userAnswer -> userAnswer.getQuestion().getQuestionGroup().getPart(),
                         LinkedHashMap::new, Collectors.toList()));
     }
