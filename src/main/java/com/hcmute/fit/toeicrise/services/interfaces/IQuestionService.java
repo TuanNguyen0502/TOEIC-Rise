@@ -40,7 +40,7 @@ public interface IQuestionService {
 
     List<Question> getQuestionsWithGroupsAndTagsByIds(List<Long> questionIds);
 
-    List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds);
+    List<Question> getQuestionsWithGroupsAndPartsByIds(List<Long> questionIds);
 
     void validateQuestion(List<Long> questionIds, List<Question> questions);
 

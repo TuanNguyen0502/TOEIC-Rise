@@ -131,7 +131,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 .map(WritingAnswerSubmissionRequest::getQuestionId)
                 .distinct()
                 .toList();
-        List<Question> questions = questionService.getQuestionsWithGroupsByIds(questionIds);
+        List<Question> questions = questionService.getQuestionsWithGroupsAndPartsByIds(questionIds);
         Map<Long, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, q -> q));
         UserTest userTest = UserTest.builder()
                 .user(user)

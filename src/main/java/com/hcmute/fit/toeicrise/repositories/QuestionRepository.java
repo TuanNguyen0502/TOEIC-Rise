@@ -32,8 +32,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
 
     @Query("SELECT DISTINCT q FROM Question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +
+            "LEFT JOIN FETCH qg.part p " +
             "WHERE q.id IN :questionIds")
-    List<Question> findAllByIdWithGroups(@Param("questionIds") List<Long> questionIds);
+    List<Question> findAllByIdsWithGroupsAndParts(@Param("questionIds") List<Long> questionIds);
 
     @Query("SELECT DISTINCT q FROM Question q " +
             "INNER JOIN FETCH q.questionGroup qg " +

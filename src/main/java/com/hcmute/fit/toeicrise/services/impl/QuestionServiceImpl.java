@@ -146,10 +146,10 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds) {
+    public List<Question> getQuestionsWithGroupsAndPartsByIds(List<Long> questionIds) {
         if (questionIds == null || questionIds.isEmpty())
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question");
-        return questionRepository.findAllByIdWithGroups(questionIds);
+        return questionRepository.findAllByIdsWithGroupsAndParts(questionIds);
     }
 
     @Override
