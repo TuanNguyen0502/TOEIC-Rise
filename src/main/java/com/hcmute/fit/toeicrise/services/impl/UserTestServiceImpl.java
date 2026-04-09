@@ -141,6 +141,7 @@ public class UserTestServiceImpl implements IUserTestService {
                 .parts(request.getParts())
                 .build();
         List<UserAnswer> userAnswers = new ArrayList<>();
+        int correctAnswers = 0;
 
         for (WritingAnswerSubmissionRequest answerRequest : request.getAnswers()) {
             Question question = questionMap.get(answerRequest.getQuestionId());
@@ -153,7 +154,10 @@ public class UserTestServiceImpl implements IUserTestService {
                     .isCorrect(answerRequest.getAnswerText() != null && !answerRequest.getAnswerText().isBlank())
                     .build();
             userAnswers.add(userAnswer);
+            if (answerRequest.getAnswerText() != null && !answerRequest.getAnswerText().isBlank())
+                correctAnswers++;
         }
+        userTest.setCorrectAnswers(correctAnswers);
         userTest.setUserAnswers(userAnswers);
 
         testService.incrementNumberOfLearnersSubmit(test);
