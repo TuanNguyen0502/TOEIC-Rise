@@ -28,6 +28,11 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             "LEFT JOIN FETCH q.questionGroup qg " +
             "LEFT JOIN FETCH q.tags tags " +
             "WHERE q.id IN :questionIds")
+    List<Question> findAllByIdWithGroupsAndTags(@Param("questionIds") List<Long> questionIds);
+
+    @Query("SELECT DISTINCT q FROM Question q " +
+            "LEFT JOIN FETCH q.questionGroup qg " +
+            "WHERE q.id IN :questionIds")
     List<Question> findAllByIdWithGroups(@Param("questionIds") List<Long> questionIds);
 
     @Query("SELECT DISTINCT q FROM Question q " +
@@ -55,14 +60,14 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
     Optional<Question> findRandomQuestionByPartName(@Param("partName") String partName);
 
     @Query("""
-            SELECT new com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse(
-                q.id, q.position
-            )
-            FROM Question q
-            JOIN q.questionGroup qg
-            WHERE qg.test.id = :testId
-            ORDER BY q.position
-        """)
+                SELECT new com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse(
+                    q.id, q.position
+                )
+                FROM Question q
+                JOIN q.questionGroup qg
+                WHERE qg.test.id = :testId
+                ORDER BY q.position
+            """)
     List<QuestionMapResponse> getQuestionByTestId(@Param("testId") Long testId);
 
     @EntityGraph(attributePaths = {"questionGroup", "tags"})

@@ -2,10 +2,12 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
@@ -41,6 +43,12 @@ public class UserTestController {
     public ResponseEntity<?> submitTest(@Valid @RequestBody UserTestRequest request) {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(userTestService.calculateAndSaveUserTestResult(email, request));
+    }
+
+    @PostMapping("/submit-writing-test")
+    public ResponseEntity<WritingTestResultOverallResponse> submitWritingTest(@Valid @RequestBody WritingTestSubmissionRequest request) {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(userTestService.submitWritingTest(email, request));
     }
 
     @GetMapping("/view-histories/{id}")

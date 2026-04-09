@@ -7,6 +7,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.usertest.PartStats;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.ScoreAccumulator;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.TagStats;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingAnswerSubmissionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeFullTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
@@ -22,6 +24,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.*;
@@ -116,6 +119,46 @@ public class UserTestServiceImpl implements IUserTestService {
         calculate(userTest, request.getAnswers());
         userTestRepository.save(userTest);
         return userTestMapper.toTestResultOverallResponse(userTest);
+    }
+
+    @Transactional
+    @Override
+    public WritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request) {
+        User user = userService.getUserByEmail(email);
+        Test test = testService.getTestById(request.getTestId());
+
+        List<Long> questionIds = request.getAnswers().stream()
+                .map(WritingAnswerSubmissionRequest::getQuestionId)
+                .distinct()
+                .toList();
+        List<Question> questions = questionService.getQuestionsWithGroupsByIds(questionIds);
+        Map<Long, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, q -> q));
+        UserTest userTest = UserTest.builder()
+                .user(user)
+                .test(test)
+                .totalQuestions(request.getAnswers().size())
+                .timeSpent(request.getTimeSpent())
+                .parts(request.getParts())
+                .build();
+        List<UserAnswer> userAnswers = new ArrayList<>();
+
+        for (WritingAnswerSubmissionRequest answerRequest : request.getAnswers()) {
+            Question question = questionMap.get(answerRequest.getQuestionId());
+            UserAnswer userAnswer = UserAnswer.builder()
+                    .userTest(userTest)
+                    .question(question)
+                    .questionGroupId(question.getQuestionGroup().getId())
+                    .answerText(answerRequest.getAnswerText())
+                    .isCorrect(answerRequest.getAnswerText() != null && !answerRequest.getAnswerText().isBlank())
+                    .build();
+            userAnswers.add(userAnswer);
+        }
+        userTest.setUserAnswers(userAnswers);
+
+        testService.incrementNumberOfLearnersSubmit(test);
+        userTestRepository.save(userTest);
+
+        return userTestMapper.toWritingTestResultOverallResponse(userTest);
     }
 
     @Override

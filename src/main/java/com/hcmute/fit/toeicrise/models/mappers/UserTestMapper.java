@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryRespons
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -55,4 +56,13 @@ public interface UserTestMapper {
     @Mapping(source = "test.name", target = "name")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     ExamTypeFullTestResponse toExamTypeFullTestResponse(UserTest userTest);
+
+    default WritingTestResultOverallResponse toWritingTestResultOverallResponse(UserTest userTest) {
+        return WritingTestResultOverallResponse.builder()
+                .userTestId(userTest.getId())
+                .totalQuestions(userTest.getTotalQuestions())
+                .totalAnswers(userTest.getCorrectAnswers())
+                .timeSpent(userTest.getTimeSpent())
+                .build();
+    }
 }

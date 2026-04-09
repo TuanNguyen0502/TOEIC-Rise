@@ -29,7 +29,7 @@ public interface IQuestionService {
     QuestionResponse getQuestionResponseById(Long questionId);
 
     SpeakingQuestionResponse getSpeakingQuestionResponseById(Long questionId);
-    
+
     List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
 
     Question findById(Long aLong);
@@ -37,6 +37,8 @@ public interface IQuestionService {
     void updateQuestionWithEntity(Question question, QuestionRequest request);
 
     List<Question> getAllQuestionsByPartAndTags(Set<Long> tagIds, Long partId);
+
+    List<Question> getQuestionsWithGroupsAndTagsByIds(List<Long> questionIds);
 
     List<Question> getQuestionsWithGroupsByIds(List<Long> questionIds);
 
