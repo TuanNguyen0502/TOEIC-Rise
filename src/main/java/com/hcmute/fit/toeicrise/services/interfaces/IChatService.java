@@ -32,7 +32,9 @@ public interface IChatService {
 
     Flux<ChatbotResponse> generateBlogPostSummary(BlogPostSummaryRequest request);
 
-    String generateFeedbackForWritingTestAnswer(String answerText, String partName, String passage, InputStream imageInputStream, String contentType);
+    String generateFeedbackForWritingTestAnswerWithImage(String answerText, String partName, String passage, InputStream imageInputStream, String contentType);
+
+    String generateFeedbackForWritingTestAnswerWithoutImage(String answerText, String partName, String passage);
 
     Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
 

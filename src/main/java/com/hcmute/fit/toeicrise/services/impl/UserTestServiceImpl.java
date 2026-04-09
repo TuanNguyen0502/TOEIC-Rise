@@ -157,23 +157,30 @@ public class UserTestServiceImpl implements IUserTestService {
                     .answerText(answerRequest.getAnswerText())
                     .isCorrect(answerRequest.getAnswerText() != null && !answerRequest.getAnswerText().isBlank())
                     .build();
+            String feedback;
             if (questionGroup.getImageUrl() != null) {
                 try {
                     ImageResource resource = ImageUtils.fetchImage(questionGroup.getImageUrl());
                     try (InputStream is = resource.inputStream()) {
-                        String feedback = chatService.generateFeedbackForWritingTestAnswer(
+                        feedback = chatService.generateFeedbackForWritingTestAnswerWithImage(
                                 answerRequest.getAnswerText(),
                                 questionGroup.getPart().getName(),
                                 questionGroup.getPassage(),
                                 is,
                                 resource.contentType()
                         );
-                        userAnswer.setFeedback(feedback);
                     }
                 } catch (IOException e) {
                     throw new AppException(ErrorCode.INVALID_REQUEST, "Image not found");
                 }
+            } else {
+                feedback = chatService.generateFeedbackForWritingTestAnswerWithoutImage(
+                        answerRequest.getAnswerText(),
+                        questionGroup.getPart().getName(),
+                        questionGroup.getPassage()
+                );
             }
+            userAnswer.setFeedback(feedback);
             userAnswers.add(userAnswer);
         }
         userTest.setUserAnswers(userAnswers);
