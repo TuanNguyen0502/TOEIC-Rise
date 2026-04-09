@@ -499,7 +499,8 @@ public class ChatServiceImpl implements IChatService {
                 passage
         );
 
-        return ChatClient.create(chatModel)
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
                 .prompt()
                 .system(systemPrompt)
                 .user(user -> user
@@ -554,7 +555,8 @@ public class ChatServiceImpl implements IChatService {
                 passage
         );
 
-        return ChatClient.create(chatModel)
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
                 .prompt()
                 .system(systemPrompt)
                 .user(userPrompt)

@@ -2,7 +2,6 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.HelperUtil;
-import com.hcmute.fit.toeicrise.commons.utils.ImageUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.PartStats;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.ScoreAccumulator;
@@ -10,7 +9,6 @@ import com.hcmute.fit.toeicrise.dtos.requests.usertest.TagStats;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingAnswerSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.ImageResource;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeFullTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.ExamTypeStatsResponse;
@@ -43,8 +41,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -62,7 +58,6 @@ public class UserTestServiceImpl implements IUserTestService {
     private final IQuestionGroupService questionGroupService;
     private final ITestService testService;
     private final IUserService userService;
-    private final IChatService chatService;
     private final UserTestRepository userTestRepository;
     private final UserTestMapper userTestMapper;
     private final TestMapper testMapper;
@@ -157,30 +152,6 @@ public class UserTestServiceImpl implements IUserTestService {
                     .answerText(answerRequest.getAnswerText())
                     .isCorrect(answerRequest.getAnswerText() != null && !answerRequest.getAnswerText().isBlank())
                     .build();
-            String feedback;
-            if (questionGroup.getImageUrl() != null) {
-                try {
-                    ImageResource resource = ImageUtils.fetchImage(questionGroup.getImageUrl());
-                    try (InputStream is = resource.inputStream()) {
-                        feedback = chatService.generateFeedbackForWritingTestAnswerWithImage(
-                                answerRequest.getAnswerText(),
-                                questionGroup.getPart().getName(),
-                                questionGroup.getPassage(),
-                                is,
-                                resource.contentType()
-                        );
-                    }
-                } catch (IOException e) {
-                    throw new AppException(ErrorCode.INVALID_REQUEST, "Image not found");
-                }
-            } else {
-                feedback = chatService.generateFeedbackForWritingTestAnswerWithoutImage(
-                        answerRequest.getAnswerText(),
-                        questionGroup.getPart().getName(),
-                        questionGroup.getPassage()
-                );
-            }
-            userAnswer.setFeedback(feedback);
             userAnswers.add(userAnswer);
         }
         userTest.setUserAnswers(userAnswers);
