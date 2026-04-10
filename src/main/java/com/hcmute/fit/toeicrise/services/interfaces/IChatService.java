@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import reactor.core.publisher.Flux;
 
 import java.io.InputStream;

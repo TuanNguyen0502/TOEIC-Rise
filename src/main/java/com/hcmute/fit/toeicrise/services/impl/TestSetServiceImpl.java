@@ -3,9 +3,12 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestDictationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestSetDictationResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
@@ -102,7 +105,7 @@ public class TestSetServiceImpl implements ITestSetService {
         TestSet oldTestSet = findTestSetById(updateTestSetRequest.getId());
         testSetRepository.findByName(updateTestSetRequest.getTestName()).ifPresent(
                 existingTestSet -> {
-                    if (!existingTestSet.getId().equals(updateTestSetRequest.getId())){
+                    if (!existingTestSet.getId().equals(updateTestSetRequest.getId())) {
                         throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
                     }
                 }
@@ -129,6 +132,42 @@ public class TestSetServiceImpl implements ITestSetService {
         return testSetRepository.findById(testSetId).orElseThrow(
                 () -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set")
         );
+    }
+
+    @Override
+    public List<TestSetDictationResponse> getTestSetsDictation() {
+        List<TestSet> testSet = testSetRepository.
+                findByStatusWithTests(ETestSetStatus.IN_USE, ETestStatus.APPROVED);
+
+        return testSet.stream().map(ts -> {
+            List<Test> tests = ts.getTests();
+            int numberOfTests = tests.size();
+            int readyPart = tests.stream()
+                    .mapToInt(t -> t.getDictationStatus().size())
+                    .sum();
+            return TestSetDictationResponse.builder()
+                    .id(ts.getId())
+                    .name(ts.getName())
+                    .totalTests(numberOfTests)
+                    .readyPartsCount(readyPart)
+                    .totalPartsCount(numberOfTests * 4)
+                    .build();
+        }).toList();
+    }
+
+    @Override
+    public List<TestDictationResponse> getTestsDictationByTestSetId(Long testSetId) {
+
+        TestSet testSet = testSetRepository.findByIdWithApprovedTests(testSetId, ETestSetStatus.IN_USE, ETestStatus.APPROVED)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
+
+        return testSet.getTests().stream()
+                .map(t -> TestDictationResponse.builder()
+                        .id(t.getId())
+                        .name(t.getName())
+                        .readyParts(t.getDictationStatus())
+                        .build())
+                .toList();
     }
 
     private void handleChangeTestSetStatus(ETestSetStatus status, Long testSetId) {

@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;

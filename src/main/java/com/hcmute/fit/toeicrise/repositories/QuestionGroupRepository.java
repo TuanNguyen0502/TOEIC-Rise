@@ -38,13 +38,16 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
             "WHERE qg.id IN :ids")
     List<QuestionGroup> findAllByIdWithPart(@Param("ids") Set<Long> ids);
 
-    @Query("SELECT DISTINCT qg " +
-            "FROM QuestionGroup qg " +
-            "INNER JOIN FETCH qg.part p " +
-            "LEFT JOIN FETCH qg.questions q " +
-            "LEFT JOIN FETCH qg.dictationTranscript dt " +
-            "WHERE qg.test.id = :testId AND p.id = :partId " +
-            "ORDER BY qg.position ASC, q.position ASC")
-    List<QuestionGroup> findListeningDictationData(@Param("testId") Long testId, @Param("partId") Long partId);
 
+    @Query("SELECT qg FROM QuestionGroup qg " +
+            "WHERE qg.id IN :ids " +
+            "AND qg.test.id = :testId " +
+            "AND qg.part.id = :partId")
+    List<QuestionGroup> findAllByValidationInfo(
+            @Param("ids") List<Long> ids,
+            @Param("testId") Long testId,
+            @Param("partId") Long partId
+    );
+
+    List<QuestionGroup> findByTestIdAndPartIdOrderByPosition(Long testId, Long partId);
 }

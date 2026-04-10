@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ListeningDictationController {
     IDictationTranscriptService dictationTranscriptService;
 
-    @GetMapping("/listening-dictation")
-    public ResponseEntity<?> getListeningDictationData(@RequestParam Long testId, @RequestParam Long partId) {
-        return ResponseEntity.ok(
-                dictationTranscriptService.getListeningDictationByTestIdAndPartId(testId, partId));
-    }
+//    @GetMapping("/listening-dictation")
+//    public ResponseEntity<?> getListeningDictationData(@RequestParam Long testId, @RequestParam Long partId) {
+//        return ResponseEntity.ok(
+//                dictationTranscriptService.getListeningDictationByTestIdAndPartId(testId, partId));
+//    }
 }

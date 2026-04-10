@@ -39,9 +39,6 @@ public class QuestionGroup extends BaseEntity {
     @JoinColumn(name = "part_id")
     private Part part;
 
-    @OneToOne(mappedBy = "questionGroup")
-    private DictationTranscript dictationTranscript;
-
     @OneToMany(mappedBy = "questionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @ToString.Exclude

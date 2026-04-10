@@ -10,4 +10,6 @@ import java.util.List;
 public interface DictationTranscriptRepository extends JpaRepository<DictationTranscript, Long> {
 
      List<DictationTranscript> findAllByQuestionGroupIdIn(List<Long> questionGroupIds);
+     void deleteByQuestionGroupIdIn(List<Long> questionGroupIds);
+     List<DictationTranscript> findByQuestionGroupIdIn(List<Long> questionGroupIds);
 }

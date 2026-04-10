@@ -1,12 +1,17 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
+import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationImportRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.ListeningDictationResponse;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
 public interface IDictationTranscriptService {
-    void importDictationTranscript(List<DictationTranscriptRequest> requests);
-    ListeningDictationResponse getListeningDictationByTestIdAndPartId(Long testId, Long partId);
+    void importDictationTranscript(DictationImportRequest request);
+    List<DictationResponse> getListeningDictationByTestAndPart(Long testId, Long partId);
+    void updateDictationTranscript( DictationTranscriptUpdateRequest request);
 
 }
