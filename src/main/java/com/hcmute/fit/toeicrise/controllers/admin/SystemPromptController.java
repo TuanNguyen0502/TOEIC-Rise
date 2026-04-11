@@ -5,7 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptUpdateReq
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.enums.ESystemPromptFeatureType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
-import com.hcmute.fit.toeicrise.services.impl.AbstractSystemPromptService;
+import com.hcmute.fit.toeicrise.services.impl.systemprompt.AbstractSystemPromptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
