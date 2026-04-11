@@ -444,7 +444,7 @@ public class ChatServiceImpl implements IChatService {
 
             return cleanClient.prompt()
                     .user(userPrompt)
-                    .system(getBlogSummarizationSystemPrompt())
+                    .system(getActiveBlogSummarizationSystemPrompt())
                     .stream()
                     .content()
                     .map(contentText -> chatbotMapper.toChatbotResponse(
@@ -472,7 +472,7 @@ public class ChatServiceImpl implements IChatService {
         ChatClient cleanClient = chatClientBuilder.build();
         return cleanClient
                 .prompt()
-                .system(getWritingAssessmentSystemPrompt())
+                .system(getActiveWritingAssessmentSystemPrompt())
                 .user(user -> user
                         .text(userPrompt)
                         .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
@@ -496,7 +496,7 @@ public class ChatServiceImpl implements IChatService {
         ChatClient cleanClient = chatClientBuilder.build();
         return cleanClient
                 .prompt()
-                .system(getWritingAssessmentSystemPrompt())
+                .system(getActiveWritingAssessmentSystemPrompt())
                 .user(userPrompt)
                 .call()
                 .content();
@@ -517,17 +517,17 @@ public class ChatServiceImpl implements IChatService {
         return response.getContent();
     }
 
-    private String getSentenceAssessmentSystemPrompt() {
+    private String getActiveSentenceAssessmentSystemPrompt() {
         SystemPromptDetailResponse response = sentenceAssessmentSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 
-    private String getBlogSummarizationSystemPrompt() {
+    private String getActiveBlogSummarizationSystemPrompt() {
         SystemPromptDetailResponse response = blogSummarizationSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 
-    private String getWritingAssessmentSystemPrompt() {
+    private String getActiveWritingAssessmentSystemPrompt() {
         SystemPromptDetailResponse response = writingAssessmentSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
@@ -551,7 +551,7 @@ public class ChatServiceImpl implements IChatService {
                     .flatMapMany(userPrompt ->
                             cleanClient.prompt()
                                     .user(userPrompt)
-                                    .system(getSentenceAssessmentSystemPrompt())
+                                    .system(getActiveSentenceAssessmentSystemPrompt())
                                     .stream()
                                     .content()
                                     .map(contentText -> chatbotMapper.toChatbotResponse(
