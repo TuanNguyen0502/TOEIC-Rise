@@ -8,6 +8,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTes
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
@@ -30,6 +31,12 @@ public class UserTestController {
         String email = SecurityUtils.getCurrentUser();
         TestResultResponse result = userTestService.getUserTestResultById(email, userTestId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/writing/{userTestId}")
+    public ResponseEntity<WritingTestResultResponse> getWritingTestResultById(@PathVariable Long userTestId) {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(userTestService.getWritingTestResultById(email, userTestId));
     }
 
     @GetMapping("/answers-overall/{userTestId}")

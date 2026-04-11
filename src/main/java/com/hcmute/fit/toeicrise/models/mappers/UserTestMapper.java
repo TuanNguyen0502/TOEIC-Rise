@@ -7,6 +7,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallRespons
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -60,6 +61,18 @@ public interface UserTestMapper {
     default WritingTestResultOverallResponse toWritingTestResultOverallResponse(UserTest userTest) {
         return WritingTestResultOverallResponse.builder()
                 .userTestId(userTest.getId())
+                .totalQuestions(userTest.getTotalQuestions())
+                .totalAnswers(userTest.getCorrectAnswers())
+                .timeSpent(userTest.getTimeSpent())
+                .build();
+    }
+
+    default WritingTestResultResponse toWritingTestResultResponse(UserTest userTest) {
+        return WritingTestResultResponse.builder()
+                .testId(userTest.getTest().getId())
+                .userTestId(userTest.getId())
+                .testName(userTest.getTest().getName())
+                .parts(userTest.getParts() != null ? userTest.getParts() : null)
                 .totalQuestions(userTest.getTotalQuestions())
                 .totalAnswers(userTest.getCorrectAnswers())
                 .timeSpent(userTest.getTimeSpent())

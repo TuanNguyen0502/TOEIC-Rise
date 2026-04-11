@@ -25,6 +25,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagRe
 import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.*;
@@ -76,6 +77,13 @@ public class UserTestServiceImpl implements IUserTestService {
 
         Map<String, List<UserAnswerGroupedByTagResponse>> groupedAnswers = groupUserAnswersByPartAndTag(userTest);
         return userTestMapper.toTestResultResponse(userTest, groupedAnswers);
+    }
+
+    @Override
+    public WritingTestResultResponse getWritingTestResultById(String email, Long userTestId) {
+        UserTest userTest = findById(userTestId);
+        checkUserTestEqualEmail(email, userTest);
+        return userTestMapper.toWritingTestResultResponse(userTest);
     }
 
     @Override
