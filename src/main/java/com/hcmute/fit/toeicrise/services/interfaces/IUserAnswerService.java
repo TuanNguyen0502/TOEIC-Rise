@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface IUserAnswerService {
     UserAnswerDetailResponse getUserAnswerDetailResponse(Long userAnswerId);
+
     List<UserAnswer> getUserTestIdInWithQuestion(List<Long> userTestIds);
+
+    String getOrGenerateWritingFeedback(Long userAnswerId);
 }
