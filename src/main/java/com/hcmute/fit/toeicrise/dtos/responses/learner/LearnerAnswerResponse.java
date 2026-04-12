@@ -17,6 +17,7 @@ public class LearnerAnswerResponse {
     private List<String> options;
     private String userAnswer;
     private String userAnswerText;
+    private String userAnswerAudioUrl;
     private String feedback;
     private String correctOption;
     private String explanation;

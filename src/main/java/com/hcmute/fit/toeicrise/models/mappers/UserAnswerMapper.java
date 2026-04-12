@@ -77,6 +77,7 @@ public interface UserAnswerMapper {
                 .explanation(userAnswer.getQuestion().getExplanation())
                 .userAnswer(userAnswer.getAnswer())
                 .userAnswerText(userAnswer.getAnswerText())
+                .userAnswerAudioUrl(userAnswer.getAnswerAudioUrl())
                 .feedback(userAnswer.getFeedback())
                 .correctOption(userAnswer.getQuestion().getCorrectOption())
                 .isCorrect(userAnswer.getIsCorrect())
