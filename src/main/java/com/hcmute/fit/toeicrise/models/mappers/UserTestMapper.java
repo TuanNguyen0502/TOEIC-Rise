@@ -6,8 +6,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryRespons
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -58,8 +58,8 @@ public interface UserTestMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     ExamTypeFullTestResponse toExamTypeFullTestResponse(UserTest userTest);
 
-    default WritingTestResultOverallResponse toWritingTestResultOverallResponse(UserTest userTest) {
-        return WritingTestResultOverallResponse.builder()
+    default SpeakingWritingTestResultOverallResponse toSpeakingWritingTestResultOverallResponse(UserTest userTest) {
+        return SpeakingWritingTestResultOverallResponse.builder()
                 .userTestId(userTest.getId())
                 .totalQuestions(userTest.getTotalQuestions())
                 .totalAnswers(userTest.getCorrectAnswers())
@@ -67,8 +67,8 @@ public interface UserTestMapper {
                 .build();
     }
 
-    default WritingTestResultResponse toWritingTestResultResponse(UserTest userTest) {
-        return WritingTestResultResponse.builder()
+    default SpeakingWritingTestResultResponse toSpeakingWritingTestResultResponse(UserTest userTest) {
+        return SpeakingWritingTestResultResponse.builder()
                 .testId(userTest.getTest().getId())
                 .userTestId(userTest.getId())
                 .testName(userTest.getTest().getName())

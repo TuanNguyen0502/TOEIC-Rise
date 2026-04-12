@@ -14,8 +14,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +29,7 @@ import java.util.Map;
 public interface IUserTestService {
     TestResultResponse getUserTestResultById(String email, Long userTestId);
 
-    WritingTestResultResponse getWritingTestResultById(String email, Long userTestId);
+    SpeakingWritingTestResultResponse getWritingTestResultById(String email, Long userTestId);
 
     Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId);
 
@@ -38,7 +38,7 @@ public interface IUserTestService {
     List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email);
 
     @Transactional
-    WritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request);
+    SpeakingWritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request);
 
     LearnerTestPartsResponse getTestByIdAndParts(Long testId, List<Long> parts);
 

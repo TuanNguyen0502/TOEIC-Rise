@@ -7,8 +7,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingT
 import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
@@ -34,7 +34,7 @@ public class UserTestController {
     }
 
     @GetMapping("/writing/{userTestId}")
-    public ResponseEntity<WritingTestResultResponse> getWritingTestResultById(@PathVariable Long userTestId) {
+    public ResponseEntity<SpeakingWritingTestResultResponse> getWritingTestResultById(@PathVariable Long userTestId) {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(userTestService.getWritingTestResultById(email, userTestId));
     }
@@ -53,7 +53,13 @@ public class UserTestController {
     }
 
     @PostMapping("/submit-writing-test")
-    public ResponseEntity<WritingTestResultOverallResponse> submitWritingTest(@Valid @RequestBody WritingTestSubmissionRequest request) {
+    public ResponseEntity<SpeakingWritingTestResultOverallResponse> submitWritingTest(@Valid @RequestBody WritingTestSubmissionRequest request) {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(userTestService.submitWritingTest(email, request));
+    }
+
+    @PostMapping("/submit-speaking-test")
+    public ResponseEntity<SpeakingWritingTestResultOverallResponse> submitSpeakingTest(@Valid @RequestBody WritingTestSubmissionRequest request) {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(userTestService.submitWritingTest(email, request));
     }

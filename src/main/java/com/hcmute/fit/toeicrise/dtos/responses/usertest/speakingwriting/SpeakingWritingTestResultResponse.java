@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.responses.usertest.writing;
+package com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class WritingTestResultResponse {
+public class SpeakingWritingTestResultResponse {
     private Long testId;
     private Long userTestId;
     private String testName;

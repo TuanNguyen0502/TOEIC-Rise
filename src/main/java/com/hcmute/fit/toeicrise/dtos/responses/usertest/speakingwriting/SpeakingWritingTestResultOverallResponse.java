@@ -1,11 +1,11 @@
-package com.hcmute.fit.toeicrise.dtos.responses.usertest.writing;
+package com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class WritingTestResultOverallResponse {
+public class SpeakingWritingTestResultOverallResponse {
     private Long userTestId;
     private int totalQuestions;
     private int totalAnswers;

@@ -24,8 +24,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.*;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultOverallResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.usertest.writing.WritingTestResultResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.*;
@@ -80,10 +80,10 @@ public class UserTestServiceImpl implements IUserTestService {
     }
 
     @Override
-    public WritingTestResultResponse getWritingTestResultById(String email, Long userTestId) {
+    public SpeakingWritingTestResultResponse getWritingTestResultById(String email, Long userTestId) {
         UserTest userTest = findById(userTestId);
         checkUserTestEqualEmail(email, userTest);
-        return userTestMapper.toWritingTestResultResponse(userTest);
+        return userTestMapper.toSpeakingWritingTestResultResponse(userTest);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Transactional
     @Override
-    public WritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request) {
+    public SpeakingWritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request) {
         User user = userService.getUserByEmail(email);
         Test test = testService.getTestById(request.getTestId());
 
@@ -171,7 +171,7 @@ public class UserTestServiceImpl implements IUserTestService {
         testService.incrementNumberOfLearnersSubmit(test);
         userTestRepository.save(userTest);
 
-        return userTestMapper.toWritingTestResultOverallResponse(userTest);
+        return userTestMapper.toSpeakingWritingTestResultOverallResponse(userTest);
     }
 
     @Override
