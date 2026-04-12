@@ -52,6 +52,7 @@ public interface UserAnswerMapper {
                 .questionId(question.getId())
                 .userAnswer(userAnswer.getAnswer())
                 .userAnswerText(userAnswer.getAnswerText())
+                .userAnswerAudioUrl(userAnswer.getAnswerAudioUrl())
                 .feedback(userAnswer.getFeedback())
                 .position(question.getPosition())
                 .tags(question.getTags().stream().map(Tag::getName).toList())
