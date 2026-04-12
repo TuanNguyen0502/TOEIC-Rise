@@ -41,16 +41,17 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**", "/test-sets", "/tests/**")
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-reports/**", "/admin/system-prompts/**")
+                                "/admin/question-reports/**", "/admin/system-prompts/**", "/admin/learning-paths/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
                                 "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
-                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**")
+                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**", "/admin/learning-paths/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
-                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**").hasRole("LEARNER")
+                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**",
+                                "/learner/learning-paths/**", "/learner/lesson-progress/**").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

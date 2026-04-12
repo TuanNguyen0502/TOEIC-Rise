@@ -99,6 +99,32 @@ public class MessageConstant {
     public static final String SENTENCE_NOT_BLANK = "Sentence must not be blank";
     public static final String KEYWORD_NOT_EMPTY = "Keyword must not be empty.";
     public static final String KEYWORD_NOT_BLANK = "Keyword must not be blank.";
+    // LearningPath related messages
+    public static final String LEARNING_PATH_NAME_NOT_BLANK = "Learning path name must not be blank.";
+    public static final String LEARNING_PATH_NAME_NOT_NULL = "Learning path name must not be null.";
+    public static final String LEARNING_PATH_NAME_MAX = "Learning path name must not exceed 255 characters.";
+    public static final String LEARNING_PATH_DESCRIPTION_MAX = "Description must not exceed 5000 characters.";
+    // Lesson related messages
+    public static final String EITHER_MULTIPLE_OR_URL_REQUIRED = "Either video file or videoUrl must be provided";
+    public static final String LESSONS_NOT_EMPTY = "Lessons must not be empty.";
+    public static final String LESSON_ID_NOT_NULL = "LessonId must not be null.";
+    public static final String LESSON_ORDER_INDEX_NOT_NULL = "Order index must not be null.";
+    public static final String LESSON_ORDER_INDEX_MIN = "Order index must be greater than 0.";
+    public static final String LESSON_TITLE_NOT_NULL = "Title must not be null.";
+    public static final String LESSON_TITLE_NOT_BLANK = "Title must not be blank.";
+    public static final String LESSON_TITLE_MAX = "Title must not exceed 255 characters.";
+    public static final String LESSON_VIDEO_URL_MAX = "Video URL must not exceed 500 characters.";
+    public static final String LESSON_TOPIC_MAX = "Topic must not exceed 255 characters.";
+    public static final String LESSON_TOPIC_NOT_BLANK = "Topic must not be blank.";
+    public static final String LESSON_TOPIC_NOT_NULL = "Topic must not be null";
+    public static final String LESSON_LEVEL_NOT_NULL = "Level must not be null.";
+    public static final String LESSON_DO_NOT_BELONG_LEARNING_PATH = "Lesson does not belong to this learning path";
+    // User progress related messages
+    public static final String USER_PROGRESS_PERCENT_NOT_NULL = "ProgressPercentage must not be null.";
+    public static final String USER_PROGRESS_PERCENT_MIN = "ProgressPercentage must be >= 0.";
+    public static final String USER_PROGRESS_PERCENT_MAX = "ProgressPercentage must be <= 100.";
+    public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_NOT_NULL = "LastWatchedTimeMs must not be null.";
+    public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_MIN = "LastWatchedTimeMs must be >= 0.";
     // Success messages
     public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
     public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";
@@ -110,6 +136,8 @@ public class MessageConstant {
     public static final String TEST_SET_CREATED_SUCCESS = "Test Set created successfully.";
     public static final String TEST_IMPORT_SUCCESS = "Test imported successfully";
     public static final String QUESTION_UPDATE_SUCCESS = "Update question updated successfully";
+    public static final String LEARNING_PATH_CREATED_SUCCESS = "Learning path created successfully.";
+    public static final String LEARNING_PATH_UPDATED_SUCCESS = "Learning path updated successfully.";
     //Common messages
     public static final String COMMENT_NOT_BLANK = "Comment content must not be blank.";
     public static final String COMMENT_TOO_LONG = "Comment content must not exceed 500 characters.";
