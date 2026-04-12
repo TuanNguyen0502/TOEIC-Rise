@@ -30,7 +30,7 @@ import java.util.Map;
 public interface IUserTestService {
     TestResultResponse getUserTestResultById(String email, Long userTestId);
 
-    SpeakingWritingTestResultResponse getWritingTestResultById(String email, Long userTestId);
+    SpeakingWritingTestResultResponse getSpeakingWritingTestResultById(String email, Long userTestId);
 
     Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId);
 

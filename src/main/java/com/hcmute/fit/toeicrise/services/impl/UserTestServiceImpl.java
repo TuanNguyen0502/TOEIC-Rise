@@ -84,7 +84,7 @@ public class UserTestServiceImpl implements IUserTestService {
     }
 
     @Override
-    public SpeakingWritingTestResultResponse getWritingTestResultById(String email, Long userTestId) {
+    public SpeakingWritingTestResultResponse getSpeakingWritingTestResultById(String email, Long userTestId) {
         UserTest userTest = findById(userTestId);
         checkUserTestEqualEmail(email, userTest);
         return userTestMapper.toSpeakingWritingTestResultResponse(userTest);

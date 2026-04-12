@@ -38,7 +38,13 @@ public class UserTestController {
     @GetMapping("/writing/{userTestId}")
     public ResponseEntity<SpeakingWritingTestResultResponse> getWritingTestResultById(@PathVariable Long userTestId) {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(userTestService.getWritingTestResultById(email, userTestId));
+        return ResponseEntity.ok(userTestService.getSpeakingWritingTestResultById(email, userTestId));
+    }
+
+    @GetMapping("/speaking/{userTestId}")
+    public ResponseEntity<SpeakingWritingTestResultResponse> getSpeakingTestResultById(@PathVariable Long userTestId) {
+        String email = SecurityUtils.getCurrentUser();
+        return ResponseEntity.ok(userTestService.getSpeakingWritingTestResultById(email, userTestId));
     }
 
     @GetMapping("/answers-overall/{userTestId}")

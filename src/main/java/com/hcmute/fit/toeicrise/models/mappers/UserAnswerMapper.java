@@ -23,6 +23,7 @@ public interface UserAnswerMapper {
                 .correctAnswer(question.getCorrectOption())
                 .userAnswer(userAnswer.getAnswer())
                 .userAnswerText(userAnswer.getAnswerText())
+                .userAnswerAudioUrl(userAnswer.getAnswerAudioUrl())
                 .build();
     }
 

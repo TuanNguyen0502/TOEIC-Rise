@@ -11,4 +11,5 @@ public class UserAnswerOverallResponse {
     private String correctAnswer;
     private String userAnswer;
     private String userAnswerText;
+    private String userAnswerAudioUrl;
 }
