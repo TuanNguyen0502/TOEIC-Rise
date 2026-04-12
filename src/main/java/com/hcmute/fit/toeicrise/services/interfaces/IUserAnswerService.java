@@ -11,4 +11,6 @@ public interface IUserAnswerService {
     List<UserAnswer> getUserTestIdInWithQuestion(List<Long> userTestIds);
 
     String getOrGenerateWritingFeedback(Long userAnswerId);
+
+    String getOrGenerateSpeakingFeedback(Long userAnswerId);
 }

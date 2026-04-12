@@ -577,6 +577,59 @@ public class ChatServiceImpl implements IChatService {
                 .content();
     }
 
+    @Override
+    public String generateFeedbackForSpeakingTestAnswerWithImage(String partName, String passage, String questionContent, InputStream imageInputStream, String imageContentType, InputStream audioInputStream, String audioContentType) {
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Audio: (được gửi dưới dạng media)\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                4. Question: %s\s
+                """.formatted(
+                partName,
+                passage,
+                questionContent
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
+                .prompt()
+                .system(getActiveWritingAssessmentSystemPrompt())
+                .user(user -> user
+                        .text(userPrompt)
+                        .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
+                        .media(MimeTypeUtils.parseMimeType(imageContentType), new InputStreamResource(imageInputStream))
+                )
+                .call()
+                .content();
+    }
+
+    @Override
+    public String generateFeedbackForSpeakingTestAnswerWithoutImage(String partName, String passage, String questionContent, InputStream audioInputStream, String audioContentType) {
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Audio: (được gửi dưới dạng media)\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                4. Question: %s\s
+                """.formatted(
+                partName,
+                passage,
+                questionContent
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
+                .prompt()
+                .system(getActiveWritingAssessmentSystemPrompt())
+                .user(user -> user
+                        .text(userPrompt)
+                        .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
+                )
+                .call()
+                .content();
+    }
+
     private String getActiveChatbotSystemPrompt() {
         SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
         return response.getContent();

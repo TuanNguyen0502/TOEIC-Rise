@@ -1,9 +1,12 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.AudioUtils;
 import com.hcmute.fit.toeicrise.commons.utils.ImageUtils;
+import com.hcmute.fit.toeicrise.dtos.responses.AudioResource;
 import com.hcmute.fit.toeicrise.dtos.responses.ImageResource;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -72,6 +75,62 @@ public class UserAnswerServiceImpl implements IUserAnswerService {
                     questionGroup.getPart().getName(),
                     questionGroup.getPassage()
             );
+        }
+        userAnswer.setFeedback(feedback);
+        userAnswerRepository.save(userAnswer);
+        return feedback;
+    }
+
+    @Override
+    public String getOrGenerateSpeakingFeedback(Long userAnswerId) {
+        UserAnswer userAnswer = userAnswerRepository.findById(userAnswerId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Answer"));
+        if (userAnswer.getFeedback() != null && !userAnswer.getFeedback().isBlank()) {
+            return userAnswer.getFeedback();
+        }
+
+        String feedback;
+        Question question = userAnswer.getQuestion();
+        QuestionGroup questionGroup = question.getQuestionGroup();
+        if (questionGroup.getImageUrl() != null && !questionGroup.getImageUrl().isBlank()) {
+            try {
+                ImageResource imageResource = ImageUtils.fetchImage(questionGroup.getImageUrl());
+                AudioResource audioResource = AudioUtils.fetchAudio(userAnswer.getAnswerAudioUrl());
+
+                try (InputStream imageInputStream = imageResource.inputStream()) {
+                    try (InputStream audioInputStream = audioResource.inputStream()) {
+                        feedback = chatService.generateFeedbackForSpeakingTestAnswerWithImage(
+                                questionGroup.getPart().getName(),
+                                questionGroup.getPassage(),
+                                question.getContent(),
+                                imageInputStream,
+                                imageResource.contentType(),
+                                audioInputStream,
+                                audioResource.contentType()
+                        );
+                    } catch (IOException e) {
+                        throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch answer audio");
+                    }
+                }
+            } catch (IOException e) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch question image");
+            }
+        } else {
+            try {
+                AudioResource audioResource = AudioUtils.fetchAudio(userAnswer.getAnswerAudioUrl());
+
+                try (InputStream audioInputStream = audioResource.inputStream()) {
+                    feedback = chatService.generateFeedbackForSpeakingTestAnswerWithoutImage(
+                            questionGroup.getPart().getName(),
+                            questionGroup.getPassage(),
+                            question.getContent(),
+                            audioInputStream,
+                            audioResource.contentType()
+                    );
+                }
+            } catch (IOException e) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch answer audio");
+            }
         }
         userAnswer.setFeedback(feedback);
         userAnswerRepository.save(userAnswer);

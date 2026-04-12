@@ -21,4 +21,9 @@ public class UserAnswerController {
     public ResponseEntity<String> getOrGenerateWritingFeedback(@PathVariable Long userAnswerId) {
         return ResponseEntity.ok(userAnswerService.getOrGenerateWritingFeedback(userAnswerId));
     }
+
+    @GetMapping("/speaking-feedback/{userAnswerId}")
+    public ResponseEntity<String> getOrGenerateSpeakingFeedback(@PathVariable Long userAnswerId) {
+        return ResponseEntity.ok(userAnswerService.getOrGenerateSpeakingFeedback(userAnswerId));
+    }
 }
