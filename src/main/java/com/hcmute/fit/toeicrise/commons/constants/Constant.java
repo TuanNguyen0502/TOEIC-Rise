@@ -231,6 +231,7 @@ public class Constant {
     public static final String SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE = "sentenceAssessmentSystemPrompt";
     public static final String BLOG_SUMMARIZATION_SYSTEM_PROMPT_CACHE = "blogSummarizationSystemPrompt";
     public static final String WRITING_ASSESSMENT_SYSTEM_PROMPT_CACHE = "writingAssessmentSystemPrompt";
+    public static final String SPEAKING_ASSESSMENT_SYSTEM_PROMPT_CACHE = "speakingAssessmentSystemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
     // Profile constants
