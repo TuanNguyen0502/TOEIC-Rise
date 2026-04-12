@@ -1,12 +1,15 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.HelperUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.PartStats;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.ScoreAccumulator;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.TagStats;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.speaking.SpeakingAnswerSubmissionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.speaking.SpeakingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingAnswerSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
@@ -69,6 +72,7 @@ public class UserTestServiceImpl implements IUserTestService {
     private final QuestionMapper questionMapper;
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
     private final Map<Integer, Integer> estimatedListeningScoreMap = Constant.estimatedListeningScoreMap;
+    private final CloudinaryUtil cloudinaryUtil;
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
@@ -163,6 +167,55 @@ public class UserTestServiceImpl implements IUserTestService {
                     .build();
             userAnswers.add(userAnswer);
             if (answerRequest.getAnswerText() != null && !answerRequest.getAnswerText().isBlank())
+                correctAnswers++;
+        }
+        userTest.setCorrectAnswers(correctAnswers);
+        userTest.setUserAnswers(userAnswers);
+
+        testService.incrementNumberOfLearnersSubmit(test);
+        userTestRepository.save(userTest);
+
+        return userTestMapper.toSpeakingWritingTestResultOverallResponse(userTest);
+    }
+
+    @Transactional
+    @Override
+    public SpeakingWritingTestResultOverallResponse submitSpeakingTest(String email, SpeakingTestSubmissionRequest request) {
+        User user = userService.getUserByEmail(email);
+        Test test = testService.getTestById(request.getTestId());
+
+        List<Long> questionIds = request.getAnswers().stream()
+                .map(SpeakingAnswerSubmissionRequest::getQuestionId)
+                .distinct()
+                .toList();
+        List<Question> questions = questionService.getQuestionsWithGroupsAndPartsByIds(questionIds);
+        Map<Long, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, q -> q));
+        UserTest userTest = UserTest.builder()
+                .user(user)
+                .test(test)
+                .totalQuestions(request.getAnswers().size())
+                .timeSpent(request.getTimeSpent())
+                .parts(request.getParts())
+                .build();
+        List<UserAnswer> userAnswers = new ArrayList<>();
+        int correctAnswers = 0;
+
+        for (SpeakingAnswerSubmissionRequest answerRequest : request.getAnswers()) {
+            Question question = questionMap.get(answerRequest.getQuestionId());
+            QuestionGroup questionGroup = question.getQuestionGroup();
+            UserAnswer userAnswer = UserAnswer.builder()
+                    .userTest(userTest)
+                    .question(question)
+                    .questionGroupId(questionGroup.getId())
+                    .isCorrect(answerRequest.getAnswerAudio() != null)
+                    .build();
+            if (answerRequest.getAnswerAudio() != null) {
+                cloudinaryUtil.validateAudioFile(answerRequest.getAnswerAudio());
+                String audioUrl = cloudinaryUtil.uploadFile(answerRequest.getAnswerAudio());
+                userAnswer.setAnswerAudioUrl(audioUrl);
+            }
+            userAnswers.add(userAnswer);
+            if (answerRequest.getAnswerAudio() != null)
                 correctAnswers++;
         }
         userTest.setCorrectAnswers(correctAnswers);

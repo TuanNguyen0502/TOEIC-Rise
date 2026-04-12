@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.speaking.SpeakingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -39,6 +40,9 @@ public interface IUserTestService {
 
     @Transactional
     SpeakingWritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request);
+
+    @Transactional
+    SpeakingWritingTestResultOverallResponse submitSpeakingTest(String email, SpeakingTestSubmissionRequest request);
 
     LearnerTestPartsResponse getTestByIdAndParts(Long testId, List<Long> parts);
 

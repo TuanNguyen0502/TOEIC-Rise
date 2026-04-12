@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.speaking.SpeakingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
@@ -59,9 +60,9 @@ public class UserTestController {
     }
 
     @PostMapping("/submit-speaking-test")
-    public ResponseEntity<SpeakingWritingTestResultOverallResponse> submitSpeakingTest(@Valid @RequestBody WritingTestSubmissionRequest request) {
+    public ResponseEntity<SpeakingWritingTestResultOverallResponse> submitSpeakingTest(@Valid @RequestBody SpeakingTestSubmissionRequest request) {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(userTestService.submitWritingTest(email, request));
+        return ResponseEntity.ok(userTestService.submitSpeakingTest(email, request));
     }
 
     @GetMapping("/view-histories/{id}")
