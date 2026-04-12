@@ -58,6 +58,7 @@ public class ChatServiceImpl implements IChatService {
     private final SentenceAssessmentSystemPromptServiceImpl sentenceAssessmentSystemPromptService;
     private final BlogSummarizationSystemPromptServiceImpl blogSummarizationSystemPromptService;
     private final WritingAssessmentSystemPromptServiceImpl writingAssessmentSystemPromptService;
+    private final SpeakingAssessmentSystemPromptServiceImpl speakingAssessmentSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -594,7 +595,7 @@ public class ChatServiceImpl implements IChatService {
         ChatClient cleanClient = chatClientBuilder.build();
         return cleanClient
                 .prompt()
-                .system(getActiveWritingAssessmentSystemPrompt())
+                .system(getActiveSpeakingAssessmentSystemPrompt())
                 .user(user -> user
                         .text(userPrompt)
                         .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
@@ -621,7 +622,7 @@ public class ChatServiceImpl implements IChatService {
         ChatClient cleanClient = chatClientBuilder.build();
         return cleanClient
                 .prompt()
-                .system(getActiveWritingAssessmentSystemPrompt())
+                .system(getActiveSpeakingAssessmentSystemPrompt())
                 .user(user -> user
                         .text(userPrompt)
                         .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
@@ -657,6 +658,11 @@ public class ChatServiceImpl implements IChatService {
 
     private String getActiveWritingAssessmentSystemPrompt() {
         SystemPromptDetailResponse response = writingAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveSpeakingAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = speakingAssessmentSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 
