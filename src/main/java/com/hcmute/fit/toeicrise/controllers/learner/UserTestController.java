@@ -14,6 +14,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserTestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,8 +60,8 @@ public class UserTestController {
         return ResponseEntity.ok(userTestService.submitWritingTest(email, request));
     }
 
-    @PostMapping("/submit-speaking-test")
-    public ResponseEntity<SpeakingWritingTestResultOverallResponse> submitSpeakingTest(@Valid @RequestBody SpeakingTestSubmissionRequest request) {
+    @PostMapping(value = "/submit-speaking-test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SpeakingWritingTestResultOverallResponse> submitSpeakingTest(@Valid @ModelAttribute SpeakingTestSubmissionRequest request) {
         String email = SecurityUtils.getCurrentUser();
         return ResponseEntity.ok(userTestService.submitSpeakingTest(email, request));
     }
