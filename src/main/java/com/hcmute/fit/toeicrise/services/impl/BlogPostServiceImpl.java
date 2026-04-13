@@ -54,7 +54,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
             spec = spec.and(BlogPostSpecification.titleContains(title));
         }
 
-        Sort sort = Sort.by(Sort.Direction.fromString("DESC"), "updatedAt");
+        Sort sort = Sort.by(Sort.Direction.fromString("DESC"), "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<BlogPostResponse> blogPostResponses = blogPostRepository.findAll(spec, pageable)
                 .map(blogPostMapper::blogPostToBlogPostResponse);
