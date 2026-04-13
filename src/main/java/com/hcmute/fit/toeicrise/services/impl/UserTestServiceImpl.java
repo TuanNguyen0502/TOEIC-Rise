@@ -358,6 +358,8 @@ public class UserTestServiceImpl implements IUserTestService {
                 List<UserAnswer> answersInPart = entry.getValue();
 
                 if (partName == null) continue;
+                if (partName.contains("Writing") || partName.contains("Speaking"))
+                    continue; // Ignore Speaking and Writing part
                 EPart part = EPart.getEPart(partName);
                 EExamType examType = part.isRequiredAudio() ? EExamType.LISTENING : EExamType.READING;
 
