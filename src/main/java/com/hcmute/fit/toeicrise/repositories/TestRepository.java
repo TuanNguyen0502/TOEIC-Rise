@@ -38,4 +38,7 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     @NotNull
     @EntityGraph(attributePaths = {"testSet"})
     Page<Test> findAll(Specification<Test> specification, @NotNull Pageable pageable);
+
+    @Query("SELECT t FROM Test t JOIN FETCH t.testSet")
+    List<Test> findAllActiveWithTestSet();
 }

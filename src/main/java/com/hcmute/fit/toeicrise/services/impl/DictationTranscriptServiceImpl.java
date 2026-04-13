@@ -4,14 +4,16 @@ import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationImportRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestDictationAvailableResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestSetDictationAvailableResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.DictationTranscript;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
+import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.DictationTranscriptMapper;
-import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.DictationTranscriptRepository;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
@@ -26,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -116,6 +120,35 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
         existing.setPassageText(request.getPassageText());
 
         dictationTranscriptRepository.save(existing);
+    }
+
+    @Override
+    public List<TestSetDictationAvailableResponse> getDictationLibrary() {
+
+        List<Test> readyTests = testRepository.findAllActiveWithTestSet();
+
+        return readyTests.stream()
+                .filter(t -> t.getDictationStatus() != null && !t.getDictationStatus().isEmpty())
+                .collect(Collectors.groupingBy(Test::getTestSet))
+                .entrySet().stream()
+                .map(entry -> {
+                    TestSet ts = entry.getKey();
+
+                    List<TestDictationAvailableResponse> testDtos = entry.getValue().stream()
+                            .map(t -> TestDictationAvailableResponse.builder()
+                                    .id(t.getId())
+                                    .name(t.getName())
+                                    .availableParts(t.getDictationStatus())
+                                    .build())
+                            .toList();
+
+                    return TestSetDictationAvailableResponse.builder()
+                            .id(ts.getId())
+                            .name(ts.getName())
+                            .readyTests(testDtos)
+                            .build();
+                })
+                .toList();
     }
 
     private void updateTestPartStatus(Long testId, String partNameStr) {
