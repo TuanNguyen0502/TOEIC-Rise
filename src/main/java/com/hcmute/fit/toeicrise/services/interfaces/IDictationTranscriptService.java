@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationImportRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.ListeningDictationResponse;
@@ -15,5 +14,5 @@ public interface IDictationTranscriptService {
     List<DictationResponse> getListeningDictationByTestAndPart(Long testId, Long partId);
     void updateDictationTranscript( DictationTranscriptUpdateRequest request);
     List<TestSetDictationAvailableResponse> getDictationLibrary();
-
+    ListeningDictationResponse getListeningDictation(Long testId, Long partId);
 }

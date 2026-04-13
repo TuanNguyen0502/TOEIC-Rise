@@ -14,6 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class ListeningDictationResponse {
+     Long id;
+     String testName;
      String partName;
      List<QuestionGroupDictationResponse> questionGroups;
 }

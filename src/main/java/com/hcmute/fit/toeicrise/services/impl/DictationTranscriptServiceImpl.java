@@ -3,9 +3,8 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationImportRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.DictationTranscriptUpdateRequest;
-import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestDictationAvailableResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestSetDictationAvailableResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.*;
+import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.DictationTranscript;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
@@ -149,6 +148,61 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
                             .build();
                 })
                 .toList();
+    }
+
+    @Override
+    public ListeningDictationResponse getListeningDictation(Long testId, Long partId) {
+
+        List<QuestionGroup> groups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(
+                testId, List.of(partId));
+
+        if (groups.isEmpty()) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy nội dung cho Part này.");
+        }
+
+        List<Long> groupIds = groups.stream().map(QuestionGroup::getId).toList();
+
+        Map<Long, DictationTranscript> dictationMap = dictationTranscriptRepository
+                .findByQuestionGroupIdIn(groupIds)
+                .stream()
+                .collect(Collectors.toMap(d -> d.getQuestionGroup().getId(), d -> d));
+
+        List<QuestionGroupDictationResponse> groupResponses = groups.stream().map(group -> {
+            DictationTranscript dictation = dictationMap.get(group.getId());
+
+            List<QuestionResponse> questionResponses = group.getQuestions().stream()
+                    .map(q -> QuestionResponse.builder()
+                            .id(q.getId())
+                            .position(Long.valueOf(q.getPosition()))
+                            .content(q.getContent())
+                            .options(q.getOptions())
+                            .correctOption(q.getCorrectOption())
+                            .explanation(q.getExplanation())
+                            .tags(q.getTags() != null ? q.getTags().stream().map(tag -> tag.getName()).toList() : List.of())
+                            .build())
+                    .toList();
+
+            return QuestionGroupDictationResponse.builder()
+                    .id(group.getId())
+                    .audioUrl(group.getAudioUrl())
+                    .imageUrl(group.getImageUrl())
+                    .passage(group.getPassage())
+                    .transcript(group.getTranscript())
+                    .position(group.getPosition())
+
+                    .questionText(dictation != null ? dictation.getQuestionText() : null)
+                    .options(dictation != null ? dictation.getOptions() : null)
+                    .passageText(dictation != null ? dictation.getPassageText() : null)
+                    .questions(questionResponses)
+                    .build();
+        }).toList();
+
+        return ListeningDictationResponse.builder()
+                .id(testId)
+                .testName(groups.getFirst().getTest().getName())
+                .partName(groups.getFirst().getPart().getName())
+                .questionGroups(groupResponses)
+                .build();
     }
 
     private void updateTestPartStatus(Long testId, String partNameStr) {
