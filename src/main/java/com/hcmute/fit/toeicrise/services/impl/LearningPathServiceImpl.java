@@ -24,7 +24,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -96,9 +95,9 @@ public class LearningPathServiceImpl implements ILearningPathService {
 
     @Transactional
     @Override
-    public LessonResponse createLesson(Long learningPathId, LessonCreateRequest request, MultipartFile file) {
+    public LessonResponse createLesson(Long learningPathId, LessonCreateRequest request) {
         LearningPath path = getLearningPath(learningPathId);
-        return lessonService.createLesson(request, file, path);
+        return lessonService.createLesson(request, path);
     }
 
     @Transactional
@@ -126,7 +125,8 @@ public class LearningPathServiceImpl implements ILearningPathService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         PageRequest pageRequest = PageRequest.of(page, size, sort);
 
-        Page<LearningPathSummaryResponse> pages = learningPathRepository.findAll(specification, pageRequest).map(learningPathMapper::toSummaryResponse);
+        Page<LearningPathSummaryResponse> pages = learningPathRepository.findAll(specification, pageRequest)
+                .map(lp -> learningPathMapper.toSummaryResponse(lp, (long) lp.getLessons().size()));
         return pageResponseMapper.toPageResponse(pages);
     }
 }

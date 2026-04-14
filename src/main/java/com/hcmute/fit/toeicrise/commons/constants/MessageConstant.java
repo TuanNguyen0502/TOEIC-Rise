@@ -125,6 +125,10 @@ public class MessageConstant {
     public static final String USER_PROGRESS_PERCENT_MAX = "ProgressPercentage must be <= 100.";
     public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_NOT_NULL = "LastWatchedTimeMs must not be null.";
     public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_MIN = "LastWatchedTimeMs must be >= 0.";
+    // Cloudinary related messages
+    public static final String CLOUDINARY_TIMESTAMP_NOT_NULL = "Timestamp must not be null.";
+    public static final String CLOUDINARY_SOURCE_NOT_NULL = "Source must not be null.";
+    public static final String CLOUDINARY_SOURCE_NOT_BLANK = "Source must not be blank.";
     // Success messages
     public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
     public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";

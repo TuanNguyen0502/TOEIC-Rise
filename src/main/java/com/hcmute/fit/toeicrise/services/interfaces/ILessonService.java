@@ -6,13 +6,12 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface ILessonService {
-    LessonResponse createLesson(LessonCreateRequest request, MultipartFile file, LearningPath learningPath);
-    LessonResponse updateLesson(Long id, LessonUpdateRequest request, MultipartFile file);
+    LessonResponse createLesson(LessonCreateRequest request, LearningPath learningPath);
+    LessonResponse updateLesson(Long id, LessonUpdateRequest request);
     Lesson getLessonById(Long id);
     List<Lesson> getAllLessonsByIds(List<Long> ids);
     void reorderLesson(LessonReorderRequest request, LearningPath learningPath);

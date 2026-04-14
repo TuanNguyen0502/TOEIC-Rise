@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS learning_paths (
     description TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME,
-    updated_at DATETIME,
+    updated_at DATETIME
 );
 
 CREATE TABLE IF NOT EXISTS lessons (
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS lessons (
     created_at DATETIME,
     updated_at DATETIME,
     CONSTRAINT fk_lessons_learning_path FOREIGN KEY (learning_path_id) REFERENCES learning_paths(id),
-    CONSTRAINT uc_lessons_path_order UNIQUE (learning_path_id, order_index),
+    CONSTRAINT uc_lessons_path_order UNIQUE (learning_path_id, order_index)
 );
 
 CREATE TABLE IF NOT EXISTS user_lesson_progress (
@@ -34,5 +34,5 @@ CREATE TABLE IF NOT EXISTS user_lesson_progress (
     updated_at DATETIME,
     CONSTRAINT fk_ulp_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_ulp_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id),
-    CONSTRAINT uc_ulp_user_lesson UNIQUE (user_id, lesson_id),
+    CONSTRAINT uc_ulp_user_lesson UNIQUE (user_id, lesson_id)
 );

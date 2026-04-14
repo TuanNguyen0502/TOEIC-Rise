@@ -8,7 +8,6 @@ import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface ILearningPathService {
     PageResponse getAllLearningPaths(String name, int page, int size, String sortBy, String direction);
@@ -16,7 +15,7 @@ public interface ILearningPathService {
     void createLearningPath(LearningPathCreateRequest request);
     void updateLearningPath(Long learningPathId, LearningPathUpdateRequest request);
     LearningPath getLearningPath(Long learningPathId);
-    LessonResponse createLesson(Long learningPathId, LessonCreateRequest request, MultipartFile file);
+    LessonResponse createLesson(Long learningPathId, LessonCreateRequest request);
     LearningPathDetailResponse getLearningPathDetailForLearner(String email, Long learningPathId);
     void reorderLessons(Long learningPathId, LessonReorderRequest request);
     PageResponse listLearningPaths(Boolean isActive, int page, int size, String sortBy, String direction);

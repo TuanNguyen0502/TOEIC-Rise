@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
+import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.ItemRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonReorderRequest;
@@ -12,13 +13,11 @@ import com.hcmute.fit.toeicrise.models.entities.Lesson;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
 import com.hcmute.fit.toeicrise.repositories.LessonRepository;
-import com.hcmute.fit.toeicrise.services.interfaces.ICloudinaryService;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -31,32 +30,42 @@ import java.util.stream.Collectors;
 public class LessonServiceImpl implements ILessonService {
     private final LessonRepository lessonRepository;
     private final LessonMapper lessonMapper;
-    private final ICloudinaryService cloudinaryService;
+    private final CloudinaryUtil cloudinaryUtil;
     private final IUserService userService;
 
     private static final int OFFSET = 1_000_000;
 
     @Override
-    public LessonResponse createLesson(LessonCreateRequest request, MultipartFile file, LearningPath path) {
+    public LessonResponse createLesson(LessonCreateRequest request, LearningPath path) {
         Lesson lesson = lessonMapper.toEntity(request);
         lesson.setLearningPath(path);
 
-        String resolvedVideoUrl = cloudinaryService.processMediaFile(file, request.getVideoUrl(), null);
-        if (resolvedVideoUrl == null)
-            throw new AppException(ErrorCode.INVALID_REQUEST, MessageConstant.EITHER_MULTIPLE_OR_URL_REQUIRED);
-        lesson.setVideoUrl(resolvedVideoUrl);
+        if (request.getVideoUrl() == null || request.getVideoUrl().isBlank())
+            throw new AppException(ErrorCode.INVALID_REQUEST, "videoUrl is required");
+        cloudinaryUtil.validateVideoURL(request.getVideoUrl());
+        lesson.setVideoUrl(request.getVideoUrl());
 
         return lessonMapper.toResponse(lessonRepository.save(lesson));
     }
 
     @Transactional
     @Override
-    public LessonResponse updateLesson(Long id, LessonUpdateRequest request, MultipartFile file) {
+    public LessonResponse updateLesson(Long id, LessonUpdateRequest request) {
         Lesson lesson = getLessonById(id);
-        String url = cloudinaryService.processMediaFile(file, request.getVideoUrl(), lesson.getVideoUrl());
+        String oldUrl = lesson.getVideoUrl();
+        String newUrl = request.getVideoUrl();
+
+        if (newUrl != null && !newUrl.isBlank()) {
+            cloudinaryUtil.validateVideoURL(newUrl);
+            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl)) {
+                cloudinaryUtil.deleteFile(oldUrl);
+            }
+        } else {
+            newUrl = oldUrl;
+        }
 
         lesson = lessonMapper.toEntity(request);
-        lesson.setVideoUrl(url);
+        lesson.setVideoUrl(newUrl);
         return lessonMapper.toResponse(lessonRepository.save(lesson));
     }
 

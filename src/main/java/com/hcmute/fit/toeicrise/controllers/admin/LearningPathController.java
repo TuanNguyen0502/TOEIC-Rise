@@ -14,7 +14,6 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController("adminLearningPathController")
 @RequestMapping("/admin/learning-paths")
@@ -51,18 +50,17 @@ public class LearningPathController {
         return ResponseEntity.ok(MessageConstant.LEARNING_PATH_UPDATED_SUCCESS);
     }
 
-    @PostMapping("/{learningPathId}/lessons")
+    @PostMapping("/{id}/lessons")
     public ResponseEntity<?> addLesson(
-            @PathVariable Long learningPathId,
-            @Valid @RequestPart("request") LessonCreateRequest request,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @PathVariable(value = "id") Long id,
+            @Valid @RequestBody LessonCreateRequest request
     ) {
-        return ResponseEntity.ok(learningPathService.createLesson(learningPathId, request, file));
+        return ResponseEntity.ok(learningPathService.createLesson(id, request));
     }
 
     @PutMapping("/lessons/{id}")
-    public ResponseEntity<?> updateLesson(@PathVariable Long id, @Valid @RequestPart LessonUpdateRequest request, @RequestPart MultipartFile file) {
-        return ResponseEntity.ok(lessonService.updateLesson(id, request, file));
+    public ResponseEntity<?> updateLesson(@PathVariable Long id, @Valid @RequestBody LessonUpdateRequest request) {
+        return ResponseEntity.ok(lessonService.updateLesson(id, request));
     }
 
     @PatchMapping("/lessons/{lessonId}/active")

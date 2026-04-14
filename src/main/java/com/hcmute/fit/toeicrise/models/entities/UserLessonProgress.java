@@ -23,7 +23,7 @@ public class UserLessonProgress extends BaseEntity {
     @ToString.Exclude
     private Lesson lesson;
 
-    @Column(name = "progress_percentage", nullable = false, precision = 5, scale = 2)
+    @Column(name = "progress_percentage", nullable = false)
     private Double progressPercentage;
 
     @Column(name = "last_watched_time_ms", nullable = false)

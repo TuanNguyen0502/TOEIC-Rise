@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 @Component
@@ -21,10 +22,10 @@ public class CloudinaryUtil {
     }
 
     public String uploadFile(MultipartFile file) {
-        try {
-            Map data = cloudinary.uploader()
-                    .upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
-            // Return the URL of the uploaded file
+        try (InputStream in = file.getInputStream()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = (Map<String, Object>) cloudinary.uploader()
+                    .upload(in, ObjectUtils.asMap("resource_type", "auto"));
             return data.get("secure_url").toString();
         } catch (IOException e) {
             throw new AppException(ErrorCode.UPLOAD_FAILED);
@@ -72,6 +73,12 @@ public class CloudinaryUtil {
         }
     }
 
+    public void validateVideoURL(String videoUrl) {
+        if (!isValidSuffixVideo(videoUrl)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid video file format.");
+        }
+    }
+
     public void handleUploadFile(MultipartFile file, int maxSize) {
         if (file != null && !file.isEmpty()) {
             if (file.getSize() > maxSize) {
@@ -93,6 +100,12 @@ public class CloudinaryUtil {
                 audio.endsWith(".ogg") || audio.endsWith(".m4a");
     }
 
+    private boolean isValidSuffixVideo(String video) {
+        return video.endsWith(".mp4") || video.endsWith(".avi") ||
+                video.endsWith(".mkv") || video.endsWith(".mov") ||
+                video.endsWith(".wmv") || video.endsWith(".flv");
+    }
+
     public boolean isCloudinaryUrl(String url) {
         return url.contains("res.cloudinary.com");
     }
@@ -100,13 +113,15 @@ public class CloudinaryUtil {
     private String getResourceType(String filename) {
         if (filename == null) return "raw";
         if (isValidSuffixImage(filename)) return "image";
-        if (isValidSuffixAudio(filename)) return "video"; // Audio files use 'video' resource type
+        if (isValidSuffixAudio(filename)) return "audio";
+        if (isValidSuffixVideo(filename)) return "video";// Audio files use 'video' resource type
         return "raw";
     }
 
     private String getResourceTypeFromUrl(String url) {
         if (url == null) return "raw";
         if (url.contains("/image/")) return "image";
+        if (url.contains("/audio/")) return "audio";
         if (url.contains("/video/")) return "video";
         if (url.contains("/raw/")) return "raw";
         // Fallback based on file extension
