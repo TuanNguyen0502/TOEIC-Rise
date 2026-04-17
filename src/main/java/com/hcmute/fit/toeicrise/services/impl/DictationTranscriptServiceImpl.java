@@ -153,6 +153,14 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
     @Override
     public ListeningDictationResponse getListeningDictation(Long testId, Long partId) {
 
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+
+        EPart requestedPart = EPart.getEPartByPosition(partId.intValue());
+        if (test.getDictationStatus() == null || !test.getDictationStatus().contains(requestedPart)) {
+            throw new AppException(ErrorCode.INVALID_DATA, "Phần thi này chưa hỗ trợ nghe chép chính tả.");
+        }
+
         List<QuestionGroup> groups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(
                 testId, List.of(partId));
 

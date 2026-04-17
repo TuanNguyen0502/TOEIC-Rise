@@ -498,6 +498,8 @@ public class ChatServiceImpl implements IChatService {
                 .user(userMessage)
                 .call()
                 .entity(new ParameterizedTypeReference<List<DictationGenerationResponse>>() {});
+
+
     }
 
     private String getDictationGenerationSystemPrompt() {
@@ -509,6 +511,7 @@ public class ChatServiceImpl implements IChatService {
         2. REMOVE Vietnamese translations entirely.
         3. REMOVE question numbers (e.g., "32", "33", "34").
         4. REMOVE speaker labels (e.g., "M-Cn:", "W-Am:", "W:", "M:").
+        5. TRANSCRIPT FIELD: You MUST NOT process this field. Return the original transcript string exactly as provided in the input.
         
         ### PART-SPECIFIC LOGIC:
         - Part 1 & 2: Identify answer choices (A), (B), (C), (D). Extract ONLY the text of these choices into the 'answers' list. 
