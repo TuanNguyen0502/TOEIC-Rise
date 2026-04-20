@@ -1,0 +1,21 @@
+package com.hcmute.fit.toeicrise.dtos.responses.blog.post;
+
+import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class BlogPostResponse {
+    private Long id;
+    private String title;
+    private String slug;
+    private String summary;
+    private String thumbnailUrl;
+    private String authorName;
+    private String categoryName;
+    private String categorySlug;
+    private EBlogPostStatus status;
+    private Integer views;
+    private String updatedAt;
+}

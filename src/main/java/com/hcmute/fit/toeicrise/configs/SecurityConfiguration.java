@@ -38,19 +38,26 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**", "/swagger-ui.html", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/test-sets", "/tests/**")
+                                "/v3/api-docs/**", "/test-sets", "/speaking-test-sets/**", "/writing-test-sets/**",
+                                "/tests/**", "/speaking-tests/**", "/writing-tests/**",
+                                "/blog-categories/**", "/blog-posts/**")
                         .permitAll()
-                        .requestMatchers("/admin/test-sets/**", "/admin/tests/**", "/admin/chatbot-ratings/**",
+                        .requestMatchers("/admin/test-sets/**", "/admin/speaking-test-sets/**", "/admin/writing-test-sets/**",
+                                "/admin/tests/**", "/admin/chatbot-ratings/**",
                                 "/admin/question-reports/**", "/admin/system-prompts/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/question-groups/**",
-                                "/staff/questions/**", "/staff/tags/**", "/staff/question-reports/**",
-                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**")
+                        .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/speaking-tests/**",
+                                "/staff/writing-tests/**", "/staff/question-groups/**", "/staff/speaking-question-groups/**",
+                                "/staff/writing-question-groups/**", "/staff/questions/**", "/staff/speaking-questions/**",
+                                "/staff/tags/**", "/staff/question-reports/**",
+                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
+                                "/staff/blog-categories/**", "/staff/blog-posts/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
-                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**").hasRole("LEARNER")
+                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**")
+                        .hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

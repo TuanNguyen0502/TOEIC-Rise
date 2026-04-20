@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,6 @@ public class TestSetController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllTestSets() {
-        return ResponseEntity.ok(testSetService.getAllTestSets());
+        return ResponseEntity.ok(testSetService.getAllTestSetsByType(ETestSetType.LISTENING_AND_READING));
     }
 }

@@ -38,7 +38,7 @@ public class MiniTestServiceImpl implements IMiniTestService {
 
         List<Long> questionIds = request.getQuestionGroups().stream().flatMap(group -> group.getUserAnswerRequests().stream())
                 .map(UserAnswerMiniTestRequest::getQuestionId).filter(Objects::nonNull).distinct().toList();
-        List<Question> questions = questionService.getQuestionsWithGroupsByIds(questionIds);
+        List<Question> questions = questionService.getQuestionsWithGroupsAndTagsByIds(questionIds);
         questionService.validateQuestion(questionIds, questions);
         Map<Long, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, q -> q));
 

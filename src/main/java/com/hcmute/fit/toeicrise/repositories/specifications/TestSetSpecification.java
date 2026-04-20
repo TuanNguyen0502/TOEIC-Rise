@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.repositories.specifications;
 
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TestSetSpecification {
@@ -13,5 +14,10 @@ public class TestSetSpecification {
     public static Specification<TestSet> statusEquals(ETestSetStatus status) {
         return (root, _, criteriaBuilder) ->
                 status == null ? null : criteriaBuilder.equal(root.get("status"), status);
+    }
+
+    public static Specification<TestSet> typeEquals(ETestSetType type) {
+        return (root, _, criteriaBuilder) ->
+                type == null ? null : criteriaBuilder.equal(root.get("type"), type);
     }
 }

@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.services.impl;
+package com.hcmute.fit.toeicrise.services.impl.systemprompt;
 
 import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.systemprompt.SystemPromptUpdateRequest;
