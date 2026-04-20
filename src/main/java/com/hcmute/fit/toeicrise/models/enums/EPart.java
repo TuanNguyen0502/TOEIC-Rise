@@ -64,6 +64,13 @@ public enum EPart {
         if (WRITING_PART_3.getName().contains(partName)) return WRITING_PART_3.getName();
         throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, name);
     }
+  
+    public static EPart getEPartByPosition(int position) {
+        if (position < 1 || position > EPart.values().length) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part position invalid: " + position);
+        }
+        return EPart.values()[position - 1];
+    }
 
     public boolean allowImage() {
         return !this.getName().contains("2") && !this.getName().contains("5");

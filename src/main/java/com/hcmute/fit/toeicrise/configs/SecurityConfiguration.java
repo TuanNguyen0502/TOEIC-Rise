@@ -51,13 +51,12 @@ public class SecurityConfiguration {
                                 "/staff/writing-question-groups/**", "/staff/questions/**", "/staff/speaking-questions/**",
                                 "/staff/tags/**", "/staff/question-reports/**",
                                 "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
-                                "/staff/blog-categories/**", "/staff/blog-posts/**")
+                                "/staff/blog-categories/**", "/staff/blog-posts/**", "staff/dictation/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
-                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**")
-                        .hasRole("LEARNER")
+                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**", "/learner/dictation/**").hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
