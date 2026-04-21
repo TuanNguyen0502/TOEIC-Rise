@@ -70,12 +70,12 @@ public class ChatbotController {
         return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
     }
 
-    @GetMapping("/generate-preview")
+    @GetMapping("/generate-dictation")
     public ResponseEntity<List<DictationGenerationResponse>> generateDictationPreview(
             @RequestParam Long testId,
             @RequestParam Long partId) {
 
-        List<DictationGenerationResponse> result = chatService.generateDictation(testId, partId);
-        return ResponseEntity.ok(result);
+        List<DictationGenerationResponse> dictations = chatService.generateDictation(testId, partId);
+        return ResponseEntity.ok(dictations);
     }
 }

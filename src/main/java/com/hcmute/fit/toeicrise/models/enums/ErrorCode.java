@@ -51,7 +51,9 @@ public enum ErrorCode {
     DATABASE_ERROR("Database error", HttpStatus.NOT_IMPLEMENTED),
     GENERATE_TOKEN_EXCEPTION("Failed to generate token", HttpStatus.NOT_IMPLEMENTED),
     UNCATEGORIZED_EXCEPTION("Unexpected error occurred", HttpStatus.NOT_IMPLEMENTED),
-    CACHE_ERROR("Cache error", HttpStatus.NOT_IMPLEMENTED);
+    CACHE_ERROR("Cache error", HttpStatus.NOT_IMPLEMENTED),
+    INTERNAL_SERVER_ERROR("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR ),
+    AI_PROCESSING_ERROR("Error processing AI response", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String message;
     private final HttpStatus httpStatus;

@@ -1,5 +1,8 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmute.fit.toeicrise.commons.constants.PromptConstant;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.AiDictationRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
@@ -8,21 +11,19 @@ import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
+import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
-import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
-import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
-import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
-import com.hcmute.fit.toeicrise.repositories.UserAnswerRepository;
+import com.hcmute.fit.toeicrise.repositories.*;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -40,10 +41,12 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements IChatService {
@@ -51,6 +54,7 @@ public class ChatServiceImpl implements IChatService {
     private final ChatClient.Builder chatClientBuilder;
     private final ChatModel chatModel;
     private final QuestionRepository questionRepository;
+    private final TestRepository testRepository;
     private final QuestionGroupRepository questionGroupRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final ChatMemoryRepository chatMemoryRepository;
@@ -61,6 +65,7 @@ public class ChatServiceImpl implements IChatService {
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
+    private final ObjectMapper objectMapper;
 
     @Override
     public List<ChatbotResponse> getChatHistory(String conversationId) {
@@ -482,9 +487,24 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public List<DictationGenerationResponse> generateDictation(Long testId, Long partId) {
+
+        if (!testRepository.existsById(testId)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test");
+        }
+
+        EPart part = EPart.getEPartByPosition(partId.intValue());
+        if (!part.isListening()) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR, "Part must be a listening part");
+        }
+
         List<QuestionGroup> groups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, List.of(partId));
 
+        if (groups.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<AiDictationRequest> aiRequests = groups.stream()
+                .filter(g -> g.getTranscript() != null && !g.getTranscript().isBlank())
                 .map(g -> AiDictationRequest.builder()
                         .questionGroupId(g.getId())
                         .partName(g.getPart().getName())
@@ -492,36 +512,30 @@ public class ChatServiceImpl implements IChatService {
                         .build())
                 .toList();
 
-        String userMessage = "Process these question groups for TOEIC Dictation: " + aiRequests.toString();
-        return chatClient.prompt()
-                .system(getDictationGenerationSystemPrompt())
-                .user(userMessage)
-                .call()
-                .entity(new ParameterizedTypeReference<List<DictationGenerationResponse>>() {});
+        if (aiRequests.isEmpty()) {
+            return Collections.emptyList();
+        }
 
+        try {
+            String payload = objectMapper.writeValueAsString(aiRequests);
 
+            String userMessage = """
+                    Process these question groups for TOEIC Dictation.
+                    Input data:
+                    %s
+                    """.formatted(payload);
+
+            ChatClient cleanClient = chatClientBuilder.build();
+            return cleanClient.prompt()
+                    .system(PromptConstant.DICTATION_GENERATION_SYSTEM_PROMPT)
+                    .user(userMessage)
+                    .call()
+                    .entity(new ParameterizedTypeReference<List<DictationGenerationResponse>>() {
+                    });
+        } catch (JsonProcessingException e) {
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to prepare dictation request");
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.AI_PROCESSING_ERROR, "Failed to generate dictation preview");
+        }
     }
-
-    private String getDictationGenerationSystemPrompt() {
-        return """
-        You are a TOEIC data processing expert. Your task is to extract clean English text from raw TOEIC transcripts (HTML format) for dictation exercises.
-        
-        ### PROCESSING RULES:
-        1. STRIP all HTML tags.
-        2. REMOVE Vietnamese translations entirely.
-        3. REMOVE question numbers (e.g., "32", "33", "34").
-        4. REMOVE speaker labels (e.g., "M-Cn:", "W-Am:", "W:", "M:").
-        5. TRANSCRIPT FIELD: You MUST NOT process this field. Return the original transcript string exactly as provided in the input.
-        
-        ### PART-SPECIFIC LOGIC:
-        - Part 1 & 2: Identify answer choices (A), (B), (C), (D). Extract ONLY the text of these choices into the 'answers' list. 
-        - Part 2 ONLY: Extract the main question text into 'questionText'.
-        - Part 3 & 4: Extract the English dialogue lines. Separate turns with a newline (\\n) and put it into 'passageText'.
-        
-        ### OUTPUT FORMAT:
-        - Return a JSON array of objects matching the provided structure.
-        - Ensure 'questionGroupId' is preserved from the input.
-        """;
-    }
-
 }

@@ -41,6 +41,10 @@ public enum EPart {
         return EPart.values()[position - 1];
     }
 
+    public boolean isListening() {
+        return this == PART_1 || this == PART_2 || this == PART_3 || this == PART_4;
+    }
+
     public boolean allowImage() {
         return !this.getName().contains("2") && !this.getName().contains("5");
     }
