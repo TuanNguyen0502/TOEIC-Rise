@@ -1,0 +1,17 @@
+package com.hcmute.fit.toeicrise.dtos.requests.question;
+
+import lombok.*;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class SpeakingQuestionExcelRequest {
+    private Integer partNumber;
+    private String questionGroupId;
+    private Integer numberOfQuestions;
+    private String passageText;
+    private String question;
+    private String imageUrl;
+}

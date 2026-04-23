@@ -2,18 +2,29 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import org.mapstruct.*;
 import org.apache.poi.ss.usermodel.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Mapper(componentModel = "spring", uses = {PartMapper.class})
@@ -118,5 +129,74 @@ public interface TestMapper {
         request.setTranscript(getCellValueAsString(row.getCell(14)));
 
         return request;
+    }
+
+    default SpeakingQuestionExcelRequest mapRowToSpeakingDTO(Row row) {
+        SpeakingQuestionExcelRequest request = new SpeakingQuestionExcelRequest();
+
+        // Các field số
+        request.setPartNumber(getCellValueAsInteger(row.getCell(0)));
+        request.setQuestionGroupId(getCellValueAsString(row.getCell(1)));
+        request.setNumberOfQuestions(getCellValueAsInteger(row.getCell(2)));
+
+        // Các field text
+        request.setPassageText(getCellValueAsString(row.getCell(3)));
+        request.setQuestion(getCellValueAsString(row.getCell(4)));
+        request.setImageUrl(getCellValueAsString(row.getCell(5)));
+
+        return request;
+    }
+
+    default WritingQuestionExcelRequest mapRowToWritingDTO(Row row) {
+        WritingQuestionExcelRequest request = new WritingQuestionExcelRequest();
+
+        // Các field số
+        request.setPartNumber(getCellValueAsInteger(row.getCell(0)));
+        request.setQuestionGroupId(getCellValueAsString(row.getCell(1)));
+        request.setNumberOfQuestions(getCellValueAsInteger(row.getCell(2)));
+
+        // Các field text
+        request.setPassageText(getCellValueAsString(row.getCell(3)));
+        request.setImageUrl(getCellValueAsString(row.getCell(4)));
+
+        return request;
+    }
+
+    default SpeakingTestDetailResponse toSpeakingTestDetailResponse(Test test, List<SpeakingPartResponse> partResponses) {
+        return SpeakingTestDetailResponse.builder()
+                .id(test.getId())
+                .name(test.getName())
+                .status(test.getStatus())
+                .createdAt(test.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .updatedAt(test.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .partResponses(partResponses)
+                .build();
+    }
+
+    default WritingTestDetailResponse toWritingTestDetailResponse(Test test, List<WritingPartResponse> partResponses) {
+        return WritingTestDetailResponse.builder()
+                .id(test.getId())
+                .name(test.getName())
+                .status(test.getStatus())
+                .createdAt(test.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .updatedAt(test.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .partResponses(partResponses)
+                .build();
+    }
+
+    default LearnerSpeakingTestDetailResponse toLearnerSpeakingTestDetailResponse(Test test, List<LearnerSpeakingPartDetailResponse> partResponses) {
+        return LearnerSpeakingTestDetailResponse.builder()
+                .id(test.getId())
+                .testName(test.getName())
+                .partResponses(partResponses)
+                .build();
+    }
+
+    default LearnerWritingTestDetailResponse toLearnerWritingTestDetailResponse(Test test, List<LearnerWritingPartDetailResponse> partResponses) {
+        return LearnerWritingTestDetailResponse.builder()
+                .id(test.getId())
+                .testName(test.getName())
+                .partResponses(partResponses)
+                .build();
     }
 }

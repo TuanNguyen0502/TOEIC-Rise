@@ -1,10 +1,20 @@
 package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionGroupDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionGroupDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupAnswerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Part;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
@@ -39,6 +49,26 @@ public interface QuestionGroupMapper {
                 .build();
     }
 
+    default SpeakingQuestionGroupResponse toSpeakingQuestionGroupResponse(QuestionGroup questionGroup, List<SpeakingQuestionResponse> questions) {
+        return SpeakingQuestionGroupResponse.builder()
+                .id(questionGroup.getId())
+                .imageUrl(questionGroup.getImageUrl())
+                .passage(questionGroup.getPassage())
+                .position(questionGroup.getPosition())
+                .questions(questions)
+                .build();
+    }
+
+    default WritingQuestionGroupResponse toWritingQuestionGroupResponse(QuestionGroup questionGroup, List<WritingQuestionResponse> questions) {
+        return WritingQuestionGroupResponse.builder()
+                .id(questionGroup.getId())
+                .imageUrl(questionGroup.getImageUrl())
+                .passage(questionGroup.getPassage())
+                .position(questionGroup.getPosition())
+                .questions(questions)
+                .build();
+    }
+
     default QuestionGroup toQuestionGroup(Test test, Part part, QuestionExcelRequest excelRequest) {
         QuestionGroup questionGroup = new QuestionGroup();
         questionGroup.setTest(test);
@@ -49,5 +79,45 @@ public interface QuestionGroupMapper {
         questionGroup.setPassage(excelRequest.getPassageText());
         questionGroup.setTranscript(excelRequest.getTranscript());
         return questionGroup;
+    }
+
+    default QuestionGroup toQuestionGroup(Test test, Part part, SpeakingQuestionExcelRequest excelRequest) {
+        QuestionGroup questionGroup = new QuestionGroup();
+        questionGroup.setTest(test);
+        questionGroup.setPart(part);
+        questionGroup.setImageUrl(excelRequest.getImageUrl());
+        questionGroup.setPosition(excelRequest.getNumberOfQuestions());
+        questionGroup.setPassage(excelRequest.getPassageText());
+        return questionGroup;
+    }
+
+    default QuestionGroup toQuestionGroup(Test test, Part part, WritingQuestionExcelRequest excelRequest) {
+        QuestionGroup questionGroup = new QuestionGroup();
+        questionGroup.setTest(test);
+        questionGroup.setPart(part);
+        questionGroup.setImageUrl(excelRequest.getImageUrl());
+        questionGroup.setPosition(excelRequest.getNumberOfQuestions());
+        questionGroup.setPassage(excelRequest.getPassageText());
+        return questionGroup;
+    }
+
+    default LearnerSpeakingQuestionGroupDetailResponse toLearnerSpeakingQuestionGroupDetailResponse(QuestionGroup questionGroup, List<LearnerSpeakingQuestionDetailResponse> questions) {
+        return LearnerSpeakingQuestionGroupDetailResponse.builder()
+                .id(questionGroup.getId())
+                .passage(questionGroup.getPassage())
+                .imageUrl(questionGroup.getImageUrl())
+                .position(questionGroup.getPosition())
+                .questionDetailResponses(questions)
+                .build();
+    }
+
+    default LearnerWritingQuestionGroupDetailResponse toLearnerWritingQuestionGroupDetailResponse(QuestionGroup questionGroup, List<LearnerWritingQuestionDetailResponse> questions) {
+        return LearnerWritingQuestionGroupDetailResponse.builder()
+                .id(questionGroup.getId())
+                .passage(questionGroup.getPassage())
+                .imageUrl(questionGroup.getImageUrl())
+                .position(questionGroup.getPosition())
+                .questionDetailResponses(questions)
+                .build();
     }
 }

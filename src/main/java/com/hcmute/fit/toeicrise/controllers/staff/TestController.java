@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -30,12 +31,12 @@ public class TestController {
     public ResponseEntity<?> getAllTests(@RequestParam(required = false) String name,
                                          @RequestParam(required = false) ETestStatus status,
                                          @RequestParam(defaultValue = "0")
-                                             @Min(0) int page,
+                                         @Min(0) int page,
                                          @RequestParam(defaultValue = "10")
-                                             @Min(1) @Max(100) int size,
+                                         @Min(1) @Max(100) int size,
                                          @RequestParam(defaultValue = "updatedAt") String sortBy,
                                          @RequestParam(defaultValue = "DESC") String direction) {
-        return ResponseEntity.ok(testService.getAllTests(name, status, page, size, sortBy, direction));
+        return ResponseEntity.ok(testService.getAllTestsByType(ETestType.LISTENING_AND_READING, name, status, page, size, sortBy, direction));
     }
 
     @GetMapping("/{id}")

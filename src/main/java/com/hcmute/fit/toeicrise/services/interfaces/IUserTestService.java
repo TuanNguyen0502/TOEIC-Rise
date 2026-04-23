@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.UserTestRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.speaking.SpeakingTestSubmissionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.usertest.writing.WritingTestSubmissionRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.FullTestResultResponse;
@@ -13,10 +15,13 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartsResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.useranswer.UserAnswerOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,18 +30,26 @@ import java.util.Map;
 public interface IUserTestService {
     TestResultResponse getUserTestResultById(String email, Long userTestId);
 
+    SpeakingWritingTestResultResponse getSpeakingWritingTestResultById(String email, Long userTestId);
+
     Map<String, List<UserAnswerOverallResponse>> getUserAnswersGroupedByPart(String email, Long userTestId);
 
     TestResultOverallResponse calculateAndSaveUserTestResult(String email, UserTestRequest request);
 
     List<LearnerTestHistoryResponse> allLearnerTestHistories(Long testId, String email);
 
+    @Transactional
+    SpeakingWritingTestResultOverallResponse submitWritingTest(String email, WritingTestSubmissionRequest request);
+
+    @Transactional
+    SpeakingWritingTestResultOverallResponse submitSpeakingTest(String email, SpeakingTestSubmissionRequest request);
+
     LearnerTestPartsResponse getTestByIdAndParts(Long testId, List<Long> parts);
 
     LearnerTestPartsResponse getUserTestDetail(Long userTestId, String email);
 
     AnalysisResultResponse getAnalysisResult(String email, EDays days);
-  
+
     PageResponse getAllHistories(Specification<UserTest> userTestSpecification, Pageable pageable);
 
     FullTestResultResponse getFullTestResult(String email, int size);

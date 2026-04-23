@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,10 @@ public class Test extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ETestStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private ETestType type;
 
     @Column(name = "number_of_learner_tests")
     private Long numberOfLearnerTests;

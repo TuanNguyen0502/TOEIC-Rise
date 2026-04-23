@@ -2,13 +2,23 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.FileUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.LearnerTestResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.TestResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingTestDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingTestDetailResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.dtos.requests.test.TestUpdateRequest;
@@ -59,8 +69,9 @@ public class TestServiceImpl implements ITestService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse getAllTests(String name, ETestStatus status, int page, int size, String sortBy, String direction) {
+    public PageResponse getAllTestsByType(ETestType type, String name, ETestStatus status, int page, int size, String sortBy, String direction) {
         Specification<Test> specification = (_, _, cb) -> cb.conjunction();
+        specification = specification.and(TestSpecification.typeEquals(type));
         return getTestResponses(name, status, page, size, sortBy, direction, specification);
     }
 
@@ -103,7 +114,7 @@ public class TestServiceImpl implements ITestService {
     @Override
     public void deleteTestsByTestSetId(Long testSetId) {
         int updatedCount = testRepository.updateStatusByTestSetId(testSetId, ETestStatus.DELETED);
-        if (updatedCount == 0){
+        if (updatedCount == 0) {
             log.debug("No tests found for test set ID: {}", testSetId);
             return;
         }
@@ -114,7 +125,7 @@ public class TestServiceImpl implements ITestService {
     @Override
     public void changeTestsStatusToPendingByTestSetId(Long testSetId) {
         int updatedCount = testRepository.updateStatusByTestSetId(testSetId, ETestStatus.PENDING);
-        if (updatedCount == 0){
+        if (updatedCount == 0) {
             log.debug("Not found for test set ID: {}", testSetId);
             return;
         }
@@ -129,17 +140,20 @@ public class TestServiceImpl implements ITestService {
         return testMapper.toDetailResponse(test, partResponses);
     }
 
-    private PageResponse getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
-        if (name != null && !name.trim().isEmpty())
-            specification = specification.and(TestSpecification.nameContains(name));
-        if (status != null)
-            specification = specification.and(TestSpecification.statusEquals(status));
+    @Transactional(readOnly = true)
+    @Override
+    public SpeakingTestDetailResponse getSpeakingTestDetailById(Long id) {
+        Test test = getTestById(id);
+        List<SpeakingPartResponse> partResponses = questionGroupService.getSpeakingQuestionGroupsByTestIdGroupByPart(id);
+        return testMapper.toSpeakingTestDetailResponse(test, partResponses);
+    }
 
-        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<TestResponse> testResponses = testRepository.findAll(specification, pageable).map(testMapper::toResponse);
-        return pageResponseMapper.toPageResponse(testResponses);
+    @Transactional(readOnly = true)
+    @Override
+    public WritingTestDetailResponse getWritingTestDetailById(Long id) {
+        Test test = getTestById(id);
+        List<WritingPartResponse> partResponses = questionGroupService.getWritingQuestionGroupsByTestIdGroupByPart(id);
+        return testMapper.toWritingTestDetailResponse(test, partResponses);
     }
 
     @Override
@@ -153,20 +167,41 @@ public class TestServiceImpl implements ITestService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
 
         List<QuestionExcelRequest> questionExcelRequests = readFile(file);
-        Test test = createTest(request.getTestName(), testSet);
+        Test test = createTest(request.getTestName(), ETestType.LISTENING_AND_READING, testSet);
         processQuestions(test, questionExcelRequests);
         log.info("Test imported successfully with {} questions", questionExcelRequests.size());
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
-    public Test createTest(String testName, TestSet testSet) {
-        Test test = Test.builder()
-                .name(testName)
-                .status(ETestStatus.PENDING)
-                .testSet(testSet)
-                .numberOfLearnerTests(0L).build();
-        log.info("Test created successfully");
-        return testRepository.save(test);
+    public void importSpeakingTest(MultipartFile file, TestRequest request) {
+        if (!FileUtil.isValidFile(file))
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        TestSet testSet = testSetRepository.findById(request.getTestSetId()).orElseThrow(() ->
+                new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
+        if (testRepository.existsByName(request.getTestName()))
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
+
+        List<SpeakingQuestionExcelRequest> questionExcelRequests = readSpeakingFile(file);
+        Test test = createTest(request.getTestName(), ETestType.SPEAKING, testSet);
+        processSpeakingQuestions(test, questionExcelRequests);
+        log.info("Test imported successfully with {} questions", questionExcelRequests.size());
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Override
+    public void importWritingTest(MultipartFile file, TestRequest request) {
+        if (!FileUtil.isValidFile(file))
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        TestSet testSet = testSetRepository.findById(request.getTestSetId()).orElseThrow(() ->
+                new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
+        if (testRepository.existsByName(request.getTestName()))
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test's name");
+
+        List<WritingQuestionExcelRequest> questionExcelRequests = readWritingFile(file);
+        Test test = createTest(request.getTestName(), ETestType.WRITING, testSet);
+        processWritingQuestions(test, questionExcelRequests);
+        log.info("Test imported successfully with {} questions", questionExcelRequests.size());
     }
 
     @Override
@@ -242,9 +277,10 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public PageResponse searchTestsByName(com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest request) {
+    public PageResponse searchTestsByTypeAndName(ETestType type, com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest request) {
         Specification<Test> testSpecification = (_, _, cb) -> cb.conjunction();
         testSpecification = testSpecification.and(TestSpecification.testSetIdsIn(request.getSort()));
+        testSpecification = testSpecification.and(TestSpecification.typeEquals(type));
 
         if (request.getName() != null && !request.getName().isEmpty())
             testSpecification = testSpecification.and(TestSpecification.nameContains(request.getName()));
@@ -268,7 +304,7 @@ public class TestServiceImpl implements ITestService {
     }
 
     @Override
-    public Test getTestById(Long testId){
+    public Test getTestById(Long testId) {
         return testRepository.findByIdWithTestSet(testId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
     }
 
@@ -283,7 +319,58 @@ public class TestServiceImpl implements ITestService {
         return testRepository.findByIdAndStatus(testId, status).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
     }
 
-    private Map<Integer, List<QuestionExcelRequest>> groupQuestionsByKey(List<QuestionExcelRequest> questionExcelRequests){
+    @Override
+    public LearnerSpeakingTestDetailResponse getSpeakingTestDetailResponseForExam(Long testId, List<Long> parts) {
+        Test test = getApprovedTestEntity(testId);
+        if (test.getType() != ETestType.SPEAKING)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test");
+
+        List<LearnerSpeakingPartDetailResponse> partDetailResponses = questionGroupService.getLearnerSpeakingPartsByTestIdGroupByParts(testId, parts);
+        return testMapper.toLearnerSpeakingTestDetailResponse(test, partDetailResponses);
+    }
+
+    @Override
+    public LearnerWritingTestDetailResponse getWritingTestDetailResponseForExam(Long testId, List<Long> parts) {
+        Test test = getApprovedTestEntity(testId);
+        if (test.getType() != ETestType.WRITING)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test");
+
+        List<LearnerWritingPartDetailResponse> partDetailResponses = questionGroupService.getLearnerWritingPartsByTestIdGroupByParts(testId, parts);
+        return testMapper.toLearnerWritingTestDetailResponse(test, partDetailResponses);
+    }
+
+    private Test getApprovedTestEntity(Long testId) {
+        Test test = testRepository.findById(testId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+        if (test.getStatus() != ETestStatus.APPROVED)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test");
+        return test;
+    }
+
+    private PageResponse getTestResponses(String name, ETestStatus status, int page, int size, String sortBy, String direction, Specification<Test> specification) {
+        if (name != null && !name.trim().isEmpty())
+            specification = specification.and(TestSpecification.nameContains(name));
+        if (status != null)
+            specification = specification.and(TestSpecification.statusEquals(status));
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<TestResponse> testResponses = testRepository.findAll(specification, pageable).map(testMapper::toResponse);
+        return pageResponseMapper.toPageResponse(testResponses);
+    }
+
+    private Test createTest(String testName, ETestType type, TestSet testSet) {
+        Test test = Test.builder()
+                .name(testName)
+                .status(ETestStatus.PENDING)
+                .type(type)
+                .testSet(testSet)
+                .numberOfLearnerTests(0L).build();
+        log.info("Test created successfully");
+        return testRepository.save(test);
+    }
+
+    private Map<Integer, List<QuestionExcelRequest>> groupQuestionsByKey(List<QuestionExcelRequest> questionExcelRequests) {
         List<QuestionExcelRequest> sortedQuestions = questionExcelRequests.stream().sorted(
                 Comparator.comparing(QuestionExcelRequest::getNumberOfQuestions,
                         Comparator.nullsLast(Comparator.naturalOrder()))
@@ -296,5 +383,175 @@ public class TestServiceImpl implements ITestService {
             groupedQuestions.computeIfAbsent(groupKey, _ -> new ArrayList<>()).add(question);
         }
         return groupedQuestions;
+    }
+
+    private Map<Integer, List<SpeakingQuestionExcelRequest>> groupSpeakingQuestionsByKey(List<SpeakingQuestionExcelRequest> questionExcelRequests) {
+        List<SpeakingQuestionExcelRequest> sortedQuestions = questionExcelRequests.stream().sorted(
+                Comparator.comparing(SpeakingQuestionExcelRequest::getNumberOfQuestions,
+                        Comparator.nullsLast(Comparator.naturalOrder()))
+        ).toList();
+
+        Map<Integer, List<SpeakingQuestionExcelRequest>> groupedQuestions = new HashMap<>();
+        for (SpeakingQuestionExcelRequest question : sortedQuestions) {
+            Integer groupKey = Optional.ofNullable(extractGroupNumber(question.getQuestionGroupId()))
+                    .orElse(-question.getNumberOfQuestions());
+            groupedQuestions.computeIfAbsent(groupKey, _ -> new ArrayList<>()).add(question);
+        }
+        return groupedQuestions;
+    }
+
+    private Map<Integer, List<WritingQuestionExcelRequest>> groupWritingQuestionsByKey(List<WritingQuestionExcelRequest> questionExcelRequests) {
+        List<WritingQuestionExcelRequest> sortedQuestions = questionExcelRequests.stream().sorted(
+                Comparator.comparing(WritingQuestionExcelRequest::getNumberOfQuestions,
+                        Comparator.nullsLast(Comparator.naturalOrder()))
+        ).toList();
+
+        Map<Integer, List<WritingQuestionExcelRequest>> groupedQuestions = new HashMap<>();
+        for (WritingQuestionExcelRequest question : sortedQuestions) {
+            Integer groupKey = Optional.ofNullable(extractGroupNumber(question.getQuestionGroupId()))
+                    .orElse(-question.getNumberOfQuestions());
+            groupedQuestions.computeIfAbsent(groupKey, _ -> new ArrayList<>()).add(question);
+        }
+        return groupedQuestions;
+    }
+
+    private void processSpeakingQuestionGroup(Test test, List<SpeakingQuestionExcelRequest> groupQuestions) {
+        try {
+            SpeakingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
+            String partName = EPart.getSpeakingPart(firstQuestion.getPartNumber());
+            Part part = partService.getPartByName(partName);
+            QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
+
+            questionService.createSpeakingQuestionBatch(groupQuestions, questionGroup);
+            log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
+        } catch (ConstraintViolationException e) {
+            log.warn("Failed to import Question Group. Error: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error processing question group: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+    }
+
+    private void processWritingQuestionGroup(Test test, List<WritingQuestionExcelRequest> groupQuestions) {
+        try {
+            WritingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
+            String partName = EPart.getWritingPart(firstQuestion.getPartNumber());
+            Part part = partService.getPartByName(partName);
+            QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
+
+            questionService.createWritingQuestionBatch(groupQuestions, questionGroup);
+            log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
+        } catch (ConstraintViolationException e) {
+            log.warn("Failed to import Question Group. Error: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error processing question group: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+    }
+
+    private void processSpeakingQuestions(Test test, List<SpeakingQuestionExcelRequest> questions) {
+        if (questions == null || questions.isEmpty()) {
+            log.warn("No questions to process for test ID: {}", test.getId());
+            return;
+        }
+
+        Map<Integer, List<SpeakingQuestionExcelRequest>> groupedQuestions = groupSpeakingQuestionsByKey(questions);
+        int processedGroups = 0;
+        for (Map.Entry<Integer, List<SpeakingQuestionExcelRequest>> entry : groupedQuestions.entrySet()) {
+            try {
+                processSpeakingQuestionGroup(test, entry.getValue());
+                processedGroups++;
+                if (processedGroups % 10 == 0)
+                    log.debug("Processed {}/{} question groups", processedGroups, groupedQuestions.size());
+            } catch (Exception e) {
+                log.error("Failed to process question group {}: {}", entry.getKey(), e.getMessage(), e);
+            }
+        }
+    }
+
+    private void processWritingQuestions(Test test, List<WritingQuestionExcelRequest> questions) {
+        if (questions == null || questions.isEmpty()) {
+            log.warn("No questions to process for test ID: {}", test.getId());
+            return;
+        }
+
+        Map<Integer, List<WritingQuestionExcelRequest>> groupedQuestions = groupWritingQuestionsByKey(questions);
+        int processedGroups = 0;
+        for (Map.Entry<Integer, List<WritingQuestionExcelRequest>> entry : groupedQuestions.entrySet()) {
+            try {
+                processWritingQuestionGroup(test, entry.getValue());
+                processedGroups++;
+                if (processedGroups % 10 == 0)
+                    log.debug("Processed {}/{} question groups", processedGroups, groupedQuestions.size());
+            } catch (Exception e) {
+                log.error("Failed to process question group {}: {}", entry.getKey(), e.getMessage(), e);
+            }
+        }
+    }
+
+    private List<SpeakingQuestionExcelRequest> readSpeakingFile(MultipartFile file) {
+        List<SpeakingQuestionExcelRequest> questionExcelRequests;
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet.getLastRowNum() < 1)
+                throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+
+            int maxRows = 15;
+            int lastRowNum = Math.min(sheet.getLastRowNum(), maxRows);
+            questionExcelRequests = new ArrayList<>(lastRowNum);
+
+            for (int i = 1; i <= lastRowNum; i++) {
+                Row row = sheet.getRow(i);
+                if (row == null)
+                    continue;
+
+                try {
+                    SpeakingQuestionExcelRequest questionExcelRequest = testMapper.mapRowToSpeakingDTO(row);
+                    if (questionExcelRequest != null)
+                        questionExcelRequests.add(questionExcelRequest);
+                } catch (Exception e) {
+                    log.warn("Error parsing file: {}", e.getMessage());
+                }
+            }
+            if (sheet.getLastRowNum() > maxRows)
+                log.warn("File has more than {} rows, only processing first {} rows", maxRows, maxRows);
+        } catch (IOException e) {
+            log.error("Error reading file: {}", e.getMessage());
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+        return questionExcelRequests;
+    }
+
+    private List<WritingQuestionExcelRequest> readWritingFile(MultipartFile file) {
+        List<WritingQuestionExcelRequest> questionExcelRequests;
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet.getLastRowNum() < 1)
+                throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+
+            int maxRows = 15;
+            int lastRowNum = Math.min(sheet.getLastRowNum(), maxRows);
+            questionExcelRequests = new ArrayList<>(lastRowNum);
+
+            for (int i = 1; i <= lastRowNum; i++) {
+                Row row = sheet.getRow(i);
+                if (row == null)
+                    continue;
+
+                try {
+                    WritingQuestionExcelRequest questionExcelRequest = testMapper.mapRowToWritingDTO(row);
+                    if (questionExcelRequest != null)
+                        questionExcelRequests.add(questionExcelRequest);
+                } catch (Exception e) {
+                    log.warn("Error parsing file: {}", e.getMessage());
+                }
+            }
+            if (sheet.getLastRowNum() > maxRows)
+                log.warn("File has more than {} rows, only processing first {} rows", maxRows, maxRows);
+        } catch (IOException e) {
+            log.error("Error reading file: {}", e.getMessage());
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+        return questionExcelRequests;
     }
 }

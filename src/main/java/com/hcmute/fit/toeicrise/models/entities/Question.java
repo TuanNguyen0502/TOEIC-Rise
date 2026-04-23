@@ -24,7 +24,7 @@ public class Question extends BaseEntity {
     @Column(columnDefinition = "json")
     private List<String> options;
 
-    @Column(name = "correct_option", nullable = false, length = 1)
+    @Column(name = "correct_option", length = 1)
     private String correctOption;
 
     @Column(name = "explanations", columnDefinition = "TEXT")

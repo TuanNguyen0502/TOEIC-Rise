@@ -30,6 +30,16 @@ public interface IChatService {
 
     Flux<ChatbotResponse> generateExplanation(TestingSystemPromptExplanationGenerationRequest request);
 
+    Flux<ChatbotResponse> generateBlogPostSummary(BlogPostSummaryRequest request);
+
+    String generateFeedbackForWritingTestAnswerWithImage(String answerText, String partName, String passage, InputStream imageInputStream, String contentType);
+
+    String generateFeedbackForWritingTestAnswerWithoutImage(String answerText, String partName, String passage);
+
+    String generateFeedbackForSpeakingTestAnswerWithImage(String partName, String passage, String questionContent, InputStream imageInputStream, String imageContentType, InputStream audioInputStream, String audioContentType);
+
+    String generateFeedbackForSpeakingTestAnswerWithoutImage(String partName, String passage, String questionContent, InputStream audioInputStream, String audioContentType);
+
     Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
 
 }
