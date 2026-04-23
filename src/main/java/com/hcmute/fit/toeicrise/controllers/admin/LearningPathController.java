@@ -63,15 +63,15 @@ public class LearningPathController {
         return ResponseEntity.ok(lessonService.updateLesson(id, request));
     }
 
-    @PatchMapping("/lessons/{lessonId}/active")
-    public ResponseEntity<?> setLessonActive(@PathVariable Long lessonId, @RequestParam("isActive") Boolean isActive) {
-        lessonService.setLessonActive(lessonId, isActive);
-        return ResponseEntity.ok().build();
+    @PatchMapping("/lessons/{id}/active")
+    public ResponseEntity<?> setLessonActive(@PathVariable(name = "id") Long id, @RequestParam("isActive") Boolean isActive) {
+        lessonService.setLessonActive(id, isActive);
+        return ResponseEntity.ok(MessageConstant.LESSON_ACTIVE_UPDATE_SUCCESS);
     }
 
-    @PostMapping("/{learningPathId}/lessons/reorder")
-    public ResponseEntity<?> reorder(@PathVariable Long learningPathId, @Valid @RequestBody LessonReorderRequest request) {
-        learningPathService.reorderLessons(learningPathId, request);
-        return ResponseEntity.ok().build();
+    @PostMapping("/{id}/lessons/reorder")
+    public ResponseEntity<?> reorder(@PathVariable(name = "id") Long id, @Valid @RequestBody LessonReorderRequest request) {
+        learningPathService.reorderLessons(id, request);
+        return ResponseEntity.ok(MessageConstant.LESSON_REORDER_SUCCESS);
     }
 }

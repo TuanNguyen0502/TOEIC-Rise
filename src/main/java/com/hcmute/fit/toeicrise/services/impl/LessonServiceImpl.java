@@ -42,7 +42,6 @@ public class LessonServiceImpl implements ILessonService {
 
         if (request.getVideoUrl() == null || request.getVideoUrl().isBlank())
             throw new AppException(ErrorCode.INVALID_REQUEST, "videoUrl is required");
-        cloudinaryUtil.validateVideoURL(request.getVideoUrl());
         lesson.setVideoUrl(request.getVideoUrl());
 
         return lessonMapper.toResponse(lessonRepository.save(lesson));
@@ -56,15 +55,11 @@ public class LessonServiceImpl implements ILessonService {
         String newUrl = request.getVideoUrl();
 
         if (newUrl != null && !newUrl.isBlank()) {
-            cloudinaryUtil.validateVideoURL(newUrl);
-            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl)) {
+            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl))
                 cloudinaryUtil.deleteFile(oldUrl);
-            }
-        } else {
-            newUrl = oldUrl;
-        }
+        } else newUrl = oldUrl;
 
-        lesson = lessonMapper.toEntity(request);
+        lesson = lessonMapper.toEntity(request, lesson);
         lesson.setVideoUrl(newUrl);
         return lessonMapper.toResponse(lessonRepository.save(lesson));
     }
@@ -94,10 +89,10 @@ public class LessonServiceImpl implements ILessonService {
 
         for (ItemRequest item : request.getItems()) {
             Lesson lesson = byId.get(item.getLessonId());
-            lesson.setOrderIndex(item.getOrderIndex() + OFFSET);
+            lesson.setOrderIndex(-(item.getOrderIndex() + OFFSET));
         }
         lessonRepository.saveAll(lessons);
-
+        lessonRepository.flush();
         for (ItemRequest item : request.getItems()) {
             Lesson lesson = byId.get(item.getLessonId());
             lesson.setOrderIndex(item.getOrderIndex());

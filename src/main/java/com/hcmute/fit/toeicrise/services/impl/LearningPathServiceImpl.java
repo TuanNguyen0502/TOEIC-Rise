@@ -80,11 +80,13 @@ public class LearningPathServiceImpl implements ILearningPathService {
     @Transactional
     @Override
     public void updateLearningPath(Long learningPathId, LearningPathUpdateRequest request) {
-        LearningPath path = learningPathRepository.findById(learningPathId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
+        LearningPath path = getLearningPath(learningPathId);
         path.setName(request.getName());
         path.setDescription(request.getDescription());
         path.setIsActive(request.getIsActive());
+        if (Boolean.FALSE.equals(request.getIsActive()) && path.getLessons() != null) {
+            path.getLessons().forEach(lesson -> lesson.setIsActive(false));
+        }
         learningPathRepository.save(path);
     }
 
