@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AiDictationRequest {
     private Long questionGroupId;
-    private String partName;
+//    private String partName;
     private String transcript;
 }

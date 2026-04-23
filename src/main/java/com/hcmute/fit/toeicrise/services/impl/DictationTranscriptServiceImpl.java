@@ -23,9 +23,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -43,40 +42,62 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
 
     @Override
     @Transactional
-    public void importDictationTranscript(DictationImportRequest mainRequest) {
-        Long testId = mainRequest.getTestId();
-        Long partId = mainRequest.getPartId();
-        List<DictationTranscriptRequest> transcriptRequests = mainRequest.getTranscripts();
+    public void importDictationTranscript(DictationImportRequest request) {
+        Long testId = request.getTestId();
+        Long partId = request.getPartId();
 
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+
+        EPart part = EPart.getEPartByPosition(partId.intValue());
+        if (!part.isListening()) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR, "Part must be a listening part");
+        }
+
+        List<DictationTranscriptRequest> transcriptRequests = request.getTranscripts();
         List<Long> requestGroupIds = transcriptRequests.stream()
                 .map(DictationTranscriptRequest::getQuestionGroupId)
                 .toList();
 
-        List<QuestionGroup> dbGroups = questionGroupRepository.findAllByValidationInfo(
-                requestGroupIds, testId, partId
-        );
-
-        if (dbGroups.size() != requestGroupIds.size()) {
-            throw new AppException(ErrorCode.INVALID_DATA,
-                    "Data conflict.");
+        Set<Long> requestGroupIdSet = new HashSet<>(requestGroupIds);
+        if (requestGroupIdSet.size() != requestGroupIds.size()) {
+            throw new AppException(ErrorCode.INVALID_DATA, "Duplicate questionGroupId in request.");
         }
 
-        dictationTranscriptRepository.deleteByQuestionGroupIdIn(requestGroupIds);
+        List<QuestionGroup> dbGroups = questionGroupRepository.findAllByTestIdAndPartId(testId, partId);
+        Set<Long> dbIdsSet = dbGroups.stream()
+                .map(QuestionGroup::getId)
+                .collect(Collectors.toSet());
+
+        if (!requestGroupIdSet.equals(dbIdsSet)) {
+            Set<Long> missingIds = new HashSet<>(dbIdsSet);
+            missingIds.removeAll(dbIdsSet);
+
+            Set<Long> extraIds = new HashSet<>(dbIdsSet);
+            extraIds.removeAll(dbIdsSet);
+
+            throw new AppException(
+                    ErrorCode.INVALID_DATA,
+                    "Question group IDs do not match. Missing: " + missingIds + ", Extra: " + extraIds
+            );
+        }
 
         Map<Long, QuestionGroup> groupMap = dbGroups.stream()
-                .collect(Collectors.toMap(QuestionGroup::getId, g -> g));
+                .collect(Collectors.toMap(QuestionGroup::getId, Function.identity()));
+
+        dictationTranscriptRepository.deleteByQuestionGroupIdIn(requestGroupIds);
 
         List<DictationTranscript> newTranscripts = transcriptRequests.stream()
                 .map(req -> {
                     DictationTranscript dt = dictationTranscriptMapper.toDictationTranscript(req);
                     dt.setQuestionGroup(groupMap.get(req.getQuestionGroupId()));
                     return dt;
-                }).toList();
+                })
+                .toList();
 
         dictationTranscriptRepository.saveAll(newTranscripts);
 
-        String partNameFromDb = dbGroups.getFirst().getPart().getName();
-        updateTestPartStatus(testId, partNameFromDb);
+        updateTestPartStatus(test, part);
     }
 
     @Override
@@ -213,14 +234,11 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
                 .build();
     }
 
-    private void updateTestPartStatus(Long testId, String partNameStr) {
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
-
-        EPart currentPart = EPart.getEPart(partNameStr);
-
+    private void updateTestPartStatus(Test test, EPart currentPart) {
         List<EPart> status = test.getDictationStatus();
-        if (status == null) status = new ArrayList<>();
+        if (status == null) {
+            status = new ArrayList<>();
+        }
 
         if (!status.contains(currentPart)) {
             status.add(currentPart);

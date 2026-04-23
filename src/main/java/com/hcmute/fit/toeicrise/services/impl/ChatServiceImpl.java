@@ -493,6 +493,8 @@ public class ChatServiceImpl implements IChatService {
         }
 
         EPart part = EPart.getEPartByPosition(partId.intValue());
+        String partName = part.getName();
+
         if (!part.isListening()) {
             throw new AppException(ErrorCode.VALIDATION_ERROR, "Part must be a listening part");
         }
@@ -507,7 +509,7 @@ public class ChatServiceImpl implements IChatService {
                 .filter(g -> g.getTranscript() != null && !g.getTranscript().isBlank())
                 .map(g -> AiDictationRequest.builder()
                         .questionGroupId(g.getId())
-                        .partName(g.getPart().getName())
+//                        .partName(g.getPart().getName())
                         .transcript(g.getTranscript())
                         .build())
                 .toList();
@@ -521,9 +523,10 @@ public class ChatServiceImpl implements IChatService {
 
             String userMessage = """
                     Process these question groups for TOEIC Dictation.
+                    Target Part: %s
                     Input data:
                     %s
-                    """.formatted(payload);
+                    """.formatted(partName,payload);
 
             ChatClient cleanClient = chatClientBuilder.build();
             return cleanClient.prompt()
