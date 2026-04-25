@@ -13,6 +13,7 @@ import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.DictationTranscriptMapper;
+import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.DictationTranscriptRepository;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.repositories.TestRepository;
@@ -36,8 +37,8 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
     DictationTranscriptRepository dictationTranscriptRepository;
     TestRepository testRepository;
     QuestionGroupRepository questionGroupRepository;
-    DictationTranscriptRepository dictationRepository;
     DictationTranscriptMapper dictationTranscriptMapper;
+    QuestionMapper questionMapper;
 
 
     @Override
@@ -71,9 +72,9 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
 
         if (!requestGroupIdSet.equals(dbIdsSet)) {
             Set<Long> missingIds = new HashSet<>(dbIdsSet);
-            missingIds.removeAll(dbIdsSet);
+            missingIds.removeAll(requestGroupIdSet);
 
-            Set<Long> extraIds = new HashSet<>(dbIdsSet);
+            Set<Long> extraIds = new HashSet<>(requestGroupIdSet);
             extraIds.removeAll(dbIdsSet);
 
             throw new AppException(
@@ -103,6 +104,14 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
     @Override
     public List<DictationResponse> getListeningDictationByTestAndPart(Long testId, Long partId) {
 
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
+
+        EPart requestedPart = EPart.getEPartByPosition(partId.intValue());
+        if (test.getDictationStatus() == null || !test.getDictationStatus().contains(requestedPart)) {
+            throw new AppException(ErrorCode.INVALID_DATA, "Phần thi này chưa hỗ trợ nghe chép chính tả.");
+        }
+
         List<QuestionGroup> groups = questionGroupRepository.findByTestIdAndPartIdOrderByPosition(
                 testId, partId);
 
@@ -112,7 +121,7 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
 
         List<Long> groupIds = groups.stream().map(QuestionGroup::getId).toList();
 
-        Map<Long, DictationTranscript> dictationMap = dictationRepository.findByQuestionGroupIdIn(groupIds)
+        Map<Long, DictationTranscript> dictationMap = dictationTranscriptRepository.findByQuestionGroupIdIn(groupIds)
                 .stream()
                 .collect(Collectors.toMap(d -> d.getQuestionGroup().getId(), d -> d));
 
@@ -200,15 +209,7 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
             DictationTranscript dictation = dictationMap.get(group.getId());
 
             List<QuestionResponse> questionResponses = group.getQuestions().stream()
-                    .map(q -> QuestionResponse.builder()
-                            .id(q.getId())
-                            .position(Long.valueOf(q.getPosition()))
-                            .content(q.getContent())
-                            .options(q.getOptions())
-                            .correctOption(q.getCorrectOption())
-                            .explanation(q.getExplanation())
-                            .tags(q.getTags() != null ? q.getTags().stream().map(tag -> tag.getName()).toList() : List.of())
-                            .build())
+                    .map( questionMapper :: toQuestionResponse )
                     .toList();
 
             return QuestionGroupDictationResponse.builder()

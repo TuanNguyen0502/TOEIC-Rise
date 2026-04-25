@@ -102,6 +102,7 @@ public class MessageConstant {
     public static final String KEYWORD_NOT_BLANK = "Keyword must not be blank.";
     // DictationTranscript related messages
     public static final String DICTATION_TRANSCRIPT_LIST_NOT_EMPTY = "Dictation transcript list must not be empty.";
+    public static final String DICTATION_TRANSCRIPT_ID_NOT_NULL = "Dictation transcript ID must not be null.";
     // Success messages
     public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
     public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";

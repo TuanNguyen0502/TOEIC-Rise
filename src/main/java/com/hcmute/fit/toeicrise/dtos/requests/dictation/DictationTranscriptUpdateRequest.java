@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.dtos.requests.dictation;
 
+import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class DictationTranscriptUpdateRequest {
-    @NotNull(message = "Dictation Transcript ID is required")
+    @NotNull(message = MessageConstant.DICTATION_TRANSCRIPT_ID_NOT_NULL)
     Long id;
     String questionText;
     List<String> options;
