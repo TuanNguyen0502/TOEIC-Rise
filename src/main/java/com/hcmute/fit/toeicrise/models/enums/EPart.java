@@ -47,6 +47,17 @@ public enum EPart {
         throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, name);
     }
 
+    public static EPart getEPartByPosition(int position) {
+        if (position < 1 || position > EPart.values().length) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Part position invalid: " + position);
+        }
+        return EPart.values()[position - 1];
+    }
+
+    public boolean isListening() {
+        return this == PART_1 || this == PART_2 || this == PART_3 || this == PART_4;
+    }
+  
     public static String getSpeakingPart(Integer name) {
         String partName = String.valueOf(name);
         if (SPEAKING_PART_1.getName().contains(partName)) return SPEAKING_PART_1.getName();
