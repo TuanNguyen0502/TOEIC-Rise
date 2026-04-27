@@ -229,6 +229,9 @@ public class Constant {
     public static final String Q_AND_A_SYSTEM_PROMPT_CACHE = "qAndASystemPrompt";
     public static final String EXPLANATION_GENERATION_SYSTEM_PROMPT_CACHE = "explanationGenerationSystemPrompt";
     public static final String SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE = "sentenceAssessmentSystemPrompt";
+    public static final String BLOG_SUMMARIZATION_SYSTEM_PROMPT_CACHE = "blogSummarizationSystemPrompt";
+    public static final String WRITING_ASSESSMENT_SYSTEM_PROMPT_CACHE = "writingAssessmentSystemPrompt";
+    public static final String SPEAKING_ASSESSMENT_SYSTEM_PROMPT_CACHE = "speakingAssessmentSystemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
     // Profile constants
@@ -254,4 +257,11 @@ public class Constant {
     public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
     // Common constants
     public static final int MAX_COMMENT_LENGTH = 500;
+    // Blog category
+    public static final String BLOG_CATEGORY_NAME_PATTERN = "^[\\p{L}0-9\\s.,&()\\-]{2,50}$";
+    public static final String BLOG_CATEGORY_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    // Blog post
+    public static final String BLOG_POST_TITLE_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{5,150}$";
+    public static final String BLOG_POST_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    public static final String BLOG_POST_SUMMARY_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{10,500}$";
 }

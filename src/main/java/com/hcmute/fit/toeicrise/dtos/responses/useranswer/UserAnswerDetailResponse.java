@@ -11,6 +11,9 @@ public class UserAnswerDetailResponse {
     private Long userAnswerId;
     private Long questionId;
     private String userAnswer;
+    private String userAnswerText;
+    private String userAnswerAudioUrl;
+    private String feedback;
     private int position;
     private List<String> tags;
     private String audioUrl;

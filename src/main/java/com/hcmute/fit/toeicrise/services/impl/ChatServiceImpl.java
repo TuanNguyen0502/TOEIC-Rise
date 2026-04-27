@@ -3,9 +3,11 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.commons.constants.PromptConstant;
+import com.hcmute.fit.toeicrise.commons.utils.ImageUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.requests.dictation.AiDictationRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.ImageResource;
 import com.hcmute.fit.toeicrise.dtos.responses.analysis.AnalysisResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
@@ -19,7 +21,10 @@ import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
-import com.hcmute.fit.toeicrise.repositories.*;
+import com.hcmute.fit.toeicrise.repositories.ChatMemoryRepository;
+import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
+import com.hcmute.fit.toeicrise.repositories.UserAnswerRepository;
+import com.hcmute.fit.toeicrise.services.impl.systemprompt.*;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatTitleService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +45,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +68,9 @@ public class ChatServiceImpl implements IChatService {
     private final QAndASystemPromptServiceImpl qAndASystemPromptService;
     private final ExplanationGenerationSystemPromptServiceImpl explanationGenerationSystemPromptService;
     private final SentenceAssessmentSystemPromptServiceImpl sentenceAssessmentSystemPromptService;
+    private final BlogSummarizationSystemPromptServiceImpl blogSummarizationSystemPromptService;
+    private final WritingAssessmentSystemPromptServiceImpl writingAssessmentSystemPromptService;
+    private final SpeakingAssessmentSystemPromptServiceImpl speakingAssessmentSystemPromptService;
     private final IChatTitleService chatTitleService;
     private final ChatbotMapper chatbotMapper;
     private final TemplateEngine templateEngine;
@@ -100,7 +109,7 @@ public class ChatServiceImpl implements IChatService {
         ));
     }
 
-    public Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt) {
+    private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt) {
         // Ensure conversationId is set
         if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
             chatRequest.setConversationId(UUID.randomUUID().toString());
@@ -196,6 +205,49 @@ public class ChatServiceImpl implements IChatService {
                 ));
     }
 
+    private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt, InputStream imageInputStream, String contentType) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = ChatClient.create(chatModel)
+                .prompt()
+                .system(systemPrompt)
+                .user(user -> user
+                        .text(chatRequest.getMessage())
+                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
+                .stream()
+                .content();
+
+        // Collect the streaming content and save when complete
+        AtomicReference<String> fullResponse = new AtomicReference<>("");
+
+        return content
+                .doOnNext(chunk -> {
+                    // Accumulate the response
+                    fullResponse.updateAndGet(current -> current + chunk);
+                })
+                .doOnComplete(() -> {
+                    // Save the complete assistant message when streaming is done
+                    Message assistantMessage = new AssistantMessage(fullResponse.get());
+                    chatMemoryRepository.saveMessage(chatRequest.getConversationId(), assistantMessage);
+                })
+                .map(contentChunk -> chatbotMapper.toChatbotResponse(
+                        contentChunk,
+                        messageId,
+                        chatRequest.getConversationId(),
+                        MessageType.ASSISTANT.name()
+                ));
+    }
+
     @Override
     public String generateConversationTitle(String email, TitleRequest titleRequest) {
         String prompt = "Dựa trên tin nhắn sau của người dùng, hãy tạo một tiêu đề ngắn gọn, rõ ràng và phù hợp cho cuộc hội thoại. "
@@ -218,44 +270,52 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest) {
-        Mono<String> promptMono;
+    public Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest request) {
+        return Mono.fromCallable(() -> {
+                    UserAnswer userAnswer = userAnswerRepository.findById(request.getUserAnswerId())
+                            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
 
-        if (chatAboutQuestionRequest.getConversationId() == null || chatAboutQuestionRequest.getConversationId().isEmpty()) {
-            promptMono = Mono.fromCallable(() -> {
-                UserAnswer userAnswer = userAnswerRepository.findById(chatAboutQuestionRequest.getUserAnswerId())
-                        .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question"));
+                    Question question = userAnswer.getQuestion();
+                    QuestionGroup questionGroup = question.getQuestionGroup();
 
-                Question question = userAnswer.getQuestion();
-                QuestionGroup questionGroup = question.getQuestionGroup();
+                    String prompt;
+                    if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
+                        String options = String.join(", ", question.getOptions());
+                        String tags = question.getTags().stream()
+                                .map(Tag::getName)
+                                .reduce((a, b) -> a + ", " + b)
+                                .orElse("N/A");
 
-                String options = String.join(", ", question.getOptions());
-                String tags = question.getTags().stream()
-                        .map(Tag::getName)
-                        .reduce((a, b) -> a + ", " + b)
-                        .orElse("N/A");
-                return """
-                        ### DỮ LIỆU ĐẦU VÀO:\s
-                        1. Tin nhắn của người dùng:
-                        %s\s
-                        2. Passage (đoạn văn nếu có):
-                        %s\s
-                        3. Transcript (nghe hiểu nếu có):
-                        %s\s
-                        4. Nội dung câu hỏi:
-                        %s\s
-                        5. Các lựa chọn:
-                        %s\s
-                        6. Đáp án đúng:
-                        %s\s
-                        7. Giải thích đáp án đúng:
-                        %s\s
-                        8. Đáp án người dùng đã chọn (nếu có):
-                        %s\s
-                        9. Tags / Chủ điểm kiến thức:
-                        %s\s
-                        """
-                        .formatted(chatAboutQuestionRequest.getMessage(),
+                        prompt = """
+                                ### DỮ LIỆU ĐẦU VÀO:
+                                1. Tin nhắn của người dùng:
+                                %s
+                                
+                                2. Passage (đoạn văn nếu có):
+                                %s
+                                
+                                3. Transcript (nghe hiểu nếu có):
+                                %s
+                                
+                                4. Nội dung câu hỏi:
+                                %s
+                                
+                                5. Các lựa chọn:
+                                %s
+                                
+                                6. Đáp án đúng:
+                                %s
+                                
+                                7. Giải thích đáp án đúng:
+                                %s
+                                
+                                8. Đáp án người dùng đã chọn (nếu có):
+                                %s
+                                
+                                9. Tags / Chủ điểm kiến thức:
+                                %s
+                                """.formatted(
+                                request.getMessage(),
                                 questionGroup.getPassage(),
                                 questionGroup.getTranscript(),
                                 question.getContent(),
@@ -263,19 +323,40 @@ public class ChatServiceImpl implements IChatService {
                                 question.getCorrectOption(),
                                 question.getExplanation(),
                                 userAnswer.getAnswer() != null ? userAnswer.getAnswer() : "N/A",
-                                tags);
-            }).subscribeOn(Schedulers.boundedElastic());
-        } else {
-            promptMono = Mono.just(chatAboutQuestionRequest.getMessage());
-        }
+                                tags
+                        );
+                    } else {
+                        prompt = request.getMessage();
+                    }
 
-        return promptMono.flatMapMany(prompt ->
-                chat(ChatRequest.builder()
-                                .conversationId(chatAboutQuestionRequest.getConversationId())
-                                .message(prompt)
-                                .build(),
-                        getActiveQAndASystemPrompt())
-        );
+                    return new ChatAboutQuestionContext(prompt, questionGroup);
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(ctx -> {
+                    String prompt = ctx.prompt();
+                    QuestionGroup questionGroup = ctx.questionGroup();
+                    if (questionGroup.getImageUrl() != null && !questionGroup.getImageUrl().isBlank()) {
+                        try {
+                            ImageResource resource = ImageUtils.fetchImage(questionGroup.getImageUrl());
+                            InputStream is = resource.inputStream(); // keep open during streaming
+
+                            return chat(ChatRequest.builder()
+                                            .conversationId(request.getConversationId())
+                                            .message(prompt)
+                                            .build(),
+                                    getActiveQAndASystemPrompt(),
+                                    is,
+                                    resource.contentType());
+                        } catch (IOException e) {
+                            throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch question image");
+                        }
+                    }
+                    return chat(ChatRequest.builder()
+                                    .conversationId(request.getConversationId())
+                                    .message(prompt)
+                                    .build(),
+                            getActiveQAndASystemPrompt());
+                });
     }
 
     @Override
@@ -433,6 +514,136 @@ public class ChatServiceImpl implements IChatService {
         });
     }
 
+    @Override
+    public Flux<ChatbotResponse> generateBlogPostSummary(BlogPostSummaryRequest request) {
+        return Flux.defer(() -> {
+            ChatClient cleanClient = chatClientBuilder.build();
+            // Toàn bộ logic tạo prompt nằm bên trong này để đảm bảo tính Lazy
+            String conversationId = UUID.randomUUID().toString();
+            String messageId = UUID.randomUUID().toString();
+
+            String userPrompt = """
+                    ### DỮ LIỆU ĐẦU VÀO:\s
+                    1. Title: %s\s
+                    2. Content: %s\s
+                    """.formatted(
+                    request.getTitle(),
+                    request.getContent()
+            );
+
+            return cleanClient.prompt()
+                    .user(userPrompt)
+                    .system(getActiveBlogSummarizationSystemPrompt())
+                    .stream()
+                    .content()
+                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                            contentText,
+                            messageId,
+                            conversationId,
+                            MessageType.ASSISTANT.name()
+                    ));
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public String generateFeedbackForWritingTestAnswerWithImage(String answerText, String partName, String passage, InputStream imageInputStream, String contentType) {
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Text: %s\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                """.formatted(
+                answerText,
+                partName,
+                passage
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
+                .prompt()
+                .system(getActiveWritingAssessmentSystemPrompt())
+                .user(user -> user
+                        .text(userPrompt)
+                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
+                .call()
+                .content();
+    }
+
+    @Override
+    public String generateFeedbackForWritingTestAnswerWithoutImage(String answerText, String partName, String passage) {
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Text: %s\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                """.formatted(
+                answerText,
+                partName,
+                passage
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
+                .prompt()
+                .system(getActiveWritingAssessmentSystemPrompt())
+                .user(userPrompt)
+                .call()
+                .content();
+    }
+
+    @Override
+    public String generateFeedbackForSpeakingTestAnswerWithImage(String partName, String passage, String questionContent, InputStream imageInputStream, String imageContentType, InputStream audioInputStream, String audioContentType) {
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Audio: (được gửi dưới dạng media)\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                4. Question: %s\s
+                """.formatted(
+                partName,
+                passage,
+                questionContent
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
+                .prompt()
+                .system(getActiveSpeakingAssessmentSystemPrompt())
+                .user(user -> user
+                        .text(userPrompt)
+                        .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
+                        .media(MimeTypeUtils.parseMimeType(imageContentType), new InputStreamResource(imageInputStream))
+                )
+                .call()
+                .content();
+    }
+
+    @Override
+    public String generateFeedbackForSpeakingTestAnswerWithoutImage(String partName, String passage, String questionContent, InputStream audioInputStream, String audioContentType) {
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Audio: (được gửi dưới dạng media)\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                4. Question: %s\s
+                """.formatted(
+                partName,
+                passage,
+                questionContent
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        return cleanClient
+                .prompt()
+                .system(getActiveSpeakingAssessmentSystemPrompt())
+                .user(user -> user
+                        .text(userPrompt)
+                        .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
+                )
+                .call()
+                .content();
+    }
+
     private String getActiveChatbotSystemPrompt() {
         SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
@@ -448,8 +659,23 @@ public class ChatServiceImpl implements IChatService {
         return response.getContent();
     }
 
-    private String getSentenceAssessmentSystemPrompt() {
+    private String getActiveSentenceAssessmentSystemPrompt() {
         SystemPromptDetailResponse response = sentenceAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveBlogSummarizationSystemPrompt() {
+        SystemPromptDetailResponse response = blogSummarizationSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveWritingAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = writingAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveSpeakingAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = speakingAssessmentSystemPromptService.getActiveSystemPrompt();
         return response.getContent();
     }
 
@@ -472,7 +698,7 @@ public class ChatServiceImpl implements IChatService {
                     .flatMapMany(userPrompt ->
                             cleanClient.prompt()
                                     .user(userPrompt)
-                                    .system(getSentenceAssessmentSystemPrompt())
+                                    .system(getActiveSentenceAssessmentSystemPrompt())
                                     .stream()
                                     .content()
                                     .map(contentText -> chatbotMapper.toChatbotResponse(
@@ -541,4 +767,8 @@ public class ChatServiceImpl implements IChatService {
             throw new AppException(ErrorCode.AI_PROCESSING_ERROR, "Failed to generate dictation preview");
         }
     }
+  
+    private record ChatAboutQuestionContext(String prompt, QuestionGroup questionGroup) {
+    }
+
 }

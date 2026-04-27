@@ -17,7 +17,9 @@ import java.util.Optional;
 public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificationExecutor<Test> {
     @Query("SELECT t FROM Test t LEFT JOIN FETCH t.testSet WHERE t.id = :id")
     Optional<Test> findByIdWithTestSet(@Param("id") Long id);
+
     Optional<Test> findByName(String name);
+
     @Query(value = "SELECT t.id, t.name, t.number_of_learner_tests, p.name, p.id," +
             "GROUP_CONCAT(DISTINCT tg.name ORDER BY tg.name SEPARATOR '; ') AS tags " +
             "FROM tests t " +
@@ -30,11 +32,15 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
             "GROUP BY t.id, t.name, t.number_of_learner_tests, p.name, p.id " +
             "ORDER BY p.id", nativeQuery = true)
     List<Object[]> findListTagByIdOrderByPartName(@Param("id") Long id, @Param("status") String status);
+
     Optional<Test> findByIdAndStatus(Long id, ETestStatus status);
+
     boolean existsByName(String name);
+
     @Modifying
     @Query("UPDATE Test t SET t.status = :status WHERE t.testSet.id = :testSetId")
     int updateStatusByTestSetId(@Param("testSetId") Long testSetId, @Param("status") ETestStatus status);
+
     @NotNull
     @EntityGraph(attributePaths = {"testSet"})
     Page<Test> findAll(Specification<Test> specification, @NotNull Pageable pageable);

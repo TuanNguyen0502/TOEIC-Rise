@@ -3,12 +3,23 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.HelperUtil;
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestPartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionGroupDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingPartDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionGroupDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.*;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingPartResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionGroupResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
@@ -17,9 +28,6 @@ import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
-import com.hcmute.fit.toeicrise.dtos.responses.test.PartResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionGroupResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +61,24 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     @Transactional
     @Override
+    public QuestionGroup createQuestionGroup(Test test, Part part, SpeakingQuestionExcelRequest questionExcelRequest) {
+        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+        log.info("Created question group: {}", questionGroup.getId());
+        return questionGroup;
+    }
+
+    @Transactional
+    @Override
+    public QuestionGroup createQuestionGroup(Test test, Part part, WritingQuestionExcelRequest questionExcelRequest) {
+        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+        log.info("Created question group: {}", questionGroup.getId());
+        return questionGroup;
+    }
+
+    @Transactional
+    @Override
     public QuestionGroupResponse updateQuestionGroup(Long questionGroupId, QuestionGroupUpdateRequest request) {
         QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
         updateQuestionGroupWithEntity(questionGroup, request);
@@ -60,6 +86,50 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         List<QuestionResponse> questionResponses = questionGroup.getQuestions().stream()
                 .map(questionMapper::toQuestionResponse).toList();
         return questionGroupMapper.toResponse(getQuestionGroupEntity(questionGroupId), questionResponses);
+    }
+
+    @Override
+    public SpeakingQuestionGroupResponse updateSpeakingQuestionGroup(Long questionGroupId, SWQuestionGroupUpdateRequest request) {
+        QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
+        Part part = questionGroup.getPart();
+
+        validateImageForPart(part, request.getImage(), request.getImageUrl());
+        validatePassageForPart(part, request.getPassage());
+
+        questionGroup.setImageUrl(processMediaFile(
+                request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
+        questionGroup.setPassage(request.getPassage());
+
+        questionGroupRepository.save(questionGroup);
+        log.info("Update question group successfully with ID: {}", questionGroup.getId());
+        questionService.changeTestStatusToPending(questionGroup.getTest());
+        log.info("Updated question group: {}", questionGroup.getId());
+
+        List<SpeakingQuestionResponse> questionResponses = questionGroup.getQuestions().stream()
+                .map(questionMapper::toSpeakingQuestionResponse).toList();
+        return questionGroupMapper.toSpeakingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questionResponses);
+    }
+
+    @Override
+    public WritingQuestionGroupResponse updateWritingQuestionGroup(Long questionGroupId, SWQuestionGroupUpdateRequest request) {
+        QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
+        Part part = questionGroup.getPart();
+
+        validateImageForPart(part, request.getImage(), request.getImageUrl());
+        validatePassageForPart(part, request.getPassage());
+
+        questionGroup.setImageUrl(processMediaFile(
+                request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
+        questionGroup.setPassage(request.getPassage());
+
+        questionGroupRepository.save(questionGroup);
+        log.info("Update question group successfully with ID: {}", questionGroup.getId());
+        questionService.changeTestStatusToPending(questionGroup.getTest());
+        log.info("Updated question group: {}", questionGroup.getId());
+
+        List<WritingQuestionResponse> questionResponses = questionGroup.getQuestions().stream()
+                .map(questionMapper::toWritingQuestionResponse).toList();
+        return questionGroupMapper.toWritingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questionResponses);
     }
 
     @Override
@@ -90,15 +160,21 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     }
 
     @Override
-    public QuestionGroup getQuestionGroupEntity(Long questionGroupId) {
-        return questionGroupRepository.findById(questionGroupId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group"));
+    public SpeakingQuestionGroupResponse getSpeakingQuestionGroupResponse(Long questionGroupId) {
+        List<SpeakingQuestionResponse> questions = questionService.getSpeakingQuestionsByQuestionGroupId(questionGroupId);
+        return questionGroupMapper.toSpeakingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questions);
     }
 
     @Override
-    public String getPartNameByQuestionGroupId(Long questionGroupId) {
-        QuestionGroup questionGroup = getQuestionGroupEntity(questionGroupId);
-        return questionGroup.getPart().getName();
+    public WritingQuestionGroupResponse getWritingQuestionGroupResponse(Long questionGroupId) {
+        List<WritingQuestionResponse> questions = questionService.getWritingQuestionsByQuestionGroupId(questionGroupId);
+        return questionGroupMapper.toWritingQuestionGroupResponse(getQuestionGroupEntity(questionGroupId), questions);
+    }
+
+    @Override
+    public QuestionGroup getQuestionGroupEntity(Long questionGroupId) {
+        return questionGroupRepository.findById(questionGroupId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group"));
     }
 
     @Override
@@ -184,8 +260,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         if (ePart.isRequiredPassage()) {
             if (passage == null || passage.isBlank())
                 throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
-        }
-        else if (passage != null && !passage.isBlank())
+        } else if (passage != null && !passage.isBlank())
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
     }
 
@@ -217,6 +292,56 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }, Comparator.comparing(LearnerTestPartResponse::getPartName));
     }
 
+    @Override
+    public List<LearnerSpeakingPartDetailResponse> getLearnerSpeakingPartsByTestIdGroupByParts(Long testId, List<Long> partIds) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, partIds);
+        return questionGroups.stream()
+                .collect(Collectors.groupingBy(QuestionGroup::getPart))
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(e -> EPart.getEPart(e.getKey().getName())))
+                .map(entry -> {
+                    Part part = entry.getKey();
+                    List<LearnerSpeakingQuestionGroupDetailResponse> groupDetails = entry.getValue().stream()
+                            .sorted(Comparator.comparing(QuestionGroup::getPosition))
+                            .map(group -> {
+                                List<LearnerSpeakingQuestionDetailResponse> questionDetails = group.getQuestions().stream()
+                                        .sorted(Comparator.comparing(Question::getPosition))
+                                        .map(questionMapper::toLearnerSpeakingQuestionDetailResponse)
+                                        .toList();
+                                return questionGroupMapper.toLearnerSpeakingQuestionGroupDetailResponse(group, questionDetails);
+                            })
+                            .toList();
+                    return partMapper.toLearnerSpeakingPartDetailResponse(part, groupDetails);
+                })
+                .toList();
+    }
+
+    @Override
+    public List<LearnerWritingPartDetailResponse> getLearnerWritingPartsByTestIdGroupByParts(Long testId, List<Long> partIds) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(testId, partIds);
+        return questionGroups.stream()
+                .collect(Collectors.groupingBy(QuestionGroup::getPart))
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(e -> EPart.getEPart(e.getKey().getName())))
+                .map(entry -> {
+                    Part part = entry.getKey();
+                    List<LearnerWritingQuestionGroupDetailResponse> groupDetails = entry.getValue().stream()
+                            .sorted(Comparator.comparing(QuestionGroup::getPosition))
+                            .map(group -> {
+                                List<LearnerWritingQuestionDetailResponse> questionDetails = group.getQuestions().stream()
+                                        .sorted(Comparator.comparing(Question::getPosition))
+                                        .map(questionMapper::toLearnerWritingQuestionDetailResponse)
+                                        .toList();
+                                return questionGroupMapper.toLearnerWritingQuestionGroupDetailResponse(group, questionDetails);
+                            })
+                            .toList();
+                    return partMapper.toLearnerWritingPartDetailResponse(part, groupDetails);
+                })
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<PartResponse> getQuestionGroupsByTestIdGroupByPart(Long testId) {
@@ -234,7 +359,41 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         }, Comparator.comparing(PartResponse::getName));
     }
 
-    public Map<Long, List<Question>> attachQuestionsToGroups(List<QuestionGroup> questionGroups){
+    @Transactional(readOnly = true)
+    @Override
+    public List<SpeakingPartResponse> getSpeakingQuestionGroupsByTestIdGroupByPart(Long testId) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdWithPart(testId);
+        Map<Long, List<Question>> questionsByGroupId = attachQuestionsToGroups(questionGroups);
+
+        return HelperUtil.groupByPartAndMap(questionGroups, (part, groups) -> {
+            List<SpeakingQuestionGroupResponse> groupResponses = groups.stream().map(group -> {
+                List<Question> groupQuestions = questionsByGroupId.getOrDefault(group.getId(), Collections.emptyList());
+                List<SpeakingQuestionResponse> questionResponses = groupQuestions.stream().sorted(Comparator.comparing(Question::getPosition))
+                        .map(questionMapper::toSpeakingQuestionResponse).toList();
+                return questionGroupMapper.toSpeakingQuestionGroupResponse(group, questionResponses);
+            }).toList();
+            return partMapper.toSpeakingPartResponse(part, groupResponses);
+        }, Comparator.comparing(SpeakingPartResponse::getName));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<WritingPartResponse> getWritingQuestionGroupsByTestIdGroupByPart(Long testId) {
+        List<QuestionGroup> questionGroups = questionGroupRepository.findByTestIdWithPart(testId);
+        Map<Long, List<Question>> questionsByGroupId = attachQuestionsToGroups(questionGroups);
+
+        return HelperUtil.groupByPartAndMap(questionGroups, (part, groups) -> {
+            List<WritingQuestionGroupResponse> groupResponses = groups.stream().map(group -> {
+                List<Question> groupQuestions = questionsByGroupId.getOrDefault(group.getId(), Collections.emptyList());
+                List<WritingQuestionResponse> questionResponses = groupQuestions.stream().sorted(Comparator.comparing(Question::getPosition))
+                        .map(questionMapper::toWritingQuestionResponse).toList();
+                return questionGroupMapper.toWritingQuestionGroupResponse(group, questionResponses);
+            }).toList();
+            return partMapper.toWritingPartResponse(part, groupResponses);
+        }, Comparator.comparing(WritingPartResponse::getName));
+    }
+
+    public Map<Long, List<Question>> attachQuestionsToGroups(List<QuestionGroup> questionGroups) {
         Set<Long> groupIds = questionGroups.stream().map(QuestionGroup::getId).collect(Collectors.toSet());
         if (groupIds.isEmpty())
             return Collections.emptyMap();

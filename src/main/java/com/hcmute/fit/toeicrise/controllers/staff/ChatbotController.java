@@ -55,6 +55,11 @@ public class ChatbotController {
         return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
     }
 
+    @PostMapping(path = "/generate-blog-summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> generateBlogSummary(@Valid @ModelAttribute BlogPostSummaryRequest request) {
+        return chatService.generateBlogPostSummary(request).delayElements(Duration.ofMillis(50));
+    }
+
     @PostMapping(path = "/testing-system-prompt-chatbot", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> testingChatbotSystemPrompt(@Valid @ModelAttribute TestingSystemPromptChatbotRequest request) {
         return chatService.chat(request).delayElements(Duration.ofMillis(50));
@@ -77,5 +82,9 @@ public class ChatbotController {
 
         List<DictationGenerationResponse> dictations = chatService.generateDictation(testId, partId);
         return ResponseEntity.ok(dictations);
+   }
+    @PostMapping(path = "/testing-system-prompt-blog-summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatbotResponse> testingBlogSummarizationSystemPrompt(@Valid @ModelAttribute BlogPostSummaryRequest request) {
+        return chatService.generateBlogPostSummary(request).delayElements(Duration.ofMillis(50));
     }
 }

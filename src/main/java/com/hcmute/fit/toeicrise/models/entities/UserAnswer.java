@@ -26,6 +26,15 @@ public class UserAnswer extends BaseEntity {
     @Column(name = "answer", columnDefinition = "CHAR(1)")
     private String answer;
 
+    @Column(name = "answer_text", columnDefinition = "TEXT")
+    private String answerText;
+
+    @Column(name = "answer_audio_url", columnDefinition = "VARCHAR(255)")
+    private String answerAudioUrl;
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+
     @Column(name = "is_correct", nullable = false)
     private Boolean isCorrect;
 }

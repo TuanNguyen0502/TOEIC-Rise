@@ -24,6 +24,7 @@ public class MessageConstant {
     public static final String QUESTION_GROUP_IMAGE_URL_INVALID = "Question group image URL is invalid.";
     public static final String QUESTION_GROUP_AUDIO_URL_FORMAT_INVALID = "Question group audio URL format is invalid.";
     public static final String QUESTION_GROUP_IMAGE_URL_FORMAT_INVALID = "Question group image URL format is invalid.";
+    public static final String QUESTION_GROUP_PASSAGE_NOT_BLANK = "Question group passage must not be blank.";
     // System Prompt related messages
     public static final String SYSTEM_PROMPT_CONTENT_NOT_BLANK = "Content must not be blank";
     public static final String SYSTEM_PROMPT_CONTENT_INVALID = "Content must be at least 20 characters and can only contain letters, digits, spaces, and allowed punctuation (!#%&*()[]_+;:'\",.<>?/{}-\\n\\r–).";
@@ -117,4 +118,22 @@ public class MessageConstant {
     //Common messages
     public static final String COMMENT_NOT_BLANK = "Comment content must not be blank.";
     public static final String COMMENT_TOO_LONG = "Comment content must not exceed 500 characters.";
+    // Blog category
+    public static final String BLOG_CATEGORY_NAME_NOT_BLANK = "Blog category name must not be blank.";
+    public static final String BLOG_CATEGORY_NAME_INVALID = "Blog category name can only contain letters, digits, spaces, and punctuation (.,&()-), and must be between 2 and 50 characters long.";
+    public static final String BLOG_CATEGORY_SLUG_NOT_BLANK = "Blog category slug must not be blank.";
+    public static final String BLOG_CATEGORY_SLUG_INVALID = "Blog category slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 50 characters long.";
+    public static final String BLOG_CATEGORY_ACTIVE_NOT_NULL = "Blog category active must not be null.";
+    // Blog post
+    public static final String BLOG_POST_TITLE_NOT_BLANK = "Blog post title must not be blank.";
+    public static final String BLOG_POST_TITLE_INVALID = "Blog post title can only contain letters, digits, spaces, and punctuation (. , ! ? : ' \" ( ) -), and must be between 5 and 150 characters long.";
+    public static final String BLOG_POST_SLUG_NOT_BLANK = "Blog post slug must not be blank.";
+    public static final String BLOG_POST_SLUG_INVALID = "Blog post slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 50 characters long.";
+    public static final String BLOG_POST_SUMMARY_NOT_BLANK = "Blog post summary must not be blank.";
+    public static final String BLOG_POST_SUMMARY_INVALID = "Blog post summary can only contain letters, digits, spaces, and punctuation (. , ! ? : ' \" ( ) -), and must be between 10 and 500 characters long.";
+    public static final String BLOG_POST_CONTENT_NOT_BLANK = "Blog post content must not be blank.";
+    public static final String BLOG_POST_CONTENT_INVALID = "Blog post content must be at least 50 characters long.";
+    public static final String BLOG_POST_THUMBNAIL_NOT_NULL = "Blog post thumbnail must not be null.";
+    public static final String BLOG_POST_STATUS_NOT_NULL = "Blog post status must not be null.";
+    public static final String BLOG_POST_IMAGE_NOT_BLANK = "Blog post image must not be blank.";
 }
