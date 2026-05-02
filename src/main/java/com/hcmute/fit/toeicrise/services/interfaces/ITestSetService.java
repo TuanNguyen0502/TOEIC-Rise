@@ -3,6 +3,8 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestDictationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestSetDictationResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
@@ -29,4 +31,6 @@ public interface ITestSetService {
     Long totalTestSets();
 
     TestSet findTestSetById(Long testSetId);
+    List<TestSetDictationResponse> getTestSetsDictation();
+    List<TestDictationResponse> getTestsDictationByTestSetId(Long testSetId);
 }

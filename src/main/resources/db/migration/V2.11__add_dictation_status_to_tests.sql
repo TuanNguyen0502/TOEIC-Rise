@@ -1,0 +1,2 @@
+ALTER TABLE tests
+    ADD COLUMN dictation_status JSON NOT NULL DEFAULT (JSON_ARRAY());

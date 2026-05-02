@@ -5,6 +5,9 @@ import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "test_sets")
 @EqualsAndHashCode(callSuper = true)
@@ -20,6 +23,9 @@ public class TestSet extends BaseEntity {
     @Column(name = "status")
     private ETestSetStatus status;
 
+    @OneToMany(mappedBy = "testSet")
+    @Builder.Default
+    private List<Test> tests = new ArrayList<>();
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private ETestSetType type;
