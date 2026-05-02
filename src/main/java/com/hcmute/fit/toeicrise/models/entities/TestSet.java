@@ -26,6 +26,7 @@ public class TestSet extends BaseEntity {
     @OneToMany(mappedBy = "testSet")
     @Builder.Default
     private List<Test> tests = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private ETestSetType type;

@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
@@ -40,6 +41,7 @@ public class TestSetController {
 
     @PostMapping("")
     public ResponseEntity<?> createTestSet(@Valid @RequestBody TestSetRequest testSetRequest) {
+        testSetRequest.setTestSetType(ETestSetType.LISTENING_AND_READING);
         testSetService.addTestSet(testSetRequest);
         return ResponseEntity.ok(MessageConstant.TEST_SET_CREATED_SUCCESS);
     }
