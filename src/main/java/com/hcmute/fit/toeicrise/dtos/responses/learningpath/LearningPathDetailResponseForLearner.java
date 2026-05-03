@@ -5,16 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class LearningPathSummaryResponse {
+@NoArgsConstructor
+public class LearningPathDetailResponseForLearner {
     private Long id;
     private String name;
     private String slug;
-    private String description;
-    private Boolean isActive;
-    private Integer lessonCount;
-    private String updatedAt;
+    private List<LessonWithProgressResponse> lessons;
 }

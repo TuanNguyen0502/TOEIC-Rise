@@ -5,6 +5,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightRespons
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -88,4 +89,6 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "FROM UserTest ut " +
             "WHERE ut.createdAt >= :start AND ut.createdAt < :end")
     ScoreDistInsightResponse countUserTestByScore(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    UserTest findTopByUserAccountEmailAndTestTypeOrderByCreatedAtDesc(String email, ETestType testType);
 }

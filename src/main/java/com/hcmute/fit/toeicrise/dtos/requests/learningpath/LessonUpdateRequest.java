@@ -1,10 +1,12 @@
 package com.hcmute.fit.toeicrise.dtos.requests.learningpath;
 
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +22,13 @@ public class LessonUpdateRequest {
     @NotBlank(message = MessageConstant.LESSON_TITLE_NOT_BLANK)
     @Size(max = 255, message = MessageConstant.LESSON_TITLE_MAX)
     private String title;
+
+    @NotBlank(message = MessageConstant.LESSON_SLUG_NOT_BLANK)
+    @Pattern(regexp = Constant.LEARNING_PATH_SLUG_PATTERN, message = MessageConstant.LESSON_SLUG_INVALID)
+    @Size(max = 255, message = MessageConstant.LESSON_SLUG_INVALID)
+    private String slug;
+
+    private String practice;
 
     @Size(max = 500, message = MessageConstant.LESSON_VIDEO_URL_MAX)
     private String videoUrl;

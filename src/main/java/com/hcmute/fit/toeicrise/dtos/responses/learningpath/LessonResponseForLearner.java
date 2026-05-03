@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LearningPathSummaryResponse {
+public class LessonResponseForLearner {
     private Long id;
-    private String name;
+    private String title;
     private String slug;
-    private String description;
-    private Boolean isActive;
-    private Integer lessonCount;
-    private String updatedAt;
+    private String practice;
+    private Integer orderIndex;
 }

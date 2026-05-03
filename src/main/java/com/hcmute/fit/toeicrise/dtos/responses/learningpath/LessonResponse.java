@@ -14,6 +14,8 @@ public class LessonResponse {
     private Long id;
     private Long learningPathId;
     private String title;
+    private String slug;
+    private String practice;
     private String videoUrl;
     private String topic;
     private ELessonLevel level;

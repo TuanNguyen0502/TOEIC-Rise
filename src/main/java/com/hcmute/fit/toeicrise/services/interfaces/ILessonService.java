@@ -4,8 +4,10 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonReorderRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLearner;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
+import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 
 import java.util.List;
 
@@ -18,4 +20,5 @@ public interface ILessonService {
     void setLessonActive(Long id, Boolean active);
     Lesson getLessonWithLearningPathId(Long id);
     LessonResponse getLessonForLearner(Long id, String email);
+    LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson);
 }

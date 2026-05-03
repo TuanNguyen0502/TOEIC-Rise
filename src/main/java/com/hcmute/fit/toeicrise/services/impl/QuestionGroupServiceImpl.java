@@ -98,7 +98,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         validateImageForPart(part, request.getImage(), request.getImageUrl());
         validatePassageForPart(part, request.getPassage());
 
-        questionGroup.setImageUrl(processMediaFile(
+        questionGroup.setImageUrl(cloudinaryService.processMediaFile(
                 request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
 
@@ -120,7 +120,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         validateImageForPart(part, request.getImage(), request.getImageUrl());
         validatePassageForPart(part, request.getPassage());
 
-        questionGroup.setImageUrl(processMediaFile(
+        questionGroup.setImageUrl(cloudinaryService.processMediaFile(
                 request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
 

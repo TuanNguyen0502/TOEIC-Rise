@@ -1,18 +1,22 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
+import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
-    @Query("SELECT l, p " +
+    @Query("SELECT l " +
             "FROM Lesson l " +
-            "LEFT JOIN LearningPath p " +
+            "LEFT JOIN FETCH l.learningPath " +
             "WHERE l.id =:id")
     Optional<Lesson> findWithLearningPathById(@Param("id") Long id);
+
+    List<Lesson> findByLearningPathIdAndIsActiveAndLevelOrderByOrderIndexAsc(Long learningPathId, Boolean isActive, ELessonLevel level);
 }

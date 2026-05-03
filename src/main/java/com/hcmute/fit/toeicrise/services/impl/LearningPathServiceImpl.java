@@ -2,21 +2,20 @@ package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.*;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathSummaryResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
+import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.entities.UserLearningPath;
+import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
-import com.hcmute.fit.toeicrise.models.mappers.LearningPathMapper;
 import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
+import com.hcmute.fit.toeicrise.models.mappers.LearningPathMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.LearningPathRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.LearningPathSpecification;
-import com.hcmute.fit.toeicrise.services.interfaces.ILearningPathService;
-import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
-import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
+import com.hcmute.fit.toeicrise.services.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,8 +30,10 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LearningPathServiceImpl implements ILearningPathService {
     private final LearningPathRepository learningPathRepository;
+    private final IUserLearningPathService userLearningPathService;
     private final ILessonService lessonService;
     private final IUserService userService;
+    private final IUserLessonProgressService userLessonProgressService;
     private final LearningPathMapper learningPathMapper;
     private final LessonMapper lessonMapper;
     private final PageResponseMapper pageResponseMapper;
@@ -55,18 +56,15 @@ public class LearningPathServiceImpl implements ILearningPathService {
         LearningPath path = learningPathRepository.findLearningPathWithLessonsById(learningPathId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
 
-        List<LessonResponse> lessonResponses = path.getLessons() == null ? List.of() : path.getLessons().stream()
-                .sorted(Comparator.comparing(Lesson::getOrderIndex))
-                .map(lessonMapper::toResponse)
-                .toList();
         LearningPathDetailResponse response = learningPathMapper.toLearningPathDetailResponse(path);
-        response.setLessons(lessonResponses);
+        if (path.getLessons() == null) response.setLessons(List.of());
+        else response.setLessons(
+                path.getLessons().stream()
+                        .sorted(Comparator.comparingInt(l -> l.getOrderIndex() == null ? Integer.MAX_VALUE : l.getOrderIndex()))
+                        .map(lessonMapper::toResponse)
+                        .toList()
+        );
         return response;
-    }
-
-    @Override
-    public LearningPathDetailResponse getLearningPathDetailForAdmin(Long learningPathId) {
-        return getLearningPathDetail(learningPathId);
     }
 
     @Override
@@ -74,6 +72,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
     public void createLearningPath(LearningPathCreateRequest request) {
         LearningPath path = learningPathMapper.toEntity(request);
         path.setIsActive(true);
+        path.setTestType(request.getTestType());
         learningPathRepository.save(path);
     }
 
@@ -82,6 +81,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
     public void updateLearningPath(Long learningPathId, LearningPathUpdateRequest request) {
         LearningPath path = getLearningPath(learningPathId);
         path.setName(request.getName());
+        path.setSlug(request.getSlug());
         path.setDescription(request.getDescription());
         path.setIsActive(request.getIsActive());
         if (Boolean.FALSE.equals(request.getIsActive()) && path.getLessons() != null) {
@@ -115,9 +115,29 @@ public class LearningPathServiceImpl implements ILearningPathService {
     }
 
     @Override
-    public LearningPathDetailResponse getLearningPathDetailForLearner(String email, Long learningPathId) {
-        userService.getUserByEmail(email);
-        return getLearningPathDetail(learningPathId);
+    public LearningPathDetailResponseForLearner getLearningPathDetailForLearner(String email, Long learningPathId) {
+        User user = userService.getUserByEmail(email);
+        LearningPath path = learningPathRepository.findLearningPathWithLessonsById(learningPathId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
+        if (!Boolean.TRUE.equals(path.getIsActive()))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path");
+
+        UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), learningPathId);
+        if (userLearningPathService.getUserLearningPath(user.getId(), path.getId()) == null) {
+            ELessonLevel level = userLearningPathService.getLessonLevel(email, path.getTestType());
+            userLearningPath = userLearningPathService.createUserLearningPath(user, path, level);
+        }
+        ELessonLevel targetLevel = userLearningPath.getLevel();
+        List<Lesson> lessonsForLearner =
+                path.getLessons() == null ? List.of() : path.getLessons().stream()
+                        .filter(l -> Boolean.TRUE.equals(l.getIsActive()))
+                        .filter(l -> l.getLevel() == targetLevel)
+                        .sorted(Comparator.comparingInt(l -> l.getOrderIndex() == null ? Integer.MAX_VALUE : l.getOrderIndex()))
+                        .toList();
+
+        LearningPathDetailResponseForLearner response = learningPathMapper.toLearningPathDetailResponseForLearner(path);
+        response.setLessons(userLessonProgressService.getLessonProgress(email, lessonsForLearner));
+        return response;
     }
 
     private PageResponse getLearningPathResponses(String name, int page, int size, String sortBy, String direction, Specification<LearningPath> specification) {

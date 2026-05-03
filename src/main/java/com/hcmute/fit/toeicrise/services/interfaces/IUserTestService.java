@@ -19,6 +19,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.Speaking
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.models.enums.EDays;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,4 +70,6 @@ public interface IUserTestService {
     RetestResultOverallResponse getResultAfterSubmitWrongAnswer(Long userTestId, String email, UserTestRequest request);
 
     LearnerTestPartsResponse getQuestionsAndCorrectAnswersWrongAnswer(Long userTestId, String email);
+
+    UserTest getLastestUserTest(String email, ETestType testType);
 }

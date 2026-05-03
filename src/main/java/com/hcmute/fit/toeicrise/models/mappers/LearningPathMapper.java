@@ -3,13 +3,14 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LearningPathCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathDetailResponseForLearner;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathSummaryResponse;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface LearningPathMapper {
     LearningPath toEntity(LearningPathCreateRequest request);
 
@@ -17,6 +18,8 @@ public interface LearningPathMapper {
     LearningPathSummaryResponse toSummaryResponse(LearningPath learningPath);
 
     LearningPathDetailResponse toLearningPathDetailResponse(LearningPath learningPath);
+
+    LearningPathDetailResponseForLearner toLearningPathDetailResponseForLearner(LearningPath learningPath);
 
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     default LearningPathSummaryResponse toSummaryResponse(LearningPath learningPath, Long lessonCount) {

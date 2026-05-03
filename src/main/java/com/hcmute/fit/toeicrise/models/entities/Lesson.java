@@ -6,7 +6,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "lessons", uniqueConstraints = {
-        @UniqueConstraint(name = "uc_lessons_path_order", columnNames = {"learning_path_id", "order_index"})
+        @UniqueConstraint(name = "uc_lessons_path_order", columnNames = {"learning_path_id", "order_index"}),
+        @UniqueConstraint(name = "uc_lessons_path_slug", columnNames = {"learning_path_id", "slug"})
 })
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -21,6 +22,12 @@ public class Lesson extends BaseEntity {
 
     @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "slug", nullable = false, length = 255)
+    private String slug;
+
+    @Column(name = "practice", length = 255)
+    private String practice;
 
     @Column(name = "video_url", length = 500)
     private String videoUrl;

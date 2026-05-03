@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS user_lesson_progress (
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME,
     updated_at DATETIME,
-    CONSTRAINT fk_ulp_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_ulp_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id),
-    CONSTRAINT uc_ulp_user_lesson UNIQUE (user_id, lesson_id)
+    CONSTRAINT fk_ulpr_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_ulpr_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id),
+    CONSTRAINT uc_ulpr_user_lesson UNIQUE (user_id, lesson_id)
 );

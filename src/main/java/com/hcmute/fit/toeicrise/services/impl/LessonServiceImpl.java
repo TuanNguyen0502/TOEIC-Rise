@@ -7,9 +7,11 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonReorderRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLearner;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
+import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
 import com.hcmute.fit.toeicrise.repositories.LessonRepository;
@@ -39,9 +41,6 @@ public class LessonServiceImpl implements ILessonService {
     public LessonResponse createLesson(LessonCreateRequest request, LearningPath path) {
         Lesson lesson = lessonMapper.toEntity(request);
         lesson.setLearningPath(path);
-
-        if (request.getVideoUrl() == null || request.getVideoUrl().isBlank())
-            throw new AppException(ErrorCode.INVALID_REQUEST, "videoUrl is required");
         lesson.setVideoUrl(request.getVideoUrl());
 
         return lessonMapper.toResponse(lessonRepository.save(lesson));
@@ -122,5 +121,10 @@ public class LessonServiceImpl implements ILessonService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
         return lessonMapper.toResponse(lesson);
+    }
+
+    @Override
+    public LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson) {
+        return lessonMapper.toLessonResponseForLearner(lesson);
     }
 }

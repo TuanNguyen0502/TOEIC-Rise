@@ -1,8 +1,11 @@
 package com.hcmute.fit.toeicrise.dtos.requests.learningpath;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +22,14 @@ public class LearningPathCreateRequest {
     @Size(max = 255, message = MessageConstant.LEARNING_PATH_NAME_MAX)
     private String name;
 
+    @NotBlank(message = MessageConstant.LEARNING_PATH_SLUG_NOT_BLANK)
+    @Pattern(regexp = Constant.LEARNING_PATH_SLUG_PATTERN, message = MessageConstant.LEARNING_PATH_SLUG_INVALID)
+    @Size(max = 255, message = MessageConstant.LEARNING_PATH_SLUG_INVALID)
+    private String slug;
+
     @Size(max = 5000, message = MessageConstant.LEARNING_PATH_DESCRIPTION_MAX)
     private String description;
+
+    @NotNull(message = MessageConstant.TEST_TYPE_NOT_NULL)
+    private ETestType testType;
 }
