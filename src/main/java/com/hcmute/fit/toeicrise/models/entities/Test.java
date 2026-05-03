@@ -36,8 +36,9 @@ public class Test extends BaseEntity {
     @JoinColumn(name = "test_set_id")
     private TestSet testSet;
 
-    @Column(name = "dictation_status", columnDefinition = "json")
+    @Column(name = "dictation_status", columnDefinition = "json NOT NULL DEFAULT (JSON_ARRAY())")
     @Convert(converter = EPartListJsonConverter.class)
+    @Builder.Default
     private List<EPart> dictationStatus = new ArrayList<>();
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -733,7 +733,6 @@ public class ChatServiceImpl implements IChatService {
                 .filter(g -> g.getTranscript() != null && !g.getTranscript().isBlank())
                 .map(g -> AiDictationRequest.builder()
                         .questionGroupId(g.getId())
-//                        .partName(g.getPart().getName())
                         .transcript(g.getTranscript())
                         .build())
                 .toList();
