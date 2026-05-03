@@ -24,10 +24,12 @@ public interface TestSetRepository extends JpaRepository<TestSet, Long>, JpaSpec
     @Query("SELECT DISTINCT ts FROM TestSet ts " +
             "LEFT JOIN FETCH ts.tests t " +
             "WHERE ts.status = :tsStatus " +
+            "AND ts.type = :type " +
             "AND (t.status = :tStatus OR t.id IS NULL) " +
             "ORDER BY ts.id DESC")
     List<TestSet> findByStatusWithTests(@Param("tsStatus") ETestSetStatus tsStatus,
-                                        @Param("tStatus") ETestStatus tStatus);
+                                        @Param("tStatus") ETestStatus tStatus,
+                                        @Param("type") ETestSetType type);
 
     @Query("SELECT DISTINCT ts FROM TestSet ts " +
             "LEFT JOIN FETCH ts.tests t " +

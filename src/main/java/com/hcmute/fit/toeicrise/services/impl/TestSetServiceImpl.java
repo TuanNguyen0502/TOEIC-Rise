@@ -141,7 +141,8 @@ public class TestSetServiceImpl implements ITestSetService {
     @Override
     public List<TestSetDictationResponse> getTestSetsDictation() {
         List<TestSet> testSet = testSetRepository.
-                findByStatusWithTests(ETestSetStatus.IN_USE, ETestStatus.APPROVED);
+                findByStatusWithTests(ETestSetStatus.IN_USE, ETestStatus.APPROVED,
+                        ETestSetType.LISTENING_AND_READING);
 
         return testSet.stream().map(ts -> {
             List<Test> tests = ts.getTests();
