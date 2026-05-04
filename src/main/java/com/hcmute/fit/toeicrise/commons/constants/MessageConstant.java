@@ -88,6 +88,7 @@ public class MessageConstant {
     public static final String PART_ID_MIN = "Part ID must be greater than 1.";
     public static final String PART_ID_MAX = "Part ID must be less than 7.";
     public static final String PART_NAME_NOT_BLANK = "Part name must not be blank.";
+    public static final String PART_ID_NOT_NULL = "Part ID must not be null.";
     // Tag related messages
     public static final String TAGS_SIZE = "Tags size must be between 1 and 3.";
     public static final String TAG_NOT_NULL = "Tag must not be null.";
@@ -131,6 +132,9 @@ public class MessageConstant {
     public static final String USER_PROGRESS_PERCENT_MAX = "ProgressPercentage must be <= 100.";
     public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_NOT_NULL = "LastWatchedTimeMs must not be null.";
     public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_MIN = "LastWatchedTimeMs must be >= 0.";
+    // DictationTranscript related messages
+    public static final String DICTATION_TRANSCRIPT_LIST_NOT_EMPTY = "Dictation transcript list must not be empty.";
+    public static final String DICTATION_TRANSCRIPT_ID_NOT_NULL = "Dictation transcript ID must not be null.";
     // Success messages
     public static final String REGISTRATION_SUCCESS = "Registration successful. Please check your email for the verification code.";
     public static final String ACCOUNT_VERIFICATION_SUCCESS = "Account verified successfully.";

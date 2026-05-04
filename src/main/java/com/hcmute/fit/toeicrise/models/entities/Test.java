@@ -1,10 +1,13 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
+import com.hcmute.fit.toeicrise.commons.utils.EPartListJsonConverter;
+import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,6 +35,11 @@ public class Test extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "test_set_id")
     private TestSet testSet;
+
+    @Column(name = "dictation_status", columnDefinition = "json NOT NULL DEFAULT (JSON_ARRAY())")
+    @Convert(converter = EPartListJsonConverter.class)
+    @Builder.Default
+    private List<EPart> dictationStatus = new ArrayList<>();
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestionGroup> questionGroups;
