@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.models.mappers;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLearner;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
@@ -17,6 +18,9 @@ public interface LessonMapper {
 
     @Mapping(target = "learningPathId", source = "learningPath.id")
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
+    LessonDetailResponse toDetailResponse(Lesson lesson);
+
+    @Mapping(target = "learningPathId", source = "learningPath.id")
     LessonResponse toResponse(Lesson lesson);
 
     LessonResponseForLearner toLessonResponseForLearner(Lesson lesson);

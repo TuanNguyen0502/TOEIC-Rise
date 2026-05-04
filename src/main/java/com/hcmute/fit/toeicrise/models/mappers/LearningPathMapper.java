@@ -17,6 +17,7 @@ public interface LearningPathMapper {
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     LearningPathSummaryResponse toSummaryResponse(LearningPath learningPath);
 
+    @Mapping(target = "lessons", ignore = true)
     LearningPathDetailResponse toLearningPathDetailResponse(LearningPath learningPath);
 
     LearningPathDetailResponseForLearner toLearningPathDetailResponseForLearner(LearningPath learningPath);

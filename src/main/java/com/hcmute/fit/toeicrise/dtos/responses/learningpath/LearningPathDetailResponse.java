@@ -1,12 +1,11 @@
 package com.hcmute.fit.toeicrise.dtos.responses.learningpath;
 
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -19,5 +18,5 @@ public class LearningPathDetailResponse {
     private String description;
     private Boolean isActive;
     private ETestType testType;
-    private List<LessonResponse> lessons;
+    private PageResponse lessons;
 }

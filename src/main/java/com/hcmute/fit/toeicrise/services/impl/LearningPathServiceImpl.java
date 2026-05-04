@@ -10,7 +10,6 @@ import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.entities.UserLearningPath;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
-import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
 import com.hcmute.fit.toeicrise.models.mappers.LearningPathMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.LearningPathRepository;
@@ -35,7 +34,6 @@ public class LearningPathServiceImpl implements ILearningPathService {
     private final IUserService userService;
     private final IUserLessonProgressService userLessonProgressService;
     private final LearningPathMapper learningPathMapper;
-    private final LessonMapper lessonMapper;
     private final PageResponseMapper pageResponseMapper;
 
     @Override
@@ -52,18 +50,13 @@ public class LearningPathServiceImpl implements ILearningPathService {
     }
 
     @Override
-    public LearningPathDetailResponse getLearningPathDetail(Long learningPathId) {
+    public LearningPathDetailResponse getLearningPathDetail(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction) {
         LearningPath path = learningPathRepository.findLearningPathWithLessonsById(learningPathId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
 
         LearningPathDetailResponse response = learningPathMapper.toLearningPathDetailResponse(path);
-        if (path.getLessons() == null) response.setLessons(List.of());
-        else response.setLessons(
-                path.getLessons().stream()
-                        .sorted(Comparator.comparingInt(l -> l.getOrderIndex() == null ? Integer.MAX_VALUE : l.getOrderIndex()))
-                        .map(lessonMapper::toResponse)
-                        .toList()
-        );
+        if (path.getLessons() == null) response.setLessons((PageResponse) List.of());
+        else response.setLessons(lessonService.getLessonsForPage(learningPathId, name, level, page, size, sortBy, direction));
         return response;
     }
 
@@ -97,7 +90,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
 
     @Transactional
     @Override
-    public LessonResponse createLesson(Long learningPathId, LessonCreateRequest request) {
+    public LessonDetailResponse createLesson(Long learningPathId, LessonCreateRequest request) {
         LearningPath path = getLearningPath(learningPathId);
         return lessonService.createLesson(request, path);
     }

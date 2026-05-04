@@ -6,6 +6,8 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.ItemRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonReorderRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLearner;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -14,10 +16,17 @@ import com.hcmute.fit.toeicrise.models.entities.Lesson;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
+import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.LessonRepository;
+import com.hcmute.fit.toeicrise.repositories.specifications.LessonSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,21 +43,22 @@ public class LessonServiceImpl implements ILessonService {
     private final LessonMapper lessonMapper;
     private final CloudinaryUtil cloudinaryUtil;
     private final IUserService userService;
+    private final PageResponseMapper pageResponseMapper;
 
     private static final int OFFSET = 1_000_000;
 
     @Override
-    public LessonResponse createLesson(LessonCreateRequest request, LearningPath path) {
+    public LessonDetailResponse createLesson(LessonCreateRequest request, LearningPath path) {
         Lesson lesson = lessonMapper.toEntity(request);
         lesson.setLearningPath(path);
         lesson.setVideoUrl(request.getVideoUrl());
 
-        return lessonMapper.toResponse(lessonRepository.save(lesson));
+        return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
     }
 
     @Transactional
     @Override
-    public LessonResponse updateLesson(Long id, LessonUpdateRequest request) {
+    public LessonDetailResponse updateLesson(Long id, LessonUpdateRequest request) {
         Lesson lesson = getLessonById(id);
         String oldUrl = lesson.getVideoUrl();
         String newUrl = request.getVideoUrl();
@@ -60,7 +70,7 @@ public class LessonServiceImpl implements ILessonService {
 
         lesson = lessonMapper.toEntity(request, lesson);
         lesson.setVideoUrl(newUrl);
-        return lessonMapper.toResponse(lessonRepository.save(lesson));
+        return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
     }
 
     @Override
@@ -113,18 +123,39 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
-    public LessonResponse getLessonForLearner(Long id, String email) {
+    public LessonDetailResponse getLessonForLearner(Long id, String email) {
         userService.getUserByEmail(email);
         Lesson lesson = getLessonWithLearningPathId(id);
 
         if (!Boolean.TRUE.equals(lesson.getIsActive()) || !Boolean.TRUE.equals(lesson.getLearningPath().getIsActive()))
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
-        return lessonMapper.toResponse(lesson);
+        return lessonMapper.toDetailResponse(lesson);
     }
 
     @Override
     public LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson) {
         return lessonMapper.toLessonResponseForLearner(lesson);
+    }
+
+    @Override
+    public PageResponse getLessonsForPage(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction) {
+        Specification<Lesson> specification = (_, _, cb) -> cb.conjunction();
+        return getLessonResponses(learningPathId, name, level, page,size, sortBy, direction, specification);
+    }
+
+    private PageResponse getLessonResponses(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction, Specification<Lesson> specification) {
+        if (learningPathId != null)
+            specification = specification.and(LessonSpecification.learningPathIdEquals(learningPathId));
+        if (name != null && !name.trim().isEmpty())
+            specification = specification.and(LessonSpecification.nameContains(name));
+        if (level != null)
+            specification = specification.and(LessonSpecification.lessonLevelEquals(level));
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<LessonResponse> lessonResponses = lessonRepository.findAll(specification, pageable).map(lessonMapper::toResponse);
+        return pageResponseMapper.toPageResponse(lessonResponses);
     }
 }

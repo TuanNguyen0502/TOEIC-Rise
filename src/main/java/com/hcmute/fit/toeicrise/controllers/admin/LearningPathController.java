@@ -6,6 +6,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LearningPathUpdateReq
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonReorderRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
+import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.services.interfaces.ILearningPathService;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
 import jakarta.validation.Valid;
@@ -34,8 +35,16 @@ public class LearningPathController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detail(@PathVariable Long id) {
-        return ResponseEntity.ok(learningPathService.getLearningPathDetail(id));
+    public ResponseEntity<?> detail(@PathVariable Long id,
+                                    @RequestParam(required = false) String name,
+                                    @RequestParam(required = false)ELessonLevel level,
+                                    @RequestParam(defaultValue = "0")
+                                    @Min(value = 0) int page,
+                                    @RequestParam(defaultValue = "10")
+                                    @Min(1) @Max(100) int size,
+                                    @RequestParam(defaultValue = "orderIndex") String sortBy,
+                                    @RequestParam(defaultValue = "ASC") String direction)  {
+        return ResponseEntity.ok(learningPathService.getLearningPathDetail(id, name, level, page, size, sortBy, direction));
     }
 
     @PostMapping
