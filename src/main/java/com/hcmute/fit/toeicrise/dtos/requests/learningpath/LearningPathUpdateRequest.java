@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.dtos.requests.learningpath;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -28,6 +29,8 @@ public class LearningPathUpdateRequest {
 
     @Size(max = 5000, message = MessageConstant.LEARNING_PATH_DESCRIPTION_MAX)
     private String description;
+
+    private ETestType testType;
 
     private Boolean isActive;
 }

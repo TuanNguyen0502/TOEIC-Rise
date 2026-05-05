@@ -5,9 +5,9 @@ import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import org.springframework.data.jpa.domain.Specification;
 
 public class LessonSpecification {
-    public static Specification<Lesson> learningPathIdEquals(Long learningPathId) {
+    public static Specification<Lesson> learningPathSlugEquals(String learningPathSlug) {
         return ((root, _, criteriaBuilder) ->
-                learningPathId == null ? null : criteriaBuilder.equal(root.get("learningPath").get("id"), learningPathId));
+                learningPathSlug == null ? null : criteriaBuilder.equal(root.get("learningPath").get("slug"), learningPathSlug));
     }
 
     public static Specification<Lesson> nameContains(String name) {

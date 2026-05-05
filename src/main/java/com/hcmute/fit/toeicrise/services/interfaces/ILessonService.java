@@ -6,21 +6,20 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLearner;
-import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 
 import java.util.List;
 
 public interface ILessonService {
-    LessonDetailResponse createLesson(LessonCreateRequest request, LearningPath learningPath);
+    LessonDetailResponse createLesson(String slug, String email, LessonCreateRequest request);
     LessonDetailResponse updateLesson(Long id, LessonUpdateRequest request);
     Lesson getLessonById(Long id);
     List<Lesson> getAllLessonsByIds(List<Long> ids);
-    void reorderLesson(LessonReorderRequest request, LearningPath learningPath);
+    void reorderLesson(LessonReorderRequest request);
     void setLessonActive(Long id, Boolean active);
     Lesson getLessonWithLearningPathId(Long id);
-    LessonDetailResponse getLessonForLearner(Long id, String email);
+    LessonDetailResponse getLesson(Long id, String email);
     LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson);
-    PageResponse getLessonsForPage(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction);
+    PageResponse getLessonsForPage(String learningPathSlug, String name, ELessonLevel level, int page, int size, String sortBy, String direction);
 }

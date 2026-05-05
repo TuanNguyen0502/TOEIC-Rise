@@ -33,6 +33,6 @@ public class LearningPathController {
     @GetMapping("/lessons/{lessonId}")
     public ResponseEntity<?> getLesson(@PathVariable Long lessonId) {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(lessonService.getLessonForLearner(lessonId, email));
+        return ResponseEntity.ok(lessonService.getLesson(lessonId, email));
     }
 }

@@ -30,9 +30,9 @@ import java.util.*;
 public class LearningPathServiceImpl implements ILearningPathService {
     private final LearningPathRepository learningPathRepository;
     private final IUserLearningPathService userLearningPathService;
-    private final ILessonService lessonService;
     private final IUserService userService;
     private final IUserLessonProgressService userLessonProgressService;
+    private final ILessonService lessonService;
     private final LearningPathMapper learningPathMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -47,17 +47,6 @@ public class LearningPathServiceImpl implements ILearningPathService {
         Specification<LearningPath> specification = (_, _, cb) -> cb.conjunction();
         specification = specification.and(LearningPathSpecification.hasIsActive(isActive));
         return getLearningPathResponses(null, page, size, sortBy, direction, specification);
-    }
-
-    @Override
-    public LearningPathDetailResponse getLearningPathDetail(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction) {
-        LearningPath path = learningPathRepository.findLearningPathWithLessonsById(learningPathId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
-
-        LearningPathDetailResponse response = learningPathMapper.toLearningPathDetailResponse(path);
-        if (path.getLessons() == null) response.setLessons((PageResponse) List.of());
-        else response.setLessons(lessonService.getLessonsForPage(learningPathId, name, level, page, size, sortBy, direction));
-        return response;
     }
 
     @Override
@@ -76,6 +65,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
         path.setName(request.getName());
         path.setSlug(request.getSlug());
         path.setDescription(request.getDescription());
+        path.setTestType(request.getTestType());
         path.setIsActive(request.getIsActive());
         if (Boolean.FALSE.equals(request.getIsActive()) && path.getLessons() != null) {
             path.getLessons().forEach(lesson -> lesson.setIsActive(false));
@@ -88,23 +78,27 @@ public class LearningPathServiceImpl implements ILearningPathService {
         return learningPathRepository.findLearningPathWithLessonsById(learningPathId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning path"));
     }
 
-    @Transactional
-    @Override
-    public LessonDetailResponse createLesson(Long learningPathId, LessonCreateRequest request) {
-        LearningPath path = getLearningPath(learningPathId);
-        return lessonService.createLesson(request, path);
-    }
-
-    @Transactional
-    @Override
-    public void reorderLessons(Long learningPathId, LessonReorderRequest request) {
-        LearningPath path = getLearningPath(learningPathId);
-        lessonService.reorderLesson(request, path);
-    }
-
     @Override
     public PageResponse listActiveLearningPaths(int page, int size, String sortBy, String direction) {
         return listLearningPaths(true, page, size, sortBy, direction);
+    }
+
+    @Override
+    public LearningPathResponse getLearningPathResponse(Long learningPathId) {
+        LearningPath learningPath = learningPathRepository.findLearningPathWithLessonsById(learningPathId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning path"));
+        return learningPathMapper.toLearningPathResponse(learningPath);
+    }
+
+    @Override
+    public LearningPathDetailResponse getLearningPathDetail(String learningPathSlug, String name, ELessonLevel level, int page, int size, String sortBy, String direction) {
+        LearningPath path = learningPathRepository.findBySlug(learningPathSlug)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
+
+        LearningPathDetailResponse response = learningPathMapper.toLearningPathDetailResponse(path);
+        if (path.getLessons() == null) response.setLessons((PageResponse) List.of());
+        else response.setLessons(lessonService.getLessonsForPage(learningPathSlug, name, level, page, size, sortBy, direction));
+        return response;
     }
 
     @Override

@@ -10,13 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LearningPathSummaryResponse {
+public class LearningPathResponse {
     private Long id;
     private String name;
     private String slug;
     private String description;
-    private Boolean isActive;
-    private Integer lessonCount;
     private ETestType testType;
-    private String updatedAt;
+    private Boolean isActive;
 }

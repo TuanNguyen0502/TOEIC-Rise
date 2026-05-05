@@ -4,6 +4,7 @@ import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LearningPathCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathDetailResponseForLearner;
+import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LearningPathSummaryResponse;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import org.mapstruct.Mapper;
@@ -21,6 +22,8 @@ public interface LearningPathMapper {
     LearningPathDetailResponse toLearningPathDetailResponse(LearningPath learningPath);
 
     LearningPathDetailResponseForLearner toLearningPathDetailResponseForLearner(LearningPath learningPath);
+
+    LearningPathResponse toLearningPathResponse(LearningPath learningPath);
 
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
     default LearningPathSummaryResponse toSummaryResponse(LearningPath learningPath, Long lessonCount) {

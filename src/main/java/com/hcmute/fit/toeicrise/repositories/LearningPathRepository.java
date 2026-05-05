@@ -24,4 +24,6 @@ public interface LearningPathRepository extends JpaRepository<LearningPath, Long
             "LEFT JOIN lp.lessons " +
             "WHERE lp.id =:id")
     Optional<LearningPath> findLearningPathWithLessonsById(@Param("id") Long id);
+
+    Optional<LearningPath> findBySlug(String slug);
 }

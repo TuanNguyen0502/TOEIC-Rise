@@ -1,6 +1,10 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
+import com.hcmute.fit.toeicrise.dtos.requests.cloudinary.CloudinaryImageDeleteRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.cloudinary.CloudinaryImageRequest;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.ICloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,5 +32,20 @@ public class CloudinaryServiceImpl implements ICloudinaryService {
             return newUrl;
         }
         return oldUrl;
+    }
+
+    @Override
+    public String uploadImage(CloudinaryImageRequest request) {
+        cloudinaryUtil.validateImageFile(request.getImage());
+        return cloudinaryUtil.uploadFile(request.getImage());
+    }
+
+    @Override
+    public void deleteImage(CloudinaryImageDeleteRequest request) {
+        if (!cloudinaryUtil.isCloudinaryUrl(request.getImageUrl())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid image URL");
+        }
+        cloudinaryUtil.validateImageURL(request.getImageUrl());
+        cloudinaryUtil.deleteFile(request.getImageUrl());
     }
 }

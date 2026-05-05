@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.ItemRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
@@ -13,10 +12,12 @@ import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLea
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.LearningPath;
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
+import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
+import com.hcmute.fit.toeicrise.repositories.LearningPathRepository;
 import com.hcmute.fit.toeicrise.repositories.LessonRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.LessonSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
@@ -32,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,14 +43,23 @@ public class LessonServiceImpl implements ILessonService {
     private final LessonMapper lessonMapper;
     private final CloudinaryUtil cloudinaryUtil;
     private final IUserService userService;
+    private final LearningPathRepository learningPathRepository;
     private final PageResponseMapper pageResponseMapper;
 
     private static final int OFFSET = 1_000_000;
 
     @Override
-    public LessonDetailResponse createLesson(LessonCreateRequest request, LearningPath path) {
+    public LessonDetailResponse createLesson(String slug, String email, LessonCreateRequest request) {
+        LearningPath learningPath = learningPathRepository.findBySlug(slug).orElse(null);
+        User user = userService.getUserByEmail(email);
+
+        if (learningPath == null)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning path");
+        if (user == null)
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User");
+
         Lesson lesson = lessonMapper.toEntity(request);
-        lesson.setLearningPath(path);
+        lesson.setLearningPath(learningPath);
         lesson.setVideoUrl(request.getVideoUrl());
 
         return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
@@ -84,15 +93,11 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
-    public void reorderLesson(LessonReorderRequest request, LearningPath path) {
+    public void reorderLesson(LessonReorderRequest request) {
         List<Long> lessonIds = request.getItems().stream().map(ItemRequest::getLessonId).toList();
         List<Lesson> lessons = getAllLessonsByIds(lessonIds);
         Map<Long, Lesson> byId = lessons.stream().collect(Collectors.toMap(Lesson::getId, Function.identity()));
 
-        for (Lesson lesson : lessons) {
-            if (!Objects.equals(lesson.getLearningPath().getId(), path.getId()))
-                throw new AppException(ErrorCode.INVALID_REQUEST, MessageConstant.LESSON_DO_NOT_BELONG_LEARNING_PATH);
-        }
         if (byId.size() != lessonIds.size())
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
@@ -123,7 +128,7 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
-    public LessonDetailResponse getLessonForLearner(Long id, String email) {
+    public LessonDetailResponse getLesson(Long id, String email) {
         userService.getUserByEmail(email);
         Lesson lesson = getLessonWithLearningPathId(id);
 
@@ -139,14 +144,14 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
-    public PageResponse getLessonsForPage(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction) {
+    public PageResponse getLessonsForPage(String learningPathSlug, String name, ELessonLevel level, int page, int size, String sortBy, String direction) {
         Specification<Lesson> specification = (_, _, cb) -> cb.conjunction();
-        return getLessonResponses(learningPathId, name, level, page,size, sortBy, direction, specification);
+        return getLessonResponses(learningPathSlug, name, level, page,size, sortBy, direction, specification);
     }
 
-    private PageResponse getLessonResponses(Long learningPathId, String name, ELessonLevel level, int page, int size, String sortBy, String direction, Specification<Lesson> specification) {
-        if (learningPathId != null)
-            specification = specification.and(LessonSpecification.learningPathIdEquals(learningPathId));
+    private PageResponse getLessonResponses(String learningPathSlug, String name, ELessonLevel level, int page, int size, String sortBy, String direction, Specification<Lesson> specification) {
+        if (learningPathSlug != null)
+            specification = specification.and(LessonSpecification.learningPathSlugEquals(learningPathSlug));
         if (name != null && !name.trim().isEmpty())
             specification = specification.and(LessonSpecification.nameContains(name));
         if (level != null)

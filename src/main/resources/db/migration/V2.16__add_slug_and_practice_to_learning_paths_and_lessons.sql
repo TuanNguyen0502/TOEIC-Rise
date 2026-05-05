@@ -1,5 +1,5 @@
 ALTER TABLE learning_paths
-    ADD COLUMN slug VARCHAR(255) NULL AFTER name,
+    ADD COLUMN slug VARCHAR(255) NULL AFTER name;
 
 UPDATE learning_paths SET slug = CONCAT('learning-path-', id) WHERE slug IS NULL;
 

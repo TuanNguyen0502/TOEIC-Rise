@@ -44,14 +44,14 @@ public class SecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/admin/test-sets/**", "/admin/speaking-test-sets/**", "/admin/writing-test-sets/**",
                                 "/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-reports/**", "/admin/system-prompts/**", "/admin/learning-paths/**")
+                                "/admin/question-reports/**", "/admin/system-prompts/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/speaking-tests/**",
                                 "/staff/writing-tests/**", "/staff/question-groups/**", "/staff/speaking-question-groups/**",
                                 "/staff/writing-question-groups/**", "/staff/questions/**", "/staff/speaking-questions/**",
                                 "/staff/tags/**", "/staff/question-reports/**",
                                 "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
-                                "/staff/blog-categories/**", "/staff/blog-posts/**",  "/admin/learning-paths/**", "staff/dictation/**")
+                                "/staff/blog-categories/**", "/staff/blog-posts/**",  "/admin/learning-paths/**", "staff/dictation/**", "/admin/lessons/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",

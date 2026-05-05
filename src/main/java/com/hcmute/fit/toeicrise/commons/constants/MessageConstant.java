@@ -5,6 +5,8 @@ public class MessageConstant {
     public static final String INVALID_PASSWORD = "Invalid password! Password must be 8-20 characters long, contain at least one digit, one lowercase letter, one uppercase letter, one special character from .@#$%^&+=, and have no whitespace.";
     public static final String INVALID_OTP = "Invalid OTP! OTP must be exactly 6 digits (0-9).";
     public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";
+    public static final String THUMBNAIL_NOT_NULL = "Thumbnail must not be null.";
+    public static final String IMAGE_NOT_BLANK = "Image must not be blank.";
     // Profile messages
     public static final String INVALID_USER = "Invalid or anonymous user";
     public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
@@ -125,7 +127,6 @@ public class MessageConstant {
     public static final String LESSON_LEVEL_NOT_NULL = "Level must not be null.";
     public static final String LESSON_SLUG_NOT_BLANK = "Lesson slug must not be blank.";
     public static final String LESSON_SLUG_INVALID = "Lesson slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 255 characters long.";
-    public static final String LESSON_DO_NOT_BELONG_LEARNING_PATH = "Lesson does not belong to this learning path";
     // User progress related messages
     public static final String USER_PROGRESS_PERCENT_NOT_NULL = "ProgressPercentage must not be null.";
     public static final String USER_PROGRESS_PERCENT_MIN = "ProgressPercentage must be >= 0.";
