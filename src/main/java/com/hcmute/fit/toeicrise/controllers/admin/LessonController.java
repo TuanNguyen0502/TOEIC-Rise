@@ -44,13 +44,13 @@ public class LessonController {
     @PostMapping(value = "/{learning-path-slug}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addLesson(
             @PathVariable(value = "learning-path-slug") String learningPathSlug,
-            @Valid @RequestBody LessonCreateRequest request
+            @Valid @ModelAttribute LessonCreateRequest request
     ) {
         return ResponseEntity.ok(lessonService.createLesson(learningPathSlug, SecurityUtils.getCurrentUser(), request));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateLesson(@PathVariable Long id, @Valid @RequestBody LessonUpdateRequest request) {
+    public ResponseEntity<?> updateLesson(@PathVariable Long id, @Valid @ModelAttribute LessonUpdateRequest request) {
         return ResponseEntity.ok(lessonService.updateLesson(id, request));
     }
 

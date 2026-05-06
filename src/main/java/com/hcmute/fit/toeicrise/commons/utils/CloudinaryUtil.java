@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 @Component
@@ -22,10 +21,9 @@ public class CloudinaryUtil {
     }
 
     public String uploadFile(MultipartFile file) {
-        try (InputStream in = file.getInputStream()) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> data = (Map<String, Object>) cloudinary.uploader()
-                    .upload(in, ObjectUtils.asMap("resource_type", "auto"));
+        try {
+            Map data = cloudinary.uploader()
+                    .upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
             return data.get("secure_url").toString();
         } catch (IOException e) {
             throw new AppException(ErrorCode.UPLOAD_FAILED);
@@ -70,12 +68,6 @@ public class CloudinaryUtil {
     public void validateAudioURL(String audioUrl) {
         if (!isValidSuffixAudio(audioUrl)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio file format.");
-        }
-    }
-
-    public void validateVideoURL(String videoUrl) {
-        if (!isValidSuffixVideo(videoUrl)) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid video file format.");
         }
     }
 
