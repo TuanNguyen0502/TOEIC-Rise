@@ -60,4 +60,9 @@ public class UserLearningPathServiceImpl implements IUserLearningPathService {
         };
     }
 
+    @Override
+    public UserLearningPath getUserLearningPath(Long userId, String learningPathSlug) {
+        return userLearningPathRepository.findByUserIdAndLearningPathSlug(userId, learningPathSlug).orElse(null);
+    }
+
 }

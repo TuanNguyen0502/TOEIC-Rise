@@ -102,14 +102,14 @@ public class LearningPathServiceImpl implements ILearningPathService {
     }
 
     @Override
-    public LearningPathDetailResponseForLearner getLearningPathDetailForLearner(String email, Long learningPathId) {
+    public LearningPathDetailResponseForLearner getLearningPathDetailForLearner(String email, String learningPathSlug) {
         User user = userService.getUserByEmail(email);
-        LearningPath path = learningPathRepository.findLearningPathWithLessonsById(learningPathId)
+        LearningPath path = learningPathRepository.findLearningPathWithLessonsBySlug(learningPathSlug)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
         if (!Boolean.TRUE.equals(path.getIsActive()))
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path");
 
-        UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), learningPathId);
+        UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), learningPathSlug);
         if (userLearningPathService.getUserLearningPath(user.getId(), path.getId()) == null) {
             ELessonLevel level = userLearningPathService.getLessonLevel(email, path.getTestType());
             userLearningPath = userLearningPathService.createUserLearningPath(user, path, level);

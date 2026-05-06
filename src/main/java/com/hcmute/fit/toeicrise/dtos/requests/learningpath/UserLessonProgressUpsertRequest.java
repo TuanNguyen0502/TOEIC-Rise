@@ -25,4 +25,6 @@ public class UserLessonProgressUpsertRequest {
     @NotNull(message = MessageConstant.USER_PROGRESS_LAST_WATCHED_TIME_MS_NOT_NULL)
     @Min(value = 0, message = MessageConstant.USER_PROGRESS_LAST_WATCHED_TIME_MS_MIN)
     private Long lastWatchedTimeMs;
+
+    private String notice;
 }

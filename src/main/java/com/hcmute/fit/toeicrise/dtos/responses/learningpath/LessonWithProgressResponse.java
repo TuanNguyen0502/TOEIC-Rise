@@ -16,4 +16,5 @@ public class LessonWithProgressResponse {
     private Boolean isCompleted;
     private String progressUpdatedAt;
     private String createdAt;
+    private String notice;
 }

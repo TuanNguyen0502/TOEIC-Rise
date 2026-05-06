@@ -19,6 +19,7 @@ public interface ILessonService {
     void reorderLesson(LessonReorderRequest request);
     void setLessonActive(Long id, Boolean active);
     Lesson getLessonWithLearningPathId(Long id);
+    LessonDetailResponse getLesson(String slug, String email);
     LessonDetailResponse getLesson(Long id, String email);
     LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson);
     PageResponse getLessonsForPage(String learningPathSlug, String name, ELessonLevel level, int page, int size, String sortBy, String direction);

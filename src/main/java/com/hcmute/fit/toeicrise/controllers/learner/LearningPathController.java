@@ -24,15 +24,15 @@ public class LearningPathController {
         return ResponseEntity.ok(learningPathService.listActiveLearningPaths(page, size, sortBy, direction));
     }
 
-    @GetMapping("/{learningPathId}")
-    public ResponseEntity<?> detail(@PathVariable Long learningPathId) {
+    @GetMapping("/{learningPathSlug}")
+    public ResponseEntity<?> detail(@PathVariable (name = "learningPathSlug") String learningPathSlug) {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(learningPathService.getLearningPathDetailForLearner(email, learningPathId));
+        return ResponseEntity.ok(learningPathService.getLearningPathDetailForLearner(email, learningPathSlug));
     }
 
-    @GetMapping("/lessons/{lessonId}")
-    public ResponseEntity<?> getLesson(@PathVariable Long lessonId) {
+    @GetMapping("/lessons/{lessonSlug}")
+    public ResponseEntity<?> getLesson(@PathVariable (name = "lessonSlug") String lessonSlug) {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(lessonService.getLesson(lessonId, email));
+        return ResponseEntity.ok(lessonService.getLesson(lessonSlug, email));
     }
 }

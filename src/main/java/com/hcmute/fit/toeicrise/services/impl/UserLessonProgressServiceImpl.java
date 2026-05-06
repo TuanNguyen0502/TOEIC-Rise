@@ -46,12 +46,14 @@ public class UserLessonProgressServiceImpl implements IUserLessonProgressService
                         .progressPercentage(0.0)
                         .lastWatchedTimeMs(0L)
                         .isCompleted(false)
+                        .notice(request.getNotice())
                         .build());
 
         double pct = request.getProgressPercentage();
         progress.setProgressPercentage(pct);
         progress.setLastWatchedTimeMs(request.getLastWatchedTimeMs());
         progress.setIsCompleted(pct >= 100.0);
+        progress.setNotice(request.getNotice());
         userLessonProgressRepository.save(progress);
     }
 

@@ -13,7 +13,7 @@ public interface ILearningPathService {
     void createLearningPath(LearningPathCreateRequest request);
     void updateLearningPath(Long learningPathId, LearningPathUpdateRequest request);
     LearningPath getLearningPath(Long learningPathId);
-    LearningPathDetailResponseForLearner getLearningPathDetailForLearner(String email, Long learningPathId);
+    LearningPathDetailResponseForLearner getLearningPathDetailForLearner(String email, String learningPathSlug);
     PageResponse listLearningPaths(Boolean isActive, int page, int size, String sortBy, String direction);
     PageResponse listActiveLearningPaths(int page, int size, String sortBy, String direction);
     LearningPathResponse getLearningPathResponse(Long learningPathId);

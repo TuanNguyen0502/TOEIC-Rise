@@ -119,4 +119,10 @@ public class TagServiceImpl implements ITagService {
         existingTag.setName(tagRequest.getName());
         tagRepository.save(existingTag);
     }
+
+    @Override
+    public Tag getTagByName(String name) {
+        return tagRepository.findByName(name)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag name"));
+    }
 }

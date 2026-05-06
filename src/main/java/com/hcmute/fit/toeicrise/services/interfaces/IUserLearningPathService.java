@@ -10,4 +10,5 @@ public interface IUserLearningPathService {
     UserLearningPath getUserLearningPath(Long userId, Long pathId);
     UserLearningPath createUserLearningPath(User user, LearningPath learningPath, ELessonLevel level);
     ELessonLevel getLessonLevel(String email, ETestType testType);
+    UserLearningPath getUserLearningPath(Long userId, String learningPathSlug);
 }

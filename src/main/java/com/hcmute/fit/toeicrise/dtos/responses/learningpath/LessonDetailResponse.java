@@ -20,6 +20,7 @@ public class LessonDetailResponse {
     private String topic;
     private ELessonLevel level;
     private String content;
+    private String notice;
     private Boolean isActive;
     private Integer orderIndex;
     private String updatedAt;

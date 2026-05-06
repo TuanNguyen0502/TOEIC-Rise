@@ -10,15 +10,14 @@ import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonDetailResponse
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonResponseForLearner;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.LearningPath;
-import com.hcmute.fit.toeicrise.models.entities.Lesson;
-import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.LessonMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.LearningPathRepository;
 import com.hcmute.fit.toeicrise.repositories.LessonRepository;
+import com.hcmute.fit.toeicrise.repositories.UserLessonProgressRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.LessonSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
@@ -44,6 +43,7 @@ public class LessonServiceImpl implements ILessonService {
     private final CloudinaryUtil cloudinaryUtil;
     private final IUserService userService;
     private final LearningPathRepository learningPathRepository;
+    private final UserLessonProgressRepository userLessonProgressRepository;
     private final PageResponseMapper pageResponseMapper;
 
     private static final int OFFSET = 1_000_000;
@@ -128,6 +128,22 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
+    public LessonDetailResponse getLesson(String slug, String email) {
+        User user = userService.getUserByEmail(email);
+        Lesson lesson = lessonRepository.findByLearningPathBySlug(slug).orElseThrow(()
+                -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson"));
+        UserLessonProgress userLessonProgress = userLessonProgressRepository.findByUserIdAndLessonId(user.getId(), lesson.getId()).orElse(null);
+
+        if (!Boolean.TRUE.equals(lesson.getIsActive()) || !Boolean.TRUE.equals(lesson.getLearningPath().getIsActive()))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
+
+        LessonDetailResponse response = lessonMapper.toDetailResponse(lesson);
+        if (userLessonProgress != null)
+            response.setNotice(userLessonProgress.getNotice());
+        return response;
+    }
+
+    @Override
     public LessonDetailResponse getLesson(Long id, String email) {
         userService.getUserByEmail(email);
         Lesson lesson = getLessonWithLearningPathId(id);
@@ -135,8 +151,7 @@ public class LessonServiceImpl implements ILessonService {
         if (!Boolean.TRUE.equals(lesson.getIsActive()) || !Boolean.TRUE.equals(lesson.getLearningPath().getIsActive()))
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
-        return lessonMapper.toDetailResponse(lesson);
-    }
+        return lessonMapper.toDetailResponse(lesson);    }
 
     @Override
     public LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson) {

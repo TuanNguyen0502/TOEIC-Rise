@@ -25,4 +25,6 @@ public interface ITagService {
     void createTagIfNotExists(TagRequest tagRequest);
 
     void updateTag(Long tagId, TagRequest tagRequest);
+
+    Tag getTagByName(String name);
 }

@@ -31,4 +31,7 @@ public class UserLessonProgress extends BaseEntity {
 
     @Column(name = "is_completed", nullable = false)
     private Boolean isCompleted;
+
+    @Column(name = "notice")
+    private String notice;
 }
