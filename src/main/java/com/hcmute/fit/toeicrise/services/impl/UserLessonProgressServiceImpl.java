@@ -50,6 +50,8 @@ public class UserLessonProgressServiceImpl implements IUserLessonProgressService
                         .build());
 
         double pct = request.getProgressPercentage();
+        if (lesson.getVideoUrl() == null || lesson.getVideoUrl().isEmpty())
+            pct = 100.0;
         if (progress.getProgressPercentage() < 100)
             progress.setProgressPercentage(pct);
         progress.setLastWatchedTimeMs(request.getLastWatchedTimeMs());
