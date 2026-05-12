@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.staff;
 
+import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.blog.category.BlogCategoryUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
@@ -46,7 +47,8 @@ public class BlogCategoryController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> inactiveBlogCategory(@PathVariable Long id) {
-        blogCategoryService.inactiveBlogCategory(id);
+        String email = SecurityUtils.getCurrentUser();
+        blogCategoryService.inactiveBlogCategory(email, id);
         return ResponseEntity.ok().build();
     }
 }
