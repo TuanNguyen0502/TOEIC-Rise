@@ -152,6 +152,7 @@ public class MessageConstant {
     public static final String LESSON_REORDER_SUCCESS = "Lesson reorder successfully.";
     public static final String LESSON_ACTIVE_UPDATE_SUCCESS = "Lesson update active successfully.";
     public static final String USER_LESSON_PROGRESS_UPDATED_SUCCESS = "User lesson progress updated successfully.";
+    public static final String USER_LESSON_CREATED_SUCCESS = "User lesson created successfully.";
     //Common messages
     public static final String COMMENT_NOT_BLANK = "Comment content must not be blank.";
     public static final String COMMENT_TOO_LONG = "Comment content must not exceed 500 characters.";

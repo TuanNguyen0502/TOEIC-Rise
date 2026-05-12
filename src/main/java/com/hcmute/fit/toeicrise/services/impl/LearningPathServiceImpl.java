@@ -9,6 +9,7 @@ import com.hcmute.fit.toeicrise.models.entities.Lesson;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.entities.UserLearningPath;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.LearningPathMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
@@ -102,6 +103,29 @@ public class LearningPathServiceImpl implements ILearningPathService {
     }
 
     @Override
+    public LessonLevelResponse getLearningPathLevel(String learningPathSlug, String email, ETestType testType) {
+        User user = userService.getUserByEmail(email);
+        UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), learningPathSlug);
+        ELessonLevel level = userLearningPath == null ? null : userLearningPath.getLevel();
+        ELessonLevel chooseLevel = userLearningPathService.getLessonLevel(email, testType);
+        return LessonLevelResponse.builder()
+                .currentLevel(level)
+                .chooseLevel(chooseLevel)
+                .build();
+    }
+
+    @Override
+    public void createUserLearningPath(String email, String learningPathSlug, ELessonLevel level) {
+        User user = userService.getUserByEmail(email);
+        LearningPath path = learningPathRepository.findLearningPathWithLessonsBySlug(learningPathSlug)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
+        if (!Boolean.TRUE.equals(path.getIsActive()))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path");
+
+        userLearningPathService.createUserLearningPath(user, path, level);
+    }
+
+    @Override
     public LearningPathDetailResponseForLearner getLearningPathDetailForLearner(String email, String learningPathSlug) {
         User user = userService.getUserByEmail(email);
         LearningPath path = learningPathRepository.findLearningPathWithLessonsBySlug(learningPathSlug)
@@ -110,10 +134,6 @@ public class LearningPathServiceImpl implements ILearningPathService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path");
 
         UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), learningPathSlug);
-        if (userLearningPathService.getUserLearningPath(user.getId(), path.getId()) == null) {
-            ELessonLevel level = userLearningPathService.getLessonLevel(email, path.getTestType());
-            userLearningPath = userLearningPathService.createUserLearningPath(user, path, level);
-        }
         ELessonLevel targetLevel = userLearningPath.getLevel();
         List<Lesson> lessonsForLearner =
                 path.getLessons() == null ? List.of() : path.getLessons().stream()
@@ -124,6 +144,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
 
         LearningPathDetailResponseForLearner response = learningPathMapper.toLearningPathDetailResponseForLearner(path);
         response.setLessons(userLessonProgressService.getLessonProgress(email, lessonsForLearner));
+        response.setLevel(targetLevel);
         return response;
     }
 

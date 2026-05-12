@@ -6,16 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class LearningPathDetailResponseForLearner {
-    private Long id;
-    private String name;
-    private String slug;
-    private ELessonLevel level;
-    private List<LessonWithProgressResponse> lessons;
+@AllArgsConstructor
+public class LessonLevelResponse {
+    private ELessonLevel currentLevel;
+    private ELessonLevel chooseLevel;
 }
