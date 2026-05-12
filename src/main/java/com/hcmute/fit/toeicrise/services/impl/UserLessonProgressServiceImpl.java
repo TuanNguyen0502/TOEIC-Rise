@@ -3,13 +3,12 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.UserLessonProgressUpsertRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.LessonWithProgressResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.Lesson;
-import com.hcmute.fit.toeicrise.models.entities.User;
-import com.hcmute.fit.toeicrise.models.entities.UserLessonProgress;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.UserLessonProgressMapper;
 import com.hcmute.fit.toeicrise.repositories.UserLessonProgressRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
+import com.hcmute.fit.toeicrise.services.interfaces.IUserLearningPathService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserLessonProgressService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +26,7 @@ import java.util.stream.Collectors;
 public class UserLessonProgressServiceImpl implements IUserLessonProgressService {
     private final IUserService userService;
     private final ILessonService lessonService;
+    private final IUserLearningPathService userLearningPathService;
     private final UserLessonProgressRepository userLessonProgressRepository;
     private final UserLessonProgressMapper userLessonProgressMapper;
 
@@ -58,6 +58,12 @@ public class UserLessonProgressServiceImpl implements IUserLessonProgressService
         progress.setIsCompleted(pct >= 80.0);
         progress.setNotice(request.getNotice());
         userLessonProgressRepository.save(progress);
+
+        if (lessonService.getLessonOrderByOrderIndexDesc(lesson.getLearningPath().getId(), lesson.getLevel()) == lesson){
+            UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), lesson.getLearningPath().getId());
+            userLearningPath.setLevel(lesson.getLevel().getNextLevel());
+            userLearningPathService.saveUserLearningPath(userLearningPath);
+        }
     }
 
     @Override

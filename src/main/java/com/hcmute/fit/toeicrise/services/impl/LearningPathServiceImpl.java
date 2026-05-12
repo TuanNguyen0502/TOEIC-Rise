@@ -138,13 +138,12 @@ public class LearningPathServiceImpl implements ILearningPathService {
         List<Lesson> lessonsForLearner =
                 path.getLessons() == null ? List.of() : path.getLessons().stream()
                         .filter(l -> Boolean.TRUE.equals(l.getIsActive()))
-                        .filter(l -> l.getLevel() == targetLevel)
+                        .filter(l -> l.getLevel().ordinal() <= targetLevel.ordinal())
                         .sorted(Comparator.comparingInt(l -> l.getOrderIndex() == null ? Integer.MAX_VALUE : l.getOrderIndex()))
                         .toList();
 
         LearningPathDetailResponseForLearner response = learningPathMapper.toLearningPathDetailResponseForLearner(path);
         response.setLessons(userLessonProgressService.getLessonProgress(email, lessonsForLearner));
-        response.setLevel(targetLevel);
         return response;
     }
 

@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.Lesson;
+import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,7 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
             "FROM Lesson l " +
             "LEFT JOIN FETCH l.learningPath " +
             "WHERE l.slug =:slug")
-    Optional<Lesson> findByLearningPathBySlug(@Param("slug") String slug);}
+    Optional<Lesson> findByLearningPathBySlug(@Param("slug") String slug);
+
+    Optional<Lesson> findFirstByLearningPathIdAndLevelOrderByOrderIndexDesc(Long learningPathId, ELessonLevel level);
+}

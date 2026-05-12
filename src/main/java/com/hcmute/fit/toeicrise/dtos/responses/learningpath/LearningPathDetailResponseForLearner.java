@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.dtos.responses.learningpath;
 
-import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +15,5 @@ public class LearningPathDetailResponseForLearner {
     private Long id;
     private String name;
     private String slug;
-    private ELessonLevel level;
     private List<LessonWithProgressResponse> lessons;
 }

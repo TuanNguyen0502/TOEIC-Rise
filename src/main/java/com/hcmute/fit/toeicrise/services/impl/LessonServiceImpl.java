@@ -164,6 +164,11 @@ public class LessonServiceImpl implements ILessonService {
         return getLessonResponses(learningPathSlug, name, level, page,size, sortBy, direction, specification);
     }
 
+    @Override
+    public Lesson getLessonOrderByOrderIndexDesc(Long learningPathId, ELessonLevel level) {
+        return lessonRepository.findFirstByLearningPathIdAndLevelOrderByOrderIndexDesc(learningPathId, level).orElse(null);
+    }
+
     private PageResponse getLessonResponses(String learningPathSlug, String name, ELessonLevel level, int page, int size, String sortBy, String direction, Specification<Lesson> specification) {
         if (learningPathSlug != null)
             specification = specification.and(LessonSpecification.learningPathSlugEquals(learningPathSlug));
