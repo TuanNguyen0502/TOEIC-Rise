@@ -52,7 +52,7 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "LEFT JOIN FETCH q.questionGroup qg " +
             "LEFT JOIN FETCH qg.part p " +
             "WHERE ut.user.account.email = :email AND ut.createdAt >= :days AND t.status = :status")
-    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days, @Param("status")ETestStatus status);
+    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days, @Param("status") ETestStatus status);
 
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
             "ut.id, t.name, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
@@ -90,5 +90,5 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "WHERE ut.createdAt >= :start AND ut.createdAt < :end")
     ScoreDistInsightResponse countUserTestByScore(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    UserTest findTopByUserAccountEmailAndTestTypeOrderByCreatedAtDesc(String email, ETestType testType);
+    UserTest findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(String email, ETestType testType);
 }
