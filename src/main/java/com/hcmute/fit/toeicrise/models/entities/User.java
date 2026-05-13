@@ -30,5 +30,6 @@ public class User extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @ToString.Exclude
     private Role role;
 }

@@ -34,13 +34,16 @@ public class Test extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "test_set_id")
+    @ToString.Exclude
     private TestSet testSet;
 
     @Column(name = "dictation_status", columnDefinition = "json NOT NULL DEFAULT (JSON_ARRAY())")
     @Convert(converter = EPartListJsonConverter.class)
     @Builder.Default
+    @ToString.Exclude
     private List<EPart> dictationStatus = new ArrayList<>();
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<QuestionGroup> questionGroups;
 }

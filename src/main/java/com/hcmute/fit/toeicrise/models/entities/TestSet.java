@@ -12,6 +12,7 @@ import java.util.List;
 @Table(name = "test_sets")
 @EqualsAndHashCode(callSuper = true)
 @Data
+@ToString(exclude = "tests")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

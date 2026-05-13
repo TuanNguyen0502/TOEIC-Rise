@@ -36,5 +36,6 @@ public class LearningPath extends BaseEntity {
     @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     @Builder.Default
+    @ToString.Exclude
     private List<Lesson> lessons = new ArrayList<>();
 }

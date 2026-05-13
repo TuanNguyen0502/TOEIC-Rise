@@ -18,10 +18,12 @@ import java.time.LocalDateTime;
 public class FlashcardItemProgress extends BaseEntity{
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
     private User user;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "flashcard_item_id", nullable = false)
+    @ToString.Exclude
     private FlashcardItem flashcardItem;
 
     @Enumerated(EnumType.STRING)

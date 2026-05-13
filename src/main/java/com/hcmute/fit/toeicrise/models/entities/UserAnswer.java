@@ -18,6 +18,7 @@ public class UserAnswer extends BaseEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "question_id")
+    @ToString.Exclude
     private Question question;
 
     @Column(name = "question_group_id", nullable = false)

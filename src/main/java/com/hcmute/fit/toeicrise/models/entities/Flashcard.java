@@ -16,6 +16,7 @@ import java.util.List;
 public class Flashcard extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @Column(name = "name", nullable = false)
@@ -32,8 +33,10 @@ public class Flashcard extends BaseEntity {
     private Integer favouriteCount;
 
     @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @ToString.Exclude
     private List<FlashcardItem> flashcardItems;
 
     @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @ToString.Exclude
     private List<FlashcardFavourite> favourites;
 }

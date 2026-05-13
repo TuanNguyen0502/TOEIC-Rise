@@ -33,6 +33,7 @@ public class BlogPost extends BaseEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id")
+    @ToString.Exclude
     private BlogCategory category;
 
     @Enumerated(EnumType.STRING)
