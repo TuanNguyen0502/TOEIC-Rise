@@ -41,5 +41,6 @@ public class Question extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @Builder.Default
+    @ToString.Exclude
     private List<Tag> tags = new ArrayList<>();
 }

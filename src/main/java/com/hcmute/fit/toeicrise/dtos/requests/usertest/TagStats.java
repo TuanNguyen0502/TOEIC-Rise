@@ -8,7 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TagStats {
+    @Builder.Default
     private int correct = 0;
+    @Builder.Default
     private int wrong = 0;
 
     public void add(int correctDelta, int wrongDelta) {

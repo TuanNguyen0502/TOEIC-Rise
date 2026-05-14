@@ -14,6 +14,7 @@ import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
 import com.hcmute.fit.toeicrise.models.entities.BlogPost;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
+import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.BlogPostMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
@@ -168,7 +169,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Staff"));
 
         // Only the author of the blog post can update it
-        if (!blogPost.getAuthor().getId().equals(author.getId())) {
+        if (!blogPost.getAuthor().getId().equals(author.getId()) && !author.getRole().getName().equals(ERole.ADMIN)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "You are not the author of this blog post");
         }
         if (!blogPost.getSlug().equals(request.getSlug())) {
@@ -210,7 +211,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Staff"));
         BlogCategory blogCategory = blogPost.getCategory();
 
-        if (!blogPost.getAuthor().getId().equals(author.getId())) {
+        if (!blogPost.getAuthor().getId().equals(author.getId()) && !author.getRole().getName().equals(ERole.ADMIN)) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "You are not the author of this blog post");
         }
         if (status.equals(EBlogPostStatus.PUBLISHED) && blogCategory.getIsActive() == false) {

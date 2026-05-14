@@ -31,6 +31,8 @@ public class MiniTestServiceImpl implements IMiniTestService {
     private final QuestionGroupMapper questionGroupMapper;
     private final ITagService tagService;
 
+    private static final int NUMBER_OF_QUESTION = 20;
+
     @Override
     public MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request) {
         if (request == null || request.getQuestionGroups() == null || request.getQuestionGroups().isEmpty())
@@ -93,7 +95,19 @@ public class MiniTestServiceImpl implements IMiniTestService {
     @Override
     public MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion) {
         tagService.checkExistsIds(tagIds);
+        return getMiniTestResponse(partId, tagIds, numberQuestion);
+    }
 
+    @Override
+    public MiniTestResponse getLearnerTestQuestionResponse(String tagSlug) {
+        Tag tag = tagService.getTagByName(tagSlug);
+        Set<Long> tagIds = new HashSet<>();
+        tagIds.add(tag.getId());
+        Long partId = tag.getQuestions().getFirst().getQuestionGroup().getPart().getId();
+        return getMiniTestResponse(partId, tagIds, NUMBER_OF_QUESTION);
+    }
+
+    private MiniTestResponse getMiniTestResponse(Long partId, Set<Long> tagIds, int numberQuestion) {
         Map<QuestionGroup, List<Question>> groupEntities = getAllQuestionGroup(partId, tagIds, numberQuestion);
         groupEntities.values().forEach(questions -> questions.sort(Comparator.comparing(Question::getPosition)));
         List<MiniTestQuestionGroupResponse> miniTestQuestionGroupResponses = new ArrayList<>();

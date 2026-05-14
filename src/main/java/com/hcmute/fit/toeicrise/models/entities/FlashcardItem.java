@@ -13,6 +13,7 @@ import lombok.*;
 public class FlashcardItem extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "flashcard_id", nullable = false)
+    @ToString.Exclude
     private Flashcard flashcard;
 
     @Column(name = "vocabulary", nullable = false)

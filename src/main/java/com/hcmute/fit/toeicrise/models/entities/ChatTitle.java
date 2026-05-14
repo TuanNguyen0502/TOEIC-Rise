@@ -18,6 +18,7 @@ public class ChatTitle {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @Column(name = "conversation_id", nullable = false)

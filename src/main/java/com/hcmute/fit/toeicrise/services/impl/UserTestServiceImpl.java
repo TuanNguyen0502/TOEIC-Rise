@@ -664,6 +664,11 @@ public class UserTestServiceImpl implements IUserTestService {
         return learnerTestPartsResponse;
     }
 
+    @Override
+    public UserTest getLastestUserTest(String email, ETestType testType) {
+        return userTestRepository.findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, testType);
+    }
+
     private int roundToNearest5(int number) {
         return (int) (Math.round(number / 5.0) * 5);
     }

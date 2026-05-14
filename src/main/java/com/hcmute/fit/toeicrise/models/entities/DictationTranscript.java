@@ -27,6 +27,7 @@ public class DictationTranscript extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_group_id", nullable = false, unique = true)
+    @ToString.Exclude
     private QuestionGroup questionGroup;
 
 }

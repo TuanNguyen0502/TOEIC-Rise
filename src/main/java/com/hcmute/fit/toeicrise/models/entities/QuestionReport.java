@@ -18,14 +18,17 @@ import java.util.List;
 public class QuestionReport extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false)
+    @ToString.Exclude
     private Question question;
 
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
+    @ToString.Exclude
     private User reporter;
 
     @ManyToOne
     @JoinColumn(name = "resolver_id")
+    @ToString.Exclude
     private User resolver;
 
     @Convert(converter = QuestionReportReasonListJsonConverter.class)

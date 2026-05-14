@@ -264,4 +264,6 @@ public class Constant {
     public static final String BLOG_POST_TITLE_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{5,150}$";
     public static final String BLOG_POST_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
     public static final String BLOG_POST_SUMMARY_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{10,500}$";
+    // Learning path
+    public static final String LEARNING_PATH_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
 }

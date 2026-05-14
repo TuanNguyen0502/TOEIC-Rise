@@ -23,5 +23,6 @@ public class BlogCategory extends BaseEntity {
     private Boolean isActive;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<BlogPost> posts;
 }

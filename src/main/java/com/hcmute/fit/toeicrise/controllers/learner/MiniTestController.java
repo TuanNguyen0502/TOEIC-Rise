@@ -41,6 +41,11 @@ public class MiniTestController {
         return ResponseEntity.ok(miniTestService.getLearnerTestQuestionGroupResponsesByTags(partId, tagIds, numberQuestion));
     }
 
+    @GetMapping("/practice-slug")
+    public ResponseEntity<?> getQuestionGroup(@RequestParam(name = "slug") String practiceSlug) {
+        return ResponseEntity.ok(miniTestService.getLearnerTestQuestionResponse(practiceSlug));
+    }
+
     @PostMapping("")
     public ResponseEntity<?> submitTest(@Valid @RequestBody MiniTestRequest miniTestRequest){
         return ResponseEntity.ok(miniTestService.getMiniTestOverallResponse(miniTestRequest));

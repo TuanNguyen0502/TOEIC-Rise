@@ -5,6 +5,8 @@ public class MessageConstant {
     public static final String INVALID_PASSWORD = "Invalid password! Password must be 8-20 characters long, contain at least one digit, one lowercase letter, one uppercase letter, one special character from .@#$%^&+=, and have no whitespace.";
     public static final String INVALID_OTP = "Invalid OTP! OTP must be exactly 6 digits (0-9).";
     public static final String INVALID_TEST_SET = "Test set name can only contain letters, digits, spaces, and parentheses.";
+    public static final String THUMBNAIL_NOT_NULL = "Thumbnail must not be null.";
+    public static final String IMAGE_NOT_BLANK = "Image must not be blank.";
     // Profile messages
     public static final String INVALID_USER = "Invalid or anonymous user";
     public static final String PROFILE_FULLNAME_NOT_NULL = "Full name must not be null.";
@@ -40,6 +42,7 @@ public class MessageConstant {
     // Test related messages
     public static final String TEST_NAME_INVALID = "Test's name can only contain letters, digits, spaces, and parentheses.";
     public static final String TEST_NAME_NOT_BLANK = "Test's name must not be blank.";
+    public static final String TEST_TYPE_NOT_NULL = "Test's type must not be null";
     // User related messages
     public static final String EMAIL_NOT_NULL = "Email must not be null.";
     public static final String EMAIL_NOT_BLANK = "Email must not be blank.";
@@ -101,6 +104,35 @@ public class MessageConstant {
     public static final String SENTENCE_NOT_BLANK = "Sentence must not be blank";
     public static final String KEYWORD_NOT_EMPTY = "Keyword must not be empty.";
     public static final String KEYWORD_NOT_BLANK = "Keyword must not be blank.";
+    // LearningPath related messages
+    public static final String LEARNING_PATH_NAME_NOT_BLANK = "Learning path name must not be blank.";
+    public static final String LEARNING_PATH_NAME_NOT_NULL = "Learning path name must not be null.";
+    public static final String LEARNING_PATH_NAME_MAX = "Learning path name must not exceed 255 characters.";
+    public static final String LEARNING_PATH_DESCRIPTION_MAX = "Description must not exceed 5000 characters.";
+    public static final String LEARNING_PATH_SLUG_NOT_BLANK = "Learning path slug must not be blank.";
+    public static final String LEARNING_PATH_SLUG_INVALID = "Learning path slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 255 characters long.";
+    public static final String LEARNING_PATH_ID_NOT_NULL = "Learning path id must not be null.";
+    // Lesson related messages
+    public static final String LESSONS_NOT_EMPTY = "Lessons must not be empty.";
+    public static final String LESSON_ID_NOT_NULL = "LessonId must not be null.";
+    public static final String LESSON_ORDER_INDEX_NOT_NULL = "Order index must not be null.";
+    public static final String LESSON_ORDER_INDEX_MIN = "Order index must be greater than 0.";
+    public static final String LESSON_TITLE_NOT_NULL = "Title must not be null.";
+    public static final String LESSON_TITLE_NOT_BLANK = "Title must not be blank.";
+    public static final String LESSON_TITLE_MAX = "Title must not exceed 255 characters.";
+    public static final String LESSON_VIDEO_URL_MAX = "Video URL must not exceed 500 characters.";
+    public static final String LESSON_TOPIC_MAX = "Topic must not exceed 255 characters.";
+    public static final String LESSON_TOPIC_NOT_BLANK = "Topic must not be blank.";
+    public static final String LESSON_TOPIC_NOT_NULL = "Topic must not be null";
+    public static final String LESSON_LEVEL_NOT_NULL = "Level must not be null.";
+    public static final String LESSON_SLUG_NOT_BLANK = "Lesson slug must not be blank.";
+    public static final String LESSON_SLUG_INVALID = "Lesson slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 255 characters long.";
+    // User progress related messages
+    public static final String USER_PROGRESS_PERCENT_NOT_NULL = "ProgressPercentage must not be null.";
+    public static final String USER_PROGRESS_PERCENT_MIN = "ProgressPercentage must be >= 0.";
+    public static final String USER_PROGRESS_PERCENT_MAX = "ProgressPercentage must be <= 100.";
+    public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_NOT_NULL = "LastWatchedTimeMs must not be null.";
+    public static final String USER_PROGRESS_LAST_WATCHED_TIME_MS_MIN = "LastWatchedTimeMs must be >= 0.";
     // DictationTranscript related messages
     public static final String DICTATION_TRANSCRIPT_LIST_NOT_EMPTY = "Dictation transcript list must not be empty.";
     public static final String DICTATION_TRANSCRIPT_ID_NOT_NULL = "Dictation transcript ID must not be null.";
@@ -115,6 +147,12 @@ public class MessageConstant {
     public static final String TEST_SET_CREATED_SUCCESS = "Test Set created successfully.";
     public static final String TEST_IMPORT_SUCCESS = "Test imported successfully";
     public static final String QUESTION_UPDATE_SUCCESS = "Update question updated successfully";
+    public static final String LEARNING_PATH_CREATED_SUCCESS = "Learning path created successfully.";
+    public static final String LEARNING_PATH_UPDATED_SUCCESS = "Learning path updated successfully.";
+    public static final String LESSON_REORDER_SUCCESS = "Lesson reorder successfully.";
+    public static final String LESSON_ACTIVE_UPDATE_SUCCESS = "Lesson update active successfully.";
+    public static final String USER_LESSON_PROGRESS_UPDATED_SUCCESS = "User lesson progress updated successfully.";
+    public static final String USER_LESSON_CREATED_SUCCESS = "User lesson created successfully.";
     //Common messages
     public static final String COMMENT_NOT_BLANK = "Comment content must not be blank.";
     public static final String COMMENT_TOO_LONG = "Comment content must not exceed 500 characters.";

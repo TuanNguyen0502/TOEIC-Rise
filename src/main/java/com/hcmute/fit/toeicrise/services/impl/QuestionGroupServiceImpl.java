@@ -27,6 +27,7 @@ import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionGroupMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
 import com.hcmute.fit.toeicrise.repositories.QuestionGroupRepository;
+import com.hcmute.fit.toeicrise.services.interfaces.ICloudinaryService;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
 import com.hcmute.fit.toeicrise.models.mappers.PartMapper;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 public class QuestionGroupServiceImpl implements IQuestionGroupService {
     private final QuestionGroupRepository questionGroupRepository;
     private final IQuestionService questionService;
+    private final ICloudinaryService cloudinaryService;
     private final CloudinaryUtil cloudinaryUtil;
     private final QuestionGroupMapper questionGroupMapper;
     private final PartMapper partMapper;
@@ -96,7 +98,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         validateImageForPart(part, request.getImage(), request.getImageUrl());
         validatePassageForPart(part, request.getPassage());
 
-        questionGroup.setImageUrl(processMediaFile(
+        questionGroup.setImageUrl(cloudinaryService.processMediaFile(
                 request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
 
@@ -118,7 +120,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         validateImageForPart(part, request.getImage(), request.getImageUrl());
         validatePassageForPart(part, request.getPassage());
 
-        questionGroup.setImageUrl(processMediaFile(
+        questionGroup.setImageUrl(cloudinaryService.processMediaFile(
                 request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
 
@@ -141,9 +143,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         validateImageForPart(part, request.getImage(), request.getImageUrl());
         validatePassageForPart(part, request.getPassage());
 
-        questionGroup.setAudioUrl(processMediaFile(
+        questionGroup.setAudioUrl(cloudinaryService.processMediaFile(
                 request.getAudio(), request.getAudioUrl(), questionGroup.getAudioUrl()));
-        questionGroup.setImageUrl(processMediaFile(
+        questionGroup.setImageUrl(cloudinaryService.processMediaFile(
                 request.getImage(), request.getImageUrl(), questionGroup.getImageUrl()));
         questionGroup.setPassage(request.getPassage());
         questionGroup.setTranscript(request.getTranscript());
@@ -201,24 +203,6 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         List<Long> missingIds = inputIds.stream().filter(id -> !existingIds.contains(id)).toList();
         if (!missingIds.isEmpty())
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question group");
-    }
-
-    private String processMediaFile(MultipartFile newFile, String newUrl, String oldUrl) {
-        boolean hasFile = newFile != null && !newFile.isEmpty();
-        boolean hasUrl = newUrl != null && !newUrl.isBlank();
-
-        if (hasFile) {
-            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl))
-                return cloudinaryUtil.updateFile(newFile, oldUrl);
-            return cloudinaryUtil.uploadFile(newFile);
-        }
-        if (hasUrl) {
-            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl)) {
-                cloudinaryUtil.deleteFile(oldUrl);
-            }
-            return newUrl;
-        }
-        return oldUrl;
     }
 
     private void validateAudioForPart(Part part, MultipartFile audio, String audioUrl) {

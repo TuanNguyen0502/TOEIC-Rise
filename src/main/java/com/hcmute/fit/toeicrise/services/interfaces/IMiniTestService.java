@@ -9,4 +9,5 @@ import java.util.Set;
 public interface IMiniTestService {
     MiniTestOverallResponse getMiniTestOverallResponse(MiniTestRequest request);
     MiniTestResponse getLearnerTestQuestionGroupResponsesByTags(Long partId, Set<Long> tagIds, int numberQuestion);
+    MiniTestResponse getLearnerTestQuestionResponse(String tagSlug);
 }
