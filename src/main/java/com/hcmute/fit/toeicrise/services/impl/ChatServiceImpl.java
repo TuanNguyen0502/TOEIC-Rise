@@ -14,10 +14,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.SystemPromptDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.Question;
-import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.models.entities.Tag;
-import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.ChatbotMapper;
@@ -275,10 +272,34 @@ public class ChatServiceImpl implements IChatService {
 
                     Question question = userAnswer.getQuestion();
                     QuestionGroup questionGroup = question.getQuestionGroup();
+                    Part part = questionGroup.getPart();
 
                     String prompt;
                     if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
-                        String options = String.join(", ", question.getOptions());
+                        String partName = part.getName();
+                        String passage = (questionGroup.getPassage() != null && !questionGroup.getPassage().isBlank())
+                                ? questionGroup.getPassage()
+                                : "N/A";
+                        String transcript = (questionGroup.getTranscript() != null && !questionGroup.getTranscript().isBlank())
+                                ? questionGroup.getTranscript()
+                                : "N/A";
+                        String content = (question.getContent() != null && !question.getContent().isBlank())
+                                ? question.getContent()
+                                : "N/A";
+                        String options = (question.getOptions() != null && !question.getOptions().isEmpty())
+                                ? String.join(", ", question.getOptions())
+                                : "N/A";
+                        String correctOption = (question.getCorrectOption() != null && !question.getCorrectOption().isBlank())
+                                ? question.getCorrectOption()
+                                : "N/A";
+                        String explanation = (question.getExplanation() != null && !question.getExplanation().isBlank())
+                                ? question.getExplanation()
+                                : "N/A";
+                        String answer = (userAnswer.getAnswer() != null && !userAnswer.getAnswer().isBlank())
+                                ? userAnswer.getAnswer()
+                                : (userAnswer.getAnswerText() != null && !userAnswer.getAnswerText().isBlank())
+                                  ? userAnswer.getAnswerText()
+                                  : "N/A";
                         String tags = question.getTags().stream()
                                 .map(Tag::getName)
                                 .reduce((a, b) -> a + ", " + b)
@@ -289,38 +310,42 @@ public class ChatServiceImpl implements IChatService {
                                 1. Tin nhắn của người dùng:
                                 %s
                                 
-                                2. Passage (đoạn văn nếu có):
+                                2. Part (phần thi):
                                 %s
                                 
-                                3. Transcript (nghe hiểu nếu có):
+                                3. Passage (đoạn văn nếu có):
                                 %s
                                 
-                                4. Nội dung câu hỏi:
+                                4. Transcript (nghe hiểu nếu có):
                                 %s
                                 
-                                5. Các lựa chọn:
+                                5. Nội dung câu hỏi:
                                 %s
                                 
-                                6. Đáp án đúng:
+                                6. Các lựa chọn:
                                 %s
                                 
-                                7. Giải thích đáp án đúng:
+                                7. Đáp án đúng:
                                 %s
                                 
-                                8. Đáp án người dùng đã chọn (nếu có):
+                                8. Giải thích đáp án đúng:
                                 %s
                                 
-                                9. Tags / Chủ điểm kiến thức:
+                                9. Đáp án người dùng đã chọn (nếu có):
+                                %s
+                                
+                                10. Tags / Chủ điểm kiến thức:
                                 %s
                                 """.formatted(
                                 request.getMessage(),
-                                questionGroup.getPassage(),
-                                questionGroup.getTranscript(),
-                                question.getContent(),
+                                partName,
+                                passage,
+                                transcript,
+                                content,
                                 options,
-                                question.getCorrectOption(),
-                                question.getExplanation(),
-                                userAnswer.getAnswer() != null ? userAnswer.getAnswer() : "N/A",
+                                correctOption,
+                                explanation,
+                                answer,
                                 tags
                         );
                     } else {
@@ -749,14 +774,14 @@ public class ChatServiceImpl implements IChatService {
                     Target Part: %s
                     Input data:
                     %s
-                    """.formatted(partName,payload);
+                    """.formatted(partName, payload);
 
             ChatClient cleanClient = chatClientBuilder.build();
             return cleanClient.prompt()
                     .system(PromptConstant.DICTATION_GENERATION_SYSTEM_PROMPT)
                     .user(userMessage)
                     .call()
-                    .entity(new ParameterizedTypeReference<List<DictationGenerationResponse>>() {
+                    .entity(new ParameterizedTypeReference<>() {
                     });
         } catch (JsonProcessingException e) {
             throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to prepare dictation request");
@@ -764,7 +789,7 @@ public class ChatServiceImpl implements IChatService {
             throw new AppException(ErrorCode.AI_PROCESSING_ERROR, "Failed to generate dictation preview");
         }
     }
-  
+
     private record ChatAboutQuestionContext(String prompt, QuestionGroup questionGroup) {
     }
 
