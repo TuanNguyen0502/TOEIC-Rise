@@ -1,17 +1,17 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.dtos.requests.question.SWQuestionGroupUpdateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.report.QuestionReportRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.report.QuestionReportResolveRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.report.QuestionReportResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.Question;
-import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.models.entities.QuestionReport;
-import com.hcmute.fit.toeicrise.models.entities.User;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
 import com.hcmute.fit.toeicrise.models.enums.ERole;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionReportMapper;
@@ -98,14 +98,39 @@ public class QuestionReportServiceImpl implements IQuestionReportService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question Report"));
         Question question = questionReport.getQuestion();
         QuestionGroup questionGroup = question.getQuestionGroup();
+        Part part = questionGroup.getPart();
+        String partName = part.getName().toLowerCase();
+        ETestType testType = partName.contains("speaking")
+                ? ETestType.SPEAKING
+                : partName.contains("writing")
+                  ? ETestType.WRITING
+                  : ETestType.LISTENING_AND_READING;
 
         checkStaffPermission(resolver, questionReport);
 
         if (request.getQuestionUpdate() != null) {
-            questionService.updateQuestionWithEntity(question, request.getQuestionUpdate());
+            if (testType.equals(ETestType.LISTENING_AND_READING)) {
+                questionService.updateQuestionWithEntity(question, request.getQuestionUpdate());
+            } else if (testType.equals(ETestType.SPEAKING)) {
+                SpeakingQuestionUpdateRequest speakingQuestionUpdateRequest = SpeakingQuestionUpdateRequest.builder()
+                        .id(question.getId())
+                        .questionGroupId(questionGroup.getId())
+                        .content(request.getQuestionUpdate().getContent())
+                        .build();
+                questionService.updateSpeakingQuestion(speakingQuestionUpdateRequest);
+            }
         }
         if (request.getQuestionGroupUpdate() != null) {
-            questionGroupService.updateQuestionGroupWithEntity(questionGroup, request.getQuestionGroupUpdate());
+            if (testType.equals(ETestType.LISTENING_AND_READING)) {
+                questionGroupService.updateQuestionGroupWithEntity(questionGroup, request.getQuestionGroupUpdate());
+            } else {
+                SWQuestionGroupUpdateRequest questionGroupUpdateRequest = SWQuestionGroupUpdateRequest.builder()
+                        .image(request.getQuestionGroupUpdate().getImage())
+                        .imageUrl(request.getQuestionGroupUpdate().getImageUrl())
+                        .passage(request.getQuestionGroupUpdate().getPassage())
+                        .build();
+                questionGroupService.updateSpeakingQuestionGroup(questionGroup.getId(), questionGroupUpdateRequest);
+            }
         }
         questionReport.setResolver(resolver);
         questionReport.setResolvedNote(request.getResolvedNote());
