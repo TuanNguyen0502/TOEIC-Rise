@@ -58,7 +58,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         log.info("Login request for email: {}", loginRequest.getEmail());
         Account authenticatedUser = authenticate(loginRequest);
