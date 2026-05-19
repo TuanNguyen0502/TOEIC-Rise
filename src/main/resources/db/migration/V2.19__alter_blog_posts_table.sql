@@ -1,0 +1,1 @@
+ALTER TABLE blog_posts ADD FULLTEXT INDEX idx_blog_search (title, summary);
