@@ -7,9 +7,12 @@ import com.hcmute.fit.toeicrise.dtos.requests.blog.post.BlogPostUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForLearnerResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostDetailForStaffResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.post.BlogPostResponse;
 import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface IBlogPostService {
     PageResponse getNewestBlogPosts(String title, int page, int size);
@@ -37,4 +40,8 @@ public interface IBlogPostService {
     String uploadImage(BlogPostImageRequest request);
 
     void deleteImage(BlogPostImageDeleteRequest request);
+
+    PageResponse searchBlogs(String keyword, int page, int size);
+
+    List<BlogPostResponse> getRelatedBlogs(Long currentPostId, int limit);
 }

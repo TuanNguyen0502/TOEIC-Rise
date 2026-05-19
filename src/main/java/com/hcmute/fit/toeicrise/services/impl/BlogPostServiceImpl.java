@@ -23,7 +23,6 @@ import com.hcmute.fit.toeicrise.repositories.BlogPostRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.BlogPostSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
-import com.hcmute.fit.toeicrise.services.interfaces.IBlogSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +44,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
     private final UserRepository userRepository;
     private final BlogPostMapper blogPostMapper;
     private final PageResponseMapper pageResponseMapper;
-    private final IBlogSearchService blogSearchService;
 
     @Override
     public PageResponse getNewestBlogPosts(String title, int page, int size) {
@@ -156,8 +154,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
         blogPost.setCategory(blogCategory);
         blogPost.setStatus(EBlogPostStatus.DRAFT);
         blogPost.setViews(0);
-        BlogPost savedPost = blogPostRepository.save(blogPost);
-        blogSearchService.createDocument(savedPost);
+        blogPostRepository.save(blogPost);
     }
 
     @Transactional
@@ -194,12 +191,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
             blogPost.setCategory(blogCategory);
         }
         blogPostRepository.save(blogPost);
-
-        if (blogPost.getStatus().equals(EBlogPostStatus.PUBLISHED)) {
-            blogSearchService.updateDocument(blogPost);
-        } else {
-            blogSearchService.deleteDocumentById(blogPost.getId());
-        }
     }
 
     @Transactional
@@ -219,12 +210,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
         }
         blogPost.setStatus(status);
         blogPostRepository.save(blogPost);
-
-        if (blogPost.getStatus().equals(EBlogPostStatus.PUBLISHED)) {
-            blogSearchService.updateDocument(blogPost);
-        } else {
-            blogSearchService.deleteDocumentById(blogPost.getId());
-        }
     }
 
     @Override
@@ -240,5 +225,34 @@ public class BlogPostServiceImpl implements IBlogPostService {
         }
         cloudinaryUtil.validateImageURL(request.getImageUrl());
         cloudinaryUtil.deleteFile(request.getImageUrl());
+    }
+
+    @Override
+    public PageResponse searchBlogs(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BlogPost> blogPostPage = blogPostRepository.searchByKeyword(keyword, pageable);
+        Page<BlogPostResponse> blogPostResponsePage = blogPostPage.map(blogPostMapper::toBlogPostResponse);
+        return pageResponseMapper.toPageResponse(blogPostResponsePage);
+    }
+
+    @Override
+    public List<BlogPostResponse> getRelatedBlogs(Long currentPostId, int limit) {
+        BlogPost currentPost = blogPostRepository.findById(currentPostId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog post"));
+
+        // Nếu bài viết hiện tại không có danh mục, trả về danh sách rỗng
+        String currentTitle = currentPost.getTitle();
+        Long categoryId = (currentPost.getCategory() != null) ? currentPost.getCategory().getId() : null;
+        Pageable limitable = PageRequest.of(0, limit);
+        List<BlogPost> relatedPosts = blogPostRepository.findRelatedBlogsSmart(
+                currentTitle,
+                categoryId,
+                currentPostId,
+                limitable
+        );
+
+        return relatedPosts.stream()
+                .map(blogPostMapper::toBlogPostResponse)
+                .toList();
     }
 }
