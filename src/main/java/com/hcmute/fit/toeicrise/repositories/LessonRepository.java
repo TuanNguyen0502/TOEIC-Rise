@@ -25,4 +25,11 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
     Optional<Lesson> findByLearningPathBySlug(@Param("slug") String slug);
 
     Optional<Lesson> findFirstByLearningPathIdAndLevelOrderByOrderIndexDesc(Long learningPathId, ELessonLevel level);
+
+    @Query("""
+    SELECT COALESCE(MAX(l.orderIndex), 0)
+    FROM Lesson l
+    WHERE l.learningPath.id = :learningPathId
+    """)
+    Integer findTopByOrderIndexAndLearningPathId(@Param("learningPathId") Long learningPathId);
 }

@@ -58,9 +58,12 @@ public class LessonServiceImpl implements ILessonService {
         if (user == null)
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User");
 
+        Integer orderIndex = lessonRepository.findTopByOrderIndexAndLearningPathId(learningPath.getId());
+
         Lesson lesson = lessonMapper.toEntity(request);
         lesson.setLearningPath(learningPath);
         lesson.setVideoUrl(request.getVideoUrl());
+        lesson.setOrderIndex(orderIndex+1);
 
         return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
     }
@@ -138,6 +141,8 @@ public class LessonServiceImpl implements ILessonService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
         LessonDetailResponse response = lessonMapper.toDetailResponse(lesson);
+        if (lesson.getSlug() == null)
+            response.setSlug(null);
         if (userLessonProgress != null)
             response.setNotice(userLessonProgress.getNotice());
         return response;
