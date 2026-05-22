@@ -22,14 +22,33 @@ public class QuestionGroupValidation implements ConstraintValidator<QuestionGrou
                         .addConstraintViolation();
                 valid = false;
             }
+            else if ((part == EPart.PART_5||part == EPart.PART_6||part == EPart.PART_7) && !isBlank(value.getAudioUrl())){
+                context.buildConstraintViolationWithTemplate("Audio is not required for " + part.getName())
+                        .addPropertyNode("audioUrl")
+                        .addConstraintViolation();
+                valid = false;
+            }
             if (part.isRequiredImage() && isBlank(value.getImageUrl())){
                 context.buildConstraintViolationWithTemplate("Image is required for " + part.getName())
                         .addPropertyNode("imageUrl")
                         .addConstraintViolation();
                 valid = false;
             }
+            else if ((part == EPart.PART_2||part == EPart.PART_5) && !isBlank(value.getImageUrl())){
+                context.buildConstraintViolationWithTemplate("Image is not required for " + part.getName())
+                        .addPropertyNode("imageUrl")
+                        .addConstraintViolation();
+                valid = false;
+            }
             if (part.isRequiredPassage() && isBlank(value.getPassage())){
                 context.buildConstraintViolationWithTemplate("Passage is required for " + part.getName())
+                        .addPropertyNode("passage")
+                        .addConstraintViolation();
+                valid = false;
+            }
+            else if ((part == EPart.PART_1||part == EPart.PART_2||part == EPart.PART_3||part == EPart.PART_4||part == EPart.PART_5)
+                    && !isBlank(value.getPassage())){
+                context.buildConstraintViolationWithTemplate("Passage is not required for " + part.getName())
                         .addPropertyNode("passage")
                         .addConstraintViolation();
                 valid = false;
