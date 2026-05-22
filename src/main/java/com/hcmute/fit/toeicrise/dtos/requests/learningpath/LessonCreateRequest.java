@@ -43,8 +43,4 @@ public class LessonCreateRequest {
 
     private String content;
     private Boolean isActive;
-
-    @NotNull(message = MessageConstant.LESSON_ORDER_INDEX_NOT_NULL)
-    @Min(value = 1, message = MessageConstant.LESSON_ORDER_INDEX_MIN)
-    private Integer orderIndex;
 }
