@@ -7,13 +7,10 @@ import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailR
 import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
-import com.hcmute.fit.toeicrise.models.entities.User;
-import com.hcmute.fit.toeicrise.models.enums.ERole;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.BlogCategoryMapper;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.BlogCategoryRepository;
-import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.BlogCategorySpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
@@ -34,7 +31,6 @@ import java.util.List;
 public class BlogCategoryServiceImpl implements IBlogCategoryService {
     private final IBlogPostService blogPostService;
     private final BlogCategoryRepository blogCategoryRepository;
-    private final UserRepository userRepository;
     private final BlogCategoryMapper blogCategoryMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -114,14 +110,9 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
 
     @Transactional
     @Override
-    public void inactiveBlogCategory(String email, Long id) {
+    public void inactiveBlogCategory(Long id) {
         BlogCategory blogCategory = blogCategoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
-        User user = userRepository.findByAccount_Email(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User with email '" + email + "'"));
-        if (!user.getRole().getName().equals(ERole.ADMIN)) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "User with email '" + email + "' does not have permission to inactive blog category");
-        }
         blogCategory.setIsActive(false);
         blogCategoryRepository.save(blogCategory);
         blogPostService.achievedBlogPostsByCategory(id);
