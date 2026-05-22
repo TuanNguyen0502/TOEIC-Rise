@@ -84,9 +84,9 @@ public class FlashcardFavouriteServiceImpl implements IFlashcardFavouriteService
     @Transactional
     @Override
     public void deleteFavourite(String email, Long favouriteFlashcardId) {
-        userRepository.findByAccount_Email(email)
+        User user = userRepository.findByAccount_Email(email)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User"));
-        FlashcardFavourite flashcardFavourite = flashcardFavouriteRepository.findByFlashcard_Id(favouriteFlashcardId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Favourite flashcard"));
+        FlashcardFavourite flashcardFavourite = flashcardFavouriteRepository.findByFlashcard_IdAndUserId(favouriteFlashcardId, user.getId()).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Favourite flashcard"));
 
         Flashcard flashcard = flashcardFavourite.getFlashcard();
         flashcard.setFavouriteCount(Math.max(0, flashcard.getFavouriteCount() - 1));

@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface FlashcardFavouriteRepository extends JpaRepository<FlashcardFavourite, Long>, JpaSpecificationExecutor<FlashcardFavourite> {
     boolean existsByFlashcardAndUser(Flashcard flashcard, User user);
 
-    Optional<FlashcardFavourite> findByFlashcard_Id(Long flashcardId);
+    Optional<FlashcardFavourite> findByFlashcard_IdAndUserId(Long flashcardId, Long userId);
 
     void deleteAllByFlashcard(Flashcard flashcard);
 }
