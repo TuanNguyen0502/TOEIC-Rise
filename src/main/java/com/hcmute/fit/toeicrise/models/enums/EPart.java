@@ -57,7 +57,7 @@ public enum EPart {
     public boolean isListening() {
         return this == PART_1 || this == PART_2 || this == PART_3 || this == PART_4;
     }
-  
+
     public static String getSpeakingPart(Integer name) {
         String partName = String.valueOf(name);
         if (SPEAKING_PART_1.getName().contains(partName)) return SPEAKING_PART_1.getName();
@@ -77,6 +77,6 @@ public enum EPart {
     }
 
     public boolean allowImage() {
-        return !this.getName().contains("2") && !this.getName().contains("5");
+        return this != PART_2 && this != PART_5;
     }
 }
