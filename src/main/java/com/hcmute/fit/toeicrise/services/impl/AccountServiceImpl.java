@@ -13,6 +13,8 @@ import com.hcmute.fit.toeicrise.services.interfaces.IAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -62,6 +64,7 @@ public class AccountServiceImpl implements IAccountService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleFailedLoginAttempt(Account account) {
         int failedLoginAttempts = account.getFailedLoginAttempts() + 1;
         account.setFailedLoginAttempts(failedLoginAttempts);
