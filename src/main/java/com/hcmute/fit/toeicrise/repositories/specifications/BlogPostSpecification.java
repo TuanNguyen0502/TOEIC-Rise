@@ -1,0 +1,32 @@
+package com.hcmute.fit.toeicrise.repositories.specifications;
+
+import com.hcmute.fit.toeicrise.models.entities.BlogPost;
+import com.hcmute.fit.toeicrise.models.enums.EBlogPostStatus;
+import org.springframework.data.jpa.domain.Specification;
+
+public class BlogPostSpecification {
+    public static Specification<BlogPost> byCategorySlug(String category) {
+        return (root, _, criteriaBuilder) ->
+                category == null ? null : criteriaBuilder.equal(root.get("category").get("slug"), category);
+    }
+
+    public static Specification<BlogPost> titleContains(String title) {
+        return (root, _, criteriaBuilder) ->
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%");
+    }
+
+    public static Specification<BlogPost> slugContains(String slug) {
+        return (root, _, criteriaBuilder) ->
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("slug")), "%" + slug.toLowerCase() + "%");
+    }
+
+    public static Specification<BlogPost> statusEqual(EBlogPostStatus status) {
+        return (root, _, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("status"), status);
+    }
+
+    public static Specification<BlogPost> isPublished() {
+        return (root, _, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("status"), EBlogPostStatus.PUBLISHED);
+    }
+}

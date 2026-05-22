@@ -1,8 +1,7 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.hcmute.fit.toeicrise.models.enums.ESystemPromptFeatureType;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -13,6 +12,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SystemPrompt extends BaseEntity {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "feature_type", nullable = false)
+    private ESystemPromptFeatureType featureType;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 

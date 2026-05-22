@@ -3,11 +3,15 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestDictationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestSetDictationResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
@@ -17,6 +21,9 @@ import com.hcmute.fit.toeicrise.repositories.specifications.TestSetSpecification
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestSetService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +33,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TestSetServiceImpl implements ITestSetService {
     private final TestSetRepository testSetRepository;
     private final ITestService testService;
@@ -37,21 +44,18 @@ public class TestSetServiceImpl implements ITestSetService {
     private final PageResponseMapper pageResponseMapper;
 
     @Override
-    public PageResponse getAllTestSets(String name,
-                                       ETestSetStatus status,
-                                       int page,
-                                       int size,
-                                       String sortBy,
-                                       String direction) {
+    @Transactional(readOnly = true)
+    public PageResponse getAllTestSetsByType(ETestSetType type, String name, ETestSetStatus status, int page, int size, String sortBy, String direction) {
         Specification<TestSet> specification = (_, _, cb) -> cb.conjunction();
-        if (name != null && !name.isEmpty()) {
+        if (name != null && !name.isEmpty())
             specification = specification.and(TestSetSpecification.nameContains(name));
+        if (status != null) {
+            specification = specification.and(TestSetSpecification.statusEquals(status));
         }
-        specification = specification.and(TestSetSpecification.statusEquals(Objects.requireNonNullElse(status, ETestSetStatus.IN_USE)));
+        specification = specification.and(TestSetSpecification.typeEquals(type));
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-
         Page<TestSetResponse> testSetResponses = testSetRepository.findAll(specification, pageable)
                 .map(testSetMapper::toTestSetResponse);
 
@@ -59,80 +63,122 @@ public class TestSetServiceImpl implements ITestSetService {
     }
 
     @Override
-    public List<TestSetResponse> getAllTestSet() {
-        return testSetRepository.getAllByStatus().stream().map(testSetMapper::toTestSetResponse).toList();
+    @Transactional(readOnly = true)
+    @Cacheable(value = "testSets", key = "'IN_USE:' + #type", unless = "#result.isEmpty()")
+    public List<TestSetResponse> getAllTestSetsByType(ETestSetType type) {
+        return testSetRepository.findAllByTypeAndStatusOrderByCreatedAtDesc(type, ETestSetStatus.IN_USE).stream().map(testSetMapper::toTestSetResponse).toList();
     }
 
     @Override
-    public TestSetDetailResponse getTestSetDetailById(Long testSetId,
-                                                      String name,
-                                                      ETestStatus status,
-                                                      int page,
-                                                      int size,
-                                                      String sortBy,
-                                                      String direction) {
-        // Check if test set exists
-        TestSet testSet = testSetRepository.findById(testSetId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
-
-        // Get tests in the test set with filtering and pagination
+    @Transactional(readOnly = true)
+    public TestSetDetailResponse getTestSetDetailById(Long testSetId, String name, ETestStatus status, int page, int size,
+                                                      String sortBy, String direction) {
+        TestSet testSet = findTestSetById(testSetId);
         PageResponse testResponses = testService.getTestsByTestSetId(testSetId, name, status, page, size, sortBy, direction);
-        // Map to detail response
         return testSetMapper.toTestSetDetailResponse(testSet, testResponses);
     }
 
     @Override
+    @Transactional
     public void deleteTestSetById(Long id) {
-        TestSet testSet = testSetRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
+        TestSet testSet = findTestSetById(id);
         testSet.setStatus(ETestSetStatus.DELETED);
         testSetRepository.save(testSet);
-        // Also mark all tests in this test set as DELETED
+        log.info("Test set deleted successfully with id {}", id);
         testService.deleteTestsByTestSetId(id);
     }
 
     @Override
     @Transactional
     public void addTestSet(TestSetRequest testSetRequest) {
-        if (testSetRepository.existsByName(testSetRequest.getTestName())) {
+        if (testSetRepository.existsByName(testSetRequest.getTestName()))
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
-        }
         TestSet testSet = TestSet.builder()
                 .name(testSetRequest.getTestName())
-                .status(ETestSetStatus.IN_USE).build();
+                .status(ETestSetStatus.IN_USE)
+                .type(testSetRequest.getTestSetType())
+                .build();
         testSetRepository.save(testSet);
+        log.info("Test set added successfully with name {}", testSetRequest.getTestName());
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "testSets", allEntries = true)
     public TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
-        TestSet oldTestSet = testSetRepository.findById(updateTestSetRequest.getId()).orElse(null);
-        if (oldTestSet == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set");
-        }
-        TestSet testSet = testSetRepository.findByName(updateTestSetRequest.getTestName()).orElse(null);
-        if (testSet != null && !testSet.getId().equals(updateTestSetRequest.getId())) {
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
-        }
+        TestSet oldTestSet = findTestSetById(updateTestSetRequest.getId());
+        testSetRepository.findByName(updateTestSetRequest.getTestName()).ifPresent(
+                existingTestSet -> {
+                    if (!existingTestSet.getId().equals(updateTestSetRequest.getId())) {
+                        throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
+                    }
+                }
+        );
         oldTestSet.setName(updateTestSetRequest.getTestName());
 
         if (updateTestSetRequest.getStatus() != null && !oldTestSet.getStatus().equals(updateTestSetRequest.getStatus())) {
-            // If status is changed to DELETED, also mark all tests in this test set as DELETED
-            if (updateTestSetRequest.getStatus() == ETestSetStatus.DELETED) {
-                testService.deleteTestsByTestSetId(oldTestSet.getId());
-            }
-            // If status is changed to IN_USE, also mark all PENDING tests in this test set as PENDING
-            if (updateTestSetRequest.getStatus() == ETestSetStatus.IN_USE) {
-                testService.changeTestsStatusToPendingByTestSetId(oldTestSet.getId());
-            }
+            handleChangeTestSetStatus(updateTestSetRequest.getStatus(), updateTestSetRequest.getId());
             oldTestSet.setStatus(updateTestSetRequest.getStatus());
         }
 
         testSetRepository.save(oldTestSet);
+        log.info("Test set updated successfully with id {}", updateTestSetRequest.getId());
         return testSetMapper.toTestSetResponse(oldTestSet);
     }
 
     @Override
     public Long totalTestSets() {
         return testSetRepository.count();
+    }
+
+    @Override
+    public TestSet findTestSetById(Long testSetId) {
+        return testSetRepository.findById(testSetId).orElseThrow(
+                () -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set")
+        );
+    }
+
+    @Override
+    public List<TestSetDictationResponse> getTestSetsDictation() {
+        List<TestSet> testSet = testSetRepository.
+                findByStatusWithTests(ETestSetStatus.IN_USE, ETestStatus.APPROVED,
+                        ETestSetType.LISTENING_AND_READING);
+
+        return testSet.stream().map(ts -> {
+            List<Test> tests = ts.getTests();
+            int numberOfTests = tests.size();
+            int readyPart = tests.stream()
+                    .mapToInt(t -> t.getDictationStatus().size())
+                    .sum();
+            return TestSetDictationResponse.builder()
+                    .id(ts.getId())
+                    .name(ts.getName())
+                    .totalTests(numberOfTests)
+                    .readyPartsCount(readyPart)
+                    .totalPartsCount(numberOfTests * 4)
+                    .build();
+        }).toList();
+    }
+
+    @Override
+    public List<TestDictationResponse> getTestsDictationByTestSetId(Long testSetId) {
+
+        TestSet testSet = testSetRepository.findByIdWithApprovedTests(testSetId, ETestSetStatus.IN_USE, ETestStatus.APPROVED)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test set"));
+
+        return testSet.getTests().stream()
+                .map(t -> TestDictationResponse.builder()
+                        .id(t.getId())
+                        .name(t.getName())
+                        .readyParts(t.getDictationStatus())
+                        .build())
+                .toList();
+    }
+
+    private void handleChangeTestSetStatus(ETestSetStatus status, Long testSetId) {
+        if (status == ETestSetStatus.DELETED)
+            testService.deleteTestsByTestSetId(testSetId);
+        if (status == ETestSetStatus.IN_USE)
+            testService.changeTestsStatusToPendingByTestSetId(testSetId);
     }
 }

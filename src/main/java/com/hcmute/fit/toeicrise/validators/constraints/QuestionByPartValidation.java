@@ -14,13 +14,8 @@ public class QuestionByPartValidation implements ConstraintValidator<ValidQuesti
 
     @Override
     public boolean isValid(QuestionRequest value, ConstraintValidatorContext context) {
-        QuestionGroup questionGroup = questionGroupService.getQuestionGroup(value.getQuestionGroupId());
+        QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(value.getQuestionGroupId());
         context.disableDefaultConstraintViolation();
-        if (questionGroup == null) {
-            context.buildConstraintViolationWithTemplate("Question group not found")
-                    .addPropertyNode("question").addConstraintViolation();
-            return false;
-        }
         boolean valid = true;
         switch ((int) questionGroup.getPart().getId().longValue()) {
             case 3, 4, 5, 7 -> {

@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers;
 
+import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.commons.utils.SecurityUtils;
 import com.hcmute.fit.toeicrise.dtos.requests.user.ProfileUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.user.UserChangePasswordRequest;
@@ -19,7 +20,7 @@ public class UserController {
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
         authenticationService.changePassword(userChangePasswordRequest, SecurityUtils.getCurrentUser());
-        return ResponseEntity.ok("Password updated successfully");
+        return ResponseEntity.ok(MessageConstant.PASSWORD_UPDATE_SUCCESS);
     }
 
     @GetMapping("/profile")
@@ -32,6 +33,6 @@ public class UserController {
     public ResponseEntity<?> updateUserProfile(@Valid @ModelAttribute ProfileUpdateRequest profileUpdateRequest) {
         String email = SecurityUtils.getCurrentUser();
         userService.updateUserProfile(email, profileUpdateRequest);
-        return ResponseEntity.ok("Profile updated successfully");
+        return ResponseEntity.ok(MessageConstant.PROFILE_UPDATE_SUCCESS);
     }
 }

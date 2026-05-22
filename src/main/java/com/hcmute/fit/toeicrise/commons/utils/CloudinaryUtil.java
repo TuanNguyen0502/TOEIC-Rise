@@ -24,7 +24,6 @@ public class CloudinaryUtil {
         try {
             Map data = cloudinary.uploader()
                     .upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
-            // Return the URL of the uploaded file
             return data.get("secure_url").toString();
         } catch (IOException e) {
             throw new AppException(ErrorCode.UPLOAD_FAILED);
@@ -72,6 +71,15 @@ public class CloudinaryUtil {
         }
     }
 
+    public void handleUploadFile(MultipartFile file, int maxSize) {
+        if (file != null && !file.isEmpty()) {
+            if (file.getSize() > maxSize) {
+                throw new AppException(ErrorCode.IMAGE_SIZE_EXCEEDED);
+            }
+            validateImageFile(file);
+        }
+    }
+
     private boolean isValidSuffixImage(String img) {
         return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
                 img.endsWith(".png") || img.endsWith(".gif") ||
@@ -84,6 +92,12 @@ public class CloudinaryUtil {
                 audio.endsWith(".ogg") || audio.endsWith(".m4a");
     }
 
+    private boolean isValidSuffixVideo(String video) {
+        return video.endsWith(".mp4") || video.endsWith(".avi") ||
+                video.endsWith(".mkv") || video.endsWith(".mov") ||
+                video.endsWith(".wmv") || video.endsWith(".flv");
+    }
+
     public boolean isCloudinaryUrl(String url) {
         return url.contains("res.cloudinary.com");
     }
@@ -91,13 +105,15 @@ public class CloudinaryUtil {
     private String getResourceType(String filename) {
         if (filename == null) return "raw";
         if (isValidSuffixImage(filename)) return "image";
-        if (isValidSuffixAudio(filename)) return "video"; // Audio files use 'video' resource type
+        if (isValidSuffixAudio(filename)) return "audio";
+        if (isValidSuffixVideo(filename)) return "video";// Audio files use 'video' resource type
         return "raw";
     }
 
     private String getResourceTypeFromUrl(String url) {
         if (url == null) return "raw";
         if (url.contains("/image/")) return "image";
+        if (url.contains("/audio/")) return "audio";
         if (url.contains("/video/")) return "video";
         if (url.contains("/raw/")) return "raw";
         // Fallback based on file extension

@@ -12,5 +12,5 @@ import java.util.List;
 public class LearnerTestPartResponse {
     private Long id;
     private String partName;
-    private List<LearnerTestQuestionGroupResponse> questionGroups;
+    private List<Object> questionGroups;
 }

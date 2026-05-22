@@ -41,12 +41,14 @@ public class Account extends BaseEntity implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
 
     @Column(name = "failed_login_attempts", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
     private Integer failedLoginAttempts = 0;
 
     @Column(name = "account_locked_until")
     private LocalDateTime accountLockedUntil;
 
     @Column(name = "resend_verification_attempts", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
     private Integer resendVerificationAttempts = 0;
 
     @Column(name = "resend_verification_locked_until")
@@ -60,6 +62,7 @@ public class Account extends BaseEntity implements UserDetails {
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
     @JsonManagedReference
+    @ToString.Exclude
     private User user;
 
     @Override

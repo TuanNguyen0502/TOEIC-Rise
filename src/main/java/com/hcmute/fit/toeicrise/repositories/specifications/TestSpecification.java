@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.repositories.specifications;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -28,16 +29,16 @@ public class TestSpecification {
                 status == null ? null : criteriaBuilder.equal(root.get("testSet").get("status"), status);
     }
 
-    public static Specification<Test> statusNotEquals(ETestStatus eTestStatus) {
-        return (root, _, criteriaBuilder) ->
-                eTestStatus == null ? null : criteriaBuilder.notEqual(root.get("status"), eTestStatus);
-    }
-
     public static Specification<Test> testSetIdsIn(List<Long> testSetIds) {
-        return (root, _, criteriaBuilder) -> {
+        return (root, _, _) -> {
             if (testSetIds != null && !testSetIds.isEmpty())
                 return root.get("testSet").get("id").in(testSetIds);
             return null;
         };
+    }
+
+    public static Specification<Test> typeEquals(ETestType type) {
+        return (root, _, criteriaBuilder) ->
+                type == null ? null : criteriaBuilder.equal(root.get("type"), type);
     }
 }

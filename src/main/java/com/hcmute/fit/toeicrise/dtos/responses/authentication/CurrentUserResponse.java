@@ -1,10 +1,12 @@
 package com.hcmute.fit.toeicrise.dtos.responses.authentication;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CurrentUserResponse {
     private Long id;
     private String fullName;

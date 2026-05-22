@@ -17,10 +17,12 @@ import java.util.List;
 public class UserTest extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_id")
+    @ToString.Exclude
     private Test test;
 
     // General fields
@@ -68,5 +70,6 @@ public class UserTest extends BaseEntity {
 
     @OneToMany(mappedBy = "userTest", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @ToString.Exclude
     private List<UserAnswer> userAnswers = new ArrayList<>();
 }

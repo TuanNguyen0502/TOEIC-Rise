@@ -4,7 +4,6 @@ import com.hcmute.fit.toeicrise.exceptions.handlers.SecurityExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
-    private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
@@ -40,15 +38,28 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**", "/swagger-ui.html", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/test-sets", "/tests/**")
+                                "/v3/api-docs/**", "/test-sets", "/speaking-test-sets/**", "/writing-test-sets/**",
+                                "/tests/**", "/speaking-tests/**", "/writing-tests/**",
+                                "/blog-categories/**", "/blog-posts/**")
                         .permitAll()
-                        .requestMatchers("/admin/tests/**", "/admin/chatbot-ratings/**",
-                                "/admin/question-groups/**", "/admin/questions/**", "/admin/question-reports/**", "/admin/tags/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/test-sets/**", "/staff/tests/**", "/staff/question-reports/**", "/staff/stats/**", "/admin/stats/**").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers("/admin/test-sets/**", "/admin/speaking-test-sets/**", "/admin/writing-test-sets/**",
+                                "/admin/tests/**", "/admin/chatbot-ratings/**",
+                                "/admin/question-reports/**", "/admin/system-prompts/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/speaking-tests/**",
+                                "/staff/writing-tests/**", "/staff/question-groups/**", "/staff/speaking-question-groups/**",
+                                "/staff/writing-question-groups/**", "/staff/questions/**", "/staff/speaking-questions/**",
+                                "/staff/tags/**", "/staff/question-reports/**",
+                                "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
+                                "/staff/blog-categories/**", "/staff/blog-posts/**",  "/admin/learning-paths/**",
+                                "staff/dictation/**", "/admin/lessons/**", "/staff/cloudinary/**")
+                        .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
-                                "/learner/flashcards/**", "/learner/mini-tests/**").hasRole("LEARNER")
+                                "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**",
+                                "/learner/learning-paths/**", "/learner/lesson-progress/**", "/learner/comments/**", "/learner/dictation/**")
+                        .hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -66,7 +77,6 @@ public class SecurityConfiguration {
                         .permitAll()
                 )
                 .userDetailsService(userDetailsService)
-                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -75,8 +85,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
-                "https://toeic-rise.vercel.app", "http://localhost:8080", "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("https://app-backend.com", "http://localhost:8080", "http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

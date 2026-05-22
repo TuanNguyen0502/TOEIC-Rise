@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.controllers.learner;
 
 import com.hcmute.fit.toeicrise.dtos.requests.test.PageRequest;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import com.hcmute.fit.toeicrise.services.interfaces.ITestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class TestController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllTests(@Valid @ModelAttribute PageRequest pageRequest) {
-        return ResponseEntity.ok(testService.searchTestsByName(pageRequest));
+        return ResponseEntity.ok(testService.searchTestsByTypeAndName(ETestType.LISTENING_AND_READING, pageRequest));
     }
 
     @GetMapping("/{id}")

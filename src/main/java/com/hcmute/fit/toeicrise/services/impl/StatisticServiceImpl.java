@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 public class StatisticServiceImpl implements IStatisticService {
     private final IAuthenticationService authenticationService;
     private final IUserService userService;
+    private final IAccountService accountService;
     private final ITestSetService testSetService;
     private final ITestService testService;
     private final IFlashcardService flashcardService;
@@ -30,9 +31,9 @@ public class StatisticServiceImpl implements IStatisticService {
     @Cacheable(value = "systemOverview", key = "'global'")
     public SystemOverviewResponse getSystemOverview() {
         return SystemOverviewResponse.builder()
-                .totalAccounts(userService.countAllUsers())
-                .totalLearners(authenticationService.countAllUsersWithRole(ERole.LEARNER))
-                .totalStaffs(authenticationService.countAllUsersWithRole(ERole.STAFF) + authenticationService.countAllUsersWithRole(ERole.ADMIN))
+                .totalAccounts(accountService.countAllUsers())
+                .totalLearners(userService.countAllUsersWithRole(ERole.LEARNER))
+                .totalStaffs(userService.countAllUsersWithRole(ERole.STAFF) + userService.countAllUsersWithRole(ERole.ADMIN))
                 .totalTestSets(testSetService.totalTestSets())
                 .totalTests(testService.totalTest())
                 .totalFlashcards(flashcardService.totalFlashcards())
@@ -106,8 +107,8 @@ public class StatisticServiceImpl implements IStatisticService {
     }
 
     private KpiResponse getNewLearners(LocalDateTime startDate, LocalDateTime endDate, DateRange prevTime) {
-        Long current = authenticationService.countUsersBetweenDays(startDate, endDate);
-        Long prev = authenticationService.countUsersBetweenDays(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
+        Long current = userService.countUsersBetweenDays(startDate, endDate);
+        Long prev = userService.countUsersBetweenDays(prevTime.getStart().atStartOfDay(), prevTime.getEnd().plusDays(1).atStartOfDay());
 
         return KpiResponse.builder().value(current)
                 .growthPercentage(calculatorGrowth(current, prev)).build();

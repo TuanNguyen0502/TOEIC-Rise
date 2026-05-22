@@ -6,6 +6,8 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryRespons
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultOverallResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.TestResultResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.usertest.UserAnswerGroupedByTagResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultOverallResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.usertest.speakingwriting.SpeakingWritingTestResultResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -55,4 +57,25 @@ public interface UserTestMapper {
     @Mapping(source = "test.name", target = "name")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = Constant.DATE_TIME_PATTERN)
     ExamTypeFullTestResponse toExamTypeFullTestResponse(UserTest userTest);
+
+    default SpeakingWritingTestResultOverallResponse toSpeakingWritingTestResultOverallResponse(UserTest userTest) {
+        return SpeakingWritingTestResultOverallResponse.builder()
+                .userTestId(userTest.getId())
+                .totalQuestions(userTest.getTotalQuestions())
+                .totalAnswers(userTest.getCorrectAnswers())
+                .timeSpent(userTest.getTimeSpent())
+                .build();
+    }
+
+    default SpeakingWritingTestResultResponse toSpeakingWritingTestResultResponse(UserTest userTest) {
+        return SpeakingWritingTestResultResponse.builder()
+                .testId(userTest.getTest().getId())
+                .userTestId(userTest.getId())
+                .testName(userTest.getTest().getName())
+                .parts(userTest.getParts() != null ? userTest.getParts() : null)
+                .totalQuestions(userTest.getTotalQuestions())
+                .totalAnswers(userTest.getCorrectAnswers())
+                .timeSpent(userTest.getTimeSpent())
+                .build();
+    }
 }

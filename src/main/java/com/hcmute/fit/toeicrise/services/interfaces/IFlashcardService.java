@@ -1,16 +1,23 @@
 package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardReviewOverallResponse;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface IFlashcardService {
     PageResponse getAllMyFlashcards(String email, String name, int page, int size, String sortBy, String direction);
 
     PageResponse getAllPublicFlashcards(String email, String name, int page, int size, String sortBy, String direction);
+
+    PageResponse getFlashcardsForPopup(String email, int page, int size, String sortBy, String direction);
 
     FlashcardDetailResponse getFlashcardDetailById(String email, Long flashcardId);
 
@@ -23,4 +30,9 @@ public interface IFlashcardService {
     FlashcardResponse updateFlashcard(String email, Long flashcardId, FlashcardUpdateRequest flashcardUpdateRequest);
 
     Long totalFlashcards();
+
+    @Transactional
+    void addFlashcardItemToFlashcard(String email, FlashcardItemAddingRequest request);
+  
+    List<FlashcardItemDetailResponse> getFlashcardItemDetailToReview(String email, Long flashcardId);
 }

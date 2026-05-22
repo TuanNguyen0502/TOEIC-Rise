@@ -1,0 +1,42 @@
+package com.hcmute.fit.toeicrise.models.mappers;
+
+import com.hcmute.fit.toeicrise.commons.constants.Constant;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.blog.category.BlogCategoryResponse;
+import com.hcmute.fit.toeicrise.models.entities.BlogCategory;
+import org.mapstruct.Mapper;
+
+import java.time.format.DateTimeFormatter;
+
+@Mapper(componentModel = "spring")
+public interface BlogCategoryMapper {
+    default BlogCategoryResponse toBlogCategoryResponseForStaff(BlogCategory blogCategory) {
+        return BlogCategoryResponse.builder()
+                .id(blogCategory.getId())
+                .name(blogCategory.getName())
+                .slug(blogCategory.getSlug())
+                .numberOfPosts(blogCategory.getPosts().size())
+                .isActive(blogCategory.getIsActive())
+                .build();
+    }
+
+    default BlogCategoryResponse toBlogCategoryResponseForLearner(BlogCategory blogCategory) {
+        return BlogCategoryResponse.builder()
+                .id(blogCategory.getId())
+                .name(blogCategory.getName())
+                .slug(blogCategory.getSlug())
+                .isActive(blogCategory.getIsActive())
+                .build();
+    }
+
+    default BlogCategoryDetailResponse toBlogCategoryDetailResponse(BlogCategory blogCategory) {
+        return BlogCategoryDetailResponse.builder()
+                .id(blogCategory.getId())
+                .name(blogCategory.getName())
+                .slug(blogCategory.getSlug())
+                .isActive(blogCategory.getIsActive())
+                .createdAt(blogCategory.getCreatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .updatedAt(blogCategory.getUpdatedAt().format(DateTimeFormatter.ofPattern(Constant.DATE_TIME_PATTERN)))
+                .build();
+    }
+}

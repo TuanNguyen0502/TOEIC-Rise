@@ -24,7 +24,7 @@ public class Question extends BaseEntity {
     @Column(columnDefinition = "json")
     private List<String> options;
 
-    @Column(name = "correct_option", nullable = false, length = 1)
+    @Column(name = "correct_option", length = 1)
     private String correctOption;
 
     @Column(name = "explanations", columnDefinition = "TEXT")
@@ -41,5 +41,6 @@ public class Question extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @Builder.Default
+    @ToString.Exclude
     private List<Tag> tags = new ArrayList<>();
 }

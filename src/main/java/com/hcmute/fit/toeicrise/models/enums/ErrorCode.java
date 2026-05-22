@@ -32,6 +32,8 @@ public enum ErrorCode {
     RESOURCE_NOT_FOUND("%s not found", HttpStatus.NOT_FOUND),
     RESOURCE_ALREADY_EXISTS("%s already exists", HttpStatus.CONFLICT),
     INVALID_REQUEST("Invalid request, %s", HttpStatus.BAD_REQUEST),
+    TOO_MANY_REQUESTS("Too many requests", HttpStatus.TOO_MANY_REQUESTS),
+    INVALID_DATA("Invalid data", HttpStatus.BAD_REQUEST),
 
     // === 5. External Services / Upload Errors ===
     UPLOAD_FAILED("Failed to upload file", HttpStatus.NOT_IMPLEMENTED),
@@ -49,7 +51,9 @@ public enum ErrorCode {
     DATABASE_ERROR("Database error", HttpStatus.NOT_IMPLEMENTED),
     GENERATE_TOKEN_EXCEPTION("Failed to generate token", HttpStatus.NOT_IMPLEMENTED),
     UNCATEGORIZED_EXCEPTION("Unexpected error occurred", HttpStatus.NOT_IMPLEMENTED),
-    CACHE_ERROR("Cache error", HttpStatus.NOT_IMPLEMENTED);
+    CACHE_ERROR("Cache error", HttpStatus.NOT_IMPLEMENTED),
+    INTERNAL_SERVER_ERROR("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR ),
+    AI_PROCESSING_ERROR("Error processing AI response", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String message;
     private final HttpStatus httpStatus;

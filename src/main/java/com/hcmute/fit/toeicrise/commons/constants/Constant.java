@@ -221,11 +221,17 @@ public class Constant {
     public static final String TEST_SET_NAME_PATTERN = "^[\\p{L}0-9 ()]+$";
     public static final String TEST_NAME_PATTERN = "^[\\p{L}0-9 ()]+$";
     // Chatbot patterns
-    public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{20,}$";
+    public static final String SYSTEM_PROMPT_CONTENT_PATTERN = "^[\\p{L}0-9 !#%&*()\\[\\]_+;:'\",.<>?/{}\\-\\n\\r–]{20,}$";
     public static final String CHAT_TITLE_PATTERN = "^[\\p{L}0-9 .,!?()'\"-]{1,100}$";
     public static final String CHAT_CONVERSATION_ID_PATTERN = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
     // Cache constants
-    public static final String SYSTEM_PROMPT_CACHE = "systemPrompt";
+    public static final String CHATBOT_SYSTEM_PROMPT_CACHE = "chatbotSystemPrompt";
+    public static final String Q_AND_A_SYSTEM_PROMPT_CACHE = "qAndASystemPrompt";
+    public static final String EXPLANATION_GENERATION_SYSTEM_PROMPT_CACHE = "explanationGenerationSystemPrompt";
+    public static final String SENTENCE_ASSESSMENT_SYSTEM_PROMPT_CACHE = "sentenceAssessmentSystemPrompt";
+    public static final String BLOG_SUMMARIZATION_SYSTEM_PROMPT_CACHE = "blogSummarizationSystemPrompt";
+    public static final String WRITING_ASSESSMENT_SYSTEM_PROMPT_CACHE = "writingAssessmentSystemPrompt";
+    public static final String SPEAKING_ASSESSMENT_SYSTEM_PROMPT_CACHE = "speakingAssessmentSystemPrompt";
     public static final String ACTIVE_PROMPT_KEY = "active";
     public static final Duration CACHE_DURATION = Duration.ofDays(30);
     // Profile constants
@@ -241,4 +247,23 @@ public class Constant {
     public static final int AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
     // Flashcard constants
     public static final String FLASHCARD_NAME_PATTERN = "^[\\p{L}0-9 ().,'-]{1,100}$";
+    // Authentication constants
+    public static final int LOCK_DURATION_MINUTES = 30;
+    public static final int MAX_VERIFY_OTP_TIMES = 5;
+    public static final int MAX_RESEND_OTP_ATTEMPTS = 5;
+    public static final int OTP_EXPIRATION_MINUTES = 5;
+    public static final int MAX_VERIFY_LOGIN_TIMES = 15;
+    // Tag constants
+    public static final String TAG_NAME_PATTERN = "^[\\p{L}0-9 \\[\\]\\(\\):.,'\\-]{1,100}$";
+    // Common constants
+    public static final int MAX_COMMENT_LENGTH = 500;
+    // Blog category
+    public static final String BLOG_CATEGORY_NAME_PATTERN = "^[\\p{L}0-9\\s.,&()\\-]{2,50}$";
+    public static final String BLOG_CATEGORY_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    // Blog post
+    public static final String BLOG_POST_TITLE_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{5,150}$";
+    public static final String BLOG_POST_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+    public static final String BLOG_POST_SUMMARY_PATTERN = "^[\\p{L}0-9\\s.,!?:'\\\"()\\-]{10,500}$";
+    // Learning path
+    public static final String LEARNING_PATH_SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
 }

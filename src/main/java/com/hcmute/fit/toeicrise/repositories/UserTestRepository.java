@@ -5,7 +5,9 @@ import com.hcmute.fit.toeicrise.dtos.responses.statistic.ScoreDistInsightRespons
 import com.hcmute.fit.toeicrise.dtos.responses.statistic.TestModeInsightResponse;
 import com.hcmute.fit.toeicrise.models.entities.UserTest;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,10 +20,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSpecificationExecutor<UserTest> {
-    @Query("SELECT ut FROM UserTest ut " +
-            "JOIN FETCH ut.userAnswers ua " +
-            "JOIN FETCH ua.question " +
-            "WHERE ut.id = :id")
+    @EntityGraph(attributePaths = {"userAnswers", "userAnswers.question", "userAnswers.question.tags"})
+    @Query("SELECT ut FROM UserTest ut WHERE ut.id = :id")
     Optional<UserTest> findByIdWithAnswersAndQuestions(@Param("id") Long id);
 
     @Query("SELECT ut " +
@@ -41,18 +41,29 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "LEFT JOIN FETCH ua.question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +
             "LEFT JOIN FETCH qg.part p " +
+            "WHERE ut.id = :id AND ut.user.account.email = :email AND ua.isCorrect = FALSE")
+    Optional<UserTest> findUserTestByIdWithWrongAnswer(@Param("id") Long id, @Param("email") String email);
+
+    @Query("SELECT DISTINCT ut " +
+            "FROM UserTest ut " +
+            "LEFT JOIN FETCH ut.test t " +
+            "LEFT JOIN FETCH ut.userAnswers ua " +
+            "LEFT JOIN FETCH ua.question q " +
+            "LEFT JOIN FETCH q.questionGroup qg " +
+            "LEFT JOIN FETCH qg.part p " +
             "WHERE ut.user.account.email = :email AND ut.createdAt >= :days AND t.status = :status")
-    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days, @Param("status")ETestStatus status);
+    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days, @Param("status") ETestStatus status);
 
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
             "ut.id, t.name, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
-            "FROM Test t " +
-            "INNER JOIN UserTest ut ON t.id = ut.test.id " +
+            "FROM UserTest ut " +
+            "JOIN ut.test t " +
             "WHERE t.id = :id AND ut.user.account.email = :email " +
             "ORDER BY ut.createdAt DESC ")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
 
-    Optional<UserTest> findFirstByOrderByCreatedAtDesc();
+    @Query("SELECT MAX(ut.createdAt) FROM UserTest ut WHERE ut.user.account.email = :email ORDER BY ut.createdAt DESC")
+    Optional<LocalDateTime> findLatestUserTestCreatedAt(@Param("email") String email);
 
     List<UserTest> findByUser_Account_EmailAndTest_StatusAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable, ETestStatus status);
 
@@ -78,4 +89,6 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "FROM UserTest ut " +
             "WHERE ut.createdAt >= :start AND ut.createdAt < :end")
     ScoreDistInsightResponse countUserTestByScore(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    UserTest findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(String email, ETestType testType);
 }

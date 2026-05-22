@@ -1,13 +1,18 @@
 package com.hcmute.fit.toeicrise.models.entities;
 
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "test_sets")
 @EqualsAndHashCode(callSuper = true)
 @Data
+@ToString(exclude = "tests")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +23,12 @@ public class TestSet extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ETestSetStatus status;
+
+    @OneToMany(mappedBy = "testSet")
+    @Builder.Default
+    private List<Test> tests = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private ETestSetType type;
 }

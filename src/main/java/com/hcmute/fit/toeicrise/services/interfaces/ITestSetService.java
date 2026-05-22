@@ -3,30 +3,24 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.UpdateTestSetRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestDictationResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.dictation.TestSetDictationResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.testset.TestSetResponse;
+import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 
 import java.util.List;
 
 public interface ITestSetService {
-    PageResponse getAllTestSets(String name,
-                                ETestSetStatus status,
-                                int page,
-                                int size,
-                                String sortBy,
-                                String direction);
+    PageResponse getAllTestSetsByType(ETestSetType type, String name, ETestSetStatus status, int page, int size, String sortBy, String direction);
 
-    List<TestSetResponse> getAllTestSet();
+    List<TestSetResponse> getAllTestSetsByType(ETestSetType type);
 
-    TestSetDetailResponse getTestSetDetailById(Long testSetId,
-                                               String name,
-                                               ETestStatus status,
-                                               int page,
-                                               int size,
-                                               String sortBy,
-                                               String direction);
+    TestSetDetailResponse getTestSetDetailById(Long testSetId, String name, ETestStatus status, int page, int size,
+                                               String sortBy, String direction);
 
     void deleteTestSetById(Long id);
 
@@ -35,4 +29,8 @@ public interface ITestSetService {
     TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest);
 
     Long totalTestSets();
+
+    TestSet findTestSetById(Long testSetId);
+    List<TestSetDictationResponse> getTestSetsDictation();
+    List<TestDictationResponse> getTestsDictationByTestSetId(Long testSetId);
 }

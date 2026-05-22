@@ -13,10 +13,12 @@ import lombok.*;
 public class UserAnswer extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_test_id")
+    @ToString.Exclude
     private UserTest userTest;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "question_id")
+    @ToString.Exclude
     private Question question;
 
     @Column(name = "question_group_id", nullable = false)
@@ -24,6 +26,15 @@ public class UserAnswer extends BaseEntity {
 
     @Column(name = "answer", columnDefinition = "CHAR(1)")
     private String answer;
+
+    @Column(name = "answer_text", columnDefinition = "TEXT")
+    private String answerText;
+
+    @Column(name = "answer_audio_url", columnDefinition = "VARCHAR(255)")
+    private String answerAudioUrl;
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
 
     @Column(name = "is_correct", nullable = false)
     private Boolean isCorrect;

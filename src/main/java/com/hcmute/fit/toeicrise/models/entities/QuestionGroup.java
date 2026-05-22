@@ -33,13 +33,16 @@ public class QuestionGroup extends BaseEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_id")
+    @ToString.Exclude
     private Test test;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "part_id")
+    @ToString.Exclude
     private Part part;
 
     @OneToMany(mappedBy = "questionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @ToString.Exclude
     private List<Question> questions = new ArrayList<>();
 }

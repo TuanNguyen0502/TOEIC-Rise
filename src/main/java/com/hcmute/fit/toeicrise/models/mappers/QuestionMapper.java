@@ -2,23 +2,46 @@ package com.hcmute.fit.toeicrise.models.mappers;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.SpeakingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.question.WritingQuestionExcelRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionGroupWithoutTranscriptResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.RedoWrongQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.dtos.responses.test.QuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
+import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
 import org.mapstruct.*;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {QuestionGroupMapper.class})
 public interface QuestionMapper {
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
     QuestionResponse toQuestionResponse(Question question);
+
+    default SpeakingQuestionResponse toSpeakingQuestionResponse(Question question) {
+        return SpeakingQuestionResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .content(question.getContent())
+                .build();
+    }
+
+    default WritingQuestionResponse toWritingQuestionResponse(Question question) {
+        return WritingQuestionResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .build();
+    }
 
     @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
     @Mapping(source = "options", target = "options")
@@ -28,6 +51,8 @@ public interface QuestionMapper {
     MiniTestAnswerQuestionResponse toMiniTestAnswerQuestionResponse(Question question);
 
     LearnerTestQuestionResponse toLearnerTestQuestionResponse(Question question);
+
+    RedoWrongQuestionResponse toRedoWrongQuestionResponse(Question question);
 
     default Question toEntity(QuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
         List<String> options = Arrays.asList(
@@ -46,6 +71,21 @@ public interface QuestionMapper {
                 .build();
     }
 
+    default Question toEntity(SpeakingQuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
+        return Question.builder()
+                .questionGroup(questionGroup)
+                .position(excelRequest.getNumberOfQuestions())
+                .content(excelRequest.getQuestion())
+                .build();
+    }
+
+    default Question toEntity(WritingQuestionExcelRequest excelRequest, QuestionGroup questionGroup) {
+        return Question.builder()
+                .questionGroup(questionGroup)
+                .position(excelRequest.getNumberOfQuestions())
+                .build();
+    }
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "tags", ignore = true)
     Question toEntity(QuestionRequest questionRequest, @MappingTarget Question question);
@@ -54,5 +94,31 @@ public interface QuestionMapper {
     default List<String> mapTagsToNames(List<Tag> tags) {
         if (tags == null) return null;
         return tags.stream().map(Tag::getName).collect(Collectors.toList());
+    }
+
+    default LearnerTestQuestionGroupWithoutTranscriptResponse convertToGroupResponse(Map.Entry<QuestionGroup, List<UserAnswer>> entry, QuestionGroupMapper questionGroupMapper) {
+        QuestionGroup questionGroup = entry.getKey();
+        List<LearnerTestQuestionResponse> questionResponses = entry.getValue().stream()
+                .sorted(Comparator.comparing(question -> question.getQuestion().getPosition()))
+                .map(question -> toLearnerTestQuestionResponse(question.getQuestion())).toList();
+
+        LearnerTestQuestionGroupWithoutTranscriptResponse groupResponse = questionGroupMapper.toLearnerTestQuestionGroupWithoutTranscriptResponse(questionGroup);
+        groupResponse.setQuestions(new ArrayList<>(questionResponses));
+        return groupResponse;
+    }
+
+    default LearnerSpeakingQuestionDetailResponse toLearnerSpeakingQuestionDetailResponse(Question question) {
+        return LearnerSpeakingQuestionDetailResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .content(question.getContent())
+                .build();
+    }
+
+    default LearnerWritingQuestionDetailResponse toLearnerWritingQuestionDetailResponse(Question question) {
+        return LearnerWritingQuestionDetailResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .build();
     }
 }

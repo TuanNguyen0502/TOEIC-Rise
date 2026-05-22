@@ -1,16 +1,16 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
+import com.hcmute.fit.toeicrise.commons.utils.ShuffleUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardCreateRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemAddingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardItemUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.flashcard.FlashcardUpdateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardItemDetailResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardPublicResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.flashcard.FlashcardResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.flashcard.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Flashcard;
 import com.hcmute.fit.toeicrise.models.entities.FlashcardItem;
+import com.hcmute.fit.toeicrise.models.entities.FlashcardItemProgress;
 import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.EFlashcardAccessType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -20,6 +20,7 @@ import com.hcmute.fit.toeicrise.models.mappers.PageResponseMapper;
 import com.hcmute.fit.toeicrise.repositories.FlashcardRepository;
 import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardFavouriteService;
+import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemProgressService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardItemService;
 import com.hcmute.fit.toeicrise.services.interfaces.IFlashcardService;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,8 @@ public class FlashcardServiceImpl implements IFlashcardService {
     private final FlashcardMapper flashcardMapper;
     private final FlashcardItemMapper flashcardItemMapper;
     private final PageResponseMapper pageResponseMapper;
+
+    private static final int NUMBER_OF_FLASHCARD_ITEMS = 30;
 
     @Override
     public PageResponse getAllMyFlashcards(String email, String name, int page, int size, String sortBy, String direction) {
@@ -88,6 +91,20 @@ public class FlashcardServiceImpl implements IFlashcardService {
             boolean isFavourite = (boolean) result[1];
             return flashcardMapper.toFlashcardPublicResponse(flashcard, isFavourite);
         });
+
+        return pageResponseMapper.toPageResponse(flashcardPage);
+    }
+
+    @Override
+    public PageResponse getFlashcardsForPopup(String email, int page, int size, String sortBy, String direction) {
+        User user = userRepository.findByAccount_Email(email)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<FlashcardForPopupResponse> flashcardPage = flashcardRepository.findByUser(user, pageable)
+                .map(flashcardMapper::toFlashcardForPopupResponse);
 
         return pageResponseMapper.toPageResponse(flashcardPage);
     }
@@ -197,5 +214,42 @@ public class FlashcardServiceImpl implements IFlashcardService {
     @Override
     public Long totalFlashcards() {
         return flashcardRepository.count();
+    }
+
+    @Transactional
+    @Override
+    public void addFlashcardItemToFlashcard(String email, FlashcardItemAddingRequest request) {
+        Flashcard flashcard = flashcardRepository.findById(Long.valueOf(request.getFlashcardId())).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+        if (!flashcard.getUser().getAccount().getEmail().equals(email))
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+
+        FlashcardItem newItem = new FlashcardItem();
+        newItem.setFlashcard(flashcard);
+        newItem.setVocabulary(request.getVocabulary());
+        newItem.setDefinition(request.getDefinition());
+        newItem.setAudioUrl(request.getAudioUrl());
+        newItem.setPronunciation(request.getPronunciation());
+
+        flashcard.getFlashcardItems().add(newItem);
+
+        flashcardRepository.save(flashcard);
+    }
+  
+    @Override
+    public List<FlashcardItemDetailResponse> getFlashcardItemDetailToReview(String email, Long flashcardId) {
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard"));
+        if (flashcard.getAccessType() == EFlashcardAccessType.PRIVATE &&
+                !flashcard.getUser().getAccount().getEmail().equals(email)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Flashcard");
+        }
+        List<FlashcardItem> flashcardItems = flashcard.getFlashcardItems();
+        ShuffleUtil.shuffle(flashcardItems);
+        if (flashcardItems.size() > NUMBER_OF_FLASHCARD_ITEMS)
+            flashcardItems.subList(0, NUMBER_OF_FLASHCARD_ITEMS);
+
+        return flashcardItems.stream()
+                .map(flashcardItemMapper::toFlashcardItemDetailResponse)
+                .toList();
     }
 }
