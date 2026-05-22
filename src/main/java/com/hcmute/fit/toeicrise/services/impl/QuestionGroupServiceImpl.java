@@ -241,11 +241,10 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
     private void validatePassageForPart(Part part, String passage) {
         EPart ePart = EPart.getEPart(part.getName());
-        if (ePart.isRequiredPassage()) {
-            if (passage == null || passage.isBlank())
-                throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for parts 6 and 7.");
+        if (ePart.isRequiredPassage() && (passage == null || passage.isBlank())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for part " + part.getName() + ".");
         } else if (passage != null && !passage.isBlank())
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for listening parts or part 5.");
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for part " + part.getName() + ".");
     }
 
     @Override
