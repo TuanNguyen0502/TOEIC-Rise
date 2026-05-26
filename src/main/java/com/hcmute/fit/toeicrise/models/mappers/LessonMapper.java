@@ -13,6 +13,8 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface LessonMapper {
+    @Mapping(target = "learningPath", ignore = true)
+    @Mapping(target = "orderIndex", ignore = true)
     Lesson toEntity(LessonCreateRequest request);
     Lesson toEntity(LessonUpdateRequest request, @MappingTarget Lesson target);
 

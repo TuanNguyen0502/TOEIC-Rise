@@ -57,6 +57,9 @@ public class LessonServiceImpl implements ILessonService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning path");
         if (user == null)
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User");
+        Lesson existedLesson = lessonRepository.findBySlugAndLearningPathId(request.getSlug(), learningPath.getId()).orElse(null);
+        if (existedLesson != null)
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
 
         Integer orderIndex = lessonRepository.findTopByOrderIndexAndLearningPathId(learningPath.getId());
 
@@ -72,6 +75,10 @@ public class LessonServiceImpl implements ILessonService {
     @Override
     public LessonDetailResponse updateLesson(Long id, LessonUpdateRequest request) {
         Lesson lesson = getLessonById(id);
+        Lesson existedLesson = lessonRepository.findBySlugAndLearningPathId(request.getSlug(), lesson.getLearningPath().getId()).orElse(null);
+        if (existedLesson != null && !lesson.getId().equals(existedLesson.getId()))
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
+
         String oldUrl = lesson.getVideoUrl();
         String newUrl = request.getVideoUrl();
 
@@ -131,9 +138,9 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
-    public LessonDetailResponse getLesson(String slug, String email) {
+    public LessonDetailResponse getLesson(String slug, String email, String learningPathSlug) {
         User user = userService.getUserByEmail(email);
-        Lesson lesson = lessonRepository.findByLearningPathBySlug(slug).orElseThrow(()
+        Lesson lesson = lessonRepository.findByLearningPathBySlug(slug, learningPathSlug).orElseThrow(()
                 -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson"));
         UserLessonProgress userLessonProgress = userLessonProgressRepository.findByUserIdAndLessonId(user.getId(), lesson.getId()).orElse(null);
 
@@ -152,9 +159,6 @@ public class LessonServiceImpl implements ILessonService {
     public LessonDetailResponse getLesson(Long id, String email) {
         userService.getUserByEmail(email);
         Lesson lesson = getLessonWithLearningPathId(id);
-
-        if (!Boolean.TRUE.equals(lesson.getIsActive()) || !Boolean.TRUE.equals(lesson.getLearningPath().getIsActive()))
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
         return lessonMapper.toDetailResponse(lesson);    }
 
