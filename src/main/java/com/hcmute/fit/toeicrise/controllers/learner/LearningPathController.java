@@ -47,8 +47,8 @@ public class LearningPathController {
     }
 
     @GetMapping("/lessons/{lessonSlug}")
-    public ResponseEntity<?> getLesson(@PathVariable (name = "lessonSlug") String lessonSlug) {
+    public ResponseEntity<?> getLesson(@PathVariable (name = "lessonSlug") String lessonSlug, @RequestParam(name = "learningPathSlug") String learningPathSlug) {
         String email = SecurityUtils.getCurrentUser();
-        return ResponseEntity.ok(lessonService.getLesson(lessonSlug, email));
+        return ResponseEntity.ok(lessonService.getLesson(lessonSlug, email, learningPathSlug));
     }
 }

@@ -21,8 +21,8 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
     @Query("SELECT l " +
             "FROM Lesson l " +
             "LEFT JOIN FETCH l.learningPath " +
-            "WHERE l.slug =:slug")
-    Optional<Lesson> findByLearningPathBySlug(@Param("slug") String slug);
+            "WHERE l.slug =:slug and l.learningPath.slug =:learningPathSlug")
+    Optional<Lesson> findByLearningPathBySlug(@Param("slug") String slug, @Param("learningPathSlug") String learningPathSlug);
 
     Optional<Lesson> findFirstByLearningPathIdAndLevelOrderByOrderIndexDesc(Long learningPathId, ELessonLevel level);
 
@@ -32,4 +32,6 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
     WHERE l.learningPath.id = :learningPathId
     """)
     Integer findTopByOrderIndexAndLearningPathId(@Param("learningPathId") Long learningPathId);
+
+    Optional<Lesson> findBySlugAndLearningPathId(String slug, Long learningPathId);
 }

@@ -53,6 +53,10 @@ public class LearningPathServiceImpl implements ILearningPathService {
     @Override
     @Transactional
     public void createLearningPath(LearningPathCreateRequest request) {
+        LearningPath learningPath = learningPathRepository.findBySlug(request.getSlug()).orElse(null);
+        if (learningPath != null)
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Slug");
+
         LearningPath path = learningPathMapper.toEntity(request);
         path.setIsActive(true);
         path.setTestType(request.getTestType());
@@ -63,6 +67,11 @@ public class LearningPathServiceImpl implements ILearningPathService {
     @Override
     public void updateLearningPath(Long learningPathId, LearningPathUpdateRequest request) {
         LearningPath path = getLearningPath(learningPathId);
+        LearningPath learningPath = learningPathRepository.findBySlug(request.getSlug()).orElse(null);
+
+        if (learningPath != null && !learningPath.getId().equals(path.getId()))
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Slug");
+
         path.setName(request.getName());
         path.setSlug(request.getSlug());
         path.setDescription(request.getDescription());
