@@ -188,15 +188,11 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
 
         EPart requestedPart = EPart.getEPartByPosition(partId.intValue());
         if (test.getDictationStatus() == null || !test.getDictationStatus().contains(requestedPart)) {
-            throw new AppException(ErrorCode.INVALID_DATA, "Phần thi này chưa hỗ trợ nghe chép chính tả.");
+            throw new AppException(ErrorCode.INVALID_DATA, "Dictation is currently unavailable for this part.");
         }
 
         List<QuestionGroup> groups = questionGroupRepository.findByTestIdAndPartIdsWithQuestionsAndPart(
                 testId, List.of(partId));
-
-        if (groups.isEmpty()) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy nội dung cho Part này.");
-        }
 
         List<Long> groupIds = groups.stream().map(QuestionGroup::getId).toList();
 

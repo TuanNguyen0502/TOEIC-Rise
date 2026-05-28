@@ -72,7 +72,12 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public PageResponse getCommentsByTestId(Long testId, int page, int size) {
         String currentEmail = SecurityUtils.getCurrentUser();
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        if (!testRepository.existsById(testId)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test");
+        }
 
         Page<Comment> rootPage = commentRepository.findRootCommentsByTestId(testId, pageable);
         List<Comment> roots = rootPage.getContent();
@@ -81,28 +86,29 @@ public class CommentServiceImpl implements ICommentService {
             return pageResponseMapper.toPageResponse(rootPage, List.of());
         }
 
+
         List<Long> rootIds = roots.stream().map(Comment::getId).toList();
-
-        List<Comment> allReplies = commentRepository.findAllRepliesByParentIds(rootIds);
-        Map<Long, List<Comment>> repliesGroupByParent = allReplies.stream()
-                .collect(Collectors.groupingBy(c -> c.getParent().getId()));
-
         Map<Long, Long> countsMap = commentRepository.countRepliesByParentIds(rootIds)
                 .stream().collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
 
+        Pageable replyPageable = PageRequest.of(0, 5, Sort.by("createdAt").ascending());
+
         List<CommentResponse> dtoList = roots.stream().map(root -> {
             CommentResponse dto = enrichCommentDto(root, currentEmail);
-            dto.setTotalReplies(countsMap.getOrDefault(root.getId(), 0L));
 
-            List<Comment> subReplies = repliesGroupByParent.getOrDefault(root.getId(), List.of());
-            List<CommentResponse> replyDos = subReplies.stream()
-                    .limit(5)
-                    .map(r -> enrichCommentDto(r, currentEmail))
-                    .toList();
+            long totalReplies = countsMap.getOrDefault(root.getId(), 0L);
+            dto.setTotalReplies(totalReplies);
 
-            Pageable replyPageable = PageRequest.of(0, 5);
-            Page<CommentResponse> fakePage = new PageImpl<>(replyDos, replyPageable, dto.getTotalReplies());
-            dto.setReplies(pageResponseMapper.toPageResponse(fakePage, replyDos));
+            List<CommentResponse> replyDtos = List.of();
+            if (totalReplies > 0) {
+                Page<Comment> replyPage = commentRepository.findByParentId(root.getId(), replyPageable);
+                replyDtos = replyPage.getContent().stream()
+                        .map(r -> enrichCommentDto(r, currentEmail))
+                        .toList();
+            }
+
+            Page<CommentResponse> fakePage = new PageImpl<>(replyDtos, replyPageable, dto.getTotalReplies());
+            dto.setReplies(pageResponseMapper.toPageResponse(fakePage, replyDtos));
 
             return dto;
         }).toList();
@@ -124,7 +130,6 @@ public class CommentServiceImpl implements ICommentService {
                 .toList();
 
         return pageResponseMapper.toPageResponse(replyPage, dtoList);
-
     }
 
     @Override
