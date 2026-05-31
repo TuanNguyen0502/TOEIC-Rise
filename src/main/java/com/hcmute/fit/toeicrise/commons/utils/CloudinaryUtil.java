@@ -81,18 +81,21 @@ public class CloudinaryUtil {
     }
 
     private boolean isValidSuffixImage(String img) {
+        img = img.toLowerCase();
         return img.endsWith(".jpg") || img.endsWith(".jpeg") ||
                 img.endsWith(".png") || img.endsWith(".gif") ||
                 img.endsWith(".bmp") || img.endsWith(".webp");
     }
 
     private boolean isValidSuffixAudio(String audio) {
+        audio = audio.toLowerCase();
         return audio.endsWith(".mp3") || audio.endsWith(".wav") ||
                 audio.endsWith(".aac") || audio.endsWith(".flac") ||
                 audio.endsWith(".ogg") || audio.endsWith(".m4a");
     }
 
     private boolean isValidSuffixVideo(String video) {
+        video = video.toLowerCase();
         return video.endsWith(".mp4") || video.endsWith(".avi") ||
                 video.endsWith(".mkv") || video.endsWith(".mov") ||
                 video.endsWith(".wmv") || video.endsWith(".flv");
