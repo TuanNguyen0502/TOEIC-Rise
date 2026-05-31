@@ -240,8 +240,8 @@ public class Constant {
     // Question group
     public static final int QUESTION_GROUP_AUDIO_MAX_SIZE = 10 * 1024 * 1024; // 10MB
     public static final int QUESTION_GROUP_IMAGE_MAX_SIZE = 5 * 1024 * 1024;  // 5MB
-    public static final String QUESTION_GROUP_AUDIO_URL_FORMAT = "^(https?://.*\\.(mp3|wav|ogg|m4a|aac))$";
-    public static final String QUESTION_GROUP_IMAGE_URL_FORMAT = "^(https?://.*\\.(jpg|jpeg|png|gif|bmp))$";
+    public static final String QUESTION_GROUP_AUDIO_URL_FORMAT = "(?i)^https?://.+\\.(mp3|wav|ogg|m4a|aac)(?:\\?.*)?(?:#.*)?$";
+    public static final String QUESTION_GROUP_IMAGE_URL_FORMAT = "(?i)^https?://.+\\.(jpg|jpeg|png|gif|bmp)(?:\\?.*)?(?:#.*)?$";
     // User constants
     public static final String FULLNAME_PATTERN = "^[\\p{L} ]+$";
     public static final int AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
