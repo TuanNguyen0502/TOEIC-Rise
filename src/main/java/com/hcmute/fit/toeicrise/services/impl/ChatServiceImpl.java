@@ -72,11 +72,6 @@ public class ChatServiceImpl implements IChatService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public List<ChatbotResponse> getChatHistory(String conversationId) {
-        return chatMemoryRepository.getChatHistory(conversationId);
-    }
-
-    @Override
     public Flux<ChatbotResponse> chat(ChatRequest chatRequest) {
         // Ensure conversationId is set
         if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
@@ -209,7 +204,7 @@ public class ChatServiceImpl implements IChatService {
         // Generate a messageId before streaming starts
         String messageId = UUID.randomUUID().toString();
 
-        Flux<String> content = ChatClient.create(chatModel)
+        Flux<String> content = chatClient
                 .prompt()
                 .system(systemPrompt)
                 .user(user -> user
@@ -241,27 +236,6 @@ public class ChatServiceImpl implements IChatService {
                         chatRequest.getConversationId(),
                         MessageType.ASSISTANT.name()
                 ));
-    }
-
-    @Override
-    public String generateConversationTitle(String email, TitleRequest titleRequest) {
-        String prompt = "Dựa trên tin nhắn sau của người dùng, hãy tạo một tiêu đề ngắn gọn, rõ ràng và phù hợp cho cuộc hội thoại. "
-                + "Tiêu đề phải dưới 10 từ, không có dấu ngoặc kép, không thêm giải thích hoặc văn bản thừa. "
-                + "Chỉ trả về tiêu đề duy nhất.\n\nTin nhắn người dùng:\n"
-                + titleRequest.getMessage();
-        String title = ChatClient.create(chatModel)
-                .prompt()
-                .system("Bạn là một trợ lý hữu ích, có nhiệm vụ tạo ra tiêu đề cuộc hội thoại ngắn gọn và phù hợp.")
-                .user(prompt)
-                .call()
-                .content();
-        if (title != null) {
-            // Remove newline characters and trim whitespace
-            title = title.replace("\n", " ").trim();
-        }
-        // Save title to database
-        chatTitleService.createChatTitle(email, titleRequest.getConversationId(), title);
-        return title;
     }
 
     @Override
@@ -439,19 +413,6 @@ public class ChatServiceImpl implements IChatService {
                                 .build(),
                         request.getSystemPromptContent())
         );
-    }
-
-    @Override
-    public ChatbotAnalysisResponse chatAnalysisData(ChatAnalysisRequest chatRequest) {
-        AnalysisResultResponse response = chatRequest.getAnalysisResult();
-        Context context = new Context();
-        context.setVariable("analysisData", response);
-        String prompts = templateEngine.process("analysis-result", context);
-
-        return chatClient.prompt(prompts)
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
-                .call()
-                .entity(ChatbotAnalysisResponse.class);
     }
 
     @Override
@@ -790,7 +751,45 @@ public class ChatServiceImpl implements IChatService {
         }
     }
 
-    private record ChatAboutQuestionContext(String prompt, QuestionGroup questionGroup) {
+    @Override
+    public List<ChatbotResponse> getChatHistory(String conversationId) {
+        return chatMemoryRepository.getChatHistory(conversationId);
     }
 
+    @Override
+    public String generateConversationTitle(String email, TitleRequest titleRequest) {
+        String prompt = "Dựa trên tin nhắn sau của người dùng, hãy tạo một tiêu đề ngắn gọn, rõ ràng và phù hợp cho cuộc hội thoại. "
+                + "Tiêu đề phải dưới 10 từ, không có dấu ngoặc kép, không thêm giải thích hoặc văn bản thừa. "
+                + "Chỉ trả về tiêu đề duy nhất.\n\nTin nhắn người dùng:\n"
+                + titleRequest.getMessage();
+        String title = ChatClient.create(chatModel)
+                .prompt()
+                .system("Bạn là một trợ lý hữu ích, có nhiệm vụ tạo ra tiêu đề cuộc hội thoại ngắn gọn và phù hợp.")
+                .user(prompt)
+                .call()
+                .content();
+        if (title != null) {
+            // Remove newline characters and trim whitespace
+            title = title.replace("\n", " ").trim();
+        }
+        // Save title to database
+        chatTitleService.createChatTitle(email, titleRequest.getConversationId(), title);
+        return title;
+    }
+
+    @Override
+    public ChatbotAnalysisResponse chatAnalysisData(ChatAnalysisRequest chatRequest) {
+        AnalysisResultResponse response = chatRequest.getAnalysisResult();
+        Context context = new Context();
+        context.setVariable("analysisData", response);
+        String prompts = templateEngine.process("analysis-result", context);
+
+        return chatClient.prompt(prompts)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
+                .call()
+                .entity(ChatbotAnalysisResponse.class);
+    }
+
+    private record ChatAboutQuestionContext(String prompt, QuestionGroup questionGroup) {
+    }
 }
