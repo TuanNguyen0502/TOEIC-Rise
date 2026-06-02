@@ -212,7 +212,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
         if (!ePart.isRequiredAudio() && (hasAudioFile || hasAudioUrl))
             throw new AppException(ErrorCode.INVALID_REQUEST, "Audio should not be provided for non-listening parts.");
-        if (ePart.isRequiredAudio() && !hasAudioFile && !hasAudioUrl)
+        if (ePart.isRequiredAudio() && (hasAudioFile && !hasAudioUrl))
             throw new AppException(ErrorCode.INVALID_REQUEST, "Audio is required for listening parts.");
         if (hasAudioFile) {
             if (audio.getSize() > Constant.QUESTION_GROUP_AUDIO_MAX_SIZE)
@@ -227,7 +227,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         boolean hasImageFile = image != null && !image.isEmpty();
         boolean hasImageUrl = imageUrl != null && !imageUrl.isBlank();
 
-        if (ePart.isRequiredImage() && (!hasImageFile && !hasImageUrl))
+        if (ePart.isRequiredImage() && (hasImageFile && !hasImageUrl))
             throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for part " + part.getName() + ".");
         if (!ePart.allowImage() && (hasImageFile || hasImageUrl))
             throw new AppException(ErrorCode.INVALID_REQUEST, "Image should not be provided for part " + part.getName() + ".");
@@ -243,7 +243,7 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
         EPart ePart = EPart.getEPart(part.getName());
         if (ePart.isRequiredPassage() && (passage == null || passage.isBlank())) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for part " + part.getName() + ".");
-        } else if (passage != null && !passage.isBlank())
+        } else if (!ePart.isRequiredPassage() && passage != null && !passage.isBlank())
             throw new AppException(ErrorCode.INVALID_REQUEST, "Passage should not be provided for part " + part.getName() + ".");
     }
 
