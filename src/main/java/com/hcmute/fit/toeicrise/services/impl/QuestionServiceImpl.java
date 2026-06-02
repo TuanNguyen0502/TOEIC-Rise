@@ -171,8 +171,8 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public List<Question> findAllQuestionByIdWithTags(Set<Long> questionIds) {
-        return questionRepository.findAllByIdWithTags(questionIds);
+    public List<Question> findAllQuestionByIdWithTags(Set<Long> questionGroupIds) {
+        return questionRepository.findAllByIdWithTags(questionGroupIds);
     }
 
     @Override

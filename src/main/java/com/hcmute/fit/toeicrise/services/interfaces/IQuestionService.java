@@ -30,7 +30,7 @@ public interface IQuestionService {
 
     SpeakingQuestionResponse getSpeakingQuestionResponseById(Long questionId);
 
-    List<Question> getQuestionEntitiesByIds(List<Long> questionIds);
+    List<Question> getQuestionEntitiesByIds(List<Long> questionGroupIds);
 
     Question findById(Long aLong);
 
