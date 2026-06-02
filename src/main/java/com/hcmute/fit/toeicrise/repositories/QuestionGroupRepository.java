@@ -35,6 +35,8 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, Lo
 
     @Query("SELECT qg FROM QuestionGroup qg " +
             "LEFT JOIN FETCH qg.part " +
+            "LEFT JOIN FETCH qg.test t " +
+            "LEFT JOIN FETCH t.testSet ts " +
             "WHERE qg.id IN :ids")
     List<QuestionGroup> findAllByIdWithPart(@Param("ids") Set<Long> ids);
 
