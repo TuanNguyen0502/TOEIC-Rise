@@ -112,6 +112,7 @@ public class TestServiceImpl implements ITestService {
 
     @Async
     @Override
+    @Transactional
     public void deleteTestsByTestSetId(Long testSetId) {
         int updatedCount = testRepository.updateStatusByTestSetId(testSetId, ETestStatus.DELETED);
         if (updatedCount == 0) {
@@ -123,6 +124,7 @@ public class TestServiceImpl implements ITestService {
 
     @Async
     @Override
+    @Transactional
     public void changeTestsStatusToPendingByTestSetId(Long testSetId) {
         int updatedCount = testRepository.updateStatusByTestSetId(testSetId, ETestStatus.PENDING);
         if (updatedCount == 0) {

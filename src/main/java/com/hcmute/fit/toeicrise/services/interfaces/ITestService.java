@@ -32,9 +32,11 @@ public interface ITestService {
     boolean changeTestStatusById(Long id, ETestStatus status);
 
     @Async
+    @Transactional
     void deleteTestsByTestSetId(Long testSetId);
 
     @Async
+    @Transactional
     void changeTestsStatusToPendingByTestSetId(Long testSetId);
 
     TestDetailResponse getTestDetailById(Long id);
