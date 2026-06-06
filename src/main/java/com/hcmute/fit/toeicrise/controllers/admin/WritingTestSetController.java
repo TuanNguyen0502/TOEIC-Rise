@@ -32,12 +32,6 @@ public class WritingTestSetController {
         return ResponseEntity.ok(testSetService.getTestSetDetailById(id, name, status, page, size, sortBy, direction));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTestSetById(@PathVariable Long id) {
-        testSetService.deleteTestSetById(id);
-        return ResponseEntity.ok(MessageConstant.TEST_SET_DELETED_SUCCESS);
-    }
-
     @PostMapping("")
     public ResponseEntity<?> createTestSet(@Valid @RequestBody TestSetRequest testSetRequest) {
         testSetRequest.setTestSetType(ETestSetType.WRITING);

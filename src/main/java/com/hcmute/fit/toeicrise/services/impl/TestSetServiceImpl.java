@@ -90,7 +90,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "testSets", key = "'IN_USE:' + #testSetRequest.testSetType")
+    @CacheEvict(value = "testSets", allEntries = true)
     public void addTestSet(TestSetRequest testSetRequest) {
         if (testSetRepository.existsByName(testSetRequest.getTestName()))
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Test set's name");
@@ -105,7 +105,7 @@ public class TestSetServiceImpl implements ITestSetService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "testSets", key = "'IN_USE:' + #updateTestSetRequest.testSetType")
+    @CacheEvict(value = "testSets", allEntries = true)
     public TestSetResponse updateTestSet(UpdateTestSetRequest updateTestSetRequest) {
         TestSet oldTestSet = findTestSetById(updateTestSetRequest.getId());
         testSetRepository.findByName(updateTestSetRequest.getTestName()).ifPresent(
