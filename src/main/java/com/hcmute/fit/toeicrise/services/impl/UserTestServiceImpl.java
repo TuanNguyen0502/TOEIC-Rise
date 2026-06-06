@@ -274,181 +274,16 @@ public class UserTestServiceImpl implements IUserTestService {
         return learnerTestPartsResponse;
     }
 
-//    @Override
-//    public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
-//        LocalDateTime localDateTime = userTestRepository.findLatestUserTestCreatedAtByType(email, ETestType.LISTENING_AND_READING)
-//                .map(user -> user.minusDays(days.getDays()))
-//                .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
-//
-//        log.info("SQL 0");
-//        List<UserTest> userTests = userTestRepository.findAllAnalysisResultByType(email, localDateTime, ETestStatus.APPROVED, ETestType.LISTENING_AND_READING);
-//        ExamTypeStatsResponse listening = new ExamTypeStatsResponse();
-//        ExamTypeStatsResponse reading = new ExamTypeStatsResponse();
-//
-//        log.info("SQL 1");
-//
-//        if (userTests.isEmpty())
-//            return AnalysisResultResponse.builder()
-//                    .numberOfTests(0)
-//                    .numberOfSubmissions(userTests.size())
-//                    .totalTimes(0L)
-//                    .examList(List.of(
-//                            listening.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of()),
-//                            reading.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of())))
-//                    .build();
-//
-//
-//        int numberOfTests = (int) userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
-//                .filter(Objects::nonNull)
-//                .distinct()
-//                .count();
-//
-//        Set<Long> questionIds = userTests.stream()
-//                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
-//                .flatMap(ut -> ut.getUserAnswers().stream())
-//                .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
-//                .filter(Objects::nonNull)
-//                .collect(Collectors.toSet());
-//
-//        Map<Long, Question> questionMapWithTags = questionIds.isEmpty() ? new HashMap<>() :
-//                questionService.findAllQuestionByIdWithTags(questionIds).stream()
-//                .collect(Collectors.toMap(Question::getId, q -> q));
-//
-//        log.info("SQL 2");
-//
-//
-//        userTests.forEach(ut -> {
-//            if (ut.getUserAnswers() != null) {
-//                ut.getUserAnswers().forEach(userAnswer -> {
-//                    if (userAnswer.getQuestion() != null) {
-//                        Question questionWithTags = questionMapWithTags.get(userAnswer.getQuestion().getId());
-//                        if (questionWithTags != null && questionWithTags.getTags() != null) {
-//                            userAnswer.getQuestion().setTags(questionWithTags.getTags());
-//                        }
-//                    }
-//                });
-//            }
-//        });
-//
-//
-//        log.info("SQL 3");
-//
-//
-//        Set<Long> allQuestionGroupIds = userTests.stream()
-//                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
-//                .flatMap(ut -> ut.getUserAnswers().stream())
-//                .map(UserAnswer::getQuestionGroupId)
-//                .filter(Objects::nonNull)
-//                .collect(Collectors.toSet());
-//
-//
-//        Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(allQuestionGroupIds);
-//
-//        log.info("SQL 4");
-//
-//        Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
-//        Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
-//
-//        for (EExamType examType : EExamType.values()) {
-//            rawDataByExamType.put(examType, new HashMap<>());
-//            rawPartStatsByExamType.put(examType, new HashMap<>());
-//        }
-//
-//        long totalSpent = 0L;
-//        int totalQuestionsListening = 0;
-//        int correctAnswersListening = 0;
-//        int totalQuestionsReading = 0;
-//        int correctAnswersReading = 0;
-//
-//        for (UserTest ut : userTests) {
-//            totalSpent += ut.getTimeSpent() != null ? ut.getTimeSpent() : 0;
-//            totalQuestionsListening += ut.getTotalListeningQuestions() != null ? ut.getTotalListeningQuestions() : 0;
-//            correctAnswersListening += ut.getListeningCorrectAnswers() != null ? ut.getListeningCorrectAnswers() : 0;
-//            totalQuestionsReading += ut.getTotalReadingQuestions() != null ? ut.getTotalReadingQuestions() : 0;
-//            correctAnswersReading += ut.getReadingCorrectAnswers() != null ? ut.getReadingCorrectAnswers() : 0;
-//
-//            List<UserAnswer> userAnswers = ut.getUserAnswers();
-//            if (userAnswers == null || userAnswers.isEmpty()) continue;
-//
-//            Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
-//                    .collect(Collectors.groupingBy(ua ->
-//                            partNamesByGroupId.get(ua.getQuestionGroupId())
-//                    ));
-//
-//            for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
-//                String partName = entry.getKey();
-//                List<UserAnswer> answersInPart = entry.getValue();
-//
-//                if (partName == null) continue;
-//                if (partName.contains("Writing") || partName.contains("Speaking"))
-//                    continue; // Ignore Speaking and Writing part
-//                EPart part = EPart.getEPart(partName);
-//                EExamType examType = part.isRequiredAudio() ? EExamType.LISTENING : EExamType.READING;
-//
-//                Map<String, Map<String, TagStats>> examTypeRawData = rawDataByExamType.get(examType);
-//                Map<String, PartStats> examTypePartStats = rawPartStatsByExamType.get(examType);
-//
-//                examTypeRawData.computeIfAbsent(partName, _ -> new HashMap<>());
-//                examTypePartStats.computeIfAbsent(partName, _ -> new PartStats());
-//
-//                Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
-//                        .flatMap(ua -> {
-//                            if (ua.getQuestion() != null && ua.getQuestion().getTags() != null) {
-//                                return ua.getQuestion().getTags().stream()
-//                                        .map(tag -> Map.entry(tag.getName(), ua));
-//                            }
-//                            return Stream.empty();
-//                        })
-//                        .collect(Collectors.groupingBy(
-//                                Map.Entry::getKey,
-//                                Collectors.mapping(Map.Entry::getValue, toList())
-//                        ));
-//
-//                Map<String, TagStats> tagStatsMap = examTypeRawData.get(partName);
-//                answersByTag.forEach((tagName, answersForTag) -> {
-//                    int correct = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
-//                    int wrong = answersForTag.size() - correct;
-//
-//                    TagStats tagStats = tagStatsMap.computeIfAbsent(tagName, _ -> new TagStats());
-//                    tagStats.add(correct, wrong);
-//                });
-//
-//                int partCorrect = (int) answersInPart.stream().filter(UserAnswer::getIsCorrect).count();
-//                int partWrong = answersInPart.size() - partCorrect;
-//
-//                PartStats partStats = examTypePartStats.get(partName);
-//                partStats.add(partCorrect, partWrong);
-//            }
-//        }
-//
-//        listening = listening.buildExamTypeStatsResponse(totalQuestionsListening, correctAnswersListening,
-//                rawDataByExamType.get(EExamType.LISTENING), rawPartStatsByExamType.get(EExamType.LISTENING));
-//
-//        reading = reading.buildExamTypeStatsResponse(totalQuestionsReading, correctAnswersReading,
-//                rawDataByExamType.get(EExamType.READING), rawPartStatsByExamType.get(EExamType.READING));
-//
-//        return AnalysisResultResponse.builder()
-//                .numberOfTests(numberOfTests)
-//                .numberOfSubmissions(userTests.size())
-//                .totalTimes(totalSpent)
-//                .examList(List.of(listening, reading))
-//                .build();
-//    }
-
-
 @Override
 public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
     LocalDateTime localDateTime = userTestRepository.findLatestUserTestCreatedAtByType(email, ETestType.LISTENING_AND_READING)
             .map(user -> user.minusDays(days.getDays()))
             .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
 
-    log.info("SQL 0 UserTest");
     List<UserTest> userTests = userTestRepository.findAllAnalysisResultByType(email, localDateTime, ETestStatus.APPROVED, ETestType.LISTENING_AND_READING);
 
     ExamTypeStatsResponse listening = new ExamTypeStatsResponse();
     ExamTypeStatsResponse reading = new ExamTypeStatsResponse();
-
-    log.info("SQL 1");
 
     if (userTests.isEmpty()) {
         return AnalysisResultResponse.builder()
@@ -467,7 +302,6 @@ public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
             .distinct()
             .count();
 
-    // 3. get Set Question ID in RAM
     Set<Long> questionIds = userTests.stream()
             .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
             .flatMap(ut -> ut.getUserAnswers().stream())
@@ -475,7 +309,6 @@ public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
 
-    // 4. Find Map Tags in Projection
     Map<Long, List<String>> tagsMap = new HashMap<>();
     if (!questionIds.isEmpty()) {
         List<Object[]> questionTagsRaw = questionRepository.findTagsOnlyByQuestionIds(questionIds);
@@ -485,8 +318,6 @@ public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
             tagsMap.computeIfAbsent(qId, k -> new ArrayList<>()).add(tagName);
         }
     }
-
-    log.info("SQL 2");
 
     Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
     Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
