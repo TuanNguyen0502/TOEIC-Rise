@@ -47,6 +47,7 @@ public class SpeakingTestSetController {
 
     @PutMapping("")
     public ResponseEntity<?> updateTestSet(@Valid @RequestBody UpdateTestSetRequest updateTestSetRequest) {
+        updateTestSetRequest.setTestSetType(ETestSetType.SPEAKING);
         return ResponseEntity.ok(testSetService.updateTestSet(updateTestSetRequest));
     }
 }

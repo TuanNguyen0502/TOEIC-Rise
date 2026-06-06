@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.controllers.admin;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
-import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
 import com.hcmute.fit.toeicrise.dtos.requests.testset.TestSetRequest;
@@ -25,9 +24,9 @@ public class TestSetController {
                                                   @RequestParam(required = false) String name,
                                                   @RequestParam(required = false) ETestStatus status,
                                                   @RequestParam(defaultValue = "0")
-                                                      @Min(value = 0) int page,
+                                                  @Min(value = 0) int page,
                                                   @RequestParam(defaultValue = "10")
-                                                      @Min(value = 1) @Max(value = 100) int size,
+                                                  @Min(value = 1) @Max(value = 100) int size,
                                                   @RequestParam(defaultValue = "updatedAt") String sortBy,
                                                   @RequestParam(defaultValue = "DESC") String direction) {
         return ResponseEntity.ok(testSetService.getTestSetDetailById(id, name, status, page, size, sortBy, direction));
@@ -48,6 +47,7 @@ public class TestSetController {
 
     @PutMapping("")
     public ResponseEntity<?> updateTestSet(@Valid @RequestBody UpdateTestSetRequest updateTestSetRequest) {
+        updateTestSetRequest.setTestSetType(ETestSetType.LISTENING_AND_READING);
         return ResponseEntity.ok(testSetService.updateTestSet(updateTestSetRequest));
     }
 }
