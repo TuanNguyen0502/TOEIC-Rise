@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.dtos.requests.testset;
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.models.enums.ETestSetStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestSetType;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,4 +17,6 @@ public class UpdateTestSetRequest {
     private String testName;
     private ETestSetStatus status;
     private Long id;
+
+    private ETestSetType testSetType;
 }
