@@ -37,7 +37,7 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
 
     boolean existsByName(String name);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Test t SET t.status = :status WHERE t.testSet.id = :testSetId")
     int updateStatusByTestSetId(@Param("testSetId") Long testSetId, @Param("status") ETestStatus status);
 
