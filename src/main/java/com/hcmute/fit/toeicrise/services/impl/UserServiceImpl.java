@@ -26,6 +26,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.IRoleService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +87,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#email")
     public void updateUserProfile(String email, ProfileUpdateRequest request) {
         log.info("Updating user with email: {}", email);
         User user = userRepository.findByAccount_Email(email)
