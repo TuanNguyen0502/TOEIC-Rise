@@ -11,9 +11,13 @@ public interface QuestionReportMapper {
     default QuestionReportDetailResponse toQuestionReportDetailResponse(QuestionReport questionReport) {
         Question question = questionReport.getQuestion();
         QuestionGroup questionGroup = question.getQuestionGroup();
+        Test test = questionGroup.getTest();
         User reporter = questionReport.getReporter();
         User resolver = questionReport.getResolver();
         return QuestionReportDetailResponse.builder()
+                .testId(test.getId())
+                .testName(test.getName())
+                .testType(test.getType())
                 .questionReportId(questionReport.getId())
                 .questionId(question.getId())
                 .questionPosition(question.getPosition())

@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.dtos.responses.report;
 
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportReason;
 import com.hcmute.fit.toeicrise.models.enums.EQuestionReportStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +11,9 @@ import java.util.List;
 @Data
 @Builder
 public class QuestionReportDetailResponse {
+    private Long testId;
+    private String testName;
+    private ETestType testType;
     private Long questionReportId;
     private Long questionId;
     private Integer questionPosition;
