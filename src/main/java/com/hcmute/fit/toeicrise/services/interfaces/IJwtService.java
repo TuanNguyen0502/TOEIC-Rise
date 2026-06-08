@@ -14,6 +14,8 @@ public interface IJwtService {
 
     Boolean extractIsActive(String token);
 
+    Claims extractAllClaims(String token);
+
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
     String generateTokenFromUser(com.hcmute.fit.toeicrise.models.entities.User user);
