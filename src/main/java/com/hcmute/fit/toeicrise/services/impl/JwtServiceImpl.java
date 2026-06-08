@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -30,14 +31,54 @@ public class JwtServiceImpl implements IJwtService {
     }
 
     @Override
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        Object rolesObject = claims.get("roles");
+
+        if (rolesObject instanceof List<?>) {
+            return ((List<?>) rolesObject).stream()
+                    .map(Object::toString)
+                    .toList();
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    @Override
+    public Boolean extractIsActive(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("isActive", Boolean.class);
+    }
+
+    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
     @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateTokenFromUser(com.hcmute.fit.toeicrise.models.entities.User user) {
+        if (user.getAccount() == null) {
+            throw new com.hcmute.fit.toeicrise.exceptions.AppException(
+                    com.hcmute.fit.toeicrise.models.enums.ErrorCode.INVALID_CREDENTIALS
+            );
+        }
+
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        String roleName = "ROLE_" + user.getRole().getName().name();
+        extraClaims.put("roles", java.util.List.of(roleName));
+
+        extraClaims.put("isActive", user.getAccount().getIsActive());
+        String email = user.getAccount().getEmail();
+
+        org.springframework.security.core.userdetails.User userDetails =
+                new org.springframework.security.core.userdetails.User(
+                        email,
+                        "",
+                        java.util.Collections.emptyList()
+                );
+
+        return buildToken(extraClaims, userDetails, jwtExpirationTime);
     }
 
     @Override
@@ -66,12 +107,6 @@ public class JwtServiceImpl implements IJwtService {
     }
 
     @Override
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-    }
-
-    @Override
     public String generateTokenResetPassword(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("resetPwd", true);
@@ -84,15 +119,20 @@ public class JwtServiceImpl implements IJwtService {
         return Boolean.TRUE.equals(claims.get("resetPwd"));
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    @Override
+    public boolean isTokenExpired(String token) {
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignInKey())
