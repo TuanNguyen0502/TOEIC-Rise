@@ -145,20 +145,22 @@ public class TestSetServiceImpl implements ITestSetService {
                 findByStatusWithTests(ETestSetStatus.IN_USE, ETestStatus.APPROVED,
                         ETestSetType.LISTENING_AND_READING);
 
-        return testSet.stream().map(ts -> {
-            List<Test> tests = ts.getTests();
-            int numberOfTests = tests.size();
-            int readyPart = tests.stream()
-                    .mapToInt(t -> t.getDictationStatus().size())
-                    .sum();
-            return TestSetDictationResponse.builder()
-                    .id(ts.getId())
-                    .name(ts.getName())
-                    .totalTests(numberOfTests)
-                    .readyPartsCount(readyPart)
-                    .totalPartsCount(numberOfTests * 4)
-                    .build();
-        }).toList();
+        return testSet.stream()
+                .filter(ts -> ts.getTests() != null && !ts.getTests().isEmpty())
+                .map(ts -> {
+                    List<Test> tests = ts.getTests();
+                    int numberOfTests = tests.size();
+                    int readyPart = tests.stream()
+                            .mapToInt(t -> t.getDictationStatus().size())
+                            .sum();
+                    return TestSetDictationResponse.builder()
+                            .id(ts.getId())
+                            .name(ts.getName())
+                            .totalTests(numberOfTests)
+                            .readyPartsCount(readyPart)
+                            .totalPartsCount(numberOfTests * 4)
+                            .build();
+                }).toList();
     }
 
     @Override
