@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.responses.authentication.RefreshTokenResponse;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.Account;
+import com.hcmute.fit.toeicrise.models.entities.User;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IAccountService;
 import com.hcmute.fit.toeicrise.services.interfaces.IJwtService;
@@ -32,7 +33,9 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         accountService.validateRefreshToken(account);
 
-        String newAccessToken = jwtService.generateToken(account);
+        User user = account.getUser();
+
+        String newAccessToken = jwtService.generateTokenFromUser(user);
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
                 .accessTokenExpirationTime(jwtService.getExpirationTime())

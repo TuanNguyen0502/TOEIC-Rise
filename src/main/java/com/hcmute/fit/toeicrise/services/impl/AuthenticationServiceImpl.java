@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final int BEARER_PREFIX_LENGTH = 7;
     private final IAccountService accountService;
     private final IUserService userService;
     private final IOTPService otpService;
@@ -35,9 +37,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IRedisService redisService;
     private final IJwtService jwtService;
     private final UserMapper userMapper;
-
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final int BEARER_PREFIX_LENGTH = 7;
 
     @Override
     @Transactional
@@ -112,7 +111,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                     log.error("Login failed: Account not found for email: {}", authenticatedUser.getEmail());
                     return new AppException(ErrorCode.INVALID_CREDENTIALS);
                 });
-        String accessToken = jwtService.generateToken(authenticatedUser);
+        String accessToken = jwtService.generateTokenFromUser(user);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
@@ -128,7 +127,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Transactional
     public void verifyUser(VerifyUserRequest input) {
         Account account = redisService.get(ECacheDuration.CACHE_REGISTRATION.getCacheName(), input.getEmail(), Account.class);
-        if (account == null){
+        if (account == null) {
             log.warn("Account not found in Redis for email: {}", input.getEmail());
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account");
         }
@@ -140,8 +139,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         accountService.save(account);
 
         redisService.batch(redis -> {
-            redis.delete(ECacheDuration.CACHE_REGISTRATION.getCacheName() + "::"+ input.getEmail());
-            redis.delete(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName() + "::"+ input.getEmail());
+            redis.delete(ECacheDuration.CACHE_REGISTRATION.getCacheName() + "::" + input.getEmail());
+            redis.delete(ECacheDuration.CACHE_FULLNAME_REGISTRATION.getCacheName() + "::" + input.getEmail());
         });
         log.info("User verified successfully for email: {}", input.getEmail());
     }
@@ -203,7 +202,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     @Transactional
     public String verifyOTP(OtpRequest otpRequest) {
-        Account account = accountService.findByEmail(otpRequest.getEmail()).orElseThrow(() ->{
+        Account account = accountService.findByEmail(otpRequest.getEmail()).orElseThrow(() -> {
             log.error("Verify failed for email: {}", otpRequest.getEmail());
             return new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Account");
         });
@@ -223,7 +222,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         double sum = regSourceInsightResponse.getGoogle() + regSourceInsightResponse.getEmail();
         if (sum == 0)
             return regSourceInsightResponse;
-        return  RegSourceInsightResponse.builder()
+        return RegSourceInsightResponse.builder()
                 .google(Math.round(regSourceInsightResponse.getGoogle() / sum * 100))
                 .email(Math.round((regSourceInsightResponse.getEmail() / sum) * 100))
                 .build();
