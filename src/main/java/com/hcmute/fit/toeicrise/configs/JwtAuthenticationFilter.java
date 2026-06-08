@@ -3,7 +3,6 @@ package com.hcmute.fit.toeicrise.configs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.impl.JwtServiceImpl;
-import com.hcmute.fit.toeicrise.services.impl.UserDetailServiceImpl;
 import com.hcmute.fit.toeicrise.services.interfaces.ITokenBlacklistService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -15,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,6 +23,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -31,7 +31,6 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtServiceImpl jwtServiceImpl;
-    private final UserDetailServiceImpl userDetailsService;
     private final ITokenBlacklistService tokenBlacklistServiceImpl;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -64,13 +63,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                if (!jwtServiceImpl.isTokenExpired(jwt)) {
+                    Boolean isActive = jwtServiceImpl.extractIsActive(jwt);
+                    if (isActive != null && !isActive) {
+                        SecurityContextHolder.clearContext();
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        response.getWriter().write("{\"error\": \"FORBIDDEN\", \"message\": \"Account is deactivated\"}");
+                        return;
+                    }
 
-                if (jwtServiceImpl.isTokenValid(jwt, userDetails)) {
+                    java.util.List<String> roles = jwtServiceImpl.extractRoles(jwt);
+                    List<SimpleGrantedAuthority> authorities =
+                            roles.stream()
+                                    .map(SimpleGrantedAuthority::new)
+                                    .toList();
+
+                    org.springframework.security.core.userdetails.User principal =
+                            new org.springframework.security.core.userdetails.User(userEmail, "", authorities);
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
+                            principal,
                             null,
-                            userDetails.getAuthorities()
+                            authorities
                     );
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
