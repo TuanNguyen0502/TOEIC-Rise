@@ -105,16 +105,21 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
         blogCategory.setName(request.getName());
         blogCategory.setSlug(request.getSlug());
         blogCategory.setIsActive(request.getActive());
+        if (blogCategory.getIsActive() == false) {
+            blogPostService.achievedBlogPostsByCategory(id);
+        }
         blogCategoryRepository.save(blogCategory);
     }
 
     @Transactional
     @Override
-    public void inactiveBlogCategory(Long id) {
+    public void changeBlogCategoryStatus(Long id) {
         BlogCategory blogCategory = blogCategoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
-        blogCategory.setIsActive(false);
+        blogCategory.setIsActive(!blogCategory.getIsActive());
         blogCategoryRepository.save(blogCategory);
-        blogPostService.achievedBlogPostsByCategory(id);
+        if (blogCategory.getIsActive() == false) {
+            blogPostService.achievedBlogPostsByCategory(id);
+        }
     }
 }
