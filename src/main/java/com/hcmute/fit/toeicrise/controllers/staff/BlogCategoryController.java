@@ -45,8 +45,8 @@ public class BlogCategoryController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> inactiveBlogCategory(@PathVariable Long id) {
-        blogCategoryService.inactiveBlogCategory(id);
+    public ResponseEntity<?> changeBlogCategoryStatus(@PathVariable Long id) {
+        blogCategoryService.changeBlogCategoryStatus(id);
         return ResponseEntity.ok().build();
     }
 }

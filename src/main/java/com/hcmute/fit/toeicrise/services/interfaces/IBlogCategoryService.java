@@ -23,5 +23,5 @@ public interface IBlogCategoryService {
     void updateBlogCategory(Long id, BlogCategoryUpdateRequest request);
 
     @Transactional
-    void inactiveBlogCategory(Long id);
+    void changeBlogCategoryStatus(Long id);
 }
