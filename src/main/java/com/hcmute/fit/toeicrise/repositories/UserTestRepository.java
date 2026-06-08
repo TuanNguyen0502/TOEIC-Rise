@@ -46,13 +46,25 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
 
     @Query("SELECT DISTINCT ut " +
             "FROM UserTest ut " +
-            "LEFT JOIN FETCH ut.test t " +
+            "JOIN FETCH ut.user u " +
+            "JOIN FETCH u.account a " +
+            "LEFT JOIN FETCH u.role r " +
+            "JOIN FETCH ut.test t " +
+            "LEFT JOIN FETCH t.testSet ts " +
             "LEFT JOIN FETCH ut.userAnswers ua " +
             "LEFT JOIN FETCH ua.question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +
             "LEFT JOIN FETCH qg.part p " +
-            "WHERE ut.user.account.email = :email AND ut.createdAt >= :days AND t.status = :status")
-    List<UserTest> findAllAnalysisResult(@Param("email") String email, @Param("days") LocalDateTime days, @Param("status") ETestStatus status);
+            "WHERE a.email = :email " +
+            "AND ut.createdAt >= :days " +
+            "AND t.status = :status " +
+            "AND t.type = :testType")
+    List<UserTest> findAllAnalysisResultByType(
+            @Param("email") String email,
+            @Param("days") LocalDateTime days,
+            @Param("status") ETestStatus status,
+            @Param("testType") ETestType testType
+    );
 
     @Query("SELECT new com.hcmute.fit.toeicrise.dtos.responses.learner.LearnerTestHistoryResponse(" +
             "ut.id, t.name, ut.createdAt, ut.parts, ut.correctAnswers,ut.totalQuestions, ut.totalScore, ut.timeSpent) " +
@@ -62,8 +74,15 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "ORDER BY ut.createdAt DESC ")
     List<LearnerTestHistoryResponse> getLearnerTestHistoryByTest_IdAndUser_Email(@Param("id") Long testId, @Param("email") String email);
 
-    @Query("SELECT MAX(ut.createdAt) FROM UserTest ut WHERE ut.user.account.email = :email ORDER BY ut.createdAt DESC")
-    Optional<LocalDateTime> findLatestUserTestCreatedAt(@Param("email") String email);
+    @Query("SELECT MAX(ut.createdAt) FROM UserTest ut " +
+            "WHERE ut.user.account.email = :email " +
+            "AND ut.test.type = :testType " +
+            "AND ut.test.status = :status")
+    Optional<LocalDateTime> findLatestUserTestCreatedAtByType(
+            @Param("email") String email,
+            @Param("testType") ETestType testType,
+            @Param("status") ETestStatus status
+    );
 
     List<UserTest> findByUser_Account_EmailAndTest_StatusAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable, ETestStatus status);
 

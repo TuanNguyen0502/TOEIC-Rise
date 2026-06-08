@@ -33,6 +33,7 @@ import com.hcmute.fit.toeicrise.exceptions.AppException;
 import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.*;
 import com.hcmute.fit.toeicrise.models.mappers.*;
+import com.hcmute.fit.toeicrise.repositories.QuestionRepository;
 import com.hcmute.fit.toeicrise.repositories.UserTestRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,7 @@ public class UserTestServiceImpl implements IUserTestService {
     private final ITestService testService;
     private final IUserService userService;
     private final UserTestRepository userTestRepository;
+    private final QuestionRepository questionRepository;
     private final UserTestMapper userTestMapper;
     private final TestMapper testMapper;
     private final UserAnswerMapper userAnswerMapper;
@@ -274,23 +276,28 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public AnalysisResultResponse getAnalysisResult(String email, EDays days) {
-        LocalDateTime localDateTime = userTestRepository.findLatestUserTestCreatedAt(email)
+        LocalDateTime localDateTime = userTestRepository.findLatestUserTestCreatedAtByType(email, ETestType.LISTENING_AND_READING, ETestStatus.APPROVED)
                 .map(user -> user.minusDays(days.getDays()))
                 .orElseGet(() -> LocalDateTime.now().minusDays(days.getDays()));
-        List<UserTest> userTests = userTestRepository.findAllAnalysisResult(email, localDateTime, ETestStatus.APPROVED);
+
+        List<UserTest> userTests = userTestRepository.findAllAnalysisResultByType(email, localDateTime, ETestStatus.APPROVED, ETestType.LISTENING_AND_READING);
+
         ExamTypeStatsResponse listening = new ExamTypeStatsResponse();
         ExamTypeStatsResponse reading = new ExamTypeStatsResponse();
 
-        if (userTests.isEmpty())
+        if (userTests.isEmpty()) {
             return AnalysisResultResponse.builder()
                     .numberOfTests(0)
-                    .numberOfSubmissions(userTests.size())
+                    .numberOfSubmissions(0)
                     .totalTimes(0L)
                     .examList(List.of(
                             listening.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of()),
                             reading.buildExamTypeStatsResponse(0, 0, Map.of(), Map.of())))
                     .build();
-        int numberOfTests = (int) userTests.stream().map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
+        }
+
+        int numberOfTests = (int) userTests.stream()
+                .map(ut -> ut.getTest() != null ? ut.getTest().getId() : null)
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
@@ -301,28 +308,16 @@ public class UserTestServiceImpl implements IUserTestService {
                 .map(ua -> ua.getQuestion() != null ? ua.getQuestion().getId() : null)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, Question> questionMapWithTags = questionIds.isEmpty() ? new HashMap<>() :
-                questionService.findAllQuestionByIdWithTags(questionIds).stream()
-                .collect(Collectors.toMap(Question::getId, q -> q));
-        userTests.forEach(ut -> {
-            if (ut.getUserAnswers() != null) {
-                ut.getUserAnswers().forEach(userAnswer -> {
-                    if (userAnswer.getQuestion() != null) {
-                        Question questionWithTags = questionMapWithTags.get(userAnswer.getQuestion().getId());
-                        if (questionWithTags != null && questionWithTags.getTags() != null) {
-                            userAnswer.getQuestion().setTags(questionWithTags.getTags());
-                        }
-                    }
-                });
+
+        Map<Long, List<String>> tagsMap = new HashMap<>();
+        if (!questionIds.isEmpty()) {
+            List<Object[]> questionTagsRaw = questionRepository.findTagsOnlyByQuestionIds(questionIds);
+            for (Object[] row : questionTagsRaw) {
+                Long qId = (Long) row[0];
+                String tagName = (String) row[1];
+                tagsMap.computeIfAbsent(qId, k -> new ArrayList<>()).add(tagName);
             }
-        });
-        Set<Long> allQuestionGroupIds = userTests.stream()
-                .filter(ut -> ut.getUserAnswers() != null && !ut.getUserAnswers().isEmpty())
-                .flatMap(ut -> ut.getUserAnswers().stream())
-                .map(UserAnswer::getQuestionGroupId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        Map<Long, String> partNamesByGroupId = questionGroupService.getPartNamesByQuestionGroupIds(allQuestionGroupIds);
+        }
 
         Map<EExamType, Map<String, Map<String, TagStats>>> rawDataByExamType = new EnumMap<>(EExamType.class);
         Map<EExamType, Map<String, PartStats>> rawPartStatsByExamType = new EnumMap<>(EExamType.class);
@@ -333,10 +328,8 @@ public class UserTestServiceImpl implements IUserTestService {
         }
 
         long totalSpent = 0L;
-        int totalQuestionsListening = 0;
-        int correctAnswersListening = 0;
-        int totalQuestionsReading = 0;
-        int correctAnswersReading = 0;
+        int totalQuestionsListening = 0, correctAnswersListening = 0;
+        int totalQuestionsReading = 0, correctAnswersReading = 0;
 
         for (UserTest ut : userTests) {
             totalSpent += ut.getTimeSpent() != null ? ut.getTimeSpent() : 0;
@@ -349,17 +342,15 @@ public class UserTestServiceImpl implements IUserTestService {
             if (userAnswers == null || userAnswers.isEmpty()) continue;
 
             Map<String, List<UserAnswer>> answersByPart = userAnswers.stream()
-                    .collect(Collectors.groupingBy(ua ->
-                            partNamesByGroupId.get(ua.getQuestionGroupId())
-                    ));
+                    .filter(ua -> ua.getQuestion() != null
+                            && ua.getQuestion().getQuestionGroup() != null
+                            && ua.getQuestion().getQuestionGroup().getPart() != null)
+                    .collect(Collectors.groupingBy(ua -> ua.getQuestion().getQuestionGroup().getPart().getName()));
 
             for (Map.Entry<String, List<UserAnswer>> entry : answersByPart.entrySet()) {
                 String partName = entry.getKey();
                 List<UserAnswer> answersInPart = entry.getValue();
 
-                if (partName == null) continue;
-                if (partName.contains("Writing") || partName.contains("Speaking"))
-                    continue; // Ignore Speaking and Writing part
                 EPart part = EPart.getEPart(partName);
                 EExamType examType = part.isRequiredAudio() ? EExamType.LISTENING : EExamType.READING;
 
@@ -369,24 +360,22 @@ public class UserTestServiceImpl implements IUserTestService {
                 examTypeRawData.computeIfAbsent(partName, _ -> new HashMap<>());
                 examTypePartStats.computeIfAbsent(partName, _ -> new PartStats());
 
-                Map<String, List<UserAnswer>> answersByTag = answersInPart.stream()
-                        .flatMap(ua -> {
-                            if (ua.getQuestion() != null && ua.getQuestion().getTags() != null) {
-                                return ua.getQuestion().getTags().stream()
-                                        .map(tag -> Map.entry(tag.getName(), ua));
+                Map<String, List<UserAnswer>> answersByTag = new HashMap<>();
+                for (UserAnswer ua : answersInPart) {
+                    if (ua.getQuestion() != null) {
+                        List<String> tags = tagsMap.get(ua.getQuestion().getId());
+                        if (tags != null) {
+                            for (String tagName : tags) {
+                                answersByTag.computeIfAbsent(tagName, _ -> new ArrayList<>()).add(ua);
                             }
-                            return Stream.empty();
-                        })
-                        .collect(Collectors.groupingBy(
-                                Map.Entry::getKey,
-                                Collectors.mapping(Map.Entry::getValue, toList())
-                        ));
+                        }
+                    }
+                }
 
                 Map<String, TagStats> tagStatsMap = examTypeRawData.get(partName);
                 answersByTag.forEach((tagName, answersForTag) -> {
                     int correct = (int) answersForTag.stream().filter(UserAnswer::getIsCorrect).count();
                     int wrong = answersForTag.size() - correct;
-
                     TagStats tagStats = tagStatsMap.computeIfAbsent(tagName, _ -> new TagStats());
                     tagStats.add(correct, wrong);
                 });
