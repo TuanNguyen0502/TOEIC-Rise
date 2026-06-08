@@ -76,10 +76,12 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
 
     @Query("SELECT MAX(ut.createdAt) FROM UserTest ut " +
             "WHERE ut.user.account.email = :email " +
-            "AND ut.test.type = :testType")
+            "AND ut.test.type = :testType " +
+            "AND ut.test.status = :status")
     Optional<LocalDateTime> findLatestUserTestCreatedAtByType(
             @Param("email") String email,
-            @Param("testType") ETestType testType
+            @Param("testType") ETestType testType,
+            @Param("status") ETestStatus status
     );
 
     List<UserTest> findByUser_Account_EmailAndTest_StatusAndTotalScoreIsNotNullOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable, ETestStatus status);
