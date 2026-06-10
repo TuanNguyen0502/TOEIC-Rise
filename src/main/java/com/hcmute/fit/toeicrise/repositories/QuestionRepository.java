@@ -23,8 +23,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             "JOIN FETCH q.questionGroup qg " +
             "JOIN FETCH qg.part p " +
             "JOIN FETCH qg.test test " +
-            "LEFT JOIN FETCH test.testSet ts "+
-            "WHERE q.id IN :ids")
+            "LEFT JOIN FETCH test.testSet ts " +
+            "WHERE q.questionGroup.id IN :ids")
     List<Question> findAllByIdWithTags(@Param("ids") Set<Long> ids);
 
     @Query("SELECT q.id, t.name FROM Question q JOIN q.tags t WHERE q.id IN :ids")
