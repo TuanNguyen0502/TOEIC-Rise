@@ -128,7 +128,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> chat(TestingSystemPromptChatbotRequest request) {
+    public Flux<ChatbotResponse> testChat(TestingSystemPromptChatbotRequest request) {
         return Flux.defer(() -> {
             if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
                 request.setConversationId(UUID.randomUUID().toString());
@@ -375,7 +375,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> chatAboutQuestion(TestingSystemPromptQAndAnswerRequest request) {
+    public Flux<ChatbotResponse> testChatAboutQuestion(TestingSystemPromptQAndAnswerRequest request) {
         Mono<String> promptMono;
 
         if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
@@ -510,7 +510,7 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
-    public Flux<ChatbotResponse> generateExplanation(TestingSystemPromptExplanationGenerationRequest request) {
+    public Flux<ChatbotResponse> testGenerateExplanation(TestingSystemPromptExplanationGenerationRequest request) {
         return Flux.defer(() -> {
             ChatClient cleanClient = chatClientBuilder.build();
             String conversationId = UUID.randomUUID().toString();

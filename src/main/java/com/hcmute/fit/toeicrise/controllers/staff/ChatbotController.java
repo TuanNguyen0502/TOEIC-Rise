@@ -3,7 +3,6 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -62,17 +61,17 @@ public class ChatbotController {
 
     @PostMapping(path = "/testing-system-prompt-chatbot", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> testingChatbotSystemPrompt(@Valid @ModelAttribute TestingSystemPromptChatbotRequest request) {
-        return chatService.chat(request).delayElements(Duration.ofMillis(50));
+        return chatService.testChat(request).delayElements(Duration.ofMillis(50));
     }
 
     @PostMapping(path = "/testing-system-prompt-q-and-a", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> chatAboutQuestion(@Valid @ModelAttribute TestingSystemPromptQAndAnswerRequest request) {
-        return chatService.chatAboutQuestion(request).delayElements(Duration.ofMillis(50));
+        return chatService.testChatAboutQuestion(request).delayElements(Duration.ofMillis(50));
     }
 
     @PostMapping(path = "/testing-system-prompt-explanation-generation", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> testingExplanationGenerationSystemPrompt(@Valid @ModelAttribute TestingSystemPromptExplanationGenerationRequest request) {
-        return chatService.generateExplanation(request).delayElements(Duration.ofMillis(50));
+        return chatService.testGenerateExplanation(request).delayElements(Duration.ofMillis(50));
     }
 
     @GetMapping("/generate-dictation")
@@ -82,7 +81,8 @@ public class ChatbotController {
 
         List<DictationGenerationResponse> dictations = chatService.generateDictation(testId, partId);
         return ResponseEntity.ok(dictations);
-   }
+    }
+
     @PostMapping(path = "/testing-system-prompt-blog-summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatbotResponse> testingBlogSummarizationSystemPrompt(@Valid @ModelAttribute BlogPostSummaryRequest request) {
         return chatService.generateBlogPostSummary(request).delayElements(Duration.ofMillis(50));
