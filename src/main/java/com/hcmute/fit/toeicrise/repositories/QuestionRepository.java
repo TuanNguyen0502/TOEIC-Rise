@@ -56,6 +56,16 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             @Param("tagIds") Set<Long> tagIds,
             @Param("status") ETestStatus status);
 
+    @Query(value = """
+                SELECT q.* FROM questions q
+                JOIN question_groups qg ON q.question_group_id = qg.id
+                JOIN parts p ON qg.part_id = p.id
+                WHERE p.name LIKE CONCAT('%', :partName, '%')
+                ORDER BY RAND()
+                LIMIT 1
+            """, nativeQuery = true)
+    Optional<Question> findRandomQuestionByPartName(@Param("partName") String partName);
+
     @Query("""
                 SELECT new com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse(
                     q.id, q.position
