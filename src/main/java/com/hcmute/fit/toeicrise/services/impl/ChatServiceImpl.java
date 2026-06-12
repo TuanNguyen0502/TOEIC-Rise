@@ -193,8 +193,8 @@ public class ChatServiceImpl implements IChatService {
     @Override
     public Flux<ChatbotResponse> testChatAboutQuestion(TestingSystemPromptQAndAnswerRequest request) {
         return Mono.fromCallable(() -> {
-                    Question question = questionRepository.findRandomQuestionByPartName(request.getPartName())
-                            .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST, "No question found for part: " + request.getPartName()));
+                    Question question = questionRepository.findById(request.getQuestionId())
+                            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question not found for id: " + request.getQuestionId()));
                     QuestionGroup questionGroup = question.getQuestionGroup();
                     Part part = questionGroup.getPart();
 
@@ -381,8 +381,8 @@ public class ChatServiceImpl implements IChatService {
     @Override
     public Flux<ChatbotResponse> testGenerateExplanation(TestingSystemPromptExplanationGenerationRequest request) {
         return Mono.fromCallable(() -> {
-                    Question question = questionRepository.findRandomQuestionByPartName(request.getPartName())
-                            .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST, "No question found for part: " + request.getPartName()));
+                    Question question = questionRepository.findById(request.getQuestionId())
+                            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question not found for id: " + request.getQuestionId()));
                     QuestionGroup questionGroup = question.getQuestionGroup();
 
                     String passage = (questionGroup.getPassage() != null && !questionGroup.getPassage().isBlank())
