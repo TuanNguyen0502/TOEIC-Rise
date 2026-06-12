@@ -15,7 +15,7 @@ import java.util.List;
 public class PartController {
     private final IPartService partService;
 
-    @GetMapping()
+    @GetMapping("/part-names")
     public ResponseEntity<List<String>> getAllPartNames() {
         return ResponseEntity.ok(partService.getAllPartNames());
     }
