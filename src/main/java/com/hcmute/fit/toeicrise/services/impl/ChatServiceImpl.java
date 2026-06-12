@@ -73,86 +73,6 @@ public class ChatServiceImpl implements IChatService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public Flux<ChatbotResponse> chat(ChatRequest chatRequest) {
-        // Ensure conversationId is set
-        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
-            chatRequest.setConversationId(UUID.randomUUID().toString());
-        }
-
-        // Generate a messageId before streaming starts
-        String messageId = UUID.randomUUID().toString();
-
-        Flux<String> content = chatClient.prompt()
-                .advisors(advisorSpec -> {
-                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
-                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
-                })
-                .user(chatRequest.getMessage())
-                .system(getActiveChatbotSystemPrompt())
-                .stream()
-                .content();
-
-        return content.map(contentText -> chatbotMapper.toChatbotResponse(
-                contentText,
-                messageId,
-                chatRequest.getConversationId(),
-                MessageType.ASSISTANT.name()
-        ));
-    }
-
-    @Override
-    public Flux<ChatbotResponse> testChat(TestingSystemPromptChatbotRequest request) {
-        return Flux.defer(() -> {
-            if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
-                request.setConversationId(UUID.randomUUID().toString());
-            }
-            String messageId = UUID.randomUUID().toString();
-            return chatClient.prompt()
-                    .advisors(advisorSpec -> {
-                        advisorSpec.param(ChatMemory.CONVERSATION_ID, request.getConversationId());
-                        advisorSpec.param("messageId", messageId);
-                    })
-                    .user(request.getMessage())
-                    .system(request.getSystemPromptContent())
-                    .stream()
-                    .content()
-                    .map(contentText -> chatbotMapper.toChatbotResponse(
-                            contentText,
-                            messageId,
-                            request.getConversationId(),
-                            MessageType.ASSISTANT.name()
-                    ));
-        }).subscribeOn(Schedulers.boundedElastic());
-    }
-
-    @Override
-    public Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType) {
-        // Ensure conversationId is set
-        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
-            chatRequest.setConversationId(UUID.randomUUID().toString());
-        }
-
-        // Generate a messageId before streaming starts
-        String messageId = UUID.randomUUID().toString();
-
-        Flux<String> content = ChatClient.create(chatModel)
-                .prompt()
-                .system(getActiveChatbotSystemPrompt())
-                .user(user -> user
-                        .text(chatRequest.getMessage())
-                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
-                .advisors(advisorSpec -> {
-                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
-                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
-                })
-                .stream()
-                .content();
-
-        // Collect the streaming content and save when complete
-        return getChatbotResponseFlux(chatRequest, messageId, content);
-    }
-
-    @Override
     public Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest request) {
         return Mono.fromCallable(() -> {
                     UserAnswer userAnswer = userAnswerRepository.findById(request.getUserAnswerId())
@@ -663,41 +583,6 @@ public class ChatServiceImpl implements IChatService {
                 .content();
     }
 
-    private String getActiveChatbotSystemPrompt() {
-        SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
-    private String getActiveQAndASystemPrompt() {
-        SystemPromptDetailResponse response = qAndASystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
-    private String getActiveExplanationGenerationSystemPrompt() {
-        SystemPromptDetailResponse response = explanationGenerationSystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
-    private String getActiveSentenceAssessmentSystemPrompt() {
-        SystemPromptDetailResponse response = sentenceAssessmentSystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
-    private String getActiveBlogSummarizationSystemPrompt() {
-        SystemPromptDetailResponse response = blogSummarizationSystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
-    private String getActiveWritingAssessmentSystemPrompt() {
-        SystemPromptDetailResponse response = writingAssessmentSystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
-    private String getActiveSpeakingAssessmentSystemPrompt() {
-        SystemPromptDetailResponse response = speakingAssessmentSystemPromptService.getActiveSystemPrompt();
-        return response.getContent();
-    }
-
     @Override
     public Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest) {
         return Flux.defer(() -> {
@@ -825,6 +710,86 @@ public class ChatServiceImpl implements IChatService {
                 .entity(ChatbotAnalysisResponse.class);
     }
 
+    @Override
+    public Flux<ChatbotResponse> chat(ChatRequest chatRequest) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = chatClient.prompt()
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
+                .user(chatRequest.getMessage())
+                .system(getActiveChatbotSystemPrompt())
+                .stream()
+                .content();
+
+        return content.map(contentText -> chatbotMapper.toChatbotResponse(
+                contentText,
+                messageId,
+                chatRequest.getConversationId(),
+                MessageType.ASSISTANT.name()
+        ));
+    }
+
+    @Override
+    public Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = ChatClient.create(chatModel)
+                .prompt()
+                .system(getActiveChatbotSystemPrompt())
+                .user(user -> user
+                        .text(chatRequest.getMessage())
+                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
+                .stream()
+                .content();
+
+        // Collect the streaming content and save when complete
+        return getChatbotResponseFlux(chatRequest, messageId, content);
+    }
+
+    @Override
+    public Flux<ChatbotResponse> testChat(TestingSystemPromptChatbotRequest request) {
+        return Flux.defer(() -> {
+            if (request.getConversationId() == null || request.getConversationId().isEmpty()) {
+                request.setConversationId(UUID.randomUUID().toString());
+            }
+            String messageId = UUID.randomUUID().toString();
+            return chatClient.prompt()
+                    .advisors(advisorSpec -> {
+                        advisorSpec.param(ChatMemory.CONVERSATION_ID, request.getConversationId());
+                        advisorSpec.param("messageId", messageId);
+                    })
+                    .user(request.getMessage())
+                    .system(request.getSystemPromptContent())
+                    .stream()
+                    .content()
+                    .map(contentText -> chatbotMapper.toChatbotResponse(
+                            contentText,
+                            messageId,
+                            request.getConversationId(),
+                            MessageType.ASSISTANT.name()
+                    ));
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
     private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt) {
         // Ensure conversationId is set
         if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
@@ -945,6 +910,41 @@ public class ChatServiceImpl implements IChatService {
                         chatRequest.getConversationId(),
                         MessageType.ASSISTANT.name()
                 ));
+    }
+
+    private String getActiveChatbotSystemPrompt() {
+        SystemPromptDetailResponse response = chatbotSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveQAndASystemPrompt() {
+        SystemPromptDetailResponse response = qAndASystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveExplanationGenerationSystemPrompt() {
+        SystemPromptDetailResponse response = explanationGenerationSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveSentenceAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = sentenceAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveBlogSummarizationSystemPrompt() {
+        SystemPromptDetailResponse response = blogSummarizationSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveWritingAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = writingAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
+    }
+
+    private String getActiveSpeakingAssessmentSystemPrompt() {
+        SystemPromptDetailResponse response = speakingAssessmentSystemPromptService.getActiveSystemPrompt();
+        return response.getContent();
     }
 
     private record ChatAboutQuestionContext(String prompt, QuestionGroup questionGroup) {
