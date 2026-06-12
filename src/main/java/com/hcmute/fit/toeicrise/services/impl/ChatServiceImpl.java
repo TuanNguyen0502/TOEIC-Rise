@@ -100,33 +100,6 @@ public class ChatServiceImpl implements IChatService {
         ));
     }
 
-    private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt) {
-        // Ensure conversationId is set
-        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
-            chatRequest.setConversationId(UUID.randomUUID().toString());
-        }
-
-        // Generate a messageId before streaming starts
-        String messageId = UUID.randomUUID().toString();
-
-        Flux<String> content = chatClient.prompt()
-                .advisors(advisorSpec -> {
-                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
-                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
-                })
-                .user(chatRequest.getMessage())
-                .system(systemPrompt)
-                .stream()
-                .content();
-
-        return content.map(contentText -> chatbotMapper.toChatbotResponse(
-                contentText,
-                messageId,
-                chatRequest.getConversationId(),
-                MessageType.ASSISTANT.name()
-        ));
-    }
-
     @Override
     public Flux<ChatbotResponse> testChat(TestingSystemPromptChatbotRequest request) {
         return Flux.defer(() -> {
@@ -177,83 +150,6 @@ public class ChatServiceImpl implements IChatService {
 
         // Collect the streaming content and save when complete
         return getChatbotResponseFlux(chatRequest, messageId, content);
-    }
-
-    private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt, InputStream imageInputStream, String contentType) {
-        // Ensure conversationId is set
-        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
-            chatRequest.setConversationId(UUID.randomUUID().toString());
-        }
-
-        // Generate a messageId before streaming starts
-        String messageId = UUID.randomUUID().toString();
-
-        Flux<String> content = chatClient
-                .prompt()
-                .system(systemPrompt)
-                .user(user -> user
-                        .text(chatRequest.getMessage())
-                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
-                .advisors(advisorSpec -> {
-                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
-                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
-                })
-                .stream()
-                .content();
-
-        // Collect the streaming content and save when complete
-        return getChatbotResponseFlux(chatRequest, messageId, content);
-    }
-
-    @NonNull
-    private Flux<ChatbotResponse> getChatbotResponseFlux(ChatRequest chatRequest, String messageId, Flux<String> content) {
-        AtomicReference<String> fullResponse = new AtomicReference<>("");
-
-        return content
-                .doOnNext(chunk -> {
-                    // Accumulate the response
-                    fullResponse.updateAndGet(current -> current + chunk);
-                })
-                .doOnComplete(() -> {
-                    // Save the complete assistant message when streaming is done
-                    Message assistantMessage = new AssistantMessage(fullResponse.get());
-                    chatMemoryRepository.saveMessage(chatRequest.getConversationId(), assistantMessage);
-                })
-                .map(contentChunk -> chatbotMapper.toChatbotResponse(
-                        contentChunk,
-                        messageId,
-                        chatRequest.getConversationId(),
-                        MessageType.ASSISTANT.name()
-                ));
-    }
-
-    private Flux<ChatbotResponse> chatWithoutMemory(ChatRequest chatRequest, String systemPrompt, InputStream imageInputStream, String contentType) {
-        String messageId = UUID.randomUUID().toString();
-
-        ChatClient cleanClient = chatClientBuilder.build();
-        Flux<String> content = cleanClient
-                .prompt()
-                .system(systemPrompt)
-                .user(user -> user
-                        .text(chatRequest.getMessage())
-                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
-                .stream()
-                .content();
-
-        // Collect the streaming content and save when complete
-        AtomicReference<String> fullResponse = new AtomicReference<>("");
-
-        return content
-                .doOnNext(chunk -> {
-                    // Accumulate the response
-                    fullResponse.updateAndGet(current -> current + chunk);
-                })
-                .map(contentChunk -> chatbotMapper.toChatbotResponse(
-                        contentChunk,
-                        messageId,
-                        chatRequest.getConversationId(),
-                        MessageType.ASSISTANT.name()
-                ));
     }
 
     @Override
@@ -554,7 +450,7 @@ public class ChatServiceImpl implements IChatService {
                             throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch question image");
                         }
                     }
-                    return chat(ChatRequest.builder()
+                    return chatWithoutMemory(ChatRequest.builder()
                                     .conversationId(request.getConversationId())
                                     .message(prompt)
                                     .build(),
@@ -564,47 +460,77 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     public Flux<ChatbotResponse> testGenerateExplanation(TestingSystemPromptExplanationGenerationRequest request) {
-        return Flux.defer(() -> {
-            ChatClient cleanClient = chatClientBuilder.build();
-            String conversationId = UUID.randomUUID().toString();
-            String messageId = UUID.randomUUID().toString();
+        return Mono.fromCallable(() -> {
+                    Question question = questionRepository.findRandomQuestionByPartName(request.getPartName())
+                            .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST, "No question found for part: " + request.getPartName()));
+                    QuestionGroup questionGroup = question.getQuestionGroup();
 
-            return Mono.fromCallable(() -> {
-                        Question question = questionRepository.findRandomQuestionByPartName(request.getPartName())
-                                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST, "No question found for part: " + request.getPartName()));
-                        QuestionGroup questionGroup = question.getQuestionGroup();
-                        String options = String.join(", ", question.getOptions());
+                    String passage = (questionGroup.getPassage() != null && !questionGroup.getPassage().isBlank())
+                            ? questionGroup.getPassage()
+                            : "N/A";
+                    String transcript = (questionGroup.getTranscript() != null && !questionGroup.getTranscript().isBlank())
+                            ? questionGroup.getTranscript()
+                            : "N/A";
+                    String content = (question.getContent() != null && !question.getContent().isBlank())
+                            ? question.getContent()
+                            : "N/A";
+                    String options = (question.getOptions() != null && !question.getOptions().isEmpty())
+                            ? String.join(", ", question.getOptions())
+                            : "N/A";
+                    String correctOption = (question.getCorrectOption() != null && !question.getCorrectOption().isBlank())
+                            ? question.getCorrectOption()
+                            : "N/A";
+                    String tags = question.getTags().stream()
+                            .map(Tag::getName)
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse("N/A");
 
-                        return """
-                                ### DỮ LIỆU ĐẦU VÀO:\s
-                                1. Passage (Đoạn văn đọc hiểu): %s\s
-                                2. Transcript: %s\s
-                                3. Nội dung câu hỏi: %s\s
-                                4. Các lựa chọn: %s\s
-                                5. Đáp án đúng: %s\s
-                                """.formatted(
-                                questionGroup.getPassage(),
-                                questionGroup.getTranscript(),
-                                question.getContent(),
-                                options,
-                                question.getCorrectOption()
-                        );
-                    })
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .flatMapMany(userPrompt ->
-                            cleanClient.prompt()
-                                    .user(userPrompt)
-                                    .system(getActiveExplanationGenerationSystemPrompt())
-                                    .stream()
-                                    .content()
-                                    .map(contentText -> chatbotMapper.toChatbotResponse(
-                                            contentText,
-                                            messageId,
-                                            conversationId,
-                                            MessageType.ASSISTANT.name()
-                                    ))
+                    String prompt = """
+                            ### DỮ LIỆU ĐẦU VÀO:\s
+                            1. Passage (Đoạn văn đọc hiểu): %s\s
+                            2. Transcript: %s\s
+                            3. Nội dung câu hỏi: %s\s
+                            4. Các lựa chọn: %s\s
+                            5. Đáp án đúng: %s\s
+                            6. Tags / Chủ điểm kiến thức:  %s\s
+                            """.formatted(
+                            passage,
+                            transcript,
+                            content,
+                            options,
+                            correctOption,
+                            tags
                     );
-        });
+
+                    return new GenerateExplanationContext(prompt, questionGroup);
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(ctx -> {
+                    String prompt = ctx.prompt();
+                    QuestionGroup questionGroup = ctx.questionGroup();
+                    String conversationId = UUID.randomUUID().toString();
+                    if (questionGroup.getImageUrl() != null && !questionGroup.getImageUrl().isBlank()) {
+                        try {
+                            ImageResource resource = ImageUtils.fetchImage(questionGroup.getImageUrl());
+                            InputStream is = resource.inputStream(); // keep open during streaming
+
+                            return chatWithoutMemory(ChatRequest.builder()
+                                            .conversationId(conversationId)
+                                            .message(prompt)
+                                            .build(),
+                                    getActiveExplanationGenerationSystemPrompt(),
+                                    is,
+                                    resource.contentType());
+                        } catch (IOException e) {
+                            throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch question image");
+                        }
+                    }
+                    return chatWithoutMemory(ChatRequest.builder()
+                                    .conversationId(conversationId)
+                                    .message(prompt)
+                                    .build(),
+                            getActiveExplanationGenerationSystemPrompt());
+                });
     }
 
     @Override
@@ -897,6 +823,128 @@ public class ChatServiceImpl implements IChatService {
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, UUID.randomUUID().toString()))
                 .call()
                 .entity(ChatbotAnalysisResponse.class);
+    }
+
+    private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = chatClient.prompt()
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
+                .user(chatRequest.getMessage())
+                .system(systemPrompt)
+                .stream()
+                .content();
+
+        return content.map(contentText -> chatbotMapper.toChatbotResponse(
+                contentText,
+                messageId,
+                chatRequest.getConversationId(),
+                MessageType.ASSISTANT.name()
+        ));
+    }
+
+    private Flux<ChatbotResponse> chat(ChatRequest chatRequest, String systemPrompt, InputStream imageInputStream, String contentType) {
+        // Ensure conversationId is set
+        if (chatRequest.getConversationId() == null || chatRequest.getConversationId().isEmpty()) {
+            chatRequest.setConversationId(UUID.randomUUID().toString());
+        }
+
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = chatClient
+                .prompt()
+                .system(systemPrompt)
+                .user(user -> user
+                        .text(chatRequest.getMessage())
+                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
+                .advisors(advisorSpec -> {
+                    advisorSpec.param(ChatMemory.CONVERSATION_ID, chatRequest.getConversationId());
+                    advisorSpec.param("messageId", messageId); // Pass messageId to advisor
+                })
+                .stream()
+                .content();
+
+        // Collect the streaming content and save when complete
+        return getChatbotResponseFlux(chatRequest, messageId, content);
+    }
+
+    private Flux<ChatbotResponse> chatWithoutMemory(ChatRequest chatRequest, String systemPrompt) {
+        // Generate a messageId before streaming starts
+        String messageId = UUID.randomUUID().toString();
+
+        Flux<String> content = chatClient.prompt()
+                .user(chatRequest.getMessage())
+                .system(systemPrompt)
+                .stream()
+                .content();
+
+        return content.map(contentText -> chatbotMapper.toChatbotResponse(
+                contentText,
+                messageId,
+                chatRequest.getConversationId(),
+                MessageType.ASSISTANT.name()
+        ));
+    }
+
+    private Flux<ChatbotResponse> chatWithoutMemory(ChatRequest chatRequest, String systemPrompt, InputStream imageInputStream, String contentType) {
+        String messageId = UUID.randomUUID().toString();
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        Flux<String> content = cleanClient
+                .prompt()
+                .system(systemPrompt)
+                .user(user -> user
+                        .text(chatRequest.getMessage())
+                        .media(MimeTypeUtils.parseMimeType(contentType), new InputStreamResource(imageInputStream)))
+                .stream()
+                .content();
+
+        // Collect the streaming content and save when complete
+        AtomicReference<String> fullResponse = new AtomicReference<>("");
+
+        return content
+                .doOnNext(chunk -> {
+                    // Accumulate the response
+                    fullResponse.updateAndGet(current -> current + chunk);
+                })
+                .map(contentChunk -> chatbotMapper.toChatbotResponse(
+                        contentChunk,
+                        messageId,
+                        chatRequest.getConversationId(),
+                        MessageType.ASSISTANT.name()
+                ));
+    }
+
+    @NonNull
+    private Flux<ChatbotResponse> getChatbotResponseFlux(ChatRequest chatRequest, String messageId, Flux<String> content) {
+        AtomicReference<String> fullResponse = new AtomicReference<>("");
+
+        return content
+                .doOnNext(chunk -> {
+                    // Accumulate the response
+                    fullResponse.updateAndGet(current -> current + chunk);
+                })
+                .doOnComplete(() -> {
+                    // Save the complete assistant message when streaming is done
+                    Message assistantMessage = new AssistantMessage(fullResponse.get());
+                    chatMemoryRepository.saveMessage(chatRequest.getConversationId(), assistantMessage);
+                })
+                .map(contentChunk -> chatbotMapper.toChatbotResponse(
+                        contentChunk,
+                        messageId,
+                        chatRequest.getConversationId(),
+                        MessageType.ASSISTANT.name()
+                ));
     }
 
     private record ChatAboutQuestionContext(String prompt, QuestionGroup questionGroup) {
