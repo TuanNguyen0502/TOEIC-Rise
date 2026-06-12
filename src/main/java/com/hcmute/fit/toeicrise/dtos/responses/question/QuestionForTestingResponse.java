@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 public class QuestionForTestingResponse {
     private Long id;
+    private Integer position;
     private String content;
     private List<String> options;
     private String correctOption;

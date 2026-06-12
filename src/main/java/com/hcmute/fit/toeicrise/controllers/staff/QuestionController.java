@@ -26,8 +26,8 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.getQuestionResponseById(id));
     }
 
-    @GetMapping("/{partName}")
-    public ResponseEntity<QuestionForTestingResponse> getRandomQuestionForTesting(@PathVariable String partName) {
+    @GetMapping("/random")
+    public ResponseEntity<QuestionForTestingResponse> getRandomQuestionForTesting(@RequestParam String partName) {
         return ResponseEntity.ok(questionService.getRandomQuestionForTestingByPartName(partName));
     }
 }

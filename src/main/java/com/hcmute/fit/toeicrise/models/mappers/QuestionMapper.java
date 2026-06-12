@@ -127,6 +127,7 @@ public interface QuestionMapper {
         QuestionGroup questionGroup = question.getQuestionGroup();
         return QuestionForTestingResponse.builder()
                 .id(question.getId())
+                .position(question.getPosition())
                 .content(question.getContent())
                 .options(question.getOptions())
                 .correctOption(question.getCorrectOption())
