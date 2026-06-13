@@ -87,4 +87,9 @@ public class ChatbotController {
     public Flux<ChatbotResponse> testingBlogSummarizationSystemPrompt(@Valid @ModelAttribute BlogPostSummaryRequest request) {
         return chatService.generateBlogPostSummary(request).delayElements(Duration.ofMillis(50));
     }
+
+    @PostMapping(path = "/testing-system-prompt-writing-assessment")
+    public ResponseEntity<String> chatAboutQuestion(@Valid @RequestBody TestingSystemPromptWritingAssessmentRequest request) {
+        return ResponseEntity.ok(chatService.testGenerateFeedbackForWritingTestAnswer(request));
+    }
 }

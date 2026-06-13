@@ -531,6 +531,51 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
+    public String testGenerateFeedbackForWritingTestAnswer(TestingSystemPromptWritingAssessmentRequest request) {
+        Question question = questionRepository.findById(request.getQuestionId())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question not found for id: " + request.getQuestionId()));
+        QuestionGroup questionGroup = question.getQuestionGroup();
+        Part part = questionGroup.getPart();
+
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Text: %s\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                """.formatted(
+                request.getAnswerText(),
+                part.getName(),
+                questionGroup.getPassage()
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        if (questionGroup.getImageUrl() != null && !questionGroup.getImageUrl().isBlank()) {
+            try {
+                ImageResource resource = ImageUtils.fetchImage(questionGroup.getImageUrl());
+                try (InputStream is = resource.inputStream()) {
+                    return cleanClient
+                            .prompt()
+                            .system(getActiveWritingAssessmentSystemPrompt())
+                            .user(user -> user
+                                    .text(userPrompt)
+                                    .media(MimeTypeUtils.parseMimeType(resource.contentType()), new InputStreamResource(is)))
+                            .call()
+                            .content();
+                }
+            } catch (IOException e) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch question image");
+            }
+        } else {
+            return cleanClient
+                    .prompt()
+                    .system(request.getSystemPromptContent())
+                    .user(userPrompt)
+                    .call()
+                    .content();
+        }
+    }
+
+    @Override
     public String generateFeedbackForSpeakingTestAnswerWithImage(String partName, String passage, String questionContent, InputStream imageInputStream, String imageContentType, InputStream audioInputStream, String audioContentType) {
         String userPrompt = """
                 ### DỮ LIỆU ĐẦU VÀO:\s
