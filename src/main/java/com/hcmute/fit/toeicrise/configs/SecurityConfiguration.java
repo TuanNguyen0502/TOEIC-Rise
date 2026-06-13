@@ -49,9 +49,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/staff/test-sets/**", "/staff/tests/**", "/staff/speaking-tests/**",
                                 "/staff/writing-tests/**", "/staff/question-groups/**", "/staff/speaking-question-groups/**",
                                 "/staff/writing-question-groups/**", "/staff/questions/**", "/staff/speaking-questions/**",
-                                "/staff/tags/**", "/staff/question-reports/**",
+                                "/staff/tags/**", "/staff/parts/**", "/staff/question-reports/**",
                                 "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
-                                "/staff/blog-categories/**", "/staff/blog-posts/**",  "/admin/learning-paths/**",
+                                "/staff/blog-categories/**", "/staff/blog-posts/**", "/admin/learning-paths/**",
                                 "staff/dictation/**", "/admin/lessons/**", "/staff/cloudinary/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",

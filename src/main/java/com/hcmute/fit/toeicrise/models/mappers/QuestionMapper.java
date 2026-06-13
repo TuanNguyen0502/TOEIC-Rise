@@ -11,6 +11,7 @@ import com.hcmute.fit.toeicrise.dtos.responses.learner.speaking.LearnerSpeakingQ
 import com.hcmute.fit.toeicrise.dtos.responses.learner.writing.LearnerWritingQuestionDetailResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.minitest.MiniTestAnswerQuestionResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionForTestingResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
 import com.hcmute.fit.toeicrise.models.entities.Question;
@@ -119,6 +120,21 @@ public interface QuestionMapper {
         return LearnerWritingQuestionDetailResponse.builder()
                 .id(question.getId())
                 .position(question.getPosition())
+                .build();
+    }
+
+    default QuestionForTestingResponse toQuestionForTestingResponse(Question question) {
+        QuestionGroup questionGroup = question.getQuestionGroup();
+        return QuestionForTestingResponse.builder()
+                .id(question.getId())
+                .position(question.getPosition())
+                .content(question.getContent())
+                .options(question.getOptions())
+                .correctOption(question.getCorrectOption())
+                .imageUrl(questionGroup.getImageUrl())
+                .passage(questionGroup.getPassage())
+                .transcript(questionGroup.getTranscript())
+                .partName(questionGroup.getPart().getName())
                 .build();
     }
 }

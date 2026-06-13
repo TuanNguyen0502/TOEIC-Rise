@@ -3,6 +3,7 @@ package com.hcmute.fit.toeicrise.services.impl;
 import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.QuestionGroupSupportResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.TaggedQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionForTestingResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.tag.TagResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
@@ -273,5 +274,12 @@ public class QuestionServiceImpl implements IQuestionService {
                 tagResponses,
                 groupDTO
         );
+    }
+
+    @Override
+    public QuestionForTestingResponse getRandomQuestionForTestingByPartName(String partName) {
+        Question question = questionRepository.findRandomQuestionByPartName(partName)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question for part: " + partName));
+        return questionMapper.toQuestionForTestingResponse(question);
     }
 }

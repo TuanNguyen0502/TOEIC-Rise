@@ -60,7 +60,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
                 SELECT q.* FROM questions q
                 JOIN question_groups qg ON q.question_group_id = qg.id
                 JOIN parts p ON qg.part_id = p.id
-                WHERE p.name LIKE CONCAT('%', :partName, '%')
+                WHERE p.name = :partName
                 ORDER BY RAND()
                 LIMIT 1
             """, nativeQuery = true)
