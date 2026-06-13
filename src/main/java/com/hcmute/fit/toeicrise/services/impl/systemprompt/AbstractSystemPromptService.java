@@ -86,12 +86,12 @@ public abstract class AbstractSystemPromptService {
         // Deactivate the current active prompt
         deactivateCurrentSystemPrompt();
         // Fetch the latest version to determine the new version number
-        SystemPrompt latestVersion = systemPromptRepository.findLatestVersionByFeatureType(getFeatureType()).orElse(null);
+        int latestVersion = systemPromptRepository.getLatestVersionByFeatureType(getFeatureType());
 
         // Create and save the new system prompt as active
         SystemPrompt newPrompt = SystemPrompt.builder()
                 .featureType(getFeatureType())
-                .version(latestVersion == null ? 1 : latestVersion.getVersion() + 1)
+                .version(latestVersion + 1)
                 .content(request.getContent())
                 .isActive(true)
                 .build();
@@ -117,16 +117,13 @@ public abstract class AbstractSystemPromptService {
         }
 
         // Fetch the latest version to determine the new version number
-        SystemPrompt latestVersion = systemPromptRepository.findLatestVersionByFeatureType(getFeatureType()).orElse(null);
-        if (latestVersion == null) {
-            latestVersion = existingPrompt; // If no other versions exist, keep the current one
-        }
+        int latestVersion = systemPromptRepository.getLatestVersionByFeatureType(getFeatureType());
 
         // Create a new SystemPrompt entity with updated details and incremented version
         SystemPrompt systemPrompt = new SystemPrompt();
         systemPrompt.setFeatureType(getFeatureType());
         systemPrompt.setContent(request.getContent());
-        systemPrompt.setVersion(latestVersion.getVersion() + 1);
+        systemPrompt.setVersion(latestVersion + 1);
         systemPrompt.setIsActive(request.getIsActive());
         systemPromptRepository.save(systemPrompt);
 
