@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
-import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.commons.utils.HelperUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.useranswer.UserAnswerRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.usertest.PartStats;
@@ -74,7 +73,6 @@ public class UserTestServiceImpl implements IUserTestService {
     private final QuestionMapper questionMapper;
     private final Map<Integer, Integer> estimatedReadingScoreMap = Constant.estimatedReadingScoreMap;
     private final Map<Integer, Integer> estimatedListeningScoreMap = Constant.estimatedListeningScoreMap;
-    private final CloudinaryUtil cloudinaryUtil;
 
     @Override
     public TestResultResponse getUserTestResultById(String email, Long userTestId) {
@@ -209,15 +207,13 @@ public class UserTestServiceImpl implements IUserTestService {
                     .userTest(userTest)
                     .question(question)
                     .questionGroupId(questionGroup.getId())
-                    .isCorrect(answerRequest.getAnswerAudio() != null)
+                    .isCorrect(answerRequest.getAudioUrl() != null)
                     .build();
-            if (answerRequest.getAnswerAudio() != null) {
-                cloudinaryUtil.validateAudioFile(answerRequest.getAnswerAudio());
-                String audioUrl = cloudinaryUtil.uploadFile(answerRequest.getAnswerAudio());
-                userAnswer.setAnswerAudioUrl(audioUrl);
+            if (answerRequest.getAudioUrl() != null) {
+                userAnswer.setAnswerAudioUrl(answerRequest.getAudioUrl());
             }
             userAnswers.add(userAnswer);
-            if (answerRequest.getAnswerAudio() != null)
+            if (answerRequest.getAudioUrl() != null)
                 correctAnswers++;
         }
         userTest.setCorrectAnswers(correctAnswers);
@@ -315,7 +311,7 @@ public class UserTestServiceImpl implements IUserTestService {
             for (Object[] row : questionTagsRaw) {
                 Long qId = (Long) row[0];
                 String tagName = (String) row[1];
-                tagsMap.computeIfAbsent(qId, k -> new ArrayList<>()).add(tagName);
+                tagsMap.computeIfAbsent(qId, _ -> new ArrayList<>()).add(tagName);
             }
         }
 
