@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface SystemPromptRepository extends JpaRepository<SystemPrompt, Long>, JpaSpecificationExecutor<SystemPrompt> {
-    @Query("SELECT sp FROM SystemPrompt sp WHERE sp.featureType=:featureType AND sp.version = (SELECT MAX(s.version) FROM SystemPrompt s)")
-    Optional<SystemPrompt> findLatestVersionByFeatureType(@Param("featureType") ESystemPromptFeatureType featureType);
+    @Query("SELECT MAX(sp.version) FROM SystemPrompt sp WHERE sp.featureType=:featureType")
+    Integer getLatestVersionByFeatureType(@Param("featureType") ESystemPromptFeatureType featureType);
 
     Optional<SystemPrompt> findFirstByIsActiveAndFeatureType(Boolean isActive, ESystemPromptFeatureType featureType);
 }
