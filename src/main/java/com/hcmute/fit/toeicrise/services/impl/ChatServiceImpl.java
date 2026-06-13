@@ -555,7 +555,7 @@ public class ChatServiceImpl implements IChatService {
                 try (InputStream is = resource.inputStream()) {
                     return cleanClient
                             .prompt()
-                            .system(getActiveWritingAssessmentSystemPrompt())
+                            .system(request.getSystemPromptContent())
                             .user(user -> user
                                     .text(userPrompt)
                                     .media(MimeTypeUtils.parseMimeType(resource.contentType()), new InputStreamResource(is)))
@@ -626,6 +626,55 @@ public class ChatServiceImpl implements IChatService {
                 )
                 .call()
                 .content();
+    }
+
+    @Override
+    public String testGenerateFeedbackForSpeakingTestAnswer(TestingSystemPromptSpeakingAssessmentRequest request, InputStream audioInputStream, String audioContentType) {
+        Question question = questionRepository.findById(request.getQuestionId())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Question not found for id: " + request.getQuestionId()));
+        QuestionGroup questionGroup = question.getQuestionGroup();
+        Part part = questionGroup.getPart();
+
+        String userPrompt = """
+                ### DỮ LIỆU ĐẦU VÀO:\s
+                1. Answer Audio: (được gửi dưới dạng media)\s
+                2. Part: %s\s
+                3. Passage: %s\s
+                4. Question: %s\s
+                """.formatted(
+                part.getName(),
+                questionGroup.getPassage(),
+                question.getContent()
+        );
+
+        ChatClient cleanClient = chatClientBuilder.build();
+        if (questionGroup.getImageUrl() != null && !questionGroup.getImageUrl().isBlank()) {
+            try {
+                ImageResource resource = ImageUtils.fetchImage(questionGroup.getImageUrl());
+                try (InputStream is = resource.inputStream()) {
+                    return cleanClient
+                            .prompt()
+                            .system(request.getSystemPromptContent())
+                            .user(user -> user
+                                    .text(userPrompt)
+                                    .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream))
+                                    .media(MimeTypeUtils.parseMimeType(resource.contentType()), new InputStreamResource(is)))
+                            .call()
+                            .content();
+                }
+            } catch (IOException e) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to fetch question image");
+            }
+        } else {
+            return cleanClient
+                    .prompt()
+                    .system(request.getSystemPromptContent())
+                    .user(user -> user
+                            .text(userPrompt)
+                            .media(MimeTypeUtils.parseMimeType(audioContentType), new InputStreamResource(audioInputStream)))
+                    .call()
+                    .content();
+        }
     }
 
     @Override

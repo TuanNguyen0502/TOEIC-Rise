@@ -43,6 +43,8 @@ public interface IChatService {
 
     String generateFeedbackForSpeakingTestAnswerWithoutImage(String partName, String passage, String questionContent, InputStream audioInputStream, String audioContentType);
 
+    String testGenerateFeedbackForSpeakingTestAnswer(TestingSystemPromptSpeakingAssessmentRequest request, InputStream audioInputStream, String audioContentType);
+
     Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
 
     List<DictationGenerationResponse> generateDictation(Long testId, Long partId);

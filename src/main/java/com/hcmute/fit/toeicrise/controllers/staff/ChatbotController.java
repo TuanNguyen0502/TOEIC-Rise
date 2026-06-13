@@ -3,6 +3,8 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 import com.hcmute.fit.toeicrise.dtos.requests.chatbot.*;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
+import com.hcmute.fit.toeicrise.exceptions.AppException;
+import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.services.interfaces.IChatService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.List;
 
@@ -89,7 +92,16 @@ public class ChatbotController {
     }
 
     @PostMapping(path = "/testing-system-prompt-writing-assessment")
-    public ResponseEntity<String> chatAboutQuestion(@Valid @RequestBody TestingSystemPromptWritingAssessmentRequest request) {
+    public ResponseEntity<String> testGenerateFeedbackForWritingTestAnswer(@Valid @RequestBody TestingSystemPromptWritingAssessmentRequest request) {
         return ResponseEntity.ok(chatService.testGenerateFeedbackForWritingTestAnswer(request));
+    }
+
+    @PostMapping(path = "/testing-system-prompt-speaking-assessment")
+    public ResponseEntity<String> testGenerateFeedbackForSpeakingTestAnswer(@Valid @ModelAttribute TestingSystemPromptSpeakingAssessmentRequest request) {
+        try (InputStream inputStream = request.getAudio().getInputStream()) {
+            return ResponseEntity.ok(chatService.testGenerateFeedbackForSpeakingTestAnswer(request, inputStream, request.getAudio().getContentType()));
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Failed to process audio input");
+        }
     }
 }
