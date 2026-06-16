@@ -29,18 +29,17 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long>, JpaSp
     Page<BlogPost> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query(value =
-            "( " +
-                    "  SELECT *, MATCH(title, summary) AGAINST(:currentTitle IN NATURAL LANGUAGE MODE) AS score " +
-                    "  FROM blog_posts " +
-                    "  WHERE status = 'PUBLISHED' AND id != :currentPostId " +
-                    "  AND MATCH(title, summary) AGAINST(:currentTitle IN NATURAL LANGUAGE MODE) " +
-                    ") " +
-                    "UNION " +
-                    "( " +
-                    "  SELECT *, 0.1 AS score " +
-                    "  FROM blog_posts " +
-                    "  WHERE status = 'PUBLISHED' AND id != :currentPostId " +
-                    "  AND category_id = :categoryId " +
+            "SELECT *, " +
+                    "  CASE " +
+                    "    WHEN MATCH(title, summary) AGAINST(:currentTitle IN NATURAL LANGUAGE MODE) THEN MATCH(title, summary) AGAINST(:currentTitle IN NATURAL LANGUAGE MODE) " +
+                    "    WHEN category_id = :categoryId THEN 0.1 " +
+                    "    ELSE 0 " +
+                    "  END AS score " +
+                    "FROM blog_posts " +
+                    "WHERE status = 'PUBLISHED' AND id != :currentPostId " +
+                    "AND ( " +
+                    "  MATCH(title, summary) AGAINST(:currentTitle IN NATURAL LANGUAGE MODE) " +
+                    "  OR category_id = :categoryId " +
                     ") " +
                     "ORDER BY score DESC",
             nativeQuery = true)
