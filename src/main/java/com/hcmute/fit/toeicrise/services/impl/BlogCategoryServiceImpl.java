@@ -15,6 +15,8 @@ import com.hcmute.fit.toeicrise.repositories.specifications.BlogCategorySpecific
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogCategoryService;
 import com.hcmute.fit.toeicrise.services.interfaces.IBlogPostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +25,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -56,14 +57,12 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
     }
 
     @Override
+    @Cacheable(value = "blogCategories", key = "'allActive'")
     public List<BlogCategoryResponse> getAllBlogCategoriesForLearner() {
-        List<BlogCategoryResponse> blogCategoryResponseList = new ArrayList<>();
-        for (BlogCategory blogCategory : blogCategoryRepository.findAll()) {
-            if (blogCategory.getIsActive() == true) {
-                blogCategoryResponseList.add(blogCategoryMapper.toBlogCategoryResponseForLearner(blogCategory));
-            }
-        }
-        return blogCategoryResponseList;
+        return blogCategoryRepository.findAllByIsActive(true)
+                .stream()
+                .map(blogCategoryMapper::toBlogCategoryResponseForLearner)
+                .toList();
     }
 
     @Override
@@ -75,10 +74,15 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "blogCategories", allEntries = true)
     public void createBlogCategory(BlogCategoryCreateRequest request) {
-        BlogCategory blogCategory = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
-        if (blogCategory != null) {
+        BlogCategory blogCategoryBySlug = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
+        if (blogCategoryBySlug != null) {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + request.getSlug() + "'");
+        }
+        BlogCategory blogCategoryByName = blogCategoryRepository.findByName(request.getName()).orElse(null);
+        if (blogCategoryByName != null) {
+            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with name '" + request.getName() + "'");
         }
 
         BlogCategory newBlogCategory = new BlogCategory();
@@ -90,15 +94,23 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "blogCategories", allEntries = true)
     public void updateBlogCategory(Long id, BlogCategoryUpdateRequest request) {
         BlogCategory blogCategory = blogCategoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));
 
         // Check if the slug is being updated and if the new slug already exists
         if (!blogCategory.getSlug().equals(request.getSlug())) {
-            BlogCategory bc = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
-            if (bc != null) {
+            BlogCategory blogCategoryBySlug = blogCategoryRepository.findBySlug(request.getSlug()).orElse(null);
+            if (blogCategoryBySlug != null) {
                 throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with slug '" + request.getSlug() + "'");
+            }
+        }
+        // Check if the name is being updated and if the new name already exists
+        if (!blogCategory.getName().equals(request.getName())) {
+            BlogCategory blogCategoryByName = blogCategoryRepository.findByName(request.getName()).orElse(null);
+            if (blogCategoryByName != null) {
+                throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Blog category with name '" + request.getName() + "'");
             }
         }
 
@@ -113,6 +125,7 @@ public class BlogCategoryServiceImpl implements IBlogCategoryService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "blogCategories", allEntries = true)
     public void changeBlogCategoryStatus(Long id) {
         BlogCategory blogCategory = blogCategoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Blog category with id '" + id + "'"));

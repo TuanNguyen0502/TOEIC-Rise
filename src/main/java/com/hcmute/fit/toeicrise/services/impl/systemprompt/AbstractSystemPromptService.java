@@ -93,7 +93,7 @@ public abstract class AbstractSystemPromptService {
                 .featureType(getFeatureType())
                 .version(latestVersion + 1)
                 .content(request.getContent())
-                .isActive(true)
+                .isActive(false)
                 .build();
         systemPromptRepository.save(newPrompt);
 
@@ -108,14 +108,6 @@ public abstract class AbstractSystemPromptService {
         // Ensure the existing prompt belongs to the correct feature type
         checkFeatureType(existingPrompt);
 
-        // If the updated prompt is set to active, deactivate the current active prompt
-        if (request.getIsActive()) {
-            deactivateCurrentSystemPrompt();
-        } else if (existingPrompt.getIsActive()) {
-            // Prevent deactivating the only active prompt
-            throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
-        }
-
         // Fetch the latest version to determine the new version number
         int latestVersion = systemPromptRepository.getLatestVersionByFeatureType(getFeatureType());
 
@@ -124,13 +116,7 @@ public abstract class AbstractSystemPromptService {
         systemPrompt.setFeatureType(getFeatureType());
         systemPrompt.setContent(request.getContent());
         systemPrompt.setVersion(latestVersion + 1);
-        systemPrompt.setIsActive(request.getIsActive());
         systemPromptRepository.save(systemPrompt);
-
-        // If the new system prompt is active, update cache
-        if (request.getIsActive()) {
-            updateActivePromptCache(systemPrompt);
-        }
     }
 
     public final void changeActive(Long id) {
