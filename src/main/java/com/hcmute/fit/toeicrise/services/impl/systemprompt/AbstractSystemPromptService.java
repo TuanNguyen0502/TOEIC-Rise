@@ -116,6 +116,7 @@ public abstract class AbstractSystemPromptService {
         systemPrompt.setFeatureType(getFeatureType());
         systemPrompt.setContent(request.getContent());
         systemPrompt.setVersion(latestVersion + 1);
+        systemPrompt.setIsActive(false);
         systemPromptRepository.save(systemPrompt);
     }
 
