@@ -184,6 +184,10 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
         Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test"));
 
+        if(!test.getStatus().equals(ETestStatus.APPROVED)){
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Test");
+        }
+
         EPart requestedPart = EPart.getEPartByPosition(partId.intValue());
         if (test.getDictationStatus() == null || !test.getDictationStatus().contains(requestedPart)) {
             throw new AppException(ErrorCode.INVALID_DATA, "Dictation is currently unavailable for this part.");
