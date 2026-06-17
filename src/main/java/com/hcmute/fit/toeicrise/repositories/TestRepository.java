@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.repositories;
 
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,6 @@ public interface TestRepository extends JpaRepository<Test, Long>, JpaSpecificat
     @EntityGraph(attributePaths = {"testSet"})
     Page<Test> findAll(Specification<Test> specification, @NotNull Pageable pageable);
 
-    @Query("SELECT t FROM Test t JOIN FETCH t.testSet")
-    List<Test> findAllActiveWithTestSet();
+    @Query("SELECT t FROM Test t JOIN FETCH t.testSet WHERE t.type = :testType AND t.status = :status")
+    List<Test> findAllActiveWithTestSet(ETestType testType, ETestStatus status);
 }

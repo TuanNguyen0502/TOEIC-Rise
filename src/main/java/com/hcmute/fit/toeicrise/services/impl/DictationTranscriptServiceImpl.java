@@ -11,6 +11,8 @@ import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Test;
 import com.hcmute.fit.toeicrise.models.entities.TestSet;
 import com.hcmute.fit.toeicrise.models.enums.EPart;
+import com.hcmute.fit.toeicrise.models.enums.ETestStatus;
+import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
 import com.hcmute.fit.toeicrise.models.mappers.DictationTranscriptMapper;
 import com.hcmute.fit.toeicrise.models.mappers.QuestionMapper;
@@ -150,7 +152,7 @@ public class DictationTranscriptServiceImpl implements IDictationTranscriptServi
     @Override
     public List<TestSetDictationAvailableResponse> getDictationLibrary() {
 
-        List<Test> readyTests = testRepository.findAllActiveWithTestSet();
+        List<Test> readyTests = testRepository.findAllActiveWithTestSet(ETestType.LISTENING_AND_READING,ETestStatus.APPROVED);
 
         return readyTests.stream()
                 .filter(t -> t.getDictationStatus() != null && !t.getDictationStatus().isEmpty())
