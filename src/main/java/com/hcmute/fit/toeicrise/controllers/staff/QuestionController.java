@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.controllers.staff;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionForTestingResponse;
 import com.hcmute.fit.toeicrise.services.interfaces.IQuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,10 @@ public class QuestionController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestionById(@PathVariable Long id) {
         return ResponseEntity.ok(questionService.getQuestionResponseById(id));
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<QuestionForTestingResponse> getRandomQuestionForTesting(@RequestParam String partName) {
+        return ResponseEntity.ok(questionService.getRandomQuestionForTestingByPartName(partName));
     }
 }

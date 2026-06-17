@@ -2,6 +2,7 @@ package com.hcmute.fit.toeicrise.services.interfaces;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.*;
 import com.hcmute.fit.toeicrise.dtos.responses.comment.TaggedQuestionDetailResponse;
+import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionForTestingResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.question.QuestionMapResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.speaking.SpeakingQuestionResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.test.writing.WritingQuestionResponse;
@@ -57,4 +58,6 @@ public interface IQuestionService {
     List<QuestionMapResponse> getQuestionByTestId(Long testId);
 
     TaggedQuestionDetailResponse getTaggedQuestionDetail(Long questionId);
+
+    QuestionForTestingResponse getRandomQuestionForTestingByPartName(String partName);
 }

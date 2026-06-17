@@ -86,14 +86,14 @@ public abstract class AbstractSystemPromptService {
         // Deactivate the current active prompt
         deactivateCurrentSystemPrompt();
         // Fetch the latest version to determine the new version number
-        SystemPrompt latestVersion = systemPromptRepository.findLatestVersionByFeatureType(getFeatureType()).orElse(null);
+        int latestVersion = systemPromptRepository.getLatestVersionByFeatureType(getFeatureType());
 
         // Create and save the new system prompt as active
         SystemPrompt newPrompt = SystemPrompt.builder()
                 .featureType(getFeatureType())
-                .version(latestVersion == null ? 1 : latestVersion.getVersion() + 1)
+                .version(latestVersion + 1)
                 .content(request.getContent())
-                .isActive(true)
+                .isActive(false)
                 .build();
         systemPromptRepository.save(newPrompt);
 
@@ -108,32 +108,16 @@ public abstract class AbstractSystemPromptService {
         // Ensure the existing prompt belongs to the correct feature type
         checkFeatureType(existingPrompt);
 
-        // If the updated prompt is set to active, deactivate the current active prompt
-        if (request.getIsActive()) {
-            deactivateCurrentSystemPrompt();
-        } else if (existingPrompt.getIsActive()) {
-            // Prevent deactivating the only active prompt
-            throw new AppException(ErrorCode.SYSTEM_PROMPT_CANNOT_DEACTIVATE);
-        }
-
         // Fetch the latest version to determine the new version number
-        SystemPrompt latestVersion = systemPromptRepository.findLatestVersionByFeatureType(getFeatureType()).orElse(null);
-        if (latestVersion == null) {
-            latestVersion = existingPrompt; // If no other versions exist, keep the current one
-        }
+        int latestVersion = systemPromptRepository.getLatestVersionByFeatureType(getFeatureType());
 
         // Create a new SystemPrompt entity with updated details and incremented version
         SystemPrompt systemPrompt = new SystemPrompt();
         systemPrompt.setFeatureType(getFeatureType());
         systemPrompt.setContent(request.getContent());
-        systemPrompt.setVersion(latestVersion.getVersion() + 1);
-        systemPrompt.setIsActive(request.getIsActive());
+        systemPrompt.setVersion(latestVersion + 1);
+        systemPrompt.setIsActive(false);
         systemPromptRepository.save(systemPrompt);
-
-        // If the new system prompt is active, update cache
-        if (request.getIsActive()) {
-            updateActivePromptCache(systemPrompt);
-        }
     }
 
     public final void changeActive(Long id) {

@@ -1,4 +1,4 @@
-package com.hcmute.fit.toeicrise.dtos.requests.systemprompt;
+package com.hcmute.fit.toeicrise.dtos.requests.cloudinary;
 
 import com.hcmute.fit.toeicrise.commons.constants.Constant;
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SystemPromptUpdateRequest {
-    @NotBlank(message = MessageConstant.SYSTEM_PROMPT_CONTENT_NOT_BLANK)
-    @Pattern(regexp = Constant.SYSTEM_PROMPT_CONTENT_PATTERN, message = MessageConstant.SYSTEM_PROMPT_CONTENT_INVALID)
-    private String content;
+public class AudioDeleteRequest {
+    @NotBlank(message = MessageConstant.QUESTION_GROUP_AUDIO_URL_INVALID)
+    @Pattern(regexp = Constant.QUESTION_GROUP_AUDIO_URL_FORMAT, message = MessageConstant.QUESTION_GROUP_AUDIO_URL_INVALID)
+    private String audioUrl;
 }

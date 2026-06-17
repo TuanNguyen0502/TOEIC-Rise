@@ -18,11 +18,17 @@ import java.util.Set;
 public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSpecificationExecutor<Question> {
     List<Question> findAllByQuestionGroup_Id(Long questionGroupId);
 
-    @Query("SELECT q FROM Question q " +
+    @Query("SELECT DISTINCT q FROM Question q " +
             "LEFT JOIN FETCH q.tags t " +
-            "WHERE q.questionGroup.id IN :ids " +
-            "ORDER BY q.questionGroup.position, q.position")
+            "JOIN FETCH q.questionGroup qg " +
+            "JOIN FETCH qg.part p " +
+            "JOIN FETCH qg.test test " +
+            "LEFT JOIN FETCH test.testSet ts " +
+            "WHERE q.questionGroup.id IN :ids")
     List<Question> findAllByIdWithTags(@Param("ids") Set<Long> ids);
+
+    @Query("SELECT q.id, t.name FROM Question q JOIN q.tags t WHERE q.id IN :ids")
+    List<Object[]> findTagsOnlyByQuestionIds(@Param("ids") Set<Long> ids);
 
     @Query("SELECT DISTINCT q FROM Question q " +
             "LEFT JOIN FETCH q.questionGroup qg " +
@@ -54,7 +60,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
                 SELECT q.* FROM questions q
                 JOIN question_groups qg ON q.question_group_id = qg.id
                 JOIN parts p ON qg.part_id = p.id
-                WHERE p.name LIKE CONCAT('%', :partName, '%')
+                WHERE p.name = :partName
                 ORDER BY RAND()
                 LIMIT 1
             """, nativeQuery = true)

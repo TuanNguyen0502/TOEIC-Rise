@@ -1,6 +1,8 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
 import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
+import com.hcmute.fit.toeicrise.dtos.requests.cloudinary.AudioDeleteRequest;
+import com.hcmute.fit.toeicrise.dtos.requests.cloudinary.AudioSavingRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.cloudinary.CloudinaryImageDeleteRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.cloudinary.CloudinaryImageRequest;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
@@ -47,5 +49,20 @@ public class CloudinaryServiceImpl implements ICloudinaryService {
         }
         cloudinaryUtil.validateImageURL(request.getImageUrl());
         cloudinaryUtil.deleteFile(request.getImageUrl());
+    }
+
+    @Override
+    public String uploadAudio(AudioSavingRequest request) {
+        cloudinaryUtil.validateAudioFile(request.getAudio());
+        return cloudinaryUtil.uploadFile(request.getAudio());
+    }
+
+    @Override
+    public void deleteAudio(AudioDeleteRequest request) {
+        if (!cloudinaryUtil.isCloudinaryUrl(request.getAudioUrl())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid audio URL");
+        }
+        cloudinaryUtil.validateAudioURL(request.getAudioUrl());
+        cloudinaryUtil.deleteFile(request.getAudioUrl());
     }
 }

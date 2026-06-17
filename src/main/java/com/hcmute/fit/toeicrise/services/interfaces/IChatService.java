@@ -5,7 +5,6 @@ import com.hcmute.fit.toeicrise.dtos.requests.flashcard.SentenceCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotAnalysisResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.chatbot.ChatbotResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationGenerationResponse;
-import com.hcmute.fit.toeicrise.dtos.responses.dictation.DictationResponse;
 import reactor.core.publisher.Flux;
 
 import java.io.InputStream;
@@ -16,7 +15,7 @@ public interface IChatService {
 
     Flux<ChatbotResponse> chat(ChatRequest chatRequest);
 
-    Flux<ChatbotResponse> chat(TestingSystemPromptChatbotRequest request);
+    Flux<ChatbotResponse> testChat(TestingSystemPromptChatbotRequest request);
 
     Flux<ChatbotResponse> chat(ChatRequest chatRequest, InputStream imageInputStream, String contentType);
 
@@ -24,13 +23,13 @@ public interface IChatService {
 
     Flux<ChatbotResponse> chatAboutQuestion(ChatAboutQuestionRequest chatAboutQuestionRequest);
 
-    Flux<ChatbotResponse> chatAboutQuestion(TestingSystemPromptQAndAnswerRequest request);
+    Flux<ChatbotResponse> testChatAboutQuestion(TestingSystemPromptQAndAnswerRequest request);
 
     ChatbotAnalysisResponse chatAnalysisData(ChatAnalysisRequest chatRequest);
 
     Flux<ChatbotResponse> generateExplanation(GenerateExplanationRequest request);
 
-    Flux<ChatbotResponse> generateExplanation(TestingSystemPromptExplanationGenerationRequest request);
+    Flux<ChatbotResponse> testGenerateExplanation(TestingSystemPromptExplanationGenerationRequest request);
 
     Flux<ChatbotResponse> generateBlogPostSummary(BlogPostSummaryRequest request);
 
@@ -38,9 +37,13 @@ public interface IChatService {
 
     String generateFeedbackForWritingTestAnswerWithoutImage(String answerText, String partName, String passage);
 
+    String testGenerateFeedbackForWritingTestAnswer(TestingSystemPromptWritingAssessmentRequest request);
+
     String generateFeedbackForSpeakingTestAnswerWithImage(String partName, String passage, String questionContent, InputStream imageInputStream, String imageContentType, InputStream audioInputStream, String audioContentType);
 
     String generateFeedbackForSpeakingTestAnswerWithoutImage(String partName, String passage, String questionContent, InputStream audioInputStream, String audioContentType);
+
+    String testGenerateFeedbackForSpeakingTestAnswer(TestingSystemPromptSpeakingAssessmentRequest request, InputStream audioInputStream, String audioContentType);
 
     Flux<ChatbotResponse> chatAboutSentenceStream(SentenceCreateRequest sentenceCreateRequest);
 

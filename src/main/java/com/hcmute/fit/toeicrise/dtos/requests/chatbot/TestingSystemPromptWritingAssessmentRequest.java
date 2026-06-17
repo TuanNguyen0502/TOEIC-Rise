@@ -5,17 +5,18 @@ import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Data
 @Builder
-public class TestingSystemPromptQAndAnswerRequest {
-    @Pattern(regexp = Constant.CHAT_CONVERSATION_ID_PATTERN, message = MessageConstant.CHAT_CONVERSATION_ID_INVALID)
-    private String conversationId;
-
-    @NotBlank(message = MessageConstant.CHAT_MESSAGE_NOT_BLANK)
-    private String message;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class TestingSystemPromptWritingAssessmentRequest {
+    @NotBlank(message = MessageConstant.USER_ANSWER_NOT_EMPTY)
+    private String answerText;
 
     @NotNull(message = MessageConstant.QUESTION_ID_NOT_NULL)
     private Long questionId;
