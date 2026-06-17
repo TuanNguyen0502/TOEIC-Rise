@@ -26,6 +26,7 @@ import com.hcmute.fit.toeicrise.services.interfaces.IRoleService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -51,6 +53,7 @@ public class UserServiceImpl implements IUserService {
     private final CloudinaryUtil cloudinaryUtil;
     private final UserMapper userMapper;
     private final PageResponseMapper pageResponseMapper;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional(readOnly = true)
@@ -136,6 +139,8 @@ public class UserServiceImpl implements IUserService {
         User user = findUserById(userId);
         Account account = user.getAccount();
 
+        String email = account.getEmail();
+
         account.setIsActive(request.isActive());
         user.setRole(roleService.findByName(request.getRole()));
         user.setFullName(request.getFullName());
@@ -143,6 +148,12 @@ public class UserServiceImpl implements IUserService {
 
         uploadImage(request.getAvatar(), user, Constant.AVATAR_MAX_SIZE);
         accountService.save(account);
+
+        if (cacheManager.getCache("user") != null && email != null) {
+            Objects.requireNonNull(cacheManager.getCache("user")).evict(email);
+            log.info("Evicted cache for user email: {}", email);
+        }
+
         log.info("User updated successfully with id: {}", userId);
     }
 
