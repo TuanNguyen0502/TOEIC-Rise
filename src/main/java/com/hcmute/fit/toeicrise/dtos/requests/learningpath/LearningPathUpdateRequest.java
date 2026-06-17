@@ -30,7 +30,9 @@ public class LearningPathUpdateRequest {
     @Size(max = 5000, message = MessageConstant.LEARNING_PATH_DESCRIPTION_MAX)
     private String description;
 
+    @NotNull(message = MessageConstant.LEARNING_PATH_TEST_TYPE_NOT_NULL)
     private ETestType testType;
 
+    @NotNull(message = MessageConstant.LEARNING_PATH_IS_ACTIVE_NOT_NULL)
     private Boolean isActive;
 }
