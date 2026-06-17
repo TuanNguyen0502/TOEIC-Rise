@@ -42,5 +42,4 @@ public class LessonCreateRequest {
     private ELessonLevel level;
 
     private String content;
-    private Boolean isActive;
 }
