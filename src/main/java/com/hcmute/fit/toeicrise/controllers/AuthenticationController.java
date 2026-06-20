@@ -65,7 +65,7 @@ public class AuthenticationController {
     private ResponseCookie createRefreshTokenCookie(String refreshToken, Long expirationTime) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .httpOnly(true)
-//                .sameSite("Strict")
+               .sameSite("None")
                 .secure(true)
                 .path("/")
                 .maxAge(expirationTime/1000)
