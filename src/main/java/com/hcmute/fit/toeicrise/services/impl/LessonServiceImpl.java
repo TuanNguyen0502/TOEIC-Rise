@@ -30,10 +30,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +43,6 @@ public class LessonServiceImpl implements ILessonService {
     private final LearningPathRepository learningPathRepository;
     private final UserLessonProgressRepository userLessonProgressRepository;
     private final PageResponseMapper pageResponseMapper;
-
-    private static final int OFFSET = 1_000_000;
 
     @Override
     public LessonDetailResponse createLesson(String slug, String email, LessonCreateRequest request) {
@@ -94,26 +90,45 @@ public class LessonServiceImpl implements ILessonService {
         return lessonRepository.findAllById(ids);
     }
 
+    @Transactional
     @Override
     public void reorderLesson(LessonReorderRequest request) {
-        List<Long> lessonIds = request.getItems().stream().map(ItemRequest::getLessonId).toList();
-        List<Lesson> lessons = getAllLessonsByIds(lessonIds);
-        Map<Long, Lesson> byId = lessons.stream().collect(Collectors.toMap(Lesson::getId, Function.identity()));
+        if (request.getItems() == null || request.getItems().isEmpty())
+            return;
+        LearningPath learningPath = learningPathRepository.findBySlug(request.getLearningPathSlug())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning path"));
+        List<Lesson> lessons = learningPath.getLessons();
+        List<Lesson> updatedLessons = new ArrayList<>();
 
-        if (byId.size() != lessonIds.size())
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
+        for(ItemRequest item : request.getItems()) {
+            Long targetId = item.getLessonId();
+            int newOrderIndex = item.getOrderIndex();
 
-        for (ItemRequest item : request.getItems()) {
-            Lesson lesson = byId.get(item.getLessonId());
-            lesson.setOrderIndex(-(item.getOrderIndex() + OFFSET));
+            Lesson moveLesson = lessons.stream()
+                    .filter(l -> l.getId().equals(targetId))
+                    .findFirst().orElse(null);
+
+            if (moveLesson == null || moveLesson.getOrderIndex() == newOrderIndex)
+                continue;
+
+            int temporaryIndex = -(newOrderIndex + 100000);
+            moveLesson.setOrderIndex(temporaryIndex);
+            updatedLessons.add(moveLesson);
         }
-        lessonRepository.saveAll(lessons);
+        if (updatedLessons.isEmpty())
+            return;
+
+        lessonRepository.saveAll(updatedLessons);
         lessonRepository.flush();
+
         for (ItemRequest item : request.getItems()) {
-            Lesson lesson = byId.get(item.getLessonId());
-            lesson.setOrderIndex(item.getOrderIndex());
+            Long targetId = item.getLessonId();
+            int newOrderIndex = item.getOrderIndex();
+
+            updatedLessons.stream().filter(l -> l.getId().equals(targetId))
+                    .findFirst().ifPresent(lesson -> lesson.setOrderIndex(newOrderIndex));
         }
-        lessonRepository.saveAll(lessons);
+        lessonRepository.saveAll(updatedLessons);
     }
 
     @Transactional
