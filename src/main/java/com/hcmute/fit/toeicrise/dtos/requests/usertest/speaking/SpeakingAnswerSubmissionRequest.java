@@ -1,7 +1,6 @@
 package com.hcmute.fit.toeicrise.dtos.requests.usertest.speaking;
 
 import com.hcmute.fit.toeicrise.commons.constants.MessageConstant;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +15,5 @@ public class SpeakingAnswerSubmissionRequest {
     @NotNull(message = MessageConstant.QUESTION_ID_NOT_NULL)
     private Long questionId;
 
-    @NotBlank(message = "Audio URL must not be blank")
     private String audioUrl;
 }
