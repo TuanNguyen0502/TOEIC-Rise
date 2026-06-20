@@ -125,4 +125,9 @@ public class TagServiceImpl implements ITagService {
         return tagRepository.findByName(name)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag name"));
     }
+
+    @Override
+    public Tag getTagById(Long id) {
+        return tagRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Tag"));
+    }
 }

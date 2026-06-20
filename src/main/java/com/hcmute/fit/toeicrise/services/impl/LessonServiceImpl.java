@@ -1,6 +1,5 @@
 package com.hcmute.fit.toeicrise.services.impl;
 
-import com.hcmute.fit.toeicrise.commons.utils.CloudinaryUtil;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.ItemRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonCreateRequest;
 import com.hcmute.fit.toeicrise.dtos.requests.learningpath.LessonReorderRequest;
@@ -20,6 +19,7 @@ import com.hcmute.fit.toeicrise.repositories.LessonRepository;
 import com.hcmute.fit.toeicrise.repositories.UserLessonProgressRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.LessonSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.ILessonService;
+import com.hcmute.fit.toeicrise.services.interfaces.ITagService;
 import com.hcmute.fit.toeicrise.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 public class LessonServiceImpl implements ILessonService {
     private final LessonRepository lessonRepository;
     private final LessonMapper lessonMapper;
-    private final CloudinaryUtil cloudinaryUtil;
     private final IUserService userService;
+    private final ITagService tagService;
     private final LearningPathRepository learningPathRepository;
     private final UserLessonProgressRepository userLessonProgressRepository;
     private final PageResponseMapper pageResponseMapper;
@@ -51,16 +51,14 @@ public class LessonServiceImpl implements ILessonService {
     @Override
     public LessonDetailResponse createLesson(String slug, String email, LessonCreateRequest request) {
         LearningPath learningPath = learningPathRepository.findBySlug(slug).orElse(null);
-        User user = userService.getUserByEmail(email);
 
         if (learningPath == null)
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning path");
-        if (user == null)
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "User");
-        Lesson existedLesson = lessonRepository.findBySlugAndLearningPathId(request.getSlug(), learningPath.getId()).orElse(null);
-        if (existedLesson != null)
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
-
+        if(!request.getSlug().equals(learningPath.getSlug())){
+            Lesson existedLesson = lessonRepository.findBySlugAndLearningPathId(request.getSlug(), learningPath.getId()).orElse(null);
+            if (existedLesson != null)
+                throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
+        }
         Integer orderIndex = lessonRepository.findTopByOrderIndexAndLearningPathId(learningPath.getId());
 
         Lesson lesson = lessonMapper.toEntity(request);
@@ -76,20 +74,13 @@ public class LessonServiceImpl implements ILessonService {
     @Override
     public LessonDetailResponse updateLesson(Long id, LessonUpdateRequest request) {
         Lesson lesson = getLessonById(id);
-        Lesson existedLesson = lessonRepository.findBySlugAndLearningPathId(request.getSlug(), lesson.getLearningPath().getId()).orElse(null);
-        if (existedLesson != null && !lesson.getId().equals(existedLesson.getId()))
-            throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
-
-        String oldUrl = lesson.getVideoUrl();
-        String newUrl = request.getVideoUrl();
-
-        if (newUrl != null && !newUrl.isBlank()) {
-            if (oldUrl != null && cloudinaryUtil.isCloudinaryUrl(oldUrl) && !oldUrl.equals(newUrl))
-                cloudinaryUtil.deleteFile(oldUrl);
-        } else newUrl = oldUrl;
+        if(!request.getSlug().equals(lesson.getSlug())){
+            Lesson existedLesson = lessonRepository.findBySlugAndLearningPathId(request.getSlug(), lesson.getLearningPath().getId()).orElse(null);
+            if (existedLesson != null)
+                throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
+        }
 
         lesson = lessonMapper.toEntity(request, lesson);
-        lesson.setVideoUrl(newUrl);
         return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
     }
 
@@ -149,6 +140,11 @@ public class LessonServiceImpl implements ILessonService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
         LessonDetailResponse response = lessonMapper.toDetailResponse(lesson);
+        if(!lesson.getPractice().isEmpty()){
+            long tagId = Long.parseLong(lesson.getPractice());
+            Tag tag = tagService.getTagById(tagId);
+            response.setPractice(tag.getName());
+        }
         if (lesson.getSlug() == null)
             response.setSlug(null);
         if (userLessonProgress != null)
@@ -161,10 +157,21 @@ public class LessonServiceImpl implements ILessonService {
         userService.getUserByEmail(email);
         Lesson lesson = getLessonWithLearningPathId(id);
 
-        return lessonMapper.toDetailResponse(lesson);    }
+        if(!lesson.getPractice().isEmpty()){
+            long tagId = Long.parseLong(lesson.getPractice());
+            Tag tag = tagService.getTagById(tagId);
+            lesson.setPractice(tag.getName());
+        }
+        return lessonMapper.toDetailResponse(lesson);
+    }
 
     @Override
     public LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson) {
+        if(!lesson.getPractice().isEmpty()){
+            long tagId = Long.parseLong(lesson.getPractice());
+            Tag tag = tagService.getTagById(tagId);
+            lesson.setPractice(tag.getName());
+        }
         return lessonMapper.toLessonResponseForLearner(lesson);
     }
 
