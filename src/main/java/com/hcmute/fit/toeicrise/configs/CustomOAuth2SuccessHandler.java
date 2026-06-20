@@ -59,9 +59,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
             // Create an HttpOnly cookie with the refresh token
             ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshToken)
-                    .httpOnly(true) // Cannot be accessed by JavaScript → enhances security
-                    .secure(false) // Set to false for localhost development
-                    .path("/") // Cookie is valid for the entire system
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
+                    .path("/")
                     .maxAge(refreshTokenExpirationTime) // Cookie lifetime
                     .build();
 
