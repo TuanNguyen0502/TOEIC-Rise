@@ -58,7 +58,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Slug");
 
         LearningPath path = learningPathMapper.toEntity(request);
-        path.setIsActive(true);
+        path.setIsActive(false);
         path.setTestType(request.getTestType());
         learningPathRepository.save(path);
     }
