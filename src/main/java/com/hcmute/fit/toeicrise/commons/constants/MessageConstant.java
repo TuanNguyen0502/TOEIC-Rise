@@ -112,6 +112,8 @@ public class MessageConstant {
     public static final String LEARNING_PATH_SLUG_NOT_BLANK = "Learning path slug must not be blank.";
     public static final String LEARNING_PATH_SLUG_INVALID = "Learning path slug can only contain lowercase letters, digits, and hyphens, and must be between 1 and 255 characters long.";
     public static final String LEARNING_PATH_ID_NOT_NULL = "Learning path id must not be null.";
+    public static final String LEARNING_PATH_IS_ACTIVE_NOT_NULL = "Learning path isActive must not be null";
+    public static final String LEARNING_PATH_TEST_TYPE_NOT_NULL = "Learning path test type must not be null.";
     // Lesson related messages
     public static final String LESSONS_NOT_EMPTY = "Lessons must not be empty.";
     public static final String LESSON_ID_NOT_NULL = "LessonId must not be null.";

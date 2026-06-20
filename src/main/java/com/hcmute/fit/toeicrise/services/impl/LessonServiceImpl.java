@@ -67,6 +67,7 @@ public class LessonServiceImpl implements ILessonService {
         lesson.setLearningPath(learningPath);
         lesson.setVideoUrl(request.getVideoUrl());
         lesson.setOrderIndex(orderIndex+1);
+        lesson.setIsActive(true);
 
         return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
     }
