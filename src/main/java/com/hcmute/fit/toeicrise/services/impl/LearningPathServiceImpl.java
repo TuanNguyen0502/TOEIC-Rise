@@ -44,13 +44,6 @@ public class LearningPathServiceImpl implements ILearningPathService {
     }
 
     @Override
-    public PageResponse listLearningPaths(Boolean isActive, int page, int size, String sortBy, String direction) {
-        Specification<LearningPath> specification = (_, _, cb) -> cb.conjunction();
-        specification = specification.and(LearningPathSpecification.hasIsActive(isActive));
-        return getLearningPathResponses(null, page, size, sortBy, direction, specification);
-    }
-
-    @Override
     @Transactional
     public void createLearningPath(LearningPathCreateRequest request) {
         LearningPath learningPath = learningPathRepository.findBySlug(request.getSlug()).orElse(null);
@@ -58,7 +51,7 @@ public class LearningPathServiceImpl implements ILearningPathService {
             throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Slug");
 
         LearningPath path = learningPathMapper.toEntity(request);
-        path.setIsActive(true);
+        path.setIsActive(false);
         path.setTestType(request.getTestType());
         learningPathRepository.save(path);
     }
@@ -89,8 +82,9 @@ public class LearningPathServiceImpl implements ILearningPathService {
     }
 
     @Override
-    public PageResponse listActiveLearningPaths(int page, int size, String sortBy, String direction) {
-        return listLearningPaths(true, page, size, sortBy, direction);
+    public List<LearningPathSummaryResponse> listActiveLearningPaths() {
+        return learningPathRepository.findAllByIsActiveIsTrue().stream()
+                .map(lp -> learningPathMapper.toSummaryResponse(lp, (long) lp.getLessons().size())).toList();
     }
 
     @Override

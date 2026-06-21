@@ -27,4 +27,6 @@ public interface ITagService {
     void updateTag(Long tagId, TagRequest tagRequest);
 
     Tag getTagByName(String name);
+
+    Tag getTagById(Long id);
 }
