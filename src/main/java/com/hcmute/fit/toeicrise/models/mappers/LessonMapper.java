@@ -20,6 +20,7 @@ public interface LessonMapper {
 
     @Mapping(target = "learningPathId", source = "learningPath.id")
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = Constant.DATE_TIME_PATTERN)
+    @Mapping(target = "practice", ignore = true)
     LessonDetailResponse toDetailResponse(Lesson lesson);
 
     @Mapping(target = "learningPathId", source = "learningPath.id")

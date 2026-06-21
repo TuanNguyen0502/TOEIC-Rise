@@ -164,7 +164,7 @@ public class LessonServiceImpl implements ILessonService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Lesson");
 
         LessonDetailResponse response = lessonMapper.toDetailResponse(lesson);
-        if(!lesson.getPractice().isEmpty()){
+        if(lesson.getPractice() != null && !lesson.getPractice().isBlank()){
             long tagId = Long.parseLong(lesson.getPractice());
             Tag tag = tagService.getTagById(tagId);
             response.setPractice(tag.getName());
