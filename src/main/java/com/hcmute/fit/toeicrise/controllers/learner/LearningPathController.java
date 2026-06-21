@@ -18,13 +18,8 @@ public class LearningPathController {
     private final ILessonService lessonService;
 
     @GetMapping
-    public ResponseEntity<?> listActive(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "updatedAt") String sortBy,
-            @RequestParam(value = "direction", defaultValue = "DESC") String direction
-    ) {
-        return ResponseEntity.ok(learningPathService.listActiveLearningPaths(page, size, sortBy, direction));
+    public ResponseEntity<?> listActive() {
+        return ResponseEntity.ok(learningPathService.listActiveLearningPaths());
     }
 
     @GetMapping("/{learningPathSlug}")

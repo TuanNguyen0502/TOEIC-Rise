@@ -651,7 +651,9 @@ public class UserTestServiceImpl implements IUserTestService {
 
     @Override
     public UserTest getLastestUserTest(String email, ETestType testType) {
-        return userTestRepository.findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, testType);
+        List<UserTest> results = userTestRepository
+                .findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(email, testType, ETestStatus.APPROVED);
+        return results.isEmpty() ? null : results.getFirst();
     }
 
     private int roundToNearest5(int number) {

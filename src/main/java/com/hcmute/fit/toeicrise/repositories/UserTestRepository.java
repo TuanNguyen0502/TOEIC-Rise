@@ -109,5 +109,12 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long>, JpaSp
             "WHERE ut.createdAt >= :start AND ut.createdAt < :end")
     ScoreDistInsightResponse countUserTestByScore(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    UserTest findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(String email, ETestType testType);
+    @Query("SELECT ut " +
+            "FROM UserTest ut " +
+            "WHERE ut.user.account.email = :email " +
+            "AND ut.test.type = :testType " +
+            "AND ut.test.status = :testStatus " +
+            "AND ut.totalScore IS NOT NULL " +
+            "ORDER BY ut.createdAt DESC ")
+    List<UserTest> findTopByUserAccountEmailAndTestTypeAndTotalScoreIsNotNullOrderByCreatedAtDesc(String email, ETestType testType, ETestStatus testStatus);
 }

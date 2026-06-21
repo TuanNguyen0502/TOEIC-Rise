@@ -75,6 +75,15 @@ public class LessonServiceImpl implements ILessonService {
             if (existedLesson != null)
                 throw new AppException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Lesson's slug");
         }
+        if (request.getPractice() != null && !request.getPractice().isBlank()) {
+            String practiceValue = request.getPractice().trim();
+            if (practiceValue.matches("^\\d+$")) {
+                request.setPractice(practiceValue);
+            } else {
+                Tag tag = tagService.getTagByName(practiceValue);
+                request.setPractice(String.valueOf(tag.getId()));
+            }
+        }
 
         lesson = lessonMapper.toEntity(request, lesson);
         return lessonMapper.toDetailResponse(lessonRepository.save(lesson));
@@ -169,7 +178,6 @@ public class LessonServiceImpl implements ILessonService {
 
     @Override
     public LessonDetailResponse getLesson(Long id, String email) {
-        userService.getUserByEmail(email);
         Lesson lesson = getLessonWithLearningPathId(id);
 
         if(!lesson.getPractice().isEmpty()){
@@ -182,12 +190,16 @@ public class LessonServiceImpl implements ILessonService {
 
     @Override
     public LessonResponseForLearner getLessonsResponsesForLearner(Lesson lesson) {
-        if(!lesson.getPractice().isEmpty()){
-            long tagId = Long.parseLong(lesson.getPractice());
-            Tag tag = tagService.getTagById(tagId);
-            lesson.setPractice(tag.getName());
+        LessonResponseForLearner response = lessonMapper.toLessonResponseForLearner(lesson);
+        if (lesson.getPractice() != null && !lesson.getPractice().trim().isEmpty()) {
+            String practiceValue = lesson.getPractice().trim();
+            if (practiceValue.matches("^\\d+$")) {
+                long tagId = Long.parseLong(practiceValue);
+                Tag tag = tagService.getTagById(tagId);
+                response.setPractice(tag.getName());
+            }
         }
-        return lessonMapper.toLessonResponseForLearner(lesson);
+        return response;
     }
 
     @Override
