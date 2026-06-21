@@ -4,10 +4,7 @@ import com.hcmute.fit.toeicrise.dtos.requests.learningpath.*;
 import com.hcmute.fit.toeicrise.dtos.responses.PageResponse;
 import com.hcmute.fit.toeicrise.dtos.responses.learningpath.*;
 import com.hcmute.fit.toeicrise.exceptions.AppException;
-import com.hcmute.fit.toeicrise.models.entities.LearningPath;
-import com.hcmute.fit.toeicrise.models.entities.Lesson;
-import com.hcmute.fit.toeicrise.models.entities.User;
-import com.hcmute.fit.toeicrise.models.entities.UserLearningPath;
+import com.hcmute.fit.toeicrise.models.entities.*;
 import com.hcmute.fit.toeicrise.models.enums.ELessonLevel;
 import com.hcmute.fit.toeicrise.models.enums.ETestType;
 import com.hcmute.fit.toeicrise.models.enums.ErrorCode;
@@ -25,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -111,9 +109,24 @@ public class LearningPathServiceImpl implements ILearningPathService {
         UserLearningPath userLearningPath = userLearningPathService.getUserLearningPath(user.getId(), learningPathSlug);
         ELessonLevel level = userLearningPath == null ? null : userLearningPath.getLevel();
         ELessonLevel chooseLevel = userLearningPathService.getLessonLevel(email, testType);
+
+        LearningPath path = learningPathRepository.findLearningPathWithLessonsBySlug(learningPathSlug)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Learning Path"));
+        Set<ELessonLevel> availableLevels = path.getLessons() == null ? Set.of() : path.getLessons().stream().filter(
+                lesson -> Boolean.TRUE.equals(lesson.getIsActive()))
+                .map(Lesson::getLevel)
+                .collect(Collectors.toSet());
+        ELessonLevel finalLevel = chooseLevel;
+
+        while (finalLevel != null && !availableLevels.contains(finalLevel)) {
+            finalLevel = getLowerLevel(finalLevel);
+        }
+        if (finalLevel == null)
+            finalLevel = ELessonLevel.BEGINNER;
+
         return LessonLevelResponse.builder()
                 .currentLevel(level)
-                .chooseLevel(chooseLevel)
+                .chooseLevel(finalLevel)
                 .build();
     }
 
@@ -142,11 +155,20 @@ public class LearningPathServiceImpl implements ILearningPathService {
                 path.getLessons() == null ? List.of() : path.getLessons().stream()
                         .filter(l -> Boolean.TRUE.equals(l.getIsActive()))
                         .filter(l -> l.getLevel().ordinal() <= targetLevel.ordinal())
-                        .sorted(Comparator.comparingInt(l -> l.getOrderIndex() == null ? Integer.MAX_VALUE : l.getOrderIndex()))
                         .toList();
 
+        List<LessonWithProgressResponse> progressResponseList = userLessonProgressService.getLessonProgress(email,lessonsForLearner);
+        List<LessonWithProgressResponse> filteredLessons = progressResponseList.stream().filter(
+                response -> {
+                    ELessonLevel level = response.getLesson().getLevel();
+                    if(level == targetLevel){
+                        return true;
+                    }
+                    return response.getProgressPercentage() != null;
+                }).toList();
+
         LearningPathDetailResponseForLearner response = learningPathMapper.toLearningPathDetailResponseForLearner(path);
-        response.setLessons(userLessonProgressService.getLessonProgress(email, lessonsForLearner));
+        response.setLessons(filteredLessons);
         return response;
     }
 
@@ -160,5 +182,13 @@ public class LearningPathServiceImpl implements ILearningPathService {
         Page<LearningPathSummaryResponse> pages = learningPathRepository.findAll(specification, pageRequest)
                 .map(lp -> learningPathMapper.toSummaryResponse(lp, (long) lp.getLessons().size()));
         return pageResponseMapper.toPageResponse(pages);
+    }
+
+    private ELessonLevel getLowerLevel(ELessonLevel currentLevel){
+        if(currentLevel == ELessonLevel.ADVANCED)
+            return ELessonLevel.INTERMEDIATE;
+        if(currentLevel == ELessonLevel.INTERMEDIATE)
+            return ELessonLevel.BEGINNER;
+        return null;
     }
 }
