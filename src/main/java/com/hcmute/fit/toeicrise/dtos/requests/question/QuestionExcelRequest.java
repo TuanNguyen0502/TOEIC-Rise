@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.dtos.requests.question;
 
+import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionByPart;
 import lombok.*;
 
 @Getter
@@ -7,6 +8,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ValidQuestionByPart
 public class QuestionExcelRequest {
     private Integer partNumber;
     private String questionGroupId;
@@ -23,4 +25,5 @@ public class QuestionExcelRequest {
     private String explanation;
     private String transcript;
     private String tags;
+    private Integer indexRow;
 }

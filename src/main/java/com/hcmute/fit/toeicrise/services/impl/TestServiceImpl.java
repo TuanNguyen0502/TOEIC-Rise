@@ -31,7 +31,9 @@ import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,6 +53,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils.extractGroupNumber;
 
@@ -66,6 +69,7 @@ public class TestServiceImpl implements ITestService {
     private final PartMapper partMapper;
     private final TestMapper testMapper;
     private final PageResponseMapper pageResponseMapper;
+    private final Validator validator;
 
     @Override
     @Transactional(readOnly = true)
@@ -225,14 +229,27 @@ public class TestServiceImpl implements ITestService {
 
                 try {
                     QuestionExcelRequest questionExcelRequest = testMapper.mapRowToDTO(row);
-                    if (questionExcelRequest != null)
+                    if (questionExcelRequest != null) {
+                        questionExcelRequest.setIndexRow(i + 1);
+
+                        var violations = validator.validate(questionExcelRequest);
+                        if (!violations.isEmpty()) {
+                            String errorMessage = violations.iterator().next().getMessage();
+                            throw new AppException(ErrorCode.INVALID_REQUEST, errorMessage);
+                        }
                         questionExcelRequests.add(questionExcelRequest);
+                    }
+                } catch (AppException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.warn("Error parsing file: {}", e.getMessage());
+                    throw new AppException(ErrorCode.INVALID_REQUEST, "Error parsing file at row {}: {}", i + 1, e.getMessage());
                 }
             }
-            if (sheet.getLastRowNum() > maxRows)
+            if (sheet.getLastRowNum() > maxRows) {
                 log.warn("File has more than {} rows, only processing first {} rows", maxRows, maxRows);
+                throw new AppException(ErrorCode.INVALID_REQUEST, "File has more than {} rows", maxRows);
+            }
         } catch (IOException e) {
             log.error("Error reading file: {}", e.getMessage());
             throw new AppException(ErrorCode.FILE_READ_ERROR);
@@ -272,6 +289,9 @@ public class TestServiceImpl implements ITestService {
             log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
         } catch (ConstraintViolationException e) {
             log.warn("Failed to import Question Group. Error: {}", e.getMessage());
+            String msg = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining(", "));
+            throw new AppException(ErrorCode.INVALID_REQUEST, msg);
         } catch (Exception e) {
             log.error("Error processing question group: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.FILE_READ_ERROR);
