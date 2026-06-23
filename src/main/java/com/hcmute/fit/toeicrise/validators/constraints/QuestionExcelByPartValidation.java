@@ -1,42 +1,43 @@
 package com.hcmute.fit.toeicrise.validators.constraints;
 
-import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionRequest;
-import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
-import com.hcmute.fit.toeicrise.services.interfaces.IQuestionGroupService;
+import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
 import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionByPart;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class QuestionByPartValidation implements ConstraintValidator<ValidQuestionByPart, QuestionRequest> {
-    private final IQuestionGroupService questionGroupService;
+public class QuestionExcelByPartValidation implements ConstraintValidator<ValidQuestionByPart, QuestionExcelRequest> {
 
     @Override
-    public boolean isValid(QuestionRequest value, ConstraintValidatorContext context) {
-        QuestionGroup questionGroup = questionGroupService.getQuestionGroupEntity(value.getQuestionGroupId());
+    public boolean isValid(QuestionExcelRequest value, ConstraintValidatorContext context) {
+        if (value == null || value.getQuestionGroupId() == null)
+            return true;
+
         context.disableDefaultConstraintViolation();
         boolean valid = true;
 
-        switch ((int) questionGroup.getPart().getId().longValue()) {
+        switch (value.getPartNumber()) {
             case 3, 4, 5, 7 -> {
-                if (value.getContent() == null || value.getContent().isEmpty()) {
+                if (value.getQuestion() == null || value.getQuestion().isEmpty()) {
                     context.buildConstraintViolationWithTemplate("Content is required for Part " +
-                                    questionGroup.getPart().getId())
+                                    value.getPartNumber() + " at row " + value.getIndexRow())
                             .addPropertyNode("question").addConstraintViolation();
                     valid = false;
                 }
-                if (value.getOptions() == null || value.getOptions().isEmpty()) {
+                if (value.getOptionA() == null || value.getOptionA().isEmpty() || value.getOptionB() == null ||
+                        value.getOptionB().isEmpty()|| value.getOptionC() == null || value.getOptionC().isEmpty() ||
+                        value.getOptionD() == null || value.getOptionD().isEmpty()) {
                     context.buildConstraintViolationWithTemplate("Options are required for Part " +
-                                    questionGroup.getPart().getId())
+                                    value.getPartNumber() + "at row " + value.getIndexRow())
                             .addPropertyNode("option").addConstraintViolation();
                     valid = false;
                 }
             }
             case 6 -> {
-                if (value.getOptions() == null) {
+                if (value.getQuestion() == null) {
                     context.buildConstraintViolationWithTemplate("Options are required for Part " +
-                                    questionGroup.getPart().getId())
+                                    value.getPartNumber() + "at row " + value.getIndexRow())
                             .addPropertyNode("option").addConstraintViolation();
                     valid = false;
                 }
