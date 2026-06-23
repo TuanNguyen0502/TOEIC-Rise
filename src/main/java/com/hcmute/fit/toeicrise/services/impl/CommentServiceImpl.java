@@ -20,6 +20,8 @@ import com.hcmute.fit.toeicrise.repositories.UserRepository;
 import com.hcmute.fit.toeicrise.services.interfaces.ICommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -166,7 +168,7 @@ public class CommentServiceImpl implements ICommentService {
     private CommentResponse enrichCommentDto(Comment comment, String email) {
         CommentResponse dto = commentMapper.toResponse(comment);
 
-        dto.setOwner(comment.getUser().getAccount().getEmail().equals(email));
+        dto.setOwner(isOwner(comment));
         dto.setEdited(comment.getUpdatedAt() != null &&
                 comment.getUpdatedAt().isAfter(comment.getCreatedAt().plusSeconds(1)));
 
@@ -174,6 +176,17 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     private boolean isOwner(Comment comment) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+
+        boolean isAdminOrStaff = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_STAFF"));
+
+        if (isAdminOrStaff) {
+            return true;
+        }
         String email = SecurityUtils.getCurrentUser();
         return comment.getUser().getAccount().getEmail().equals(email);
     }

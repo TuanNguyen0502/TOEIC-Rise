@@ -52,7 +52,7 @@ public class SecurityConfiguration {
                                 "/staff/tags/**", "/staff/parts/**", "/staff/question-reports/**",
                                 "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
                                 "/staff/blog-categories/**", "/staff/blog-posts/**", "/admin/learning-paths/**",
-                                "staff/dictation/**", "/admin/lessons/**", "/staff/cloudinary/**")
+                                "/staff/dictation/**", "/admin/lessons/**", "/staff/cloudinary/**", "/learner/comments/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
