@@ -1,6 +1,7 @@
 package com.hcmute.fit.toeicrise.validators.constraints;
 
 import com.hcmute.fit.toeicrise.dtos.requests.question.QuestionExcelRequest;
+import com.hcmute.fit.toeicrise.models.enums.EPart;
 import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionByPart;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -16,6 +17,37 @@ public class QuestionExcelByPartValidation implements ConstraintValidator<ValidQ
 
         context.disableDefaultConstraintViolation();
         boolean valid = true;
+
+        try {
+            EPart part = EPart.valueOf("PART_" + value.getPartNumber());
+
+            if (part.isRequiredAudio() && isBlank(value.getAudioUrl())){
+                context.buildConstraintViolationWithTemplate("Audio is required for Part " + value.getPartNumber() + " at row " + value.getIndexRow())
+                        .addPropertyNode("audioUrl")
+                        .addConstraintViolation();
+                valid = false;
+            }
+
+            if (part.isRequiredImage() && isBlank(value.getImageUrl())){
+                context.buildConstraintViolationWithTemplate("Image is required for Part " + value.getPartNumber() + " at row " + value.getIndexRow())
+                        .addPropertyNode("imageUrl")
+                        .addConstraintViolation();
+                valid = false;
+            }
+
+            if (part.isRequiredPassage() && isBlank(value.getPassageText())){
+                context.buildConstraintViolationWithTemplate("Passage is required for Part " + value.getPartNumber() + " at row " + value.getIndexRow())
+                        .addPropertyNode("passage")
+                        .addConstraintViolation();
+                valid = false;
+            }
+
+        } catch (IllegalArgumentException e) {
+            context.buildConstraintViolationWithTemplate("Invalid part number: " + value.getPartNumber() + " at row " + value.getIndexRow())
+                    .addPropertyNode("partNumber")
+                    .addConstraintViolation();
+            valid = false;
+        }
 
         switch (value.getPartNumber()) {
             case 3, 4, 5, 7 -> {
@@ -44,5 +76,9 @@ public class QuestionExcelByPartValidation implements ConstraintValidator<ValidQ
             }
         }
         return valid;
+    }
+
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 }

@@ -529,8 +529,17 @@ public class TestServiceImpl implements ITestService {
 
                 try {
                     SpeakingQuestionExcelRequest questionExcelRequest = testMapper.mapRowToSpeakingDTO(row);
-                    if (questionExcelRequest != null)
+                    if (questionExcelRequest != null) {
+                        questionExcelRequest.setIndexRow(i);
+                        var violations = validator.validate(questionExcelRequest);
+                        if (!violations.isEmpty()) {
+                            String errorMessage = violations.iterator().next().getMessage();
+                            throw new AppException(ErrorCode.INVALID_REQUEST, errorMessage);
+                        }
                         questionExcelRequests.add(questionExcelRequest);
+                    }
+                } catch (AppException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.warn("Error parsing file: {}", e.getMessage());
                 }
