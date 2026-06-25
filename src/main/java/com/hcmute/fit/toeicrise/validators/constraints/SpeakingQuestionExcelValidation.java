@@ -24,16 +24,6 @@ public class SpeakingQuestionExcelValidation implements ConstraintValidator<Vali
                         .addPropertyNode("imageUrl").addConstraintViolation();
                 valid = false;
             }
-            if (part.isRequiredPassage() && isBlank(value.getPassageText())) {
-                context.buildConstraintViolationWithTemplate("Passage text is required for Speaking Part " + value.getPartNumber() + " at row " + value.getIndexRow())
-                        .addPropertyNode("passage").addConstraintViolation();
-                valid = false;
-            }
-            if(value.getPartNumber() == 3 && !isBlank(value.getPassageText())) {
-                context.buildConstraintViolationWithTemplate("Passage text is not required for Speaking Part " + value.getPartNumber() + " at row " + value.getIndexRow())
-                        .addPropertyNode("passage").addConstraintViolation();
-                valid = false;
-            }
         } catch (IllegalArgumentException e) {
             context.buildConstraintViolationWithTemplate("Invalid part number: " + value.getPartNumber() + " at row " + value.getIndexRow())
                     .addPropertyNode("partNumber").addConstraintViolation();
