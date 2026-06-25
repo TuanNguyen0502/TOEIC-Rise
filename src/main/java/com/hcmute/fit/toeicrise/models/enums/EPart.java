@@ -16,7 +16,7 @@ public enum EPart {
     // Speaking Tasks (Usually tracked by task type rather than standard parts)
     SPEAKING_PART_1("Speaking Part 1 - Read a text aloud", false, false, true),
     SPEAKING_PART_2("Speaking Part 2 - Describe a picture", false, true, true),
-    SPEAKING_PART_3("Speaking Part 3 - Respond to questions", false, false, false),
+    SPEAKING_PART_3("Speaking Part 3 - Respond to questions", false, false, true),
     SPEAKING_PART_4("Speaking Part 4 - Respond to questions using information provided", false, false, true),
     SPEAKING_PART_5("Speaking Part 5 - Express an opinion", false, false, true),
 
@@ -54,10 +54,6 @@ public enum EPart {
         return EPart.values()[position - 1];
     }
 
-    public boolean isListening() {
-        return this == PART_1 || this == PART_2 || this == PART_3 || this == PART_4;
-    }
-
     public static String getSpeakingPart(Integer name) {
         String partName = String.valueOf(name);
         if (SPEAKING_PART_1.getName().contains(partName)) return SPEAKING_PART_1.getName();
@@ -74,6 +70,10 @@ public enum EPart {
         if (WRITING_PART_2.getName().contains(partName)) return WRITING_PART_2.getName();
         if (WRITING_PART_3.getName().contains(partName)) return WRITING_PART_3.getName();
         throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, name);
+    }
+
+    public boolean isListening() {
+        return this == PART_1 || this == PART_2 || this == PART_3 || this == PART_4;
     }
 
     public boolean allowImage() {
