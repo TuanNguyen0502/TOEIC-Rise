@@ -17,10 +17,17 @@ public class QuestionExcelByPartValidation implements ConstraintValidator<ValidQ
         context.disableDefaultConstraintViolation();
         boolean valid = true;
 
+        if (value.getTags() == null || value.getTags().isEmpty()) {
+            context.buildConstraintViolationWithTemplate("Tags are required for Part " +
+                            value.getPartNumber() + "at row " + value.getIndexRow())
+                    .addPropertyNode("tag").addConstraintViolation();
+            valid = false;
+        }
+
         switch (value.getPartNumber()) {
             case 3, 4, 5, 7 -> {
                 if (value.getQuestion() == null || value.getQuestion().isEmpty()) {
-                    context.buildConstraintViolationWithTemplate("Content is required for Part " +
+                    context.buildConstraintViolationWithTemplate("Question is required for Part " +
                                     value.getPartNumber() + " at row " + value.getIndexRow())
                             .addPropertyNode("question").addConstraintViolation();
                     valid = false;
@@ -28,14 +35,6 @@ public class QuestionExcelByPartValidation implements ConstraintValidator<ValidQ
                 if (value.getOptionA() == null || value.getOptionA().isEmpty() || value.getOptionB() == null ||
                         value.getOptionB().isEmpty()|| value.getOptionC() == null || value.getOptionC().isEmpty() ||
                         value.getOptionD() == null || value.getOptionD().isEmpty()) {
-                    context.buildConstraintViolationWithTemplate("Options are required for Part " +
-                                    value.getPartNumber() + "at row " + value.getIndexRow())
-                            .addPropertyNode("option").addConstraintViolation();
-                    valid = false;
-                }
-            }
-            case 6 -> {
-                if (value.getQuestion() == null) {
                     context.buildConstraintViolationWithTemplate("Options are required for Part " +
                                     value.getPartNumber() + "at row " + value.getIndexRow())
                             .addPropertyNode("option").addConstraintViolation();

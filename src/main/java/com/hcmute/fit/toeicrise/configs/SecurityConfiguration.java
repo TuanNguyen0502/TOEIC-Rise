@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                                 "/tests/**", "/speaking-tests/**", "/writing-tests/**",
                                 "/blog-categories/**", "/blog-posts/**")
                         .permitAll()
+                        .requestMatchers("/learner/comments/**").hasAnyRole("LEARNER", "STAFF", "ADMIN")
                         .requestMatchers("/admin/test-sets/**", "/admin/speaking-test-sets/**", "/admin/writing-test-sets/**",
                                 "/admin/tests/**", "/admin/chatbot-ratings/**",
                                 "/admin/question-reports/**", "/admin/system-prompts/**")
@@ -52,13 +53,13 @@ public class SecurityConfiguration {
                                 "/staff/tags/**", "/staff/parts/**", "/staff/question-reports/**",
                                 "/staff/stats/**", "/admin/stats/**", "/staff/chatbot/**",
                                 "/staff/blog-categories/**", "/staff/blog-posts/**", "/admin/learning-paths/**",
-                                "/staff/dictation/**", "/admin/lessons/**", "/staff/cloudinary/**", "/learner/comments/**")
+                                "/staff/dictation/**", "/admin/lessons/**", "/staff/cloudinary/**")
                         .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/learner/home/", "/learner/chatbot/**", "/learner/test-sets/",
                                 "/learner/user-tests/**", "/learner/user-answers/**",
                                 "/learner/question-reports/**", "/learner/analysis/**",
                                 "/learner/flashcards/**", "/learner/mini-tests/**", "/learner/comments/**",
-                                "/learner/learning-paths/**", "/learner/lesson-progress/**", "/learner/comments/**", "/learner/dictation/**")
+                                "/learner/learning-paths/**", "/learner/lesson-progress/**", "/learner/dictation/**")
                         .hasRole("LEARNER")
                         .anyRequest().authenticated()
                 )

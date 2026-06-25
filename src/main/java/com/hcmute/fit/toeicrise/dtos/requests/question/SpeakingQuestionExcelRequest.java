@@ -1,5 +1,6 @@
 package com.hcmute.fit.toeicrise.dtos.requests.question;
 
+import com.hcmute.fit.toeicrise.validators.annotations.ValidQuestionSpeakingByPart;
 import lombok.*;
 
 @Getter
@@ -7,6 +8,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ValidQuestionSpeakingByPart
 public class SpeakingQuestionExcelRequest {
     private Integer partNumber;
     private String questionGroupId;
@@ -14,4 +16,5 @@ public class SpeakingQuestionExcelRequest {
     private String passageText;
     private String question;
     private String imageUrl;
+    private Integer indexRow;
 }
