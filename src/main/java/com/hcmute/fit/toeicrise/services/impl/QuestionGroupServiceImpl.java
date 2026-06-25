@@ -55,19 +55,48 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
     @Override
     @Transactional
     public QuestionGroup createQuestionGroup(Test test, Part part, QuestionExcelRequest questionExcelRequest) {
-        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
-        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
-        log.info("Created question group: {}", questionGroup.getId());
-        return questionGroup;
+        try {
+            EPart ePart = EPart.valueOf("PART_" + questionExcelRequest.getPartNumber());
+
+            if (ePart.isRequiredAudio() && isBlank(questionExcelRequest.getAudioUrl())){
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Audio is required for Part " + questionExcelRequest.getPartNumber() + " at row " + questionExcelRequest.getIndexRow());
+            }
+            if (ePart.isRequiredImage() && isBlank(questionExcelRequest.getImageUrl())){
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Image is required for Part " + questionExcelRequest.getPartNumber() + " at row " + questionExcelRequest.getIndexRow());
+            }
+            if (ePart.isRequiredPassage() && isBlank(questionExcelRequest.getPassageText())){
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for Part " + questionExcelRequest.getPartNumber() + " at row " + questionExcelRequest.getIndexRow());
+            }
+            QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+            questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+            log.info("Created question group: {}", questionGroup.getId());
+            return questionGroup;
+        } catch (AppException e){
+            throw e;
+        } catch (Exception error) {
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
     }
 
     @Transactional
     @Override
     public QuestionGroup createQuestionGroup(Test test, Part part, SpeakingQuestionExcelRequest questionExcelRequest) {
-        QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
-        questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
-        log.info("Created question group: {}", questionGroup.getId());
-        return questionGroup;
+        try {
+            EPart ePart = EPart.valueOf("SPEAKING_PART_" + questionExcelRequest.getPartNumber());
+
+            if (ePart.isRequiredPassage() && isBlank(questionExcelRequest.getPassageText())){
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Passage is required for Part " + questionExcelRequest.getPartNumber() + " at row " + questionExcelRequest.getIndexRow());
+            }
+            QuestionGroup questionGroup = questionGroupMapper.toQuestionGroup(test, part, questionExcelRequest);
+            questionGroup = questionGroupRepository.saveAndFlush(questionGroup);
+            log.info("Created question group: {}", questionGroup.getId());
+            return questionGroup;
+        } catch (AppException e){
+            throw e;
+        } catch (Exception error) {
+            throw new AppException(ErrorCode.FILE_READ_ERROR);
+        }
+
     }
 
     @Transactional
@@ -383,5 +412,9 @@ public class QuestionGroupServiceImpl implements IQuestionGroupService {
 
         return questionService.findAllQuestionByIdWithTags(groupIds).stream()
                 .collect(Collectors.groupingBy(q -> q.getQuestionGroup().getId()));
+    }
+
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 }

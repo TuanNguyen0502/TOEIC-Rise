@@ -31,8 +31,6 @@ import com.hcmute.fit.toeicrise.repositories.TestSetRepository;
 import com.hcmute.fit.toeicrise.repositories.specifications.TestSpecification;
 import com.hcmute.fit.toeicrise.services.interfaces.*;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +51,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.hcmute.fit.toeicrise.commons.utils.CodeGeneratorUtils.extractGroupNumber;
 
@@ -267,14 +264,10 @@ public class TestServiceImpl implements ITestService {
         Map<Integer, List<QuestionExcelRequest>> groupedQuestions = groupQuestionsByKey(questions);
         int processedGroups = 0;
         for (Map.Entry<Integer, List<QuestionExcelRequest>> entry : groupedQuestions.entrySet()) {
-            try {
-                processQuestionGroup(test, entry.getValue());
-                processedGroups++;
-                if (processedGroups % 10 == 0)
-                    log.debug("Processed {}/{} question groups", processedGroups, groupedQuestions.size());
-            } catch (Exception e) {
-                log.error("Failed to process question group {}: {}", entry.getKey(), e.getMessage(), e);
-            }
+            processQuestionGroup(test, entry.getValue());
+            processedGroups++;
+            if (processedGroups % 10 == 0)
+                log.debug("Processed {}/{} question groups", processedGroups, groupedQuestions.size());
         }
     }
 
@@ -287,12 +280,16 @@ public class TestServiceImpl implements ITestService {
 
             questionService.createQuestionBatch(groupQuestions, questionGroup);
             log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
-        } catch (ConstraintViolationException e) {
-            log.warn("Failed to import Question Group. Error: {}", e.getMessage());
-            String msg = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage)
-                    .collect(Collectors.joining(", "));
-            throw new AppException(ErrorCode.INVALID_REQUEST, msg);
+        } catch (AppException e) {
+            throw e;
         } catch (Exception e) {
+            Throwable cause = e;
+            while (cause != null) {
+                if (cause instanceof AppException) {
+                    throw (AppException) cause;
+                }
+                cause = cause.getCause();
+            }
             log.error("Error processing question group: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.FILE_READ_ERROR);
         }
@@ -438,37 +435,23 @@ public class TestServiceImpl implements ITestService {
     }
 
     private void processSpeakingQuestionGroup(Test test, List<SpeakingQuestionExcelRequest> groupQuestions) {
-        try {
-            SpeakingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
-            String partName = EPart.getSpeakingPart(firstQuestion.getPartNumber());
-            Part part = partService.getPartByName(partName);
-            QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
+        SpeakingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
+        String partName = EPart.getSpeakingPart(firstQuestion.getPartNumber());
+        Part part = partService.getPartByName(partName);
+        QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
 
-            questionService.createSpeakingQuestionBatch(groupQuestions, questionGroup);
-            log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
-        } catch (ConstraintViolationException e) {
-            log.warn("Failed to import Question Group. Error: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("Error processing question group: {}", e.getMessage(), e);
-            throw new AppException(ErrorCode.FILE_READ_ERROR);
-        }
+        questionService.createSpeakingQuestionBatch(groupQuestions, questionGroup);
+        log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
     }
 
     private void processWritingQuestionGroup(Test test, List<WritingQuestionExcelRequest> groupQuestions) {
-        try {
-            WritingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
-            String partName = EPart.getWritingPart(firstQuestion.getPartNumber());
-            Part part = partService.getPartByName(partName);
-            QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
+        WritingQuestionExcelRequest firstQuestion = groupQuestions.getFirst();
+        String partName = EPart.getWritingPart(firstQuestion.getPartNumber());
+        Part part = partService.getPartByName(partName);
+        QuestionGroup questionGroup = questionGroupService.createQuestionGroup(test, part, firstQuestion);
 
-            questionService.createWritingQuestionBatch(groupQuestions, questionGroup);
-            log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
-        } catch (ConstraintViolationException e) {
-            log.warn("Failed to import Question Group. Error: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("Error processing question group: {}", e.getMessage(), e);
-            throw new AppException(ErrorCode.FILE_READ_ERROR);
-        }
+        questionService.createWritingQuestionBatch(groupQuestions, questionGroup);
+        log.debug("Processed {} questions in group for test ID: {}", groupQuestions.size(), test.getId());
     }
 
     private void processSpeakingQuestions(Test test, List<SpeakingQuestionExcelRequest> questions) {
@@ -480,14 +463,10 @@ public class TestServiceImpl implements ITestService {
         Map<Integer, List<SpeakingQuestionExcelRequest>> groupedQuestions = groupSpeakingQuestionsByKey(questions);
         int processedGroups = 0;
         for (Map.Entry<Integer, List<SpeakingQuestionExcelRequest>> entry : groupedQuestions.entrySet()) {
-            try {
-                processSpeakingQuestionGroup(test, entry.getValue());
-                processedGroups++;
-                if (processedGroups % 10 == 0)
-                    log.debug("Processed {}/{} question groups", processedGroups, groupedQuestions.size());
-            } catch (Exception e) {
-                log.error("Failed to process question group {}: {}", entry.getKey(), e.getMessage(), e);
-            }
+            processSpeakingQuestionGroup(test, entry.getValue());
+            processedGroups++;
+            if (processedGroups % 10 == 0)
+                log.debug("Processed {}/{} question groups", processedGroups, groupedQuestions.size());
         }
     }
 
