@@ -96,9 +96,6 @@ public abstract class AbstractSystemPromptService {
                 .isActive(false)
                 .build();
         systemPromptRepository.save(newPrompt);
-
-        // Update cache with the new active prompt
-        updateActivePromptCache(newPrompt);
     }
 
     public final void updateSystemPrompt(Long id, SystemPromptUpdateRequest request) {
