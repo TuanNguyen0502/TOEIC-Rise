@@ -83,8 +83,6 @@ public abstract class AbstractSystemPromptService {
     }
 
     public final void createSystemPrompt(SystemPromptCreateRequest request) {
-        // Deactivate the current active prompt
-        deactivateCurrentSystemPrompt();
         // Fetch the latest version to determine the new version number
         int latestVersion = systemPromptRepository.getLatestVersionByFeatureType(getFeatureType());
 
