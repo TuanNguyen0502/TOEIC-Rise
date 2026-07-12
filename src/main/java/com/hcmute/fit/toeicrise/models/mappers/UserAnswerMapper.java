@@ -41,7 +41,7 @@ public interface UserAnswerMapper {
                                                                 QuestionGroup questionGroup) {
         Question question = userAnswer.getQuestion();
         List<String> options = new ArrayList<>();
-        if (!EPart.PART_2.getName().equals(questionGroup.getPart().getName())) {
+        if (EPart.PART_2.getName().equals(questionGroup.getPart().getName())) {
             options.add(null);
             options.add(null);
             options.add(null);
