@@ -8,6 +8,7 @@ import com.hcmute.fit.toeicrise.models.entities.Question;
 import com.hcmute.fit.toeicrise.models.entities.QuestionGroup;
 import com.hcmute.fit.toeicrise.models.entities.Tag;
 import com.hcmute.fit.toeicrise.models.entities.UserAnswer;
+import com.hcmute.fit.toeicrise.models.enums.EPart;
 import org.mapstruct.Mapper;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public interface UserAnswerMapper {
                                                                 QuestionGroup questionGroup) {
         Question question = userAnswer.getQuestion();
         List<String> options = new ArrayList<>();
-        if (questionGroup.getPart().getName().contains("2")) {
+        if (!EPart.SPEAKING_PART_2.getName().equals(questionGroup.getPart().getName()) && questionGroup.getPart().getName().contains("2")) {
             options.add(null);
             options.add(null);
             options.add(null);
